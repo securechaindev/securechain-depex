@@ -1,7 +1,9 @@
 import motor.motor_asyncio
 
+from app.config import Settings
 
-client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
+
+client = motor.motor_asyncio.AsyncIOMotorClient(Settings().DATABASE_URL)
 
 db = client.advisory
 
