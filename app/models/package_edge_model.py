@@ -5,7 +5,6 @@ from app.models.version_model import VersionModel
 
 class PackageEdgeModel(BaseModel):
     parent: 'VersionModel' = Field(...)
-    # child: 'PackageModel' | None = None
     constraints: list[str] | None = None
     schema_extra = {
             "example": {

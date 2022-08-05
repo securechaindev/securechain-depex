@@ -7,9 +7,7 @@ class GraphModel(BaseModel):
     owner: str = Field(...)
     name: str = Field(...)
     manager: str = Field(...)
-    # root: PackageModel | None = None
     packages: list[PackageModel] | None = None
-    # relationships: list['RelationshipModel'] | None = None
 
     class Config:
         allow_population_by_field_name = True
