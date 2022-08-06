@@ -1,11 +1,11 @@
 def parse_constraints(parts: list[str]) -> list[str]:
-    constraints = list()
+    constraints = []
 
     for part in parts:
-        if part.__contains__('||'):
+        if '||' in part:
             attr = part.split(' ')
             constraint = '!= ' + attr[1]
-        elif part.__contains__('*'):
+        elif '*' in part:
             part = part.replace('*', '0').replace('=', '').strip()
             constraint = '~> ' + part
         else:

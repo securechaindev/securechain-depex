@@ -20,14 +20,14 @@ router = APIRouter()
 @router.post("/graph", response_description="Generate graph", response_model = GraphModel)
 async def generate_graph(graph: GraphModel = Body(...)):
     graph_json = jsonable_encoder(graph)
-    graph_json['packages'] = list()
+    graph_json['packages'] = []
     req_dist = requires_dist(graph_json['name'])
 
-    for dist in req_dist:
+    for dist in req_dist.items():
 
         package = {
             'name': dist,
-            'versions': list()
+            'versions': []
         }
 
         constraints = parse_constraints(req_dist[dist])
@@ -35,8 +35,6 @@ async def generate_graph(graph: GraphModel = Body(...)):
         versions = filter_versions(dist, constraints)
 
         for version in versions:
-            version = version
-
             new_version = await add_version(version)
  
             package['versions'].append(new_version['_id'])

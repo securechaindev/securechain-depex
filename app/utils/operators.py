@@ -37,6 +37,7 @@ def approx_gt_minor(version, version_) -> bool:
 
     return version >= version_ and parts[1] >= parts_[1]
 
+
 ops = {
     '=': eq,
     '>': gt,

@@ -1,5 +1,3 @@
-from bson.objectid import ObjectId
-
 from app.services.db.database import version_collection
 
 
