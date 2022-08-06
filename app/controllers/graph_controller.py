@@ -24,13 +24,14 @@ async def generate_graph(graph: GraphModel = Body(...)):
     req_dist = requires_dist(graph_json['name'])
 
     for dist in req_dist.items():
+        dist, raw_constraints = dist
 
         package = {
             'name': dist,
             'versions': []
         }
 
-        constraints = parse_constraints(req_dist[dist])
+        constraints = parse_constraints(raw_constraints)
         
         versions = filter_versions(dist, constraints)
 
