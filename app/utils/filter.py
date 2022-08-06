@@ -6,17 +6,16 @@ from app.utils.operators import ops
 
 
 def filter_versions(pkg_name: str, constraints) -> list[dict[str, str]]:
-    distributions = list()
-
+    distributions = []
     all_versions = get_all_versions(pkg_name)
 
     if constraints:
         for version in all_versions:
             release_all = version['release']
-            checkers = list()
+            checkers = []
 
             for constraint in constraints:
-                if constraint.__contains__('Any'):
+                if 'Any' in constraint:
                     continue
 
                 op, release_ctc = constraint.split(' ')
