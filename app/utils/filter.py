@@ -5,7 +5,7 @@ from app.managers.pypi import get_all_versions
 from app.utils.operators import ops
 
 
-def filter_versions(pkg_name: str, constraints) -> list[str]:
+def filter_versions(pkg_name: str, constraints) -> list[dict[str, str]]:
     distributions = list()
 
     all_versions = get_all_versions(pkg_name)
