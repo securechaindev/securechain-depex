@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  backend:
+    container_name: depex_backend
+    build: .
+    depends_on:
+      - database
+    ports:
+      - "8000:8000"
+    networks:
+      - depex
+
+  database:
+    container_name: mongodb
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - depex
+
+networks:
+  depex:
+    driver: bridge
+
+volumes:
+  data:
