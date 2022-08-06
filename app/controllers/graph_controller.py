@@ -3,8 +3,6 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from app.models.graph_model import GraphModel
-from app.models.package_model import PackageModel
-from app.models.version_model import VersionModel
 
 from app.services.graph_service import add_graph
 from app.services.package_service import add_package
@@ -21,13 +19,13 @@ router = APIRouter()
 
 @router.post("/graph", response_description="Generate graph", response_model = GraphModel)
 async def generate_graph(graph: GraphModel = Body(...)):
-    graph = jsonable_encoder(graph)
-    graph['packages'] = list()
-    req_dist = requires_dist(graph['name'])
+    graph_json = jsonable_encoder(graph)
+    graph_json['packages'] = list()
+    req_dist = requires_dist(graph_json['name'])
 
     for dist in req_dist:
 
-        package: PackageModel = {
+        package = {
             'name': dist,
             'versions': list()
         }
@@ -37,7 +35,7 @@ async def generate_graph(graph: GraphModel = Body(...)):
         versions = filter_versions(dist, constraints)
 
         for version in versions:
-            version: VersionModel = version
+            version = version
 
             new_version = await add_version(version)
  
@@ -45,8 +43,8 @@ async def generate_graph(graph: GraphModel = Body(...)):
 
         new_package = await add_package(package)
 
-        graph['packages'].append(new_package['_id'])
+        graph_json['packages'].append(new_package['_id'])
 
-    new_graph = await add_graph(graph)
+    new_graph = await add_graph(graph_json)
 
     return JSONResponse(status_code = status.HTTP_201_CREATED, content = JSONEncoder().encode(new_graph))

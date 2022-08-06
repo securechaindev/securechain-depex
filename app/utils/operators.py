@@ -1,5 +1,6 @@
 from operator import eq, gt, lt, ge, le, ne
 
+
 def approx_gt(version, version_) -> bool:
     str_version = str(version)
     str_version_ = str(version_)

@@ -1,6 +1,7 @@
 from requests import get
 
-def get_all_versions(pkg_name: str) -> list[str]:
+
+def get_all_versions(pkg_name: str) -> list[dict[str, str]]:
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
     releases = get(url).json()['releases']
     versions = list()
