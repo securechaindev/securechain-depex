@@ -1,9 +1,17 @@
 import motor.motor_asyncio
 
+from functools import lru_cache
+
 from app.config import Settings
 
 
-client = motor.motor_asyncio.AsyncIOMotorClient(Settings().DATABASE_URL)
+@lru_cache()
+def get_settings():
+    return Settings()
+
+settings: Settings = get_settings()
+
+client = motor.motor_asyncio.AsyncIOMotorClient(settings.DATABASE_URL)
 
 db = client.depex
 
