@@ -9,6 +9,7 @@ from app.config import Settings
 def get_settings():
     return Settings()
 
+
 settings: Settings = get_settings()
 
 client = motor.motor_asyncio.AsyncIOMotorClient(settings.DATABASE_URL)
