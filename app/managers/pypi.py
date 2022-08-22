@@ -3,21 +3,25 @@ from requests import get
 
 def get_all_versions(pkg_name: str) -> list[dict[str, str]]:
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
-    releases = get(url).json()['releases']
-    versions = []
+    response = get(url).json()
+    versions: list[dict] = []
 
-    for release in releases:
-        release_date = None
-        for item in releases[release]:
-            release_date = item['upload_time']
+    if 'releases' in response:
+        releases = response['releases']
+        versions = []
 
-        aux = release.replace('.', '')
+        for release in releases:
+            release_date = None
+            for item in releases[release]:
+                release_date = item['upload_time']
 
-        if aux.isdigit():
-            versions.append({
-                'release': release,
-                'release_date': release_date
-            })
+            aux = release.replace('.', '')
+
+            if aux.isdigit():
+                versions.append({
+                    'release': release,
+                    'release_date': release_date
+                })
 
     return versions
 
@@ -47,5 +51,42 @@ def requires_dist(pkg_name):
             ctcs.append(f'{version} {op}')
 
         dists[dist] = ctcs
+
+    return dists
+
+def requires_dists_ver(pkg_name, version_dist):
+    url = f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
+    requires_dist = get(url).json()['info']['requires_dist']
+    dists: dict = {}
+
+    if requires_dist:
+
+        for dist in requires_dist:
+            data = dist.split(';')[0]
+
+            data = data.replace('(', '').replace(')', '').replace(' ', '')
+
+            pos: int = [data.index(char) for char in data if char in ('<', '>', '=', '!', '|', '^', '~')]
+
+            pos = pos[0] if pos else len(data)
+
+            dist = data[:pos]
+            raw_ctcs = data[pos:]
+
+            if raw_ctcs:
+
+                ctcs = []
+
+                for ctc in raw_ctcs.split(','):
+
+                    pos: int = [ctc.index(char) for char in ctc if char.isdigit()][0]
+
+                    ctcs.append(f'{ctc[:pos]} {ctc[pos:]}')
+
+                dists[dist] = ctcs
+
+            else:
+
+                dists[dist] = ['Any']
 
     return dists
