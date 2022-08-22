@@ -1,14 +1,14 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.models.version_model import VersionModel
+from app.models.package_model import PackageModel
 
 
 class PackageEdgeModel(BaseModel):
-    parent: VersionModel = Field(...)
     constraints: list[str] | None = None
+    package: PackageModel | None = None
     schema_extra = {
             "example": {
-                "constraints": "[<=0.7.0, ==1.2.1, >2.3]",
+                "constraints": ["<=0.7.0", "==1.2.1", ">2.3"],
             }
         }
 

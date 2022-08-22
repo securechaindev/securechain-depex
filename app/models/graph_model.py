@@ -1,13 +1,10 @@
 from pydantic import BaseModel, Field
 
-from app.models.package_model import PackageModel
-
 
 class GraphModel(BaseModel):
     owner: str = Field(...)
     name: str = Field(...)
     manager: str = Field(...)
-    packages: list[PackageModel] | None = None
 
     class Config:
         allow_population_by_field_name = True
