@@ -1,5 +1,7 @@
 from requests import get
 
+from dateutil.parser import parse
+
 
 def get_all_versions(pkg_name: str) -> list[dict[str, str]]:
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
@@ -13,14 +15,14 @@ def get_all_versions(pkg_name: str) -> list[dict[str, str]]:
         for release in releases:
             release_date = None
             for item in releases[release]:
-                release_date = item['upload_time']
+                release_date = item['upload_time_iso_8601']
 
             aux = release.replace('.', '')
 
             if aux.isdigit():
                 versions.append({
                     'release': release,
-                    'release_date': release_date
+                    'release_date': parse(release_date) if release_date else None
                 })
 
     return versions

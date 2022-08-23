@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 
-from app.models.package_model import PackageModel
+# from app.models.package_model import PackageModel
 
 
 class PackageEdgeModel(BaseModel):
     constraints: list[str] | None = None
-    package: PackageModel | None = None
+    # PackageModel | None
+    package = None
     schema_extra = {
             "example": {
                 "constraints": ["<=0.7.0", "==1.2.1", ">2.3"],
