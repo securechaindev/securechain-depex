@@ -8,6 +8,9 @@ def parse_constraints(parts: list[str]) -> list[str]:
         elif '*' in part:
             part = part.replace('*', '0').replace('=', '').strip()
             constraint = '~> ' + part
+        elif '~=' in part:
+            part = part.replace('~=', '').strip()
+            constraint = '~> ' + part
         else:
             constraint = part
         constraints.append(constraint)
