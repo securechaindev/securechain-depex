@@ -3,7 +3,7 @@ from requests import get
 from dateutil.parser import parse
 
 
-def get_all_versions(pkg_name: str) -> list[dict[str, str]]:
+def get_all_versions(pkg_name: str) -> list[dict]:
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
     response = get(url).json()
     versions: list[dict] = []
@@ -56,17 +56,21 @@ def requires_dist(pkg_name):
 
     return dists
 
-def requires_dists_ver(pkg_name, version_dist):
+def requires_packages(pkg_name, version_dist):
     url = f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-    requires_dist = get(url).json()['info']['requires_dist']
-    dists: dict = {}
+    response = get(url).json()['info']['requires_dist']
+    require_packages: dict = {}
 
-    if requires_dist:
+    if response:
 
-        for dist in requires_dist:
-            data = dist.split(';')[0]
+        for dist in response:
+            data = dist.split(';')
 
-            data = data.replace('(', '').replace(')', '').replace(' ', '')
+            if len(data) > 1:
+                if 'extra' in data[1]:
+                    continue
+
+            data = data[0].replace('(', '').replace(')', '').replace(' ', '')
 
             pos: int = [data.index(char) for char in data if char in ('<', '>', '=', '!', '|', '^', '~')]
 
@@ -85,10 +89,10 @@ def requires_dists_ver(pkg_name, version_dist):
 
                     ctcs.append(f'{ctc[:pos]} {ctc[pos:]}')
 
-                dists[dist] = ctcs
+                require_packages[dist] = ctcs
 
             else:
 
-                dists[dist] = ['Any']
+                require_packages[dist] = ['Any']
 
-    return dists
+    return require_packages
