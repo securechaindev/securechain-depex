@@ -14,8 +14,8 @@ class VersionModel(BaseModel):
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         schema_extra = {
-            "example": {
-                "release": "urllib3",
-                "release_date": "2015-02-11T02:48:59.009260Z"
+            'example': {
+                'release': 'urllib3',
+                'release_date': '2015-02-11T02:48:59.009260Z'
             }
         }

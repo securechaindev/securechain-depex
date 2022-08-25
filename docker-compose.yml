@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 services:
   backend:
@@ -7,7 +7,7 @@ services:
     depends_on:
       - database
     ports:
-      - "8000:8000"
+      - '8000:8000'
     networks:
       - depex
 
@@ -15,7 +15,7 @@ services:
     container_name: mongodb
     image: mongo:latest
     ports:
-      - "27017:27017"
+      - '27017:27017'
     networks:
       - depex
 
