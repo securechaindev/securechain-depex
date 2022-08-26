@@ -4,14 +4,14 @@ from operator import eq, gt, lt, ge, le, ne
 def approx_gt(version, version_) -> bool:
     str_version = str(version)
     str_version_ = str(version_)
-
-    dots = str_version.count('.')
-    if dots == 2:
-        str_version += '.0'
-    elif dots == 1:
-        str_version += '.0.0'
-    elif dots == 0:
-        str_version += '.0.0.0'
+    
+    match str_version.count('.'):
+        case 0:
+            str_version += '.0'
+        case 1:
+            str_version += '.0.0'
+        case 2:
+            str_version += '.0.0.0'
 
     parts = str_version.split('.')
     parts_ = str_version_.split('.')
@@ -47,6 +47,7 @@ ops = {
     '<=': le,
     '!=': ne,
     '~>': approx_gt,
+    '~=': approx_gt,
     '^': approx_gt_minor,
     '~': approx_gt_patch
 }

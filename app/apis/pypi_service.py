@@ -22,7 +22,8 @@ def get_all_versions(pkg_name: str) -> list[dict]:
             if aux.isdigit():
                 versions.append({
                     'release': release,
-                    'release_date': parse(release_date) if release_date else None
+                    'release_date': parse(release_date) if release_date else None,
+                    'package_edges': []
                 })
 
     return versions
@@ -87,7 +88,7 @@ def requires_packages(pkg_name, version_dist):
 
                     pos: int = [ctc.index(char) for char in ctc if char.isdigit()][0]
 
-                    ctcs.append(f'{ctc[:pos]} {ctc[pos:]}')
+                    ctcs.append([ctc[:pos], ctc[pos:]])
 
                 require_packages[dist] = ctcs
 

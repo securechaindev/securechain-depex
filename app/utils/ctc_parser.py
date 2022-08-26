@@ -1,18 +1,11 @@
-def parse_constraints(parts: list[str]) -> list[str]:
-    constraints = []
+def parse_constraints(raw_constraints: list[list[str]]) -> list[list[str]]:
+    for raw_constraint in raw_constraints:
+        
+        if '||' in raw_constraint[0] or '||' in raw_constraint[1]:
+            raw_constraint[0] = '!='
+            raw_constraint[1] = raw_constraint[1].split(' ')[0]
+        elif '*' in raw_constraint[1]:
+            raw_constraint[0] = '~>'
+            raw_constraint[1] = raw_constraint[1].replace('*', '0')
 
-    for part in parts:
-        if '||' in part:
-            attr = part.split(' ')
-            constraint = '!= ' + attr[1]
-        elif '*' in part:
-            part = part.replace('*', '0').replace('=', '').strip()
-            constraint = '~> ' + part
-        elif '~=' in part:
-            part = part.replace('~=', '').strip()
-            constraint = '~> ' + part
-        else:
-            constraint = part
-        constraints.append(constraint)
-
-    return constraints
+    return raw_constraints
