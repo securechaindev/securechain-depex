@@ -5,7 +5,7 @@ from dateutil.parser import parse
 
 def get_all_versions(pkg_name: str) -> list[dict]:
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
-    response = get(url).json()
+    response = get(url, timeout = 10).json()
     versions: list[dict] = []
 
     if 'releases' in response:
@@ -30,7 +30,7 @@ def get_all_versions(pkg_name: str) -> list[dict]:
 
 def requires_dist(pkg_name):
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
-    requires_dist = get(url).json()['info']['requires_dist']
+    requires_dist = get(url, timeout = 10).json()['info']['requires_dist']
     dists = {}
 
     for dist in requires_dist:
@@ -59,7 +59,7 @@ def requires_dist(pkg_name):
 
 def requires_packages(pkg_name, version_dist):
     url = f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-    response = get(url).json()['info']['requires_dist']
+    response = get(url, timeout = 10).json()['info']['requires_dist']
     require_packages: dict = {}
 
     if response:
