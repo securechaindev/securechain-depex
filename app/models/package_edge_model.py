@@ -7,9 +7,9 @@ from pydantic import BaseModel, Field
 class PackageEdgeModel(BaseModel):
     constraints: list[list[str]] | str = Field(...)
     # PackageModel | None
-    package = None
+    package: None = None
     # list[VersionModel] | None
-    versions = None
+    versions: None = None
 
     class Config:
         allow_population_by_field_name = True

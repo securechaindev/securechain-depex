@@ -1,13 +1,10 @@
 from pydantic import BaseModel, Field
 
-from datetime import datetime
-
 from app.models.package_edge_model import PackageEdgeModel
 
 
-class VersionModel(BaseModel):
-    release: str = Field(...)
-    release_date: datetime = Field(...)
+class RequirementFile(BaseModel):
+    name: str = Field(...)
     package_edges: list[PackageEdgeModel] | None = None
 
     class Config:
@@ -15,7 +12,6 @@ class VersionModel(BaseModel):
         arbitrary_types_allowed = True
         schema_extra = {
             'example': {
-                'release': 'urllib3',
-                'release_date': datetime.now()
+                'name': 'requirements.txt'
             }
         }
