@@ -29,6 +29,8 @@ setup(
         'python-dotenv==0.20.0',
         'requests==2.28.1'
         'types-requests==2.28.8',
-        'types-setuptools==63.4.0'
+        'types-setuptools==63.4.0',
+        'python-dateutil==2.8.2',
+        'types-python-dateutil==2.8.19'
     ]
 )

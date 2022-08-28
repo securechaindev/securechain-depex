@@ -8,20 +8,18 @@ from app.services.package_edge_service import add_package_edge, update_package_e
 from app.services.package_service import add_package, get_package_by_name, update_package_versions
 from app.services.version_service import add_version, get_version_by_release_and_date, update_version_package_edges
 
-from app.utils.ctc_parser import parse_constraints
 
 async def generate_packages(package_name: str, release: dict) -> list[ObjectId]:
     require_packages = requires_packages(package_name, release)
-    version_package_edges = []
+    package_edges = []
 
     if require_packages:
 
         for require_package in require_packages.items():
             package_edge: dict = {}
 
-            name, raw_constraints = require_package
+            name, constraints = require_package
             name = name.lower()
-            constraints = parse_constraints(raw_constraints)
 
             package_edge['constraints'] = constraints
 
@@ -35,9 +33,9 @@ async def generate_packages(package_name: str, release: dict) -> list[ObjectId]:
 
                 package_edge_id = await no_exist_package(name, package_edge, constraints)
 
-            version_package_edges.append(package_edge_id)
+            package_edges.append(package_edge_id)
 
-    return version_package_edges
+    return package_edges
 
 
 async def exist_package(package_edge: dict, package: dict) -> ObjectId:
@@ -64,12 +62,19 @@ async def no_exist_package(name: str, package_edge: dict, constraints: list[list
 
     package_edge_id = new_package_edge['_id']
 
-    await generate_versions(new_package, package_edge_id, constraints)
+    no_existing_versions = await generate_versions(new_package, package_edge_id, constraints)
+
+    for version in no_existing_versions:
+
+        version_package_edges = await generate_packages(new_package['name'], version[1])
+
+        await update_version_package_edges(version[0], version_package_edges)
 
     return package_edge_id
 
 async def generate_versions(package: dict, package_edge_id: ObjectId, constraints: list) -> None:
     package_versions = []
+    no_existing_versions = []
     package_name = package['name']
     package_id = package['_id']
 
@@ -91,12 +96,12 @@ async def generate_versions(package: dict, package_edge_id: ObjectId, constraint
 
             package_versions.append(new_version_id)
 
-            version_package_edges = await generate_packages(package['name'], new_version['release'])
-
-            await update_version_package_edges(new_version_id, version_package_edges)
+            no_existing_versions.append([new_version_id, new_version['release']])
 
     filtered_versions = await filter_versions_db(constraints, package_versions)
 
     await update_package_versions(package_id, package_versions)
 
     await update_package_edge_versions(package_edge_id, filtered_versions)
+
+    return no_existing_versions
