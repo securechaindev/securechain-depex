@@ -5,37 +5,34 @@ from dateutil.parser import parse
 from app.utils.ctc_parser import parse_constraints
 
 
-def get_all_versions(pkg_name: str) -> list[dict]:
+async def get_all_versions(pkg_name: str) -> list:
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
     response = get(url, timeout = 25).json()
-    versions: list[dict] = []
 
     if 'releases' in response:
+        versions: list = []
         releases = response['releases']
-        versions = []
 
         for release in releases:
             release_date = None
             for item in releases[release]:
-                release_date = item['upload_time_iso_8601']
+                release_date = parse(item['upload_time_iso_8601'])
 
             aux = release.replace('.', '')
 
             if aux.isdigit():
-                versions.append({
-                    'release': release,
-                    'release_date': parse(release_date) if release_date else None,
-                    'package_edges': []
-                })
+                versions.append({'release': release, 'release_date': release_date, 'package_edges': []})
 
-    return versions
+        return versions
 
-def requires_packages(pkg_name, version_dist):
+    return []
+
+async def requires_packages(pkg_name, version_dist):
     url = f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
     response = get(url, timeout = 25).json()['info']['requires_dist']
-    require_packages: dict = {}
 
     if response:
+        require_packages: dict = {}
 
         for dist in response:
             data = dist.split(';')
@@ -53,6 +50,8 @@ def requires_packages(pkg_name, version_dist):
             dist = data[:pos]
             raw_ctcs = data[pos:]
 
-            require_packages[dist] = parse_constraints(raw_ctcs)
+            require_packages[dist] = await parse_constraints(raw_ctcs)
 
-    return require_packages
+        return require_packages
+
+    return {}

@@ -1,19 +1,18 @@
-def parse_constraints(raw_constraints: str):
-    raw_constraints = raw_constraints.replace(' ', '')
-
+async def parse_constraints(raw_constraints: str) -> list[list[str]] | str:
     if raw_constraints:
+        raw_constraints = raw_constraints.replace(' ', '')
         ctcs = []
+
         for ctc in raw_constraints.split(','):
             pos: int = [ctc.index(char) for char in ctc if char.isdigit()][0]
             ctcs.append([ctc[:pos], ctc[pos:]])
-    else:
-        ctcs = ['Any']
+        return await clean_constraints(ctcs)
 
-    return clean_constraints(ctcs)
+    return 'any'
 
-def clean_constraints(raw_constraints: list[list[str]]) -> list[list[str]]:
+async def clean_constraints(raw_constraints: list[list[str]]) -> list[list[str]]:
     for raw_constraint in raw_constraints:
-        
+
         if '||' in raw_constraint[0] or '||' in raw_constraint[1]:
             raw_constraint[0] = '!='
             raw_constraint[1] = raw_constraint[1].split(' ')[0]

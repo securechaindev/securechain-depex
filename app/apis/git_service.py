@@ -5,6 +5,7 @@ from functools import lru_cache
 from app.config import Settings
 
 from app.utils.ctc_parser import parse_constraints
+from app.utils.managers import managers
 
 
 @lru_cache()
@@ -21,50 +22,29 @@ headers = {
 
 endpoint = 'https://api.github.com/graphql'
 
-async def get_repo_data(owner: str, name: str, manager: str) -> dict[str, list[str]]:
-    query = '''
-        {
-            repository(owner: \"%s\", name: \"%s\")
-            {
-                dependencyGraphManifests
-                {
-                    nodes
-                    {
-                        filename
-                        dependencies
-                        {
-                            nodes
-                            {
-                                packageName
-                                requirements
-                                packageManager
-                            }
-                        }
-                    }
-                }
-            }
-        }''' % (owner, name)
+async def get_repo_data(owner: str, name: str) -> dict[list, list]:
+    query = "{repository(owner: \"" + owner + "\", name: \"" + name + "\")"
+    query += "{dependencyGraphManifests{nodes{filename dependencies{nodes{packageName requirements}}}}}}"
 
-    response = post(endpoint, json={'query': query}, headers = headers, timeout = 25)
+    response = post(endpoint, json={'query': query}, headers = headers, timeout = 25).json()
 
-    return await json_reader(response.json(), manager)
+    return await json_reader(response)
 
-async def json_reader(data, manager: str) -> dict[str, list[str]]: 
+async def json_reader(data) -> dict[list, list]: 
     files = {}
 
     for node in data['data']['repository']['dependencyGraphManifests']['nodes']:
         file = node['filename']
 
-        if '.yml' in file:
+        if file not in managers:
             continue
-        
+
         data = []
 
         for node in node['dependencies']['nodes']:
-            if node['packageManager'] == manager:
-                req = parse_constraints(node['requirements'])
-                data.append([node['packageName'], req, node['packageManager']])
+            req = await parse_constraints(node['requirements'])
+            data.append([node['packageName'], req])
 
-        files[file] = data
+        files[file] = [managers[file], data]
 
     return files
