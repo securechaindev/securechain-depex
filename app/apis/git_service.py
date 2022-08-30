@@ -1,19 +1,10 @@
 from requests import post
 
-from functools import lru_cache
-
-from app.config import Settings
+from app.config import settings
 
 from app.utils.ctc_parser import parse_constraints
 from app.utils.managers import managers
 
-
-@lru_cache()
-def get_settings():
-    return Settings()
-
-
-settings: Settings = get_settings()
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',
