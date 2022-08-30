@@ -25,35 +25,35 @@ async def generate_packages(package_name: str, release: dict) -> list[ObjectId]:
             
             if package is not None:
 
-                package_edge_id = await exist_package(package, package_edge)
+                package_edge_id = await exist_package(package, package_edge, 'pypi')
 
             else:
 
-                package_edge_id = await no_exist_package(package_name, package_edge)
+                package_edge_id = await no_exist_package(package_name, package_edge, 'pypi')
 
             package_edges.append(package_edge_id)
 
     return package_edges
 
-async def exist_package(package: dict, package_edge: dict) -> ObjectId:
+async def exist_package(package: dict, package_edge: dict, db: str) -> ObjectId:
     package_edge['package'] = package['_id']
 
     package_edge['versions'] = await filter_versions_db(package_edge['constraints'], package['versions'])
 
-    new_package_edge = await add_package_edge(package_edge)
+    new_package_edge = await add_package_edge(package_edge, db)
 
     return new_package_edge['_id']
 
-async def no_exist_package(package_name: str, package_edge: dict) -> ObjectId:
+async def no_exist_package(package_name: str, package_edge: dict, db: str) -> ObjectId:
     package = {'name': package_name}
 
     new_package = await add_package(package)
 
     package_edge['package'] = new_package['_id']
 
-    new_package_edge = await add_package_edge(package_edge)
+    new_package_edge = await add_package_edge(package_edge, db)
 
-    no_existing_versions = await generate_versions(new_package, new_package_edge)
+    no_existing_versions = await generate_versions(new_package, new_package_edge, db)
 
     await relate_versions(no_existing_versions, new_package['name'])
 
@@ -66,7 +66,7 @@ async def relate_versions(no_existing_versions: list, package_name: str) -> None
 
         await update_version_package_edges(version[0], version_package_edges)
 
-async def generate_versions(package: dict, package_edge: dict) -> list:
+async def generate_versions(package: dict, package_edge: dict, db: str) -> list:
     no_existing_versions: list = []
     package_versions: list = []
 
@@ -94,6 +94,6 @@ async def generate_versions(package: dict, package_edge: dict) -> list:
 
     await update_package_versions(package['_id'], package_versions)
 
-    await update_package_edge_versions(package_edge['_id'], filtered_versions)
+    await update_package_edge_versions(package_edge['_id'], filtered_versions, db)
 
     return no_existing_versions

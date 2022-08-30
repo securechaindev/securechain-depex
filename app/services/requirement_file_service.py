@@ -1,6 +1,6 @@
 from bson import ObjectId
 
-from app.services.db.database import requirement_file_collection
+from app.services.dbs.databases import requirement_file_collection
 
 
 async def add_requirement_file(requirement_file_data: dict) -> dict:

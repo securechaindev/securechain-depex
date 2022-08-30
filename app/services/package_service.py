@@ -1,6 +1,6 @@
 from bson import ObjectId
 
-from app.services.db.database import package_collection
+from app.services.dbs.databases import package_collection
 
 
 async def add_package(package_data: dict) -> dict:

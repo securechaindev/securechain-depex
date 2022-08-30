@@ -2,7 +2,7 @@ from bson import ObjectId
 
 from datetime import datetime
 
-from app.services.db.database import version_collection
+from app.services.dbs.databases import version_collection
 
 
 async def add_version(version_data: dict) -> dict:
