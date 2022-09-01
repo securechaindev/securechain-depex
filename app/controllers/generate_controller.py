@@ -9,7 +9,7 @@ from app.services.package_service import add_package, get_package_by_name, updat
 from app.services.version_service import add_version, get_version_by_release_and_date, update_version_package_edges
 
 
-async def generate_packages(package_name: str, release: dict) -> list[ObjectId]:
+async def generate_packages(package_name: str, release: str) -> list[ObjectId]:
     require_packages = await requires_packages(package_name, release)
     package_edges = []
 
@@ -19,7 +19,7 @@ async def generate_packages(package_name: str, release: dict) -> list[ObjectId]:
             package_name, constraints = require_package
             package_name = package_name.lower()
 
-            package_edge: dict = {'constraints': constraints}
+            package_edge = {'constraints': constraints}
 
             package = await get_package_by_name(package_name)
             
@@ -68,7 +68,7 @@ async def relate_versions(no_existing_versions: list, package_name: str) -> None
 
 async def generate_versions(package: dict, package_edge: dict, db: str) -> list:
     no_existing_versions: list = []
-    package_versions: list = []
+    package_versions = []
 
     all_versions = await get_all_versions(package['name'])
 

@@ -11,7 +11,7 @@ async def filter_versions_db(constraints: list[list[str]], all_versions: list[Ob
     if constraints == 'any':
         return all_versions
 
-    filter_versions: list = []
+    filter_versions = []
 
     for version_id in all_versions:
         version = await get_version_by_id(version_id)
