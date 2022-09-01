@@ -1,14 +1,9 @@
 from pydantic import BaseModel, Field
 
-# from app.models.package_model import PackageModel
-# from app.models.version_model import VersionModel
-
 
 class PackageEdgeModel(BaseModel):
     constraints: list[list[str]] | str = Field(...)
-    # PackageModel | None
     package: None = None
-    # list[VersionModel] | None
     versions: None = None
 
     class Config:

@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name = 'depex',
-    version = '0.0.2',
+    version = '0.1.0',
     author = 'Antonio Germán Márquez Trujillo',
     author_email = 'amtrujillo@us.es',
     description = 'Una herramienta para el análisis de vulnerabilidades en proyectos software open-source',
