@@ -34,4 +34,4 @@ jobs:
           pip install mypy
       - name: Running static types with mypy
         run: |
-          mypy .
+          mypy app
