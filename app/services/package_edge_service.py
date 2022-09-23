@@ -3,7 +3,7 @@ from bson import ObjectId
 from app.services.dbs.databases import depex_package_edge_collection, pypi_package_edge_collection
 
 
-async def add_package_edge(package_edge_data: dict, db: str) -> dict:
+async def create_package_edge(package_edge_data: dict, db: str) -> dict:
     match db:
         case 'depex':
             collection = depex_package_edge_collection
