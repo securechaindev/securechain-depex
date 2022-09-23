@@ -3,7 +3,7 @@ from bson import ObjectId
 from app.services.dbs.databases import requirement_file_collection
 
 
-async def add_requirement_file(requirement_file_data: dict) -> dict:
+async def create_requirement_file(requirement_file_data: dict) -> dict:
     requirement_file = await requirement_file_collection.insert_one(requirement_file_data)
     new_requirement_file = await requirement_file_collection.find_one({'_id': requirement_file.inserted_id})
     return new_requirement_file
