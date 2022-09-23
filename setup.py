@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name = 'depex',
-    version = '0.1.0',
+    version = '0.1.1',
     author = 'Antonio Germán Márquez Trujillo',
     author_email = 'amtrujillo@us.es',
     description = 'Una herramienta para el análisis de vulnerabilidades en proyectos software open-source',
@@ -23,14 +23,19 @@ setup(
         'wheel==0.37.1',
         'uvicorn==0.18.2',
         'fastapi==0.79.0',
+        'email-validator==1.3.0',
         'pymongo==4.2.0',
         'motor==3.0.0',
         'motor-stubs==1.7.1',
         'python-dotenv==0.20.0',
-        'requests==2.28.1'
+        'requests==2.28.1',
         'types-requests==2.28.8',
         'types-setuptools==63.4.0',
         'python-dateutil==2.8.2',
         'types-python-dateutil==2.8.19'
+    ],
+    tests_require=[
+        'prospector[with_everything]==1.7.7',
+        'mypy==0.971'
     ]
 )
