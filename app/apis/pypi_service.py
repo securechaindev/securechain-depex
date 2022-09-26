@@ -8,7 +8,7 @@ from app.utils.get_first_pos import get_first_position
 
 async def get_all_versions(pkg_name: str) -> list:
     url = f'https://pypi.python.org/pypi/{pkg_name}/json'
-    response = get(url, timeout = 25).json()
+    response = get(url, timeout = 50).json()
 
     if 'releases' in response:
         versions = []
@@ -28,7 +28,7 @@ async def get_all_versions(pkg_name: str) -> list:
 
 async def requires_packages(pkg_name: str, version_dist: str) -> dict:
     url = f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-    response = get(url, timeout = 25).json()['info']['requires_dist']
+    response = get(url, timeout = 50).json()['info']['requires_dist']
 
     if response:
         require_packages = {}
