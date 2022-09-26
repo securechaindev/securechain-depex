@@ -12,8 +12,8 @@ headers = {
 }
 
 async def get_repo_data(owner: str, name: str) -> dict[list, list]:
-    query = "{repository(owner: \"" + owner + "\", name: \"" + name + "\")"
-    query += "{dependencyGraphManifests{nodes{filename dependencies{nodes{packageName requirements}}}}}}"
+    query = '{repository(owner: \'' + owner + '\', name: \'' + name + '\')'
+    query += '{dependencyGraphManifests{nodes{filename dependencies{nodes{packageName requirements}}}}}}'
 
     response = post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 25).json()
 

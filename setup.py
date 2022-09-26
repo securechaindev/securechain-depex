@@ -34,7 +34,7 @@ setup(
         'python-dateutil==2.8.2',
         'types-python-dateutil==2.8.19'
     ],
-    tests_require=[
+    tests_requires = [
         'prospector[with_everything]==1.7.7',
         'mypy==0.971'
     ]
