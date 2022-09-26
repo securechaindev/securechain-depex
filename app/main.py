@@ -14,17 +14,17 @@ from app.utils.json_encoder import JSONEncoder
 description = 'A simple backend for dependency extraction'
 
 app = FastAPI(
-    title = "Depex",
+    title = 'Depex',
     description = description,
-    version = "0.1.0",
+    version = '0.1.1',
     contact = {
-        "name": "Antonio Germán Márquez Trujillo",
-        "url": "https://github.com/GermanMT",
-        "email": "amtrujillo@us.es",
+        'name': 'Antonio Germán Márquez Trujillo',
+        'url': 'https://github.com/GermanMT',
+        'email': 'amtrujillo@us.es',
     },
     license_info = {
-        "name": "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-        "url": "https://www.gnu.org/licenses/gpl-3.0.html",
+        'name': 'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'url': 'https://www.gnu.org/licenses/gpl-3.0.html',
     },
 )
 
