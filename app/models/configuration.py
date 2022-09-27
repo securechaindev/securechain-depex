@@ -1,7 +1,5 @@
 from pydantic import BaseModel, Field
 
-from dateutil.parser import parse
-
 
 class ConfigurationModel(BaseModel):
     vulnerable: bool = Field(...)
