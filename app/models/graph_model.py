@@ -15,8 +15,8 @@ class GraphModel(BaseModel):
         arbitrary_types_allowed = True
         schema_extra = {
             'example': {
-                'owner': 'psf',
-                'name': 'requests',
+                'owner': 'GermanMT',
+                'name': 'prueba',
                 'add_extras': False,
                 'is_complete': False
             }
