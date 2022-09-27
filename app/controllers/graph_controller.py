@@ -9,7 +9,8 @@ from app.controllers.generate_controller import exist_package, no_exist_package
 from app.models.graph_model import GraphModel
 
 from app.services.graph_service import (
-    read_graph, create_graph,
+    read_graph,
+    create_graph,
     update_graph_requirement_files,
     update_graph_is_completed
 )
