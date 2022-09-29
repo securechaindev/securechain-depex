@@ -11,7 +11,7 @@ class CvssModel(BaseModel):
     confidentiality_impact: str = Field(...)
     integrity_impact: str = Field(...)
     availability_impact: str = Field(...)
-    base_core: str = Field(...)
+    base_score: str = Field(...)
     base_severity: str = Field(...)
     exploitability_score: str = Field(...)
     impact_score: str = Field(...)
@@ -21,18 +21,18 @@ class CvssModel(BaseModel):
         arbitrary_types_allowed = True
         schema_extra = {
             'example': {
-                'vectorString': 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N',
-                'attackVector': 'NETWORK',
-                'attackComplexity': 'LOW',
-                'privilegesRequired': 'NONE',
-                'userInteraction': 'NONE',
+                'vector_string': 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N',
+                'attack_vector': 'NETWORK',
+                'attack_complexity': 'LOW',
+                'privileges_required': 'NONE',
+                'user_interaction': 'NONE',
                 'scope': 'UNCHANGED',
-                'confidentialityImpact': 'NONE',
-                'integrityImpact': 'LOW',
-                'availabilityImpact': 'NONE',
-                'baseScore': 5.3,
-                'baseSeverity': 'MEDIUM',
-                'exploitabilityScore': 3.9,
-                'impactScore': 1.4
+                'confidentiality_impact': 'NONE',
+                'integrity_impact': 'LOW',
+                'availability_impact': 'NONE',
+                'base_score': 5.3,
+                'base_severity': 'MEDIUM',
+                'exploitability_score': 3.9,
+                'impact_score': 1.4
             }
         }

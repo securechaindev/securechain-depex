@@ -20,7 +20,16 @@ async def get_all_versions(pkg_name: str) -> list:
                 release_date = parse(item['upload_time_iso_8601'])
 
             if release.replace('.', '').isdigit():
-                versions.append({'release': release, 'release_date': release_date, 'package_edges': []})
+                xyzd = release.split('.')
+                versions.append({
+                    'release': release,
+                    'mayor': int(xyzd[0]),
+                    'minor': int(xyzd[1]) if len(xyzd) >= 2 else 0,
+                    'patch': int(xyzd[2]) if len(xyzd) >= 3 else 0,
+                    'build_number': int(xyzd[3]) if len(xyzd) >= 4 else 0,
+                    'release_date': release_date,
+                    'package_edges': []
+                })
 
         return versions
 

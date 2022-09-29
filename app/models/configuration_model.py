@@ -8,6 +8,7 @@ class ConfigurationModel(BaseModel):
     version_end_including: str | None = Field(...)
     version_start_excluding: str | None = Field(...)
     version_end_excluding: str | None = Field(...)
+
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
@@ -18,6 +19,6 @@ class ConfigurationModel(BaseModel):
                     'cpe:2.3:a:python:requests:*:*:*:*:*:*:*:*'
                 ],
                 'version_start_excluding': '1.1.0',
-                'versionEndIncluding': '2.2.1'
+                'version_end_including': '2.2.1'
             }
         }

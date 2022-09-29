@@ -8,7 +8,7 @@ from app.utils.managers import managers
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',
-    'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}',
+    'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}'
 }
 
 async def get_repo_data(owner: str, name: str) -> dict[list, list]:
