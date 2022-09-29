@@ -21,3 +21,7 @@ async def read_version_by_release_and_date(release: str, release_date: datetime)
 async def update_version_package_edges(version_id: ObjectId, package_edges: list) -> dict:
     updated_version = await version_collection.find_one_and_update({'_id': version_id}, {'$set': {'package_edges': package_edges}})
     return updated_version
+
+async def update_version_cves(version_id: ObjectId, cve_id: ObjectId) -> dict:
+    updated_version = await version_collection.find_one_and_update({'_id': version_id}, {'$push': {'cves': cve_id}})
+    return updated_version

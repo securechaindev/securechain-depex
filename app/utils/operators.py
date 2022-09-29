@@ -6,11 +6,11 @@ def approx_gt(version, version_) -> bool:
     str_version_ = str(version_)
     
     match str_version.count('.'):
-        case 0:
+        case 2:
             str_version += '.0'
         case 1:
             str_version += '.0.0'
-        case 2:
+        case 0:
             str_version += '.0.0.0'
 
     parts = str_version.split('.')

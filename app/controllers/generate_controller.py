@@ -3,6 +3,7 @@ from bson import ObjectId
 from app.apis.pypi_service import requires_packages, get_all_versions
 
 from app.controllers.version_controller import filter_versions_db
+from app.controllers.cve_controller import extract_cves
 
 from app.services.package_edge_service import (
     create_package_edge,
@@ -104,6 +105,8 @@ async def generate_versions(package: dict, package_edge: dict, db: str) -> list:
     filtered_versions = await filter_versions_db(package_edge['constraints'], package_versions)
 
     await update_package_versions(package['_id'], package_versions)
+
+    await extract_cves(await read_package_by_name(package['name']))
 
     await update_package_edge_versions(package_edge['_id'], filtered_versions, db)
 

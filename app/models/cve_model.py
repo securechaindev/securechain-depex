@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from app.models.cvss_model import CvssModel
 from app.models.weakness_model import WeaknessModel
-from app.models.configuration import ConfigurationModel
+from app.models.configuration_model import ConfigurationModel
 
 from datetime import datetime
 from dateutil.parser import parse
