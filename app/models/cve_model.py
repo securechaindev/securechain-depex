@@ -1,8 +1,6 @@
-from pydantic import BaseModel, Field
+from bson import ObjectId
 
-from app.models.cvss_model import CvssModel
-from app.models.weakness_model import WeaknessModel
-from app.models.configuration_model import ConfigurationModel
+from pydantic import BaseModel, Field
 
 from datetime import datetime
 from dateutil.parser import parse
@@ -15,9 +13,9 @@ class CveModel(BaseModel):
     last_modified: datetime = Field(...)
     vuln_status: str = Field(...)
     description: str = Field(...)
-    configurations: list[ConfigurationModel] | None = None
-    weaknesses: list[WeaknessModel] | None = None
-    metrics: list[CvssModel] | None = None
+    configurations: list[ObjectId] | None = None
+    weaknesses: list[ObjectId] | None = None
+    metrics: list[ObjectId] | None = None
 
     class Config:
         allow_population_by_field_name = True
