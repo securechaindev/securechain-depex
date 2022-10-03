@@ -1,13 +1,12 @@
 from app.apis.nvd_service import get_cves
 
-from app.controllers.version_controller import update_versions_cves_by_constraints
-
 from dateutil.parser import parse
 
 from app.services.cve_service import (
     create_cve,
     read_cve_by_cve_id
 )
+from app.services.version_service import update_versions_cves_by_constraints
 
 
 async def extract_cves(package: dict) -> None:

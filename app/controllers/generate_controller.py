@@ -2,7 +2,6 @@ from bson import ObjectId
 
 from app.apis.pypi_service import requires_packages, get_all_versions
 
-from app.controllers.version_controller import read_versions_by_constraints
 from app.controllers.cve_controller import extract_cves
 
 from app.services.package_edge_service import (
@@ -16,7 +15,8 @@ from app.services.package_service import (
 )
 from app.services.version_service import (
     create_version,
-    update_version_package_edges
+    update_version_package_edges,
+    read_versions_by_constraints
 )
 
 
