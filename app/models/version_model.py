@@ -1,9 +1,8 @@
+from bson import ObjectId
+
 from pydantic import BaseModel, Field
 
 from datetime import datetime
-
-from app.models.package_edge_model import PackageEdgeModel
-from app.models.cve_model import CveModel
 
 
 class VersionModel(BaseModel):
@@ -13,9 +12,9 @@ class VersionModel(BaseModel):
     patch: int | None = Field(...)
     build_number: int = Field(...)
     release_date: datetime | None = Field(...)
-    package_edges: list[PackageEdgeModel] | None = None
-    cves: list[CveModel] | None = None
-    package: dict | None = None
+    package_edges: list[ObjectId] | None = None
+    cves: list[ObjectId] | None = None
+    package: ObjectId | None = None
 
     class Config:
         allow_population_by_field_name = True
@@ -28,6 +27,7 @@ class VersionModel(BaseModel):
                 'patch': 5,
                 'build_number': 0,
                 'release_date': datetime.now(),
+                'package_edges': [],
                 'cves': [],
                 'package': None
             }

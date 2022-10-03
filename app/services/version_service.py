@@ -24,9 +24,8 @@ async def read_versions_by_constraints(constraints: list[list[str]], package_id:
     query = await get_complete_query(constraints, package_id)
     return [document['_id'] async for document in version_collection.find(query, {'_id': 1})]
 
-async def update_version_package_edges(version_id: ObjectId, package_edges: list) -> dict:
-    updated_version = await version_collection.find_one_and_update({'_id': version_id}, {'$set': {'package_edges': package_edges}})
-    return updated_version
+async def update_version_package_edges(version_id: ObjectId, package_edge_id: ObjectId) -> None:
+    await version_collection.find_one_and_update({'_id': version_id}, {'$push': {'package_edges': package_edge_id}})
 
 async def update_versions_cves_by_constraints(constraints: list[list[str]], package_id: ObjectId, cve_id: ObjectId) -> None:
     query = await get_complete_query(constraints, package_id)
