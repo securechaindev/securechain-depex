@@ -15,6 +15,7 @@ class VersionModel(BaseModel):
     release_date: datetime | None = Field(...)
     package_edges: list[PackageEdgeModel] | None = None
     cves: list[CveModel] | None = None
+    package: dict | None = None
 
     class Config:
         allow_population_by_field_name = True
@@ -27,6 +28,7 @@ class VersionModel(BaseModel):
                 'patch': 5,
                 'build_number': 0,
                 'release_date': datetime.now(),
-                'cves': []
+                'cves': [],
+                'package': None
             }
         }
