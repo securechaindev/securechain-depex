@@ -1,8 +1,6 @@
-from bson import ObjectId
-
 from app.apis.nvd_service import get_cves
 
-from app.controllers.version_controller import filter_versions_db
+from app.controllers.version_controller import update_versions_by_constraints
 
 from dateutil.parser import parse
 
@@ -10,7 +8,6 @@ from app.services.cve_service import (
     create_cve,
     read_cve_by_cve_id
 )
-from app.services.version_service import update_version_cves
 
 
 async def extract_cves(package: dict) -> None:
@@ -20,46 +17,45 @@ async def extract_cves(package: dict) -> None:
         raw_cve = raw_cve['cve']
         cve = await read_cve_by_cve_id(raw_cve['id'])
         if cve:
-            await relate_cve(package, cve)
+            cpe_matches = await get_cpe_matches(package['name'], cve)
+            await relate_cve(cve, cpe_matches)
         else:
             raw_cve['published'] = parse(raw_cve['published'])
             raw_cve['lastModified'] = parse(raw_cve['lastModified'])
 
             cve = await create_cve(raw_cve)
 
-            await relate_cve(package, cve)
+            cpe_matches = await get_cpe_matches(package['name'], cve)
+            await relate_cve(cve, cpe_matches)
 
-async def relate_cve(package: dict, cve: dict) -> None:
+async def get_cpe_matches(package_name: str, cve: dict) -> list:
+    cpe_matches = []
     for configuration in cve['configurations']:
         for node in configuration['nodes']:
             for cpe_match in node['cpeMatch']:
-                if package['name'] in cpe_match['criteria']:
-                    await process_cve(package, cve, cpe_match)
+                if package_name in cpe_match['criteria']:
+                    cpe_matches.append(cpe_match)
+    return cpe_matches
 
-async def process_cve(package: dict, cve: dict, cpe_match: dict) -> None:
-    if (
-        'versionStartIncluding' in cpe_match and
-        'versionEndIncluding' in cpe_match  and
-        'versionStartExcluding' in cpe_match  and
-        'versionEndExcluding' in cpe_match 
-    ):
-        version = cpe_match['criteria'].split(':')[5]
-        if '*' in version:
-            await update_versions(package['versions'], cve['_id'])
+async def relate_cve(cve: dict, cpe_matches: list) -> None:
+    for cpe_match in cpe_matches:
+        if (
+            'versionStartIncluding' not in cpe_match and
+            'versionEndIncluding' not in cpe_match  and
+            'versionStartExcluding' not in cpe_match  and
+            'versionEndExcluding' not in cpe_match 
+        ):
+            version = cpe_match['criteria'].split(':')[5]
+            if '*' in version:
+                await update_versions_by_constraints([], cve['_id'])
+            else:
+                await update_versions_by_constraints([['=', version]], cve['_id'])
         else:
-            filtered_versions = await filter_versions_db([['='], version], package['versions'])
-            await update_versions(filtered_versions, cve['_id'])
-    else:
-        ctcs = []
+            ctcs = []
 
-        if 'versionStartIncluding' in cpe_match: ctcs.append(['>=', cpe_match['versionStartIncluding']])
-        if 'versionEndIncluding' in cpe_match: ctcs.append(['<=', cpe_match['versionEndIncluding']])
-        if 'versionStartExcluding' in cpe_match: ctcs.append(['>', cpe_match['versionStartExcluding']])
-        if 'versionEndExcluding' in cpe_match: ctcs.append(['<', cpe_match['versionEndExcluding']])
+            if 'versionStartIncluding' in cpe_match: ctcs.append(['>=', cpe_match['versionStartIncluding']])
+            if 'versionEndIncluding' in cpe_match: ctcs.append(['<=', cpe_match['versionEndIncluding']])
+            if 'versionStartExcluding' in cpe_match: ctcs.append(['>', cpe_match['versionStartExcluding']])
+            if 'versionEndExcluding' in cpe_match: ctcs.append(['<', cpe_match['versionEndExcluding']])
 
-        filtered_versions = await filter_versions_db(ctcs, package['versions'])
-        await update_versions(filtered_versions, cve['_id'])
-
-async def update_versions(version_ids: list[ObjectId], cve_id: ObjectId) -> None:
-    for version_id in version_ids:
-        await update_version_cves(version_id, cve_id)
+            await update_versions_by_constraints(ctcs, cve['_id'])

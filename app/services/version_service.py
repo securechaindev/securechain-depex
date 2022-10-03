@@ -22,6 +22,5 @@ async def update_version_package_edges(version_id: ObjectId, package_edges: list
     updated_version = await version_collection.find_one_and_update({'_id': version_id}, {'$set': {'package_edges': package_edges}})
     return updated_version
 
-async def update_version_cves(version_id: ObjectId, cve_id: ObjectId) -> dict:
-    updated_version = await version_collection.find_one_and_update({'_id': version_id}, {'$push': {'cves': cve_id}})
-    return updated_version
+async def update_versions_cves(query: dict, cve_id: ObjectId) -> None:
+    await version_collection.update_many(query, {'$push': {'cves': cve_id}})
