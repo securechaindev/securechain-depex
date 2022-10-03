@@ -2,7 +2,7 @@ from bson import ObjectId
 
 from app.apis.pypi_service import requires_packages, get_all_versions
 
-from app.controllers.version_controller import filter_versions_db
+from app.controllers.version_controller import read_versions_by_constraints
 from app.controllers.cve_controller import extract_cves
 
 from app.services.package_edge_service import (
@@ -16,7 +16,6 @@ from app.services.package_service import (
 )
 from app.services.version_service import (
     create_version,
-    read_version_by_release_and_date,
     update_version_package_edges
 )
 
@@ -50,7 +49,7 @@ async def generate_packages(package_name: str, release: str) -> list[ObjectId]:
 async def exist_package(package: dict, package_edge: dict, db: str) -> ObjectId:
     package_edge['package'] = package['_id']
 
-    package_edge['versions'] = await filter_versions_db(package_edge['constraints'], package['versions'])
+    package_edge['versions'] = await read_versions_by_constraints(package_edge['constraints'], package['_id'])
 
     new_package_edge = await create_package_edge(package_edge, db)
 
@@ -85,24 +84,17 @@ async def generate_versions(package: dict, package_edge: dict, db: str) -> list:
     all_versions = await get_all_versions(package['name'])
 
     for version in all_versions:
+        version['package'] = package['_id']
 
-        existing_version = await read_version_by_release_and_date(version['release'], version['release_date'])
+        new_version = await create_version(version)
 
-        if existing_version is not None:
+        new_version_id = new_version['_id']
 
-            package_versions.append(existing_version['_id'])
+        package_versions.append(new_version_id)
 
-        else:
+        no_existing_versions.append([new_version_id, new_version['release']])
 
-            new_version = await create_version(version)
-
-            new_version_id = new_version['_id']
-
-            package_versions.append(new_version_id)
-
-            no_existing_versions.append([new_version_id, new_version['release']])
-
-    filtered_versions = await filter_versions_db(package_edge['constraints'], package_versions)
+    filtered_versions = await read_versions_by_constraints(package_edge['constraints'], package['_id'])
 
     await update_package_versions(package['_id'], package_versions)
 
