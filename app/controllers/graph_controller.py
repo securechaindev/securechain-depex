@@ -57,6 +57,7 @@ async def generate_graph(graph: dict) -> None:
 
             if package is not None:
 
+                # Añadir método en el futuro que determine si se han indexado versiones nuevas del paquete
                 await generate_package_edge(package, dependencie[1], 'depex', new_req_file['_id'], 'req_file')
 
             else:
