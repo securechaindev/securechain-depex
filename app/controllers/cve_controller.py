@@ -1,5 +1,3 @@
-from app.apis.nvd_service import get_cves
-
 from dateutil.parser import parse
 
 from app.services.cve_service import (
@@ -10,7 +8,8 @@ from app.services.version_service import update_versions_cves_by_constraints
 
 
 async def extract_cves(package: dict) -> None:
-    raw_cves = get_cves(package['name'])
+    # raw_cves = get_cves(package['name'])
+    raw_cves: dict = {'vulnerabilities': []}
 
     for raw_cve in raw_cves['vulnerabilities']:
         raw_cve = raw_cve['cve']
