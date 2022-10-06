@@ -6,6 +6,9 @@ from json import loads
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
+from app.services.populate_service import cve_bulkwrite
+from app.controllers.populate_controller import db_updater
+
 from app.router import api_router
 
 from app.utils.json_encoder import JSONEncoder
@@ -28,6 +31,11 @@ app = FastAPI(
     },
 )
 
+@app.on_event("startup")
+async def startup_event():
+    await cve_bulkwrite()
+    await db_updater()
+
 @app.exception_handler(RequestValidationError)
 @app.exception_handler(ValidationError)
 async def validation_exception_handler(_ , exc):
@@ -38,7 +46,6 @@ async def validation_exception_handler(_ , exc):
     
     return JSONResponse(content = JSONEncoder().encode(response), status_code = 422)
 
-# Set all CORS enabled origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins = [],

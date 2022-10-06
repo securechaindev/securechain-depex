@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 
-from app.controllers import graph_controller
+from app.controllers import (
+    graph_controller
+)
 
 
 api_router = APIRouter()
