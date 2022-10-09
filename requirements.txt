@@ -1,5 +1,4 @@
 wheel==0.37.1
-bson==0.5.10 
 fastapi[all]==0.85.0
 fastapi-utils==0.2.1
 motor==3.0.0

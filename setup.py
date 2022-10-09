@@ -21,7 +21,6 @@ setup(
     python_requires = '>=3.10',
     install_requires = [
         'wheel==0.37.1',
-        'bson==0.5.10',
         'fastapi[all]==0.85.0',
         'motor==3.0.0',
         'motor-stubs==1.7.1',
@@ -34,6 +33,6 @@ setup(
     ],
     tests_requires = [
         'prospector[with_everything]==1.7.7',
-        'mypy==0.971'
+        'mypy==0.982'
     ]
 )
