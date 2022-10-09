@@ -6,7 +6,8 @@ from app.config import settings
 from app.services.populate_service import update_env_variables
 from app.services.cve_service import (
     create_cve,
-    read_cve_by_cve_id
+    read_cve_by_cve_id,
+    replace_cve_by_cve_id
 )
 from app.services.populate_service import read_env_variables
 
@@ -15,7 +16,6 @@ from requests import get
 from time import sleep
 
 from datetime import datetime
-
 
 # 24h = 216000
 @repeat_every(seconds = 216000)
@@ -36,15 +36,25 @@ async def db_updater():
         str_begin = str(env_variables['last_year_update']) + '-' + str_month + '-' + str_begin_day + 'T00:00:00'
         str_end = str(env_variables['last_year_update']) + '-' + str_month + '-' + str_end_day + 'T23:59:59'
 
-        params = {
+        params_pub = {
             'pubStartDate': str_begin,
             'pubEndDate': str_end
-            }
+        }
 
         sleep(6)
-        response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params, headers = headers, timeout = 25).json()
+        response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_pub, headers = headers, timeout = 25).json()
 
         await insert_cves(response)
+
+        params_mod = {
+            'lastModStartDate': str_begin,
+            'lastModEndDate': str_end
+        }
+
+        sleep(6)
+        response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_mod, headers = headers, timeout = 25).json()
+        
+        await update_cves(response)
 
         env_variables['last_month_update'] += 1
         if env_variables['last_month_update'] == 13:
@@ -76,3 +86,12 @@ async def insert_cves(raw_cves: dict) -> None:
         cve = await read_cve_by_cve_id(raw_cve['id'])
         if not cve:
             await create_cve(raw_cve)
+
+async def update_cves(raw_cves: dict) -> None:
+    for raw_cve in raw_cves['vulnerabilities']:
+        raw_cve = raw_cve['cve']
+        cve = await read_cve_by_cve_id(raw_cve['id'])
+        if not cve:
+            await create_cve(raw_cve)
+        else:
+            await replace_cve_by_cve_id(raw_cve)

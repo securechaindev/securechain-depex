@@ -3,22 +3,19 @@ from app.services.dbs.databases import (
     env_variable_collection
 )
 
-from json import load
+from app.utils.get_zip_data import get_zip_data
 
 
 async def cve_bulkwrite() -> None:
-    # Posibilidad de extraer, poblar y borrar de un zip
-    export_file = open('app/services/dbs/db_files/cves.json', encoding = 'utf-8')
-    json_file = load(export_file)
-    cves = json_file['cves']
+    json_file = await get_zip_data()
     env_variables = {
         'last_year_update': json_file['year'],
         'last_month_update': json_file['month'],
         'last_day_update': json_file['day']
     }
     await env_variable_collection.insert_one(env_variables)
-    await cve_collection.insert_many(cves)
-    await cve_collection.create_index("cve_id")
+    await cve_collection.insert_many(json_file['cves'])
+    await cve_collection.create_index("id")
 
 async def read_env_variables() -> dict:
     cursor = env_variable_collection.find()
