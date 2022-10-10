@@ -15,7 +15,7 @@ async def cve_bulkwrite() -> None:
     }
     await env_variable_collection.insert_one(env_variables)
     await cve_collection.insert_many(json_file['cves'])
-    await cve_collection.create_index("id")
+    await cve_collection.create_index("id", unique = True)
 
 async def read_env_variables() -> dict:
     cursor = env_variable_collection.find()
@@ -23,5 +23,5 @@ async def read_env_variables() -> dict:
         return document
     return {}
 
-async def update_env_variables(env_variables: dict) -> None:
-    await env_variable_collection.find_one_and_update({'_id': env_variables['_id']}, {'$set': env_variables})
+async def replace_env_variables(env_variables: dict) -> None:
+    await env_variable_collection.replace_one({'_id': env_variables['_id']}, {'$set': env_variables})

@@ -10,5 +10,5 @@ async def read_cve_by_cve_id(cve_id: str) -> dict:
     cve = await cve_collection.find_one({'id': cve_id})
     return cve
 
-async def replace_cve_by_cve_id(cve_data: dict) -> None:
-    await cve_collection.replace_one({'id': cve_data['id']}, cve_data)
+async def bulk_write_cve_actions(actions: list) -> None:
+    await cve_collection.bulk_write(actions, ordered = True)

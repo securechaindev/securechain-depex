@@ -3,13 +3,14 @@ from fastapi_utils.tasks import repeat_every
 
 from app.config import settings
 
-from app.services.populate_service import update_env_variables
+from app.services.populate_service import replace_env_variables
 from app.services.cve_service import (
-    create_cve,
     read_cve_by_cve_id,
-    replace_cve_by_cve_id
+    bulk_write_cve_actions
 )
 from app.services.populate_service import read_env_variables
+
+from pymongo import InsertOne, ReplaceOne
 
 from requests import get
 
@@ -65,7 +66,7 @@ async def db_updater():
             env_variables['last_month_update'] = today.month
             env_variables['last_day_update'] = today.day
             env_variables['last_moment_update'] = datetime.now()
-            await update_env_variables(env_variables)
+            await replace_env_variables(env_variables)
             no_stop = False
 
 async def get_end_day(today: datetime, last_year: int, last_month: int) -> int:
@@ -81,17 +82,23 @@ async def get_end_day(today: datetime, last_year: int, last_month: int) -> int:
     return today.day
 
 async def insert_cves(raw_cves: dict) -> None:
+    inserts = []
     for raw_cve in raw_cves['vulnerabilities']:
         raw_cve = raw_cve['cve']
         cve = await read_cve_by_cve_id(raw_cve['id'])
         if not cve:
-            await create_cve(raw_cve)
+            inserts.append(InsertOne(raw_cve))
+
+    await bulk_write_cve_actions(inserts)
 
 async def update_cves(raw_cves: dict) -> None:
+    updates = []
     for raw_cve in raw_cves['vulnerabilities']:
         raw_cve = raw_cve['cve']
         cve = await read_cve_by_cve_id(raw_cve['id'])
         if not cve:
-            await create_cve(raw_cve)
+            updates.append(InsertOne(raw_cve))
         else:
-            await replace_cve_by_cve_id(raw_cve)
+            updates.append(ReplaceOne({'id': raw_cve['id']}, raw_cve))
+    
+    await bulk_write_cve_actions(updates)
