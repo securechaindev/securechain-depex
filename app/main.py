@@ -6,6 +6,7 @@ from json import loads
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
+from app.services.dbs.indexes import create_indexes
 from app.services.populate_service import cve_bulkwrite
 from app.controllers.populate_controller import db_updater
 
@@ -33,6 +34,7 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def startup_event():
+    await create_indexes()
     await cve_bulkwrite()
     await db_updater()
 
