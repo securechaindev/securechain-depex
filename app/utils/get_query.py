@@ -70,18 +70,18 @@ async def greater_than_query(xyzd: list[str], not_have_letters: bool) -> dict:
         {'mayor': {'$gt': xyzd[0]}},
         {'$and': [
             {'mayor': {'$eq': xyzd[0]}},
-            {'$or': [{'minor': {'$gt': xyzd[1]}}, {'minor': {'$regex': xyzd[1]}}]}
+            {'$or': [{'minor': {'$gt': xyzd[1]}}, await create_regex('minor', xyzd[1])]}
         ]},
         {'$and': [
             {'mayor': {'$eq': xyzd[0]}},
             {'minor': {'$eq': xyzd[1]}},
-            {'$or': [{'patch': {'$gt': xyzd[2]}}, {'patch': {'$regex': xyzd[2]}}]}
+            {'$or': [{'patch': {'$gt': xyzd[2]}}, await create_regex('patch', xyzd[2])]}
         ]},
         {'$and': [
             {'mayor': {'$eq': xyzd[0]}},
             {'minor': {'$eq': xyzd[1]}},
             {'patch': {'$eq': xyzd[2]}},
-            {'$or': [{'build_number': {'$gt': xyzd[3]}}, {'build_number': {'$regex': xyzd[3]}}]}
+            {'$or': [{'build_number': {'$gt': xyzd[3]}}, await create_regex('build_number', xyzd[3])]}
         ]}
     ]}
 
@@ -95,21 +95,21 @@ async def less_than_query(xyzd: list[str], not_have_letters: bool) -> dict:
         ]}
 
     return {'$or': [
-        {'mayor': {'$gt': xyzd[0]}},
+        {'mayor': {'$lt': xyzd[0]}},
         {'$and': [
             {'mayor': {'$eq': xyzd[0]}},
-            {'$or': [{'minor': {'$lt': xyzd[1]}}, {'minor': {'$regex': xyzd[1]}}]}
+            {'$or': [{'minor': {'$lt': xyzd[1]}}, await create_regex('minor', xyzd[1])]}
         ]},
         {'$and': [
             {'mayor': {'$eq': xyzd[0]}},
             {'minor': {'$eq': xyzd[1]}},
-            {'$or': [{'patch': {'$lt': xyzd[2]}}, {'patch': {'$regex': xyzd[2]}}]}
+            {'$or': [{'patch': {'$lt': xyzd[2]}}, await create_regex('patch', xyzd[2])]}
         ]},
         {'$and': [
             {'mayor': {'$eq': xyzd[0]}},
             {'minor': {'$eq': xyzd[1]}},
             {'patch': {'$eq': xyzd[2]}},
-            {'$or': [{'build_number': {'$lt': xyzd[3]}}, {'build_number': {'$regex': xyzd[3]}}]}
+            {'$or': [{'build_number': {'$lt': xyzd[3]}}, await create_regex('build_number', xyzd[3])]}
         ]}
     ]}
 
@@ -146,3 +146,6 @@ async def approx_greater_than_minor(xyzd: list[str], number_of_elements: int, no
         return {'$and': [await greater_or_equal_than_query(xyzd, not_have_letters), await less_than_query(up_xyzd, not_have_letters)]}
     up_xyzd[0] = str(int(up_xyzd[0]) + 1)
     return {'$and': [await greater_or_equal_than_query(xyzd, not_have_letters), await less_than_query(up_xyzd, not_have_letters)]}
+
+async def create_regex(part: str, number: str) -> dict:
+    return {'$and': [{part: {'$regex': number}}, {'$or': [{part: {'$regex': 'rc'}}, {part: {'$regex': 'b'}}, {part: {'$regex': 'a'}}]}]}
