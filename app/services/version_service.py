@@ -16,10 +16,6 @@ async def read_version_by_id(version_id: ObjectId) -> dict:
     version = await version_collection.find_one({'_id': version_id})
     return version
 
-async def read_version_by_release_and_date(release: str, release_date: datetime) -> dict:
-    version = await version_collection.find_one({'$and': [{'release': release}, {'release_date': release_date}]})
-    return version
-
 async def read_versions_by_constraints(constraints: list[list[str]], package_id: ObjectId) -> list:
     query = await get_complete_query(constraints, package_id)
     return [document['_id'] async for document in version_collection.find(query, {'_id': 1})]
