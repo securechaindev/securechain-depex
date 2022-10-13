@@ -1,4 +1,7 @@
-from app.services.dbs.databases import depex_package_edge_collection, pypi_package_edge_collection
+from app.services.dbs.databases import (
+    depex_package_edge_collection,
+    pypi_package_edge_collection
+)
 
 
 async def create_package_edge(package_edge_data: dict, db: str) -> dict:
