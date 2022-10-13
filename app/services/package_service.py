@@ -2,6 +2,8 @@ from bson import ObjectId
 
 from app.services.dbs.databases import package_collection
 
+from datetime import datetime
+
 
 async def create_package(package_data: dict) -> dict:
     package = await package_collection.insert_one(package_data)
@@ -14,3 +16,6 @@ async def read_package_by_name(package_name: str) -> dict:
 
 async def update_package_versions(package_id: ObjectId, version_id: ObjectId) -> None:
     await package_collection.find_one_and_update({'_id': package_id}, {'$push': {'versions': version_id}})
+
+async def update_package_moment(package_id: ObjectId) -> None:
+    await package_collection.find_one_and_update({'_id': package_id}, {'$set': {'moment': datetime.now()}})

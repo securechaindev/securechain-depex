@@ -2,9 +2,12 @@ from bson import ObjectId
 
 from pydantic import BaseModel, Field
 
+from datetime import datetime
+
 
 class PackageModel(BaseModel):
     name: str = Field(...)
+    moment: datetime = Field(...)
     versions: list[ObjectId] | None = None
 
     class Config:
@@ -13,6 +16,7 @@ class PackageModel(BaseModel):
         schema_extra = {
             'example': {
                 'name': 'urllib3',
+                'moment': datetime.now(),
                 'versions': []
             }
         }

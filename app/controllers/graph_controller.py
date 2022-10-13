@@ -4,7 +4,11 @@ from fastapi.encoders import jsonable_encoder
 
 from app.apis.git_service import get_repo_data
 
-from app.controllers.generate_controller import generate_package_edge, no_exist_package
+from app.controllers.generate_controller import (
+    generate_package_edge,
+    no_exist_package,
+    search_new_versions
+)
 
 from app.models.graph_model import GraphModel
 
@@ -18,6 +22,8 @@ from app.services.package_service import read_package_by_name
 from app.services.requirement_file_service import create_requirement_file
 
 from app.utils.json_encoder import JSONEncoder
+
+from datetime import datetime, timedelta
 
 
 router = APIRouter()
@@ -57,7 +63,10 @@ async def generate_graph(graph: dict) -> None:
 
             if package is not None:
 
-                # Añadir método en el futuro que determine si se han indexado versiones nuevas del paquete
+                now = datetime.now()
+                if package['moment'] < now - timedelta(days = 10):
+                    await search_new_versions(package)
+
                 await generate_package_edge(package, dependencie[1], 'depex', new_req_file['_id'], 'req_file')
 
             else:

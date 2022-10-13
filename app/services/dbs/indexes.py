@@ -28,3 +28,10 @@ async def create_indexes() -> None:
             ('build_numnber', ASCENDING)
         ]
     )
+    await version_collection.create_index(
+        [
+            ('release', ASCENDING),
+            ('package', ASCENDING)
+        ],
+        unique = True
+    )
