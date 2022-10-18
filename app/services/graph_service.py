@@ -1,6 +1,5 @@
-from fastapi import HTTPException
-
 from bson import ObjectId
+from fastapi import HTTPException
 
 from app.services.dbs.databases import graph_collection
 

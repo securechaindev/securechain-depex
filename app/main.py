@@ -1,19 +1,14 @@
-from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError, ValidationError
-
 from json import loads
 
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError, ValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
-from app.services.dbs.indexes import create_indexes
-from app.services.populate_service import cve_bulkwrite
-from app.controllers.populate_controller import db_updater
-
+from app.controllers.updater_controller import db_updater
 from app.router import api_router
-
+from app.services.dbs.indexes import create_indexes
 from app.utils.json_encoder import JSONEncoder
-
 
 description = 'A simple backend for dependency extraction'
 
@@ -35,8 +30,7 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     await create_indexes()
-    await cve_bulkwrite()
-    await db_updater()
+    # await db_updater()
 
 @app.exception_handler(RequestValidationError)
 @app.exception_handler(ValidationError)

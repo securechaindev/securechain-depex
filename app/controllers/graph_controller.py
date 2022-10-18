@@ -1,30 +1,20 @@
-from fastapi import APIRouter, Body, status, BackgroundTasks, HTTPException
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-
-from app.apis.git_service import get_repo_data
-
-from app.controllers.generate_controller import (
-    generate_package_edge,
-    no_exist_package,
-    search_new_versions
-)
-
-from app.models.graph_model import GraphModel
-
-from app.services.graph_service import (
-    create_graph,
-    read_graph,
-    update_graph_requirement_files,
-    update_graph_is_completed
-)
-from app.services.package_service import read_package_by_name
-from app.services.requirement_file_service import create_requirement_file
-
-from app.utils.json_encoder import JSONEncoder
-
 from datetime import datetime, timedelta
 
+from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+
+from app.apis.git_service import get_repo_data
+from app.controllers.generate_controller import (generate_package_edge,
+                                                 no_exist_package,
+                                                 search_new_versions)
+from app.models.graph_model import GraphModel
+from app.services.graph_service import (create_graph, read_graph,
+                                        update_graph_is_completed,
+                                        update_graph_requirement_files)
+from app.services.package_service import read_package_by_name
+from app.services.requirement_file_service import create_requirement_file
+from app.utils.json_encoder import JSONEncoder
 
 router = APIRouter()
 
@@ -41,8 +31,8 @@ async def init_graph(background_tasks: BackgroundTasks, graph: GraphModel = Body
     graph_json = jsonable_encoder(graph)
     try:
         new_graph = await create_graph(graph_json)
-        background_tasks.add_task(generate_graph, new_graph)
-        # await generate_graph(new_graph)
+        # background_tasks.add_task(generate_graph, new_graph)
+        await generate_graph(new_graph)
         return JSONResponse(status_code = status.HTTP_201_CREATED, content = JSONEncoder().encode(new_graph))
     except HTTPException as error:
         return JSONResponse(status_code = error.status_code, content = JSONEncoder().encode({'message': error.detail}))

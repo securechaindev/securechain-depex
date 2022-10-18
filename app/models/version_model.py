@@ -1,8 +1,7 @@
-from bson import ObjectId
-
-from pydantic import BaseModel, Field
-
 from datetime import datetime
+
+from bson import ObjectId
+from pydantic import BaseModel, Field
 
 
 class VersionModel(BaseModel):
@@ -10,7 +9,7 @@ class VersionModel(BaseModel):
     mayor: int = Field(...)
     minor: int = Field(...)
     patch: int | None = Field(...)
-    build_number: int = Field(...)
+    build_number: int | None  = Field(...)
     release_date: datetime | None = Field(...)
     package_edges: list[ObjectId] | None = None
     cves: list[ObjectId] | None = None

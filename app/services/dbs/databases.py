@@ -1,9 +1,8 @@
-import motor.motor_asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.config import settings
 
-
-client = motor.motor_asyncio.AsyncIOMotorClient(settings.DATABASE_URL)
+client = AsyncIOMotorClient(settings.DATABASE_URL)
 
 depex_db = client.depex
 env_variable_collection = depex_db.get_collection('env_variables')

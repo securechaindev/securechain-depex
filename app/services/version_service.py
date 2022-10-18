@@ -1,7 +1,6 @@
 from bson import ObjectId
 
 from app.services.dbs.databases import version_collection
-
 from app.utils.get_query import get_complete_query
 
 

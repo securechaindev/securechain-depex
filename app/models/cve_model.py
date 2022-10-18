@@ -1,9 +1,8 @@
-from bson import ObjectId
-
-from pydantic import BaseModel, Field
-
 from datetime import datetime
+
+from bson import ObjectId
 from dateutil.parser import parse
+from pydantic import BaseModel, Field
 
 
 class CveModel(BaseModel):

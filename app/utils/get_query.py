@@ -1,6 +1,6 @@
-from bson import ObjectId
-
 from copy import copy
+
+from bson import ObjectId
 
 
 async def get_complete_query(constraints: list[list[str]], package_id: ObjectId) -> dict:
@@ -148,4 +148,9 @@ async def approx_greater_than_minor(xyzd: list[str], number_of_elements: int, no
     return {'$and': [await greater_or_equal_than_query(xyzd, not_have_letters), await less_than_query(up_xyzd, not_have_letters)]}
 
 async def create_regex(part: str, number: str) -> dict:
-    return {'$and': [{part: {'$regex': number}}, {'$or': [{part: {'$regex': 'rc'}}, {part: {'$regex': 'b'}}, {part: {'$regex': 'a'}}]}]}
+    return {'$and': [{part: {'$regex': number}}, {'$or': [
+            {part: {'$regex': 'rc'}},
+            {part: {'$regex': 'b'}},
+            {part: {'$regex': 'a'}},
+            {part: {'$regex': 'dev'}}
+        ]}]}

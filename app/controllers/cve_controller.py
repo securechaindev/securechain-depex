@@ -1,5 +1,4 @@
 from app.services.cve_service import read_cpe_matches_by_package_name
-
 from app.services.version_service import update_versions_cves_by_constraints
 
 

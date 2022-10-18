@@ -1,14 +1,23 @@
-from requests import get
-
 from dateutil.parser import parse
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from app.utils.ctc_parser import parse_constraints
 from app.utils.get_first_pos import get_first_position
 
 
+async def get_session() -> Session:
+    session = Session()
+    retry = Retry(connect = 3, backoff_factor = 0.5)
+    adapter = HTTPAdapter(max_retries = retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
 async def get_all_versions(pkg_name: str) -> list:
-    url = f'https://pypi.python.org/pypi/{pkg_name}/json'
-    response = get(url, timeout = 50).json()
+    session = await get_session()
+    response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
 
     if 'releases' in response:
         versions = []
@@ -28,7 +37,8 @@ async def get_all_versions(pkg_name: str) -> list:
                     'patch': xyzd[2] if len(xyzd) >= 3 else '0',
                     'build_number': xyzd[3] if len(xyzd) >= 4 else '0',
                     'release_date': release_date,
-                    'package_edges': []
+                    'package_edges': [],
+                    'cves': []
                 })
 
         return versions
@@ -36,8 +46,8 @@ async def get_all_versions(pkg_name: str) -> list:
     return []
 
 async def requires_packages(pkg_name: str, version_dist: str) -> dict:
-    url = f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-    response = get(url, timeout = 50).json()['info']['requires_dist']
+    session = await get_session()
+    response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json').json()['info']['requires_dist']
 
     if response:
         require_packages = {}
@@ -49,7 +59,7 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict:
                 if 'extra' in data[1]:
                     continue
 
-            data = data[0].replace('(', '').replace(')', '').replace(' ', '')
+            data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
 
             pos = await get_first_position(data)
 

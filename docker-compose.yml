@@ -6,6 +6,7 @@ services:
     build: .
     depends_on:
       - database
+      - database_seeder
     ports:
       - '8000:8000'
     networks:
@@ -16,6 +17,18 @@ services:
     image: mongo:latest
     ports:
       - '27017:27017'
+    networks:
+      - depex
+
+  database_seeder:
+    container_name: mongodb_seeder
+    image: mongo:latest
+    links:
+      - database
+    volumes:
+      - ./mongo_seed:/mongo_seed
+    command:
+      /mongo_seed/import.sh
     networks:
       - depex
 

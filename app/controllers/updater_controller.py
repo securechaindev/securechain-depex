@@ -1,22 +1,16 @@
 # mypy: ignore-errors
-from fastapi_utils.tasks import repeat_every
-
-from app.config import settings
-
-from app.services.populate_service import replace_env_variables
-from app.services.cve_service import (
-    read_cve_by_cve_id,
-    bulk_write_cve_actions
-)
-from app.services.populate_service import read_env_variables
-
-from pymongo import InsertOne, ReplaceOne
-
-from requests import get
-
+from datetime import datetime
 from time import sleep
 
-from datetime import datetime
+from fastapi_utils.tasks import repeat_every
+from pymongo import InsertOne, ReplaceOne
+from requests import get
+
+from app.config import settings
+from app.services.cve_service import bulk_write_cve_actions, read_cve_by_cve_id
+from app.services.updater_service import (read_env_variables,
+                                          replace_env_variables)
+
 
 # 24h = 216000
 @repeat_every(seconds = 216000)

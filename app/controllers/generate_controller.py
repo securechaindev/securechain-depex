@@ -1,28 +1,19 @@
+from datetime import datetime, timedelta
+
 from bson import ObjectId
 
-from app.apis.pypi_service import (
-    requires_packages,
-    get_all_versions
-)
-
+from app.apis.pypi_service import get_all_versions, requires_packages
 from app.controllers.cve_controller import extract_cves
-
-from app.services.requirement_file_service import update_requirement_file_package_edges
 from app.services.package_edge_service import create_package_edge
-from app.services.package_service import (
-    create_package,
-    read_package_by_name,
-    update_package_versions,
-    update_package_moment
-)
-from app.services.version_service import (
-    create_version,
-    read_versions_by_constraints,
-    read_version_by_release_and_package,
-    update_version_package_edges
-)
-
-from datetime import datetime, timedelta
+from app.services.package_service import (create_package, read_package_by_name,
+                                          update_package_moment,
+                                          update_package_versions)
+from app.services.requirement_file_service import \
+    update_requirement_file_package_edges
+from app.services.version_service import (create_version,
+                                          read_version_by_release_and_package,
+                                          read_versions_by_constraints,
+                                          update_version_package_edges)
 
 
 async def generate_package_edge(package: dict, constraints: list[list[str]], db: str, parent_id: ObjectId, parent_type: str) -> None:

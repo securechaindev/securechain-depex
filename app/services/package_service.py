@@ -1,8 +1,8 @@
+from datetime import datetime
+
 from bson import ObjectId
 
 from app.services.dbs.databases import package_collection
-
-from datetime import datetime
 
 
 async def create_package(package_data: dict) -> dict:

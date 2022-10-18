@@ -1,10 +1,10 @@
+from json import JSONEncoder
+
 from bson import ObjectId
 
-import json
 
-
-class JSONEncoder(json.JSONEncoder):
+class JSONEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, ObjectId):
             return str(o)
-        return json.JSONEncoder.default(self, o)
+        return JSONEncoder.default(self, o)

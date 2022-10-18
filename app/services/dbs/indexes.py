@@ -1,10 +1,7 @@
-from app.services.dbs.databases import (
-    cve_collection,
-    version_collection,
-    package_collection
-)
-
 from pymongo import ASCENDING
+
+from app.services.dbs.databases import (cve_collection, package_collection,
+                                        version_collection)
 
 
 async def create_indexes() -> None:
