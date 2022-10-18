@@ -14,7 +14,7 @@ from app.services.graph_service import (create_graph, read_graph,
                                         update_graph_requirement_files)
 from app.services.package_service import read_package_by_name
 from app.services.requirement_file_service import create_requirement_file
-from app.utils.json_encoder import JSONEncoder
+from app.utils.json_encoder import JSONencoder
 
 router = APIRouter()
 
@@ -22,9 +22,9 @@ router = APIRouter()
 async def read_graph_data(graph_id: str):
     try:
         graph = await read_graph(graph_id)
-        return JSONResponse(status_code = status.HTTP_200_OK, content = JSONEncoder().encode(graph))
+        return JSONResponse(status_code = status.HTTP_200_OK, content = JSONencoder().encode(graph))
     except HTTPException as error:
-        return JSONResponse(status_code = error.status_code, content = JSONEncoder().encode({'message': error.detail}))
+        return JSONResponse(status_code = error.status_code, content = JSONencoder().encode({'message': error.detail}))
 
 @router.post('/graph', response_description = 'Init graph', response_model = GraphModel)
 async def init_graph(background_tasks: BackgroundTasks, graph: GraphModel = Body(...)):
@@ -33,9 +33,9 @@ async def init_graph(background_tasks: BackgroundTasks, graph: GraphModel = Body
         new_graph = await create_graph(graph_json)
         # background_tasks.add_task(generate_graph, new_graph)
         await generate_graph(new_graph)
-        return JSONResponse(status_code = status.HTTP_201_CREATED, content = JSONEncoder().encode(new_graph))
+        return JSONResponse(status_code = status.HTTP_201_CREATED, content = JSONencoder().encode(new_graph))
     except HTTPException as error:
-        return JSONResponse(status_code = error.status_code, content = JSONEncoder().encode({'message': error.detail}))
+        return JSONResponse(status_code = error.status_code, content = JSONencoder().encode({'message': error.detail}))
 
 async def generate_graph(graph: dict) -> None:
     files = await get_repo_data(graph['owner'], graph['name'])

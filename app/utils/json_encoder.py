@@ -3,7 +3,7 @@ from json import JSONEncoder
 from bson import ObjectId
 
 
-class JSONEncoder(JSONEncoder):
+class JSONencoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, ObjectId):
             return str(o)
