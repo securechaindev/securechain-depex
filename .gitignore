@@ -131,3 +131,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# MongoDB Seeds
+mongo_seed/seeds/
