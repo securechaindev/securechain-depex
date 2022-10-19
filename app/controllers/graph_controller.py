@@ -32,7 +32,6 @@ async def init_graph(background_tasks: BackgroundTasks, graph: GraphModel = Body
     try:
         new_graph = await create_graph(graph_json)
         background_tasks.add_task(generate_graph, new_graph)
-        # await generate_graph(new_graph)
         return JSONResponse(status_code = status.HTTP_201_CREATED, content = JSONencoder().encode(new_graph))
     except HTTPException as error:
         return JSONResponse(status_code = error.status_code, content = JSONencoder().encode({'message': error.detail}))
