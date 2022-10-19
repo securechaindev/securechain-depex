@@ -1,10 +1,11 @@
+from bson import ObjectId
 from pydantic import BaseModel, Field
 
 
 class PackageEdgeModel(BaseModel):
     constraints: list[list[str]] | str = Field(...)
-    package: None = None
-    versions: None = None
+    versions: ObjectId | None = None
+    package: ObjectId | None = None
 
     class Config:
         allow_population_by_field_name = True
@@ -12,5 +13,7 @@ class PackageEdgeModel(BaseModel):
         schema_extra = {
             'example': {
                 'constraints': [['<=', '0.7.0'], ['==', '1.2.1'], ['>', '2.3']],
+                'versions': [],
+                'package': None
             }
         }

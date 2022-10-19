@@ -1,11 +1,13 @@
-from pydantic import BaseModel, Field
+from datetime import datetime
 
-from app.models.version_model import VersionModel
+from bson import ObjectId
+from pydantic import BaseModel, Field
 
 
 class PackageModel(BaseModel):
     name: str = Field(...)
-    versions: list[VersionModel] | None = None
+    moment: datetime = Field(...)
+    versions: list[ObjectId] | None = None
 
     class Config:
         allow_population_by_field_name = True
@@ -13,5 +15,7 @@ class PackageModel(BaseModel):
         schema_extra = {
             'example': {
                 'name': 'urllib3',
+                'moment': datetime.now(),
+                'versions': []
             }
         }

@@ -8,14 +8,14 @@ from app.utils.managers import managers
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',
-    'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}',
+    'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}'
 }
 
 async def get_repo_data(owner: str, name: str) -> dict[list, list]:
-    query = '{repository(owner: \'' + owner + '\', name: \'' + name + '\')'
+    query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
     query += '{dependencyGraphManifests{nodes{filename dependencies{nodes{packageName requirements}}}}}}'
 
-    response = post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 25).json()
+    response = post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 50).json()
 
     return await json_reader(response)
 
