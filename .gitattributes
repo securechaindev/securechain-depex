@@ -1,5 +1,1 @@
-mongo_seed/seeds/cves.json filter=lfs diff=lfs merge=lfs -text
-mongo_seed/seeds/package_edges.json filter=lfs diff=lfs merge=lfs -text
-mongo_seed/seeds/packages.json filter=lfs diff=lfs merge=lfs -text
-mongo_seed/seeds/versions.json filter=lfs diff=lfs merge=lfs -text
 *.json filter=lfs diff=lfs merge=lfs -text
