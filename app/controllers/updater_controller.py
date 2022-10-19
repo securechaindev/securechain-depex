@@ -2,6 +2,7 @@
 from datetime import datetime
 from time import sleep
 
+from dateutil.parser import parse
 from fastapi_utils.tasks import repeat_every
 from pymongo import InsertOne, ReplaceOne
 from requests import get
@@ -39,7 +40,7 @@ async def db_updater():
         sleep(6)
         response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_pub, headers = headers, timeout = 25).json()
 
-        await insert_cves(response)
+        await update_db(response)
 
         params_mod = {
             'lastModStartDate': str_begin,
@@ -49,7 +50,7 @@ async def db_updater():
         sleep(6)
         response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_mod, headers = headers, timeout = 25).json()
         
-        await update_cves(response)
+        await update_db(response)
 
         env_variables['last_month_update'] += 1
         if env_variables['last_month_update'] == 13:
@@ -75,24 +76,16 @@ async def get_end_day(today: datetime, last_year: int, last_month: int) -> int:
             return 28
     return today.day
 
-async def insert_cves(raw_cves: dict) -> None:
-    inserts = []
+async def update_db(raw_cves: dict) -> None:
+    actions = []
     for raw_cve in raw_cves['vulnerabilities']:
         raw_cve = raw_cve['cve']
+        raw_cve['published'] = parse(raw_cve['published'])
+        raw_cve['lastModified'] = parse(raw_cve['lastModified'])
         cve = await read_cve_by_cve_id(raw_cve['id'])
         if not cve:
-            inserts.append(InsertOne(raw_cve))
-
-    await bulk_write_cve_actions(inserts)
-
-async def update_cves(raw_cves: dict) -> None:
-    updates = []
-    for raw_cve in raw_cves['vulnerabilities']:
-        raw_cve = raw_cve['cve']
-        cve = await read_cve_by_cve_id(raw_cve['id'])
-        if not cve:
-            updates.append(InsertOne(raw_cve))
+            actions.append(InsertOne(raw_cve))
         else:
-            updates.append(ReplaceOne({'id': raw_cve['id']}, raw_cve))
+            actions.append(ReplaceOne({'id': raw_cve['id']}, raw_cve))
     
-    await bulk_write_cve_actions(updates)
+    if actions: await bulk_write_cve_actions(actions)

@@ -8,4 +8,4 @@ async def read_env_variables() -> dict:
     return {}
 
 async def replace_env_variables(env_variables: dict) -> None:
-    await env_variable_collection.replace_one({'_id': env_variables['_id']}, {'$set': env_variables})
+    await env_variable_collection.replace_one({'_id': env_variables['_id']}, env_variables)

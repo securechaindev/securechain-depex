@@ -30,7 +30,7 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     await create_indexes()
-    # await db_updater()
+    await db_updater()
 
 @app.exception_handler(RequestValidationError)
 @app.exception_handler(ValidationError)
