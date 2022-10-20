@@ -1,10 +1,8 @@
 from requests import post
 
 from app.config import settings
-
 from app.utils.ctc_parser import parse_constraints
 from app.utils.managers import managers
-
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',

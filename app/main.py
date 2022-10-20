@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError, ValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
-from app.controllers.updater_controller import db_updater
+from app.controllers.update_db_controller import db_updater
 from app.router import api_router
 from app.services.dbs.indexes import create_indexes
 from app.utils.json_encoder import JSONEncoder
