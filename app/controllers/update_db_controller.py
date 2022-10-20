@@ -1,16 +1,15 @@
-# mypy: ignore-errors
 from datetime import datetime
 from time import sleep
 
 from dateutil.parser import parse
 from fastapi_utils.tasks import repeat_every
 from pymongo import InsertOne, ReplaceOne
-from requests import get
 
 from app.config import settings
 from app.services.cve_service import bulk_write_cve_actions, read_cve_by_cve_id
 from app.services.updater_service import (read_env_variables,
                                           replace_env_variables)
+from app.utils.get_session import get_session
 
 
 # 24h = 216000
@@ -20,9 +19,16 @@ async def db_updater():
     today = datetime.today()
 
     headers = {'apiKey': settings.NVD_APY_KEY}
+    session = await get_session()
 
-    no_stop = True
-    while no_stop:
+    while True:
+        if env_variables['last_year_update'] == today.year and env_variables['last_month_update'] == today.month + 1:
+            env_variables['last_month_update'] = today.month
+            env_variables['last_day_update'] = today.day
+            env_variables['last_moment_update'] = datetime.now()
+            await replace_env_variables(env_variables)
+            break
+
         end_day = await get_end_day(today, env_variables['last_year_update'], env_variables['last_month_update'])
 
         str_month = str(env_variables['last_month_update']) if env_variables['last_month_update'] > 9 else '0' + str(env_variables['last_month_update'])
@@ -38,7 +44,7 @@ async def db_updater():
         }
 
         sleep(6)
-        response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_pub, headers = headers, timeout = 25).json()
+        response = session.get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_pub, headers = headers, timeout = 25).json()
 
         await update_db(response)
 
@@ -48,21 +54,15 @@ async def db_updater():
         }
 
         sleep(6)
-        response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_mod, headers = headers, timeout = 25).json()
+        response = session.get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_mod, headers = headers, timeout = 25).json()
         
         await update_db(response)
 
         env_variables['last_month_update'] += 1
+        env_variables['last_day_update'] = 0
         if env_variables['last_month_update'] == 13:
             env_variables['last_month_update'] = 1
             env_variables['last_year_update'] += 1
-
-        if env_variables['last_year_update'] == today.year and env_variables['last_month_update'] == today.month + 1:
-            env_variables['last_month_update'] = today.month
-            env_variables['last_day_update'] = today.day
-            env_variables['last_moment_update'] = datetime.now()
-            await replace_env_variables(env_variables)
-            no_stop = False
 
 async def get_end_day(today: datetime, last_year: int, last_month: int) -> int:
     if last_year != today.year or last_month != today.month:
@@ -77,7 +77,7 @@ async def get_end_day(today: datetime, last_year: int, last_month: int) -> int:
     return today.day
 
 async def update_db(raw_cves: dict) -> None:
-    actions = []
+    actions: list = []
     for raw_cve in raw_cves['vulnerabilities']:
         raw_cve = raw_cve['cve']
         raw_cve['published'] = parse(raw_cve['published'])
