@@ -1,7 +1,6 @@
-from requests import post
-
 from app.config import settings
 from app.utils.ctc_parser import parse_constraints
+from app.utils.get_session import get_session
 from app.utils.managers import managers
 
 headers = {
@@ -13,7 +12,8 @@ async def get_repo_data(owner: str, name: str) -> dict[list, list]:
     query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
     query += '{dependencyGraphManifests{nodes{filename dependencies{nodes{packageName requirements}}}}}}'
 
-    response = post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 50).json()
+    session = await get_session()
+    response = session.post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 50).json()
 
     return await json_reader(response)
 

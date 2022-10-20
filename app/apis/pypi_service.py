@@ -1,19 +1,9 @@
 from dateutil.parser import parse
-from requests import Session
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 from app.utils.ctc_parser import parse_constraints
 from app.utils.get_first_pos import get_first_position
+from app.utils.get_session import get_session
 
-
-async def get_session() -> Session:
-    session = Session()
-    retry = Retry(connect = 3, backoff_factor = 0.5)
-    adapter = HTTPAdapter(max_retries = retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
 
 async def get_all_versions(pkg_name: str) -> list:
     session = await get_session()
