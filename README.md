@@ -19,3 +19,7 @@
 1. Here they are the [GitHub releases](https://github.com/GermanMT/depex/releases)
 
 2. Here they are the [DockerHub releases](https://hub.docker.com/r/germanmt/depex/tags)
+
+3. How to get a GitHub [API key](https://github.com/settings/tokens)
+
+4. How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
