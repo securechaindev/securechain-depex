@@ -1,14 +1,22 @@
+from bson import ObjectId
 from app.services.dbs.databases import (depex_package_edge_collection,
                                         pypi_package_edge_collection)
 
 
-async def create_package_edge(package_edge_data: dict, db: str) -> dict:
+async def select_db(db: str):
     match db:
         case 'depex':
-            collection = depex_package_edge_collection
+            return depex_package_edge_collection
         case 'pypi':
-            collection = pypi_package_edge_collection
+            return pypi_package_edge_collection
 
+async def read_package_edge_by_id(package_edge_id: ObjectId, db: str, fields_to_remove: dict = {}) -> dict:
+    collection = await select_db(db)
+    package_edge = await collection.find_one({'_id': package_edge_id}, fields_to_remove)
+    return package_edge
+
+async def create_package_edge(package_edge_data: dict, db: str) -> dict:
+    collection = await select_db(db)
     package_edge = await collection.insert_one(package_edge_data)
     new_package_edge = await collection.find_one({'_id': package_edge.inserted_id})
     return new_package_edge

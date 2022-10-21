@@ -9,8 +9,8 @@ async def create_version(version_data: dict) -> dict:
     new_version = await version_collection.find_one({'_id': version.inserted_id})
     return new_version
 
-async def read_version_by_id(version_id: ObjectId) -> dict:
-    version = await version_collection.find_one({'_id': version_id})
+async def read_version_by_id(version_id: ObjectId, fields_to_remove: dict = {}) -> dict:
+    version = await version_collection.find_one({'_id': version_id}, fields_to_remove)
     return version
 
 async def read_versions_by_constraints(constraints: list[list[str]], package_id: ObjectId) -> list:

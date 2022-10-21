@@ -10,6 +10,10 @@ async def create_package(package_data: dict) -> dict:
     new_package = await package_collection.find_one({'_id': package.inserted_id})
     return new_package
 
+async def read_package_by_id(package_id: ObjectId, fields_to_remove: dict = {}) -> dict:
+    package = await package_collection.find_one({'_id': package_id}, fields_to_remove)
+    return package
+
 async def read_package_by_name(package_name: str) -> dict:
     package = await package_collection.find_one({'name': package_name})
     return package
