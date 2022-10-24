@@ -22,17 +22,19 @@ setup(
     install_requires = [
         'wheel==0.37.1',
         'fastapi[all]==0.85.0',
+        'fastapi-utils==0.2.1',
         'motor==3.0.0',
-        'motor-stubs==1.7.1',
         'python-dotenv==0.21.0',
         'requests==2.28.1',
-        'types-requests==2.28.11.1',
-        'types-setuptools==65.4.0',
         'python-dateutil==2.8.2',
-        'types-python-dateutil==2.8.19'
+        'flamapy-dn==1.0.0'
     ],
     tests_requires = [
         'prospector[with_everything]==1.7.7',
-        'mypy==0.982'
+        'mypy==0.982',
+        'motor-stubs==1.7.1',
+        'types-requests==2.28.11.1',
+        'types-setuptools==65.4.0',
+        'types-python-dateutil==2.8.19'
     ]
 )

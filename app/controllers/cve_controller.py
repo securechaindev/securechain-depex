@@ -2,11 +2,8 @@ from app.services.cve_service import read_cpe_matches_by_package_name
 from app.services.version_service import update_versions_cves_by_constraints
 
 
-async def extract_cves(package: dict) -> None:
+async def relate_cves(package: dict) -> None:
     cpe_matches = await read_cpe_matches_by_package_name(package['name'])
-    await relate_cve(cpe_matches, package)
-
-async def relate_cve(cpe_matches: list, package: dict) -> None:
     for raw_cpe_match in cpe_matches:
         cpe_match = raw_cpe_match['configurations']['nodes']['cpeMatch']
         if (
