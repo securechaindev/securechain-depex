@@ -2,7 +2,7 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from famapy.metamodels.dn_metamodel.transformations import SerializeNetwork
+from flamapy.metamodels.dn_metamodel.transformations import SerializeNetwork
 
 from app.services.cve_service import read_cve_by_id
 from app.services.network_service import read_network_by_id
