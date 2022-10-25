@@ -7,8 +7,8 @@
 2. Create a .env file from template.env
 
 3. Deploy
-- First time --> Run command 'docker-compose -f docker-compose-init.yml up --build' (Init dockerfile will seed MongoDB database with vulnerabilities and modeled package managers)
-- After first Time --> Run command 'docker-compose up --build'
+- First time --> Run command 'docker compose -f docker-compose-init.yml up --build' (Init dockerfile will seed MongoDB database with vulnerabilities and modeled package managers)
+- After first Time --> Run command 'docker compose up --build'
 
 4. Enter [here](http://0.0.0.0:8000/docs)
 
