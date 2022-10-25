@@ -7,7 +7,8 @@ async def create_cve(cve_data: dict) -> dict:
     new_cve = await cve_collection.find_one({'_id': cve.inserted_id})
     return new_cve
 
-async def read_cve_by_id(cve_id: ObjectId, fields: dict = {}) -> dict:
+async def read_cve_by_id(cve_id: ObjectId, fields: dict = None) -> dict:
+    if not fields: fields = {}
     cve = await cve_collection.find_one({'_id': cve_id}, fields)
     return cve
 

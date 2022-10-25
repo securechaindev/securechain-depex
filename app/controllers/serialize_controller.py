@@ -47,7 +47,7 @@ async def read_packages(package_egde_ids: list[ObjectId], db: str) -> list[dict]
         packages.append(package)
     return packages
 
-async def read_versions(version_ids: list[ObjectId]) -> dict:
+async def read_versions(version_ids: list[ObjectId]) -> list[dict]:
     versions = []
     for version_id in version_ids:
         version = await read_version_by_id(version_id, {'_id': 0, 'package': 0})
@@ -57,5 +57,5 @@ async def read_versions(version_ids: list[ObjectId]) -> dict:
         versions.append(version)
     return versions
 
-async def read_cves(cve_ids: list[ObjectId]) -> dict:
+async def read_cves(cve_ids: list[ObjectId]) -> list[dict]:
     return [await read_cve_by_id(cve_id, {'_id': 0, 'id': 1, 'metrics': 1}) for cve_id in cve_ids]

@@ -8,7 +8,8 @@ async def create_requirement_file(requirement_file_data: dict) -> dict:
     new_requirement_file = await requirement_file_collection.find_one({'_id': requirement_file.inserted_id})
     return new_requirement_file
 
-async def read_requirement_file_by_id(requirement_file_id: ObjectId, fields: dict = {}) -> dict:
+async def read_requirement_file_by_id(requirement_file_id: ObjectId, fields: dict = None) -> dict:
+    if not fields: fields = {}
     requirement_file = await requirement_file_collection.find_one({'_id': requirement_file_id}, fields)
     return requirement_file
 

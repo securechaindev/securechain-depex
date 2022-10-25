@@ -10,7 +10,8 @@ async def select_db(db: str):
         case 'pypi':
             return pypi_package_edge_collection
 
-async def read_package_edge_by_id(package_edge_id: ObjectId, db: str, fields: dict = {}) -> dict:
+async def read_package_edge_by_id(package_edge_id: ObjectId, db: str, fields: dict = None) -> dict:
+    if not fields: fields = {}
     collection = await select_db(db)
     package_edge = await collection.find_one({'_id': package_edge_id}, fields)
     return package_edge

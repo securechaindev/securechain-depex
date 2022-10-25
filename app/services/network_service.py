@@ -9,7 +9,8 @@ async def create_network(network_data: dict) -> dict:
     new_network = await network_collection.find_one({'_id': network.inserted_id})
     return new_network
 
-async def read_network_by_id(network_id: str, fields: dict = {}) -> dict:
+async def read_network_by_id(network_id: str, fields: dict = None) -> dict:
+    if not fields: fields = {}
     network = await network_collection.find_one({'_id': ObjectId(network_id)}, fields)
     if network:
         return network
