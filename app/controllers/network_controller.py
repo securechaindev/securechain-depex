@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from app.apis.git_service import get_repo_data
+from app.controllers.cve_controller import relate_cves
 from app.controllers.generate_controller import (generate_package_edge,
                                                  no_exist_package,
                                                  search_new_versions)
@@ -59,6 +60,7 @@ async def generate_network(network: dict) -> None:
                 now = datetime.now()
                 if package['moment'] < now - timedelta(days = 10):
                     await search_new_versions(package)
+                    await relate_cves(package)
 
                 await generate_package_edge(package, dependencie[1], 'depex', new_req_file['_id'])
 

@@ -52,6 +52,7 @@ async def generate_packages(package_name: str, version: list) -> None:
                 now = datetime.now()
                 if package['moment'] < now - timedelta(days = 10):
                     await search_new_versions(package)
+                    await relate_cves(package)
 
                 await generate_package_edge(package, constraints, 'pypi', version[0])
 
