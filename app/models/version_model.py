@@ -3,7 +3,8 @@ from datetime import datetime
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
-from app.models.package_model import PackageModel
+# Poner todos los modelos en un mismo archivo .py para hacerlo más pytonic
+# from app.models.package_model import PackageModel
 
 
 class VersionModel(BaseModel):
@@ -14,7 +15,7 @@ class VersionModel(BaseModel):
     build_number: int | None  = Field(...)
     release_date: datetime | None = Field(...)
     cves: list[ObjectId] | None = None
-    package: PackageModel | None = None
+    package: dict | None = None
 
     class Config:
         allow_population_by_field_name = True
