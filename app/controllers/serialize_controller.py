@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from famapy.metamodels.dn_metamodel.transformations import SerializeNetwork
 
 from app.services.cve_service import read_cve_by_id
-from app.services.graph_service import read_graph_by_id
+from app.services.network_service import read_network_by_id
 from app.services.requirement_file_service import read_requirement_file_by_id
 from app.services.package_edge_service import read_package_edge_by_id
 from app.services.package_service import read_package_by_id
@@ -14,12 +14,12 @@ from app.utils.json_encoder import JSONencoder
 
 router = APIRouter()
 
-@router.get('/serialize/{graph_id}', response_description = 'Serialize graph')
-async def serialize_network(graph_id: str):
+@router.get('/serialize/{network_id}', response_description = 'Serialize network')
+async def serialize_network(network_id: str):
     try:
-        graph = await read_graph_by_id(graph_id, {'_id': 0, 'owner': 1, 'name': 1, 'requirement_files': 1})
-        graph['requirement_files'] = await read_requirement_files(graph['requirement_files'])
-        serializer = SerializeNetwork(source_model = graph)
+        network = await read_network_by_id(network_id, {'_id': 0, 'owner': 1, 'name': 1, 'requirement_files': 1})
+        network['requirement_files'] = await read_requirement_files(network['requirement_files'])
+        serializer = SerializeNetwork(source_model = network)
         serializer.transform()
         print(serializer.destination_model)
         # TODO: Completar con la transformación a SMT

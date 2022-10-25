@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from bson import ObjectId
 
 from app.apis.pypi_service import get_all_versions, requires_packages
-from app.controllers.cve_controller import extract_cves
+from app.controllers.cve_controller import relate_cves
 from app.services.package_edge_service import create_package_edge
 from app.services.package_service import (create_package, read_package_by_name,
                                           update_package_moment,
@@ -36,7 +36,7 @@ async def no_exist_package(package_name: str, constraints: list[list[str]], db: 
 
     await generate_package_edge(new_package, constraints, db, parent_id, parent_type)
 
-    await extract_cves(await read_package_by_name(new_package['name']))
+    await relate_cves(await read_package_by_name(new_package['name']))
 
     for version in no_existing_versions:
 
@@ -70,8 +70,10 @@ async def generate_versions(package: dict) -> list:
 
     all_versions = await get_all_versions(package['name'])
 
+    counter = 0
     for version in all_versions:
         version['package'] = package['_id']
+        version['count'] = counter
 
         new_version = await create_version(version)
 
@@ -81,6 +83,8 @@ async def generate_versions(package: dict) -> list:
 
         no_existing_versions.append([new_version_id, new_version['release']])
 
+        counter += 1
+
     return no_existing_versions
 
 async def search_new_versions(package: dict) -> None:
@@ -89,9 +93,11 @@ async def search_new_versions(package: dict) -> None:
     all_versions = await get_all_versions(package['name'])
 
     if len(package['versions']) < len(all_versions):
+        counter = len(package['versions']) + 1
         for version in all_versions:
             if not await read_version_by_release_and_package(version['release'], package['_id']):
                 version['package'] = package['_id']
+                version['count'] = counter
 
                 new_version = await create_version(version)
 
@@ -100,6 +106,8 @@ async def search_new_versions(package: dict) -> None:
                 await update_package_versions(package['_id'], new_version_id)
 
                 no_existing_versions.append([new_version_id, new_version['release']])
+
+                counter += 1
 
     await update_package_moment(package['_id'])
     for version in no_existing_versions:

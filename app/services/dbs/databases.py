@@ -6,7 +6,7 @@ client = AsyncIOMotorClient(settings.DATABASE_URL)
 
 depex_db = client.depex
 env_variable_collection = depex_db.get_collection('env_variables')
-graph_collection = depex_db.get_collection('graphs')
+network_collection = depex_db.get_collection('networks')
 depex_package_edge_collection = depex_db.get_collection('package_edges')
 requirement_file_collection = depex_db.get_collection('requirement_files')
 
