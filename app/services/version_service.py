@@ -22,8 +22,8 @@ async def read_version_by_release_and_package(release: str, package_id: ObjectId
     version = await version_collection.find_one({'$and': [{'release': release}, {'package': package_id}]})
     return version
 
-async def update_version_package_edges(version_id: ObjectId, package_edge_id: ObjectId) -> None:
-    await version_collection.find_one_and_update({'_id': version_id}, {'$push': {'package_edges': package_edge_id}})
+# async def update_version_package_edges(version_id: ObjectId, package_edge_id: ObjectId) -> None:
+#     await version_collection.find_one_and_update({'_id': version_id}, {'$push': {'package_edges': package_edge_id}})
 
 async def update_versions_cves_by_constraints(constraints: list[list[str]], package_id: ObjectId, cve_id: ObjectId) -> None:
     query = await get_complete_query(constraints, package_id)

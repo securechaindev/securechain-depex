@@ -3,6 +3,8 @@ from datetime import datetime
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
+from app.models.package_model import PackageModel
+
 
 class VersionModel(BaseModel):
     release: str = Field(...)
@@ -11,9 +13,8 @@ class VersionModel(BaseModel):
     patch: int | None = Field(...)
     build_number: int | None  = Field(...)
     release_date: datetime | None = Field(...)
-    package_edges: list[ObjectId] | None = None
     cves: list[ObjectId] | None = None
-    package: ObjectId | None = None
+    package: PackageModel | None = None
 
     class Config:
         allow_population_by_field_name = True
@@ -26,7 +27,6 @@ class VersionModel(BaseModel):
                 'patch': 5,
                 'build_number': 0,
                 'release_date': datetime.now(),
-                'package_edges': [],
                 'cves': [],
                 'package': None
             }

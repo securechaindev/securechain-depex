@@ -27,7 +27,6 @@ async def get_all_versions(pkg_name: str) -> list:
                     'patch': xyzd[2] if len(xyzd) >= 3 else '0',
                     'build_number': xyzd[3] if len(xyzd) >= 4 else '0',
                     'release_date': release_date,
-                    'package_edges': [],
                     'cves': []
                 })
 

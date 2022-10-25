@@ -1,6 +1,6 @@
-# from bson import ObjectId
-
 from pydantic import BaseModel, Field
+
+from app.models.requirement_file_model import RequirementFile
 
 
 class NetworkModel(BaseModel):
@@ -8,8 +8,7 @@ class NetworkModel(BaseModel):
     name: str = Field(..., min_length = 1, description = 'The name repository size must be greater than zero')
     add_extras: bool = Field(...)
     is_complete: bool = Field(...)
-    # Buscar forma de poder tipar esto con ObjectId
-    requirement_files: list | None = None
+    requirement_files: list[RequirementFile] | None = None
 
     class Config:
         allow_population_by_field_name = True

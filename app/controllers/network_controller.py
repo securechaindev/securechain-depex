@@ -44,7 +44,7 @@ async def generate_network(network: dict) -> None:
         if file[1][0] != 'PIP':
             continue
 
-        req_file = {'name': file[0], 'manager': file[1][0], 'package_edges': []}
+        req_file = {'name': file[0], 'manager': file[1][0]}
 
         new_req_file = await create_requirement_file(req_file)
 
@@ -60,10 +60,10 @@ async def generate_network(network: dict) -> None:
                 if package['moment'] < now - timedelta(days = 10):
                     await search_new_versions(package)
 
-                await generate_package_edge(package, dependencie[1], 'depex', new_req_file['_id'], 'req_file')
+                await generate_package_edge(package, dependencie[1], 'depex', new_req_file['_id'])
 
             else:
 
-                await no_exist_package(dependencie[0],  dependencie[1], 'depex', new_req_file['_id'], 'req_file')
+                await no_exist_package(dependencie[0],  dependencie[1], 'depex', new_req_file['_id'])
 
     await update_network_is_completed(network['_id'])

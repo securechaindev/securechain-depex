@@ -1,11 +1,14 @@
-from bson import ObjectId
 from pydantic import BaseModel, Field
+
+from app.models.requirement_file_model import RequirementFile
+from app.models.package_model import PackageModel, VersionModel
 
 
 class PackageEdgeModel(BaseModel):
     constraints: list[list[str]] | str = Field(...)
-    versions: ObjectId | None = None
-    package: ObjectId | None = None
+    versions: list[VersionModel] | None = None
+    parent: VersionModel | RequirementFile | None = None
+    child: PackageModel | None = None
 
     class Config:
         allow_population_by_field_name = True
@@ -14,6 +17,7 @@ class PackageEdgeModel(BaseModel):
             'example': {
                 'constraints': [['<=', '0.7.0'], ['==', '1.2.1'], ['>', '2.3']],
                 'versions': [],
-                'package': None
+                'parent': None,
+                'child': None
             }
         }

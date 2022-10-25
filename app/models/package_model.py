@@ -1,13 +1,14 @@
 from datetime import datetime
 
-from bson import ObjectId
 from pydantic import BaseModel, Field
+
+from app.models.version_model import VersionModel
 
 
 class PackageModel(BaseModel):
     name: str = Field(...)
     moment: datetime = Field(...)
-    versions: list[ObjectId] | None = None
+    versions: list[VersionModel] | None = None
 
     class Config:
         allow_population_by_field_name = True
