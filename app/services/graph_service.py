@@ -9,8 +9,8 @@ async def create_graph(graph_data: dict) -> dict:
     new_graph = await graph_collection.find_one({'_id': graph.inserted_id})
     return new_graph
 
-async def read_graph_by_id(graph_id: str, fields_to_remove: dict = {}) -> dict:
-    graph = await graph_collection.find_one({'_id': ObjectId(graph_id)}, fields_to_remove)
+async def read_graph_by_id(graph_id: str, fields: dict = {}) -> dict:
+    graph = await graph_collection.find_one({'_id': ObjectId(graph_id)}, fields)
     if graph:
         return graph
     raise HTTPException(status_code = 404, detail = [f'Graph with id {graph_id} not found'])
