@@ -48,7 +48,7 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict:
                 if 'extra' in data[1]:
                     continue
 
-            if 'dev' in data[0]:
+            if '.' not in data[0]:
                 continue
 
             data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
