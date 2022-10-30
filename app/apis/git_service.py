@@ -8,7 +8,7 @@ headers = {
     'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}'
 }
 
-all_packages = []
+all_packages = {}
 
 async def get_repo_data(owner: str, name: str, end_cursor: str = '') -> dict[list, list] | list:
     query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
@@ -18,25 +18,25 @@ async def get_repo_data(owner: str, name: str, end_cursor: str = '') -> dict[lis
     session = await get_session()
     response = session.post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 50).json()
 
-    packages, page_info, file = await json_reader(response)
+    page_info = await json_reader(response)
 
     if not page_info['hasNextPage'] and end_cursor != '':
         return []
 
-    all_packages.extend(packages)
     await get_repo_data(owner, name, page_info['endCursor'])
-    return {file: [managers[file], all_packages]}
+    return all_packages
 
 async def json_reader(response) -> tuple:
-    packages = []
-
     for node in response['data']['repository']['dependencyGraphManifests']['nodes']:
         file = node['filename']
-
         page_info = node['dependencies']['pageInfo']
+        if file not in managers:
+            continue
 
+        if file not in all_packages.keys():
+            all_packages[file] = [managers[file], []]
         for node in node['dependencies']['nodes']:
             req = await parse_constraints(node['requirements'])
-            packages.append([node['packageName'], req])
+            all_packages[file][1].append([node['packageName'], req])
 
-    return (packages, page_info, file)
+    return page_info
