@@ -7,13 +7,13 @@ from pymongo import InsertOne, ReplaceOne
 
 from app.config import settings
 from app.services.cve_service import bulk_write_cve_actions, read_cve_by_cve_id
-from app.services.updater_service import (read_env_variables,
+from app.services.update_db_service import (read_env_variables,
                                           replace_env_variables)
 from app.utils.get_session import get_session
 
 
 # 24h = 216000
-@repeat_every(seconds = 216000)
+# @repeat_every(seconds = 216000)
 async def db_updater():
     env_variables = await read_env_variables()
     today = datetime.today()
@@ -44,6 +44,7 @@ async def db_updater():
         }
 
         sleep(6)
+        print(params_pub)
         response = session.get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_pub, headers = headers, timeout = 25).json()
 
         await update_db(response)
@@ -59,7 +60,7 @@ async def db_updater():
         await update_db(response)
 
         env_variables['last_month_update'] += 1
-        env_variables['last_day_update'] = 0
+        env_variables['last_day_update'] = 1
         if env_variables['last_month_update'] == 13:
             env_variables['last_month_update'] = 1
             env_variables['last_year_update'] += 1
@@ -88,4 +89,4 @@ async def update_db(raw_cves: dict) -> None:
         else:
             actions.append(ReplaceOne({'id': raw_cve['id']}, raw_cve))
     
-    if actions: await bulk_write_cve_actions(actions)
+    if actions: await bulk_write_cve_actions(actions, True)
