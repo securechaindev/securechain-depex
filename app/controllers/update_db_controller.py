@@ -13,7 +13,7 @@ from app.utils.get_session import get_session
 
 
 # 24h = 216000
-# @repeat_every(seconds = 216000)
+@repeat_every(seconds = 216000)
 async def db_updater():
     env_variables = await read_env_variables()
     today = datetime.today()
@@ -44,7 +44,6 @@ async def db_updater():
         }
 
         sleep(6)
-        print(params_pub)
         response = session.get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params = params_pub, headers = headers, timeout = 25).json()
 
         await update_db(response)
