@@ -4,40 +4,51 @@ from bson import ObjectId
 
 from app.apis.pypi_service import get_all_versions, requires_packages
 from app.controllers.cve_controller import relate_cves
-from app.services.package_edge_service import create_package_edge
+from app.services.package_edge_service import create_package_edge, update_package_edge, read_package_edge_by_name_constraints
 from app.services.package_service import (create_package, read_package_by_name,
                                           update_package_moment,
                                           update_package_versions)
 from app.services.version_service import (create_version,
                                           read_version_by_release_and_package,
-                                          read_versions_by_constraints)
+                                          read_versions_by_constraints,
+                                          update_version_package_edges)
+from app.services.requirement_file_service import update_requirement_file_package_edges
 
 
-async def generate_package_edge(package: dict, constraints: list[list[str]], db: str, parent_id: ObjectId) -> None:
-    package_edge = {
-            'constraints': constraints,
-            'versions': await read_versions_by_constraints(constraints, package['_id']),
-            'parent': parent_id,
-            'child': package['_id']
-        }
+async def generate_package_edge(package_name: str, constraints: dict[str, str], db: str, parent_id: ObjectId, parent_type: str) -> None:
+    package_edge = await read_package_edge_by_name_constraints(package_name, constraints, db)
+    if not package_edge:
+        package_edge = {
+                'package_name': package_name,
+                'constraints': constraints
+            }
 
-    await create_package_edge(package_edge, db)
+        package_edge = await create_package_edge(package_edge, db)
 
-async def no_exist_package(package_name: str, constraints: list[list[str]], db: str, parent_id: ObjectId) -> None:
+        package_edge['versions'] = await read_versions_by_constraints(constraints, package_name)
+        await update_package_edge(package_edge['_id'], package_edge, db)
+
+    match parent_type:
+        case 'version':
+            await update_version_package_edges(parent_id, package_edge['_id'])
+        case 'requirement_file':
+            await update_requirement_file_package_edges(parent_id, package_edge['_id'])
+
+async def no_exist_package(package_name: str, constraints: list[list[str]], db: str, parent_id: ObjectId, parent_type: str) -> None:
     new_package = await create_package({'name': package_name, 'moment': datetime.now(), 'versions': []})
 
     no_existing_versions = await generate_versions(new_package)
 
-    await generate_package_edge(new_package, constraints, db, parent_id)
-
-    await relate_cves(await read_package_by_name(new_package['name']))
+    await relate_cves(new_package['name'])
 
     for version in no_existing_versions:
 
         await generate_packages(package_name, version)
 
-async def generate_packages(package_name: str, version: list) -> None:
-    require_packages = await requires_packages(package_name, version[1])
+    await generate_package_edge(new_package['name'], constraints, db, parent_id, parent_type)
+
+async def generate_packages(package_name: str, version: dict) -> None:
+    require_packages = await requires_packages(package_name, version['release'])
 
     if require_packages:
 
@@ -52,13 +63,14 @@ async def generate_packages(package_name: str, version: list) -> None:
                 now = datetime.now()
                 if package['moment'] < now - timedelta(days = 10):
                     await search_new_versions(package)
-                    await relate_cves(package)
+                    await relate_cves(package['name'])
 
-                await generate_package_edge(package, constraints, 'pypi', version[0])
+                await generate_package_edge(package['name'], constraints, 'pypi', version['_id'], 'version')
 
             else:
 
-                await no_exist_package(package_name, constraints, 'pypi', version[0])
+                print(package_name)
+                await no_exist_package(package_name, constraints, 'pypi', version['_id'], 'version')
 
 async def generate_versions(package: dict) -> list:
     no_existing_versions: list = []
@@ -67,7 +79,7 @@ async def generate_versions(package: dict) -> list:
 
     counter = 0
     for version in all_versions:
-        version['package'] = package['_id']
+        version['package'] = package['name']
         version['count'] = counter
 
         new_version = await create_version(version)
@@ -76,7 +88,7 @@ async def generate_versions(package: dict) -> list:
 
         await update_package_versions(package['_id'], new_version_id)
 
-        no_existing_versions.append([new_version_id, new_version['release']])
+        no_existing_versions.append(new_version)
 
         counter += 1
 

@@ -16,19 +16,23 @@ async def read_cve_by_cve_id(cve_id: str) -> dict:
     cve = await cve_collection.find_one({'id': cve_id})
     return cve
 
-async def bulk_write_cve_actions(actions: list) -> None:
-    await cve_collection.bulk_write(actions, ordered = True)
+async def bulk_write_cve_actions(actions: list, ordered: bool) -> None:
+    await cve_collection.bulk_write(actions, ordered = ordered)
 
 async def read_cpe_matches_by_package_name(package_name: str) -> list:
+    V2 = 'metrics.cvssMetricV2.impactScore'
+    V30 = 'metrics.cvssMetricV30.impactScore'
+    V31 = 'metrics.cvssMetricV31.impactScore'
+    CPEMATCH = 'configurations.nodes.cpeMatch'
     pipeline = [
-        {'$project': {'configurations.nodes.cpeMatch': 1}},
+        {'$project': {'id': 1, V2: 1, V30: 1, V31: 1, CPEMATCH: 1}},
         {'$unwind': '$configurations'},
         {'$unwind': '$configurations.nodes'},
         {'$unwind': '$configurations.nodes.cpeMatch'},
         {
             '$match': {
                 'configurations.nodes.cpeMatch.criteria': {
-                    '$regex': package_name
+                    '$regex': f':{package_name}:'
                 }
             }
         }
