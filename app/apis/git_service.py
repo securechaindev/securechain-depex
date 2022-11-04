@@ -8,7 +8,7 @@ headers = {
     'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}'
 }
 
-async def get_repo_data(owner: str, name: str, all_packages: dict, end_cursor: str = None) -> dict[list, list] | list:
+async def get_repo_data(owner: str, name: str, all_packages: dict = {}, end_cursor: str = None) -> dict[list, list] | list:
     if not end_cursor:
         query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
         query += '{dependencyGraphManifests{nodes{filename dependencies{pageInfo {hasNextPage endCursor} nodes{packageName requirements}}}}}}'
