@@ -25,7 +25,7 @@ async def get_repo_data(owner: str, name: str, all_packages: dict = {}, end_curs
     if not page_info['hasNextPage']:
         return all_packages
 
-    await get_repo_data(owner, name, all_packages, page_info['endCursor'])
+    return await get_repo_data(owner, name, all_packages, page_info['endCursor'])
 
 async def json_reader(response, all_packages: dict) -> tuple:
     page_info = {'hasNextPage': None}
