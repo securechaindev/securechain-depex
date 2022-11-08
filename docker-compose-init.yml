@@ -16,7 +16,7 @@ services:
 
   database_seeder:
     container_name: mongodb_seeder
-    image: mongo:latest
+    image: mongo:6.0.2
     depends_on:
       - database
     volumes:
@@ -28,7 +28,7 @@ services:
 
   database:
     container_name: mongodb
-    image: mongo:latest
+    image: mongo:6.0.2
     ports:
       - '27017:27017'
     networks:
