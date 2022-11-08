@@ -2,11 +2,11 @@ from bson import ObjectId
 from app.services.dbs.databases import network_collection, version_collection
 
 
-async def aggregate_network_by_id(network_id: ObjectId) -> dict:
+async def aggregate_network_by_id(network_id: str) -> dict:
     pipeline = [
         {
             '$match': {
-                '_id': network_id
+                '_id': ObjectId(network_id)
             }
         },
         {
