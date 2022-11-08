@@ -32,6 +32,8 @@ async def get_partial_query(operator: str, version: str) -> dict:
             query = await approx_greater_than(xyzd)
         case '~>' | '~=' | '~':
             query = await approx_greater_than_minor(xyzd, number_of_elements)
+        case _:
+            query = {}
 
     return query
 
