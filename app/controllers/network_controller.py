@@ -32,8 +32,8 @@ async def init_network(background_tasks: BackgroundTasks, network: NetworkModel 
     network_json = jsonable_encoder(network)
     try:
         new_network = await create_network(network_json)
-        # background_tasks.add_task(generate_network, new_network)
-        await generate_network(new_network)
+        background_tasks.add_task(generate_network, new_network)
+        # await generate_network(new_network)
         return JSONResponse(status_code = status.HTTP_201_CREATED, content = JSONencoder().encode(new_network))
     except HTTPException as error:
         return JSONResponse(status_code = error.status_code, content = JSONencoder().encode({'message': error.detail}))
@@ -60,7 +60,7 @@ async def generate_network(network: dict) -> None:
                 now = datetime.now()
                 if package['moment'] < now - timedelta(days = 10):
                     await search_new_versions(package)
-                    await relate_cves(package)
+                    await relate_cves(package['name'])
 
                 await generate_package_edge(package['name'], dependencie[1], 'depex', new_req_file['_id'], 'requirement_file')
 

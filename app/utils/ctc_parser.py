@@ -1,4 +1,4 @@
-async def parse_constraints(raw_constraints: str) -> list[list[str]] | str:
+async def parse_constraints(raw_constraints: str) -> dict[str, str] | str:
     if raw_constraints:
         raw_constraints = raw_constraints.replace(' ', '')
         ctcs = {}
@@ -11,7 +11,7 @@ async def parse_constraints(raw_constraints: str) -> list[list[str]] | str:
 
     return 'any'
 
-async def clean_constraints(raw_constraints: dict[str, str]) -> list[list[str]]:
+async def clean_constraints(raw_constraints: dict[str, str]) -> dict[str, str]:
     constrains = {}
     for operator, version in raw_constraints.items():
         if not version.replace('.','').isdigit():

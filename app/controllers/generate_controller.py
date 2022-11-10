@@ -15,7 +15,7 @@ from app.services.version_service import (create_version,
 from app.services.requirement_file_service import update_requirement_file_package_edges
 
 
-async def generate_package_edge(package_name: str, constraints: dict[str, str], db: str, parent_id: ObjectId, parent_type: str) -> None:
+async def generate_package_edge(package_name: str, constraints: dict[str, str] | str, db: str, parent_id: ObjectId, parent_type: str) -> None:
     package_edge = await read_package_edge_by_name_constraints(package_name, constraints, db)
     if not package_edge:
         package_edge = {
@@ -34,7 +34,7 @@ async def generate_package_edge(package_name: str, constraints: dict[str, str], 
         case 'requirement_file':
             await update_requirement_file_package_edges(parent_id, package_edge['_id'])
 
-async def no_exist_package(package_name: str, constraints: list[list[str]], db: str, parent_id: ObjectId, parent_type: str) -> None:
+async def no_exist_package(package_name: str, constraints: dict[str, str] | str, db: str, parent_id: ObjectId, parent_type: str) -> None:
     new_package = await create_package({'name': package_name, 'moment': datetime.now(), 'versions': []})
 
     no_existing_versions = await generate_versions(new_package)

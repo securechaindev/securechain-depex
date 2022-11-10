@@ -22,7 +22,7 @@ async def read_package_edge_by_id(package_edge_id: ObjectId, db: str, fields: di
     package_edge = await collection.find_one({'_id': package_edge_id}, fields)
     return package_edge
 
-async def read_package_edge_by_name_constraints(package_name: ObjectId, constraints: str, db: str, fields: dict = None) -> dict:
+async def read_package_edge_by_name_constraints(package_name: str, constraints: dict[str, str] | str, db: str, fields: dict = None) -> dict:
     if not fields: fields = {}
     collection = await select_db(db)
     package_edge = await collection.find_one({'package_name': package_name, 'constraints': constraints}, fields)

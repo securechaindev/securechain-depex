@@ -1,5 +1,5 @@
 from bson import ObjectId
-from app.services.dbs.databases import network_collection, version_collection
+from app.services.dbs.databases import network_collection
 
 
 async def aggregate_network_by_id(network_id: str) -> dict:
@@ -42,27 +42,4 @@ async def aggregate_network_by_id(network_id: str) -> dict:
     ]
     async for network in network_collection.aggregate(pipeline):
         return network
-
-async def aggregate_version_by_id(version_id: ObjectId) -> dict:
-    pipeline = [
-        {
-            '$project': {
-                'package_edges': 1
-            }
-        },
-        {
-            '$match': {
-                '_id': version_id
-            }
-        },
-        {
-            '$lookup': {
-                'from': 'package_edges',
-                'localField': 'package_edges',
-                'foreignField': '_id',
-                'as': 'package_edges'
-            }
-        }
-    ]
-    async for version in version_collection.aggregate(pipeline):
-        return version
+    return {}

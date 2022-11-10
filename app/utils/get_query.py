@@ -1,7 +1,7 @@
 from copy import copy
 
 
-async def get_complete_query(constraints: dict[str, str], package_name: str) -> dict:
+async def get_complete_query(constraints, package_name: str) -> dict:
     query: dict = {'$and': [{'package': package_name}]}
 
     if constraints != 'any':
@@ -47,7 +47,7 @@ async def sanitize(version: str, number_of_points: int) -> list[int]:
             version += '.0'
     return [int(part) for part in version.split('.')]
 
-async def equal_query(xyzd: list[str]) -> dict:
+async def equal_query(xyzd: list[int]) -> dict:
     return {'$and': [
         {'mayor': {'$eq': xyzd[0]}},
         {'minor': {'$eq': xyzd[1]}},

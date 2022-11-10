@@ -13,8 +13,8 @@ from app.services.serialize_service import aggregate_network_by_id
 from app.utils.json_encoder import JSONencoder
 
 router = APIRouter()
-all_package_edges = []
-all_package_edges_ids = []
+all_package_edges: list[dict] = []
+all_package_edges_ids: list[ObjectId] = []
 
 @router.get('/serialize/{network_id}', response_description = 'Serialize network')
 async def serialize_network(network_id: str):
@@ -72,17 +72,17 @@ async def read_versions(versions: list[dict], package: Package) -> None:
         package.versions.append(version)
         await read_packages(package_edges, version)
 
-async def search_package_edge(package_edges_ids: list[ObjectId]):
+async def search_package_edge(package_edge_ids: list[ObjectId]):
     package_edges = []
-    for id in package_edges_ids:
-        if id not in all_package_edges_ids:
-            package_edge = await read_package_edge_by_id(id, 'pypi')
+    for package_edge_id in package_edge_ids:
+        if package_edge_id not in all_package_edges_ids:
+            package_edge = await read_package_edge_by_id(package_edge_id, 'pypi')
             all_package_edges.append(package_edge)
-            all_package_edges_ids.append(id)
+            all_package_edges_ids.append(package_edge_id)
             package_edges.append(package_edge)
             continue
         for package_edge in all_package_edges:
-            if package_edge['_id'] == id:
+            if package_edge['_id'] == package_edge_id:
                 package_edges.append(package_edge)
                 break
     return package_edges
