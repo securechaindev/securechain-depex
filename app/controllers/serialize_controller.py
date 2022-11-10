@@ -1,44 +1,23 @@
-import time
-
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status
-from fastapi.responses import JSONResponse
 from flamapy.metamodels.dn_metamodel.models import (DependencyNetwork, Package,
                                                     RequirementFile, Version)
-from flamapy.metamodels.dn_metamodel.operations import NetworkInfo
 from flamapy.metamodels.dn_metamodel.transformations import SerializeNetwork
 
 from app.services.package_edge_service import read_package_edge_by_id
 from app.services.serialize_service import aggregate_network_by_id
-from app.utils.json_encoder import JSONencoder
 
-router = APIRouter()
 all_package_edges: list[dict] = []
 all_package_edges_ids: list[ObjectId] = []
 
-@router.get('/serialize/{network_id}', response_description = 'Serialize network')
 async def serialize_network(network_id: str):
-    try:
-        begin = time.time()
-        network = await aggregate_network_by_id(network_id)
-        requirement_files = network['requirement_files']
-        del network['_id']
-        network['requirement_files'] = []
-        serializer = SerializeNetwork(source_model = network)
-        serializer.transform()
-        await read_requirement_files(requirement_files, serializer.destination_model)
-        end = time.time()
-        print('Extraer y Serializar: ' + str(end - begin))
-        begin = time.time()
-        operation = NetworkInfo()
-        operation.execute(serializer.destination_model)
-        end = time.time()
-        print('Operacion: ' + str(end - begin))
-        print(operation.get_result())
-        # TODO: Completar con la transformación a SMT
-        return JSONResponse(status_code = status.HTTP_200_OK, content = JSONencoder().encode(operation.get_result()))
-    except HTTPException as error:
-        return JSONResponse(status_code = error.status_code, content = JSONencoder().encode({'message': error.detail}))
+    network = await aggregate_network_by_id(network_id)
+    requirement_files = network['requirement_files']
+    del network['_id']
+    network['requirement_files'] = []
+    serializer = SerializeNetwork(source_model = network)
+    serializer.transform()
+    await read_requirement_files(requirement_files, serializer.destination_model)
+    return serializer.destination_model
 
 async def read_requirement_files(requirement_files: list[dict], dn_model: DependencyNetwork) -> None:
     for requirement_file in requirement_files:
