@@ -1,10 +1,14 @@
+from json import JSONEncoder
+
 from bson import ObjectId
 
-import json
+from datetime import datetime
 
 
-class JSONEncoder(json.JSONEncoder):
+class JSONencoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, ObjectId):
             return str(o)
-        return json.JSONEncoder.default(self, o)
+        if isinstance(o, datetime):
+            return str(o)
+        return JSONEncoder.default(self, o)

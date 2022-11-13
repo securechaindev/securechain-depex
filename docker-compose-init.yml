@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  backend:
+    container_name: depex_backend
+    build:
+      context: .
+      dockerfile: Dockerfile.Init
+    depends_on:
+      database_seeder:
+        condition: service_completed_successfully
+    ports:
+      - '8000:8000'
+    networks:
+      - depex
+
+  database_seeder:
+    container_name: mongodb_seeder
+    image: mongo:6.0.2
+    depends_on:
+      - database
+    volumes:
+      - ./mongo_seed:/mongo_seed
+    command:
+      /mongo_seed/import.sh
+    networks:
+      - depex
+
+  database:
+    container_name: mongodb
+    image: mongo:6.0.2
+    ports:
+      - '27017:27017'
+    networks:
+      - depex
+
+networks:
+  depex:
+    driver: bridge
+
+volumes:
+  data:

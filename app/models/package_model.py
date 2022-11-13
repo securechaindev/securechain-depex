@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from app.models.version_model import VersionModel
@@ -5,6 +7,7 @@ from app.models.version_model import VersionModel
 
 class PackageModel(BaseModel):
     name: str = Field(...)
+    moment: datetime = Field(...)
     versions: list[VersionModel] | None = None
 
     class Config:
@@ -13,5 +16,7 @@ class PackageModel(BaseModel):
         schema_extra = {
             'example': {
                 'name': 'urllib3',
+                'moment': datetime.now(),
+                'versions': []
             }
         }

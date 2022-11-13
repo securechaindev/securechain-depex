@@ -1,14 +1,13 @@
-from requests import get
-
 from dateutil.parser import parse
 
 from app.utils.ctc_parser import parse_constraints
 from app.utils.get_first_pos import get_first_position
+from app.utils.get_session import get_session
 
 
 async def get_all_versions(pkg_name: str) -> list:
-    url = f'https://pypi.python.org/pypi/{pkg_name}/json'
-    response = get(url, timeout = 25).json()
+    session = await get_session()
+    response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
 
     if 'releases' in response:
         versions = []
@@ -20,15 +19,25 @@ async def get_all_versions(pkg_name: str) -> list:
                 release_date = parse(item['upload_time_iso_8601'])
 
             if release.replace('.', '').isdigit():
-                versions.append({'release': release, 'release_date': release_date, 'package_edges': []})
+                xyzd = release.split('.')
+                versions.append({
+                    'release': release,
+                    'mayor': int(xyzd[0]),
+                    'minor': int(xyzd[1]) if len(xyzd) >= 2 else 0,
+                    'patch': int(xyzd[2]) if len(xyzd) >= 3 else 0,
+                    'build_number': int(xyzd[3]) if len(xyzd) >= 4 else 0,
+                    'release_date': release_date,
+                    'package_edges': [],
+                    'cves': []
+                })
 
         return versions
 
     return []
 
 async def requires_packages(pkg_name: str, version_dist: str) -> dict:
-    url = f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-    response = get(url, timeout = 25).json()['info']['requires_dist']
+    session = await get_session()
+    response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json').json()['info']['requires_dist']
 
     if response:
         require_packages = {}
@@ -36,13 +45,23 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict:
         for dist in response:
             data = dist.split(';')
 
+            # TODO: En el futuro sería interesante construir el grado teniendo en cuenta los extras
             if len(data) > 1:
                 if 'extra' in data[1]:
                     continue
 
-            data = data[0].replace('(', '').replace(')', '').replace(' ', '')
+            # TODO: Eliminamos que se puedan requerir extras
+            if '[' in data[0]:
+                pos_1 = await get_first_position(data[0], ['['])
+                pos_2 = await get_first_position(data[0], [']']) + 1
+                data[0] = data[0][:pos_1] + data[0][pos_2:]
 
-            pos = await get_first_position(data)
+            if '.' not in data[0]:
+                continue
+
+            data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
+
+            pos = await get_first_position(data, ['<', '>', '=', '!', '|', '^', '~'])
 
             dist = data[:pos]
             raw_ctcs = data[pos:]

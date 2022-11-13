@@ -1,25 +1,33 @@
 from bson import ObjectId
+from app.services.dbs.databases import (depex_package_edge_collection,
+                                        pypi_package_edge_collection)
 
-from app.services.dbs.databases import depex_package_edge_collection, pypi_package_edge_collection
 
-
-async def create_package_edge(package_edge_data: dict, db: str) -> dict:
+async def select_db(db: str):
     match db:
         case 'depex':
-            collection = depex_package_edge_collection
+            return depex_package_edge_collection
         case 'pypi':
-            collection = pypi_package_edge_collection
+            return pypi_package_edge_collection
 
+async def create_package_edge(package_edge_data: dict, db: str) -> dict:
+    collection = await select_db(db)
     package_edge = await collection.insert_one(package_edge_data)
     new_package_edge = await collection.find_one({'_id': package_edge.inserted_id})
     return new_package_edge
 
-async def update_package_edge_versions(package_edge_id: ObjectId, versions: list, db: str) -> dict:
-    match db:
-        case 'depex':
-            collection = depex_package_edge_collection
-        case 'pypi':
-            collection = pypi_package_edge_collection
+async def read_package_edge_by_id(package_edge_id: ObjectId, db: str, fields: dict = None) -> dict:
+    if not fields: fields = {}
+    collection = await select_db(db)
+    package_edge = await collection.find_one({'_id': package_edge_id}, fields)
+    return package_edge
 
-    updated_package_edge = await collection.find_one_and_update({'_id': package_edge_id}, {'$set': {'versions': versions}})
-    return updated_package_edge
+async def read_package_edge_by_name_constraints(package_name: str, constraints: dict[str, str] | str, db: str, fields: dict = None) -> dict:
+    if not fields: fields = {}
+    collection = await select_db(db)
+    package_edge = await collection.find_one({'package_name': package_name, 'constraints': constraints}, fields)
+    return package_edge
+
+async def update_package_edge(package_edge_id: ObjectId, package_edge_data: dict, db: str) -> None:
+    collection = await select_db(db)
+    await collection.replace_one({'_id': package_edge_id}, package_edge_data)

@@ -13,7 +13,7 @@ services:
 
   database:
     container_name: mongodb
-    image: mongo:latest
+    image: mongo:6.0.2
     ports:
       - '27017:27017'
     networks:

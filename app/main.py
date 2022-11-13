@@ -1,15 +1,14 @@
-from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError, ValidationError
-
 from json import loads
 
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError, ValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
+from app.controllers.update_db_controller import db_updater
 from app.router import api_router
-
+from app.services.dbs.indexes import create_indexes
 from app.utils.json_encoder import JSONEncoder
-
 
 description = 'A simple backend for dependency extraction'
 
@@ -28,6 +27,11 @@ app = FastAPI(
     },
 )
 
+@app.on_event("startup")
+async def startup_event():
+    await create_indexes()
+    await db_updater()
+
 @app.exception_handler(RequestValidationError)
 @app.exception_handler(ValidationError)
 async def validation_exception_handler(_ , exc):
@@ -38,7 +42,6 @@ async def validation_exception_handler(_ , exc):
     
     return JSONResponse(content = JSONEncoder().encode(response), status_code = 422)
 
-# Set all CORS enabled origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins = [],

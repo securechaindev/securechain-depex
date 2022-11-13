@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from app.models.requirement_file_model import RequirementFile
 
 
-class GraphModel(BaseModel):
+class NetworkModel(BaseModel):
     owner: str = Field(..., min_length = 1, description = 'The owner repository size must be greater than zero')
     name: str = Field(..., min_length = 1, description = 'The name repository size must be greater than zero')
     add_extras: bool = Field(...)
@@ -15,9 +15,10 @@ class GraphModel(BaseModel):
         arbitrary_types_allowed = True
         schema_extra = {
             'example': {
-                'owner': 'psf',
-                'name': 'requests',
+                'owner': 'GermanMT',
+                'name': 'prueba',
                 'add_extras': False,
-                'is_complete': False
+                'is_complete': False,
+                'requirement_files': []
             }
         }

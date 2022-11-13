@@ -1,8 +1,9 @@
 name: Publish Docker image
 
 on:
-  release:
-    branches: [ main ]
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.*
 
 jobs:
   push_to_registry:
@@ -25,6 +26,7 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
+          dockerfile: Dockerfile.Init
           push: true
           tags: ${{steps.meta.outputs.tags}}
           labels: ${{steps.meta.outputs.labels}}

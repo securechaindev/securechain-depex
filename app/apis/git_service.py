@@ -1,39 +1,46 @@
-from requests import post
-
 from app.config import settings
-
 from app.utils.ctc_parser import parse_constraints
+from app.utils.get_session import get_session
 from app.utils.managers import managers
-
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',
-    'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}',
+    'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}'
 }
 
-async def get_repo_data(owner: str, name: str) -> dict[list, list]:
-    query = '{repository(owner: \'' + owner + '\', name: \'' + name + '\')'
-    query += '{dependencyGraphManifests{nodes{filename dependencies{nodes{packageName requirements}}}}}}'
+async def get_repo_data(owner: str, name: str, all_packages: dict = None, end_cursor: str = None):
+    if not all_packages: all_packages = {}
+    if not end_cursor:
+        query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
+        query += '{dependencyGraphManifests{nodes{filename dependencies{pageInfo {hasNextPage endCursor} nodes{packageName requirements}}}}}}'
+    else:
+        query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
+        query += '{dependencyGraphManifests{nodes{filename dependencies(after: \"' + end_cursor + '\"){pageInfo {hasNextPage endCursor}'
+        query += 'nodes{packageName requirements}}}}}}'
 
-    response = post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 25).json()
+    session = await get_session()
+    response = session.post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 50).json()
 
-    return await json_reader(response)
+    page_info, all_packages = await json_reader(response, all_packages)
 
-async def json_reader(response) -> dict[list, list]: 
-    files = {}
+    if not page_info['hasNextPage']:
+        return all_packages
+
+    return await get_repo_data(owner, name, all_packages, page_info['endCursor'])
+
+async def json_reader(response, all_packages: dict) -> tuple:
+    page_info = {'hasNextPage': None}
 
     for node in response['data']['repository']['dependencyGraphManifests']['nodes']:
         file = node['filename']
-
+        page_info = node['dependencies']['pageInfo']
         if file not in managers:
             continue
 
-        packages = []
-
+        if file not in all_packages:
+            all_packages[file] = [managers[file], []]
         for node in node['dependencies']['nodes']:
             req = await parse_constraints(node['requirements'])
-            packages.append([node['packageName'], req])
+            all_packages[file][1].append([node['packageName'], req])
 
-        files[file] = [managers[file], packages]
-
-    return files
+    return (page_info, all_packages)
