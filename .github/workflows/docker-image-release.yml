@@ -1,21 +1,47 @@
 name: Publish Docker image
 
 on:
-  release:
-    branches: [ main ]
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.*
 
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
+      - name: Checkout git repo
         uses: actions/checkout@v3
+
+      - name: Automated Version Bump
+        id: changelog
+        uses: Requarks/changelog-action@v1
+        with:
+          token: ${{secrets.GIT_TOKEN}}
+          tag: ${{github.ref_name}}
+          writeToFile: 'false'
+
+      - name: Get variables
+        id: get_variables
+        run: |
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+          echo ::set-output name=IS_PRERELEASE::"${{contains(github.ref, 'dev')}}"
+
+      - name: Publish release github
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{secrets.GIT_TOKEN}}
+          prerelease: ${{steps.get_variables.outputs.IS_PRERELEASE}}
+          tag_name: ${{steps.get_variables.outputs.VERSION}}
+          body: ${{steps.changelog.outputs.changes}}
+
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           username: ${{secrets.DOCKER_USER}}
           password: ${{secrets.DOCKER_PASSWORD}}
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
