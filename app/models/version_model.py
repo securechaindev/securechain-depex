@@ -12,7 +12,7 @@ class VersionModel(BaseModel):
     mayor: int = Field(...)
     minor: int = Field(...)
     patch: int | None = Field(...)
-    build_number: int | None  = Field(...)
+    build_number: int | None = Field(...)
     release_date: datetime | None = Field(...)
     cves: list[ObjectId] | None = None
     package: dict | None = None

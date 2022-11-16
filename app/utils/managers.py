@@ -1,10 +1,10 @@
-pip = 'PIP'
-composer = 'COMPOSER'
-npm = 'NPM'
+PIP = 'PIP'
+COMPOSER = 'COMPOSER'
+NPM = 'NPM'
 
 managers = {
-    'pipfile': pip,
-    'requirements.txt': pip,
-    'pipfile.lock': pip,
-    'setup.py': pip
+    'pipfile': PIP,
+    'requirements.txt': PIP,
+    'pipfile.lock': PIP,
+    'setup.py': PIP
 }

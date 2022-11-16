@@ -1,8 +1,7 @@
+from datetime import datetime
 from json import JSONEncoder
 
 from bson import ObjectId
-
-from datetime import datetime
 
 
 class JSONencoder(JSONEncoder):

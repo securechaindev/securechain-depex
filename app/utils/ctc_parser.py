@@ -6,15 +6,16 @@ async def parse_constraints(raw_constraints: str) -> dict[str, str] | str:
         for ctc in raw_constraints.split(','):
             pos: int = [ctc.index(char) for char in ctc if char.isdigit()][0]
             ctcs[ctc[:pos]] = ctc[pos:]
-            
+
         return await clean_constraints(ctcs)
 
     return 'any'
 
+
 async def clean_constraints(raw_constraints: dict[str, str]) -> dict[str, str]:
     constrains = {}
     for operator, version in raw_constraints.items():
-        if not version.replace('.','').isdigit():
+        if not version.replace('.', '').isdigit():
             version = await sanitize_version(version)
         if '||' in operator or '||' in version:
             operator = '!='
@@ -26,6 +27,7 @@ async def clean_constraints(raw_constraints: dict[str, str]) -> dict[str, str]:
         constrains[operator] = version
 
     return constrains
+
 
 async def sanitize_version(version: str) -> str:
     parts = []

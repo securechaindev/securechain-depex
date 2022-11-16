@@ -6,14 +6,14 @@ from app.services.dbs.databases import (cve_collection, package_collection,
 
 
 async def create_indexes() -> None:
-    await package_collection.create_index('name', unique = True)
+    await package_collection.create_index('name', unique=True)
 
     await depex_package_edge_collection.create_index(
         [
             ('package_name', ASCENDING),
             ('constraints', ASCENDING)
         ],
-        unique = True
+        unique=True
     )
 
     await pypi_package_edge_collection.create_index(
@@ -21,16 +21,16 @@ async def create_indexes() -> None:
             ('package_name', ASCENDING),
             ('constraints', ASCENDING)
         ],
-        unique = True
+        unique=True
     )
 
-    await cve_collection.create_index('id', unique = True)
+    await cve_collection.create_index('id', unique=True)
     await cve_collection.create_index(
         [
             ('id', ASCENDING),
             ('configurations.nodes.cpeMatch.criteria', ASCENDING)
         ],
-        unique = True
+        unique=True
     )
 
     await version_collection.create_index(
@@ -47,5 +47,5 @@ async def create_indexes() -> None:
             ('release', ASCENDING),
             ('package', ASCENDING)
         ],
-        unique = True
+        unique=True
     )

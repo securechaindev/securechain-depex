@@ -8,18 +8,27 @@ headers = {
     'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}'
 }
 
+
 async def get_repo_data(owner: str, name: str, all_packages: dict = None, end_cursor: str = None):
-    if not all_packages: all_packages = {}
+    if not all_packages:
+        all_packages = {}
     if not end_cursor:
         query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
-        query += '{dependencyGraphManifests{nodes{filename dependencies{pageInfo {hasNextPage endCursor} nodes{packageName requirements}}}}}}'
+        query += '{dependencyGraphManifests{nodes{filename dependencies{pageInfo {'
+        query += 'hasNextPage endCursor} nodes{packageName requirements}}}}}}'
     else:
         query = '{repository(owner: \"' + owner + '\", name: \"' + name + '\")'
-        query += '{dependencyGraphManifests{nodes{filename dependencies(after: \"' + end_cursor + '\"){pageInfo {hasNextPage endCursor}'
+        query += '{dependencyGraphManifests{nodes{filename dependencies(after: \"'
+        query += end_cursor + '\"){pageInfo {hasNextPage endCursor}'
         query += 'nodes{packageName requirements}}}}}}'
 
     session = await get_session()
-    response = session.post('https://api.github.com/graphql', json={'query': query}, headers = headers, timeout = 50).json()
+    response = session.post(
+        'https://api.github.com/graphql',
+        json={'query': query},
+        headers=headers,
+        timeout=50
+    ).json()
 
     page_info, all_packages = await json_reader(response, all_packages)
 
@@ -27,6 +36,7 @@ async def get_repo_data(owner: str, name: str, all_packages: dict = None, end_cu
         return all_packages
 
     return await get_repo_data(owner, name, all_packages, page_info['endCursor'])
+
 
 async def json_reader(response, all_packages: dict) -> tuple:
     page_info = {'hasNextPage': None}

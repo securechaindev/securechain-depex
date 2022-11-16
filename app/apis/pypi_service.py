@@ -35,9 +35,12 @@ async def get_all_versions(pkg_name: str) -> list:
 
     return []
 
+
 async def requires_packages(pkg_name: str, version_dist: str) -> dict:
     session = await get_session()
-    response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json').json()['info']['requires_dist']
+    response = session.get(
+        f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
+    ).json()['info']['requires_dist']
 
     if response:
         require_packages = {}

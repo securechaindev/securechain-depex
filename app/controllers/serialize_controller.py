@@ -9,17 +9,22 @@ from app.services.serialize_service import aggregate_network_by_id
 all_package_edges: list[dict] = []
 all_package_edges_ids: list[ObjectId] = []
 
+
 async def serialize_network(network_id: str):
     network = await aggregate_network_by_id(network_id)
     requirement_files = network['requirement_files']
     del network['_id']
     network['requirement_files'] = []
-    serializer = SerializeNetwork(source_model = network)
+    serializer = SerializeNetwork(source_model=network)
     serializer.transform()
     await read_requirement_files(requirement_files, serializer.destination_model)
     return serializer.destination_model
 
-async def read_requirement_files(requirement_files: list[dict], dn_model: DependencyNetwork) -> None:
+
+async def read_requirement_files(
+    requirement_files: list[dict],
+    dn_model: DependencyNetwork
+) -> None:
     for requirement_file in requirement_files:
         if not requirement_file['package_edges']:
             continue
@@ -33,11 +38,13 @@ async def read_requirement_files(requirement_files: list[dict], dn_model: Depend
         all_package_edges.clear()
         all_package_edges_ids.clear()
 
+
 async def read_packages(package_egdes: list[dict], parent: RequirementFile | Version) -> None:
     for package_edge in package_egdes:
         package = Package(**{'name': package_edge['package_name'], 'versions': []})
         parent.packages.append(package)
         await read_versions(package_edge['versions'], package)
+
 
 async def read_versions(versions: list[dict], package: Package) -> None:
     for version in versions:
@@ -50,6 +57,7 @@ async def read_versions(versions: list[dict], package: Package) -> None:
         version = Version(**version)
         package.versions.append(version)
         await read_packages(package_edges, version)
+
 
 async def search_package_edge(package_edge_ids: list[ObjectId]):
     package_edges = []

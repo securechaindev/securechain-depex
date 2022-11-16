@@ -1,0 +1,11 @@
+strictness: high
+test-warnings: true
+doc-warnings: false
+
+pylint:
+  disable:
+    - super-init-not-called
+    - unsubscriptable-object
+
+mccabe:
+  run: true
