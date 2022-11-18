@@ -17,6 +17,20 @@ async def read_version_by_id(version_id: ObjectId, fields: dict = None) -> dict:
     return version
 
 
+async def read_version_by_count_package(package: str, count: str, fields: dict = None) -> dict:
+    if not fields:
+        fields = {}
+    version = await version_collection.find_one({'package': package, 'count': count}, fields)
+    return version
+
+async def get_release_by_values(configs: list[dict[str, float | int]]) -> list[dict[str, float | int | str]]:
+    for config in configs:
+        for var, value in config.items():
+            version = await read_version_by_count_package(var, value)
+            if version:
+                config[var] = version['release']
+    return configs
+
 async def read_versions_by_constraints(
     constraints: dict[str, str] | str,
     package_name: str

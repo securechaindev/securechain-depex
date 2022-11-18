@@ -49,3 +49,10 @@ async def create_indexes() -> None:
         ],
         unique=True
     )
+    await version_collection.create_index(
+        [
+            ('count', ASCENDING),
+            ('package', ASCENDING)
+        ],
+        unique=True
+    )
