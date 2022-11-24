@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from app.controllers.update_db_controller import db_updater
 from app.router import api_router
 from app.services.dbs.indexes import create_indexes
-from app.utils.json_encoder import JSONEncoder
+from app.utils.json_encoder import json_encoder
 
 DESCRIPTION = 'A simple backend for dependency extraction'
 
@@ -42,7 +42,7 @@ async def validation_exception_handler(_, exc):
     for error in exc_json:
         response['message'].append(error['loc'][-1] + f": {error['msg']}")
 
-    return JSONResponse(content=JSONEncoder().encode(response), status_code=422)
+    return JSONResponse(content=json_encoder(response), status_code=422)
 
 app.add_middleware(
     CORSMiddleware,

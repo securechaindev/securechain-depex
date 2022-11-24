@@ -1,5 +1,8 @@
+from json import JSONEncoder, loads
+
+from typing import Any
+
 from datetime import datetime
-from json import JSONEncoder
 
 from bson import ObjectId
 
@@ -11,3 +14,7 @@ class JSONencoder(JSONEncoder):
         if isinstance(o, datetime):
             return str(o)
         return JSONEncoder.default(self, o)
+
+
+def json_encoder(raw_response: dict[str, Any]) -> Any:
+    return loads(JSONencoder().encode(raw_response))

@@ -19,7 +19,9 @@ from app.services.network_service import (
 )
 from app.services.package_service import read_package_by_name
 from app.services.requirement_file_service import create_requirement_file
-from app.utils.json_encoder import JSONencoder
+from app.utils.json_encoder import json_encoder
+
+import time
 
 router = APIRouter()
 
@@ -34,12 +36,12 @@ async def read_network_data(network_id: str):
         network = await read_network_by_id(network_id)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=JSONencoder().encode(network)
+            content=json_encoder(network)
         )
     except HTTPException as error:
         return JSONResponse(
             status_code=error.status_code,
-            content=JSONencoder().encode({'message': error.detail})
+            content=json_encoder({'message': error.detail})
         )
 
 
@@ -48,16 +50,16 @@ async def init_network(background_tasks: BackgroundTasks, network: NetworkModel 
     network_json = jsonable_encoder(network)
     try:
         new_network = await create_network(network_json)
-        background_tasks.add_task(generate_network, new_network)
-        # await generate_network(new_network)
+        # background_tasks.add_task(generate_network, new_network)
+        await generate_network(new_network)
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
-            content=JSONencoder().encode(new_network)
+            content=json_encoder(new_network)
         )
     except HTTPException as error:
         return JSONResponse(
             status_code=error.status_code,
-            content=JSONencoder().encode({'message': error.detail})
+            content=json_encoder({'message': error.detail})
         )
 
 
