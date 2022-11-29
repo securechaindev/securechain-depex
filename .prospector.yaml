@@ -6,6 +6,7 @@ pylint:
   disable:
     - super-init-not-called
     - unsubscriptable-object
+    - dangerous-default-value
 
 mccabe:
   run: true
