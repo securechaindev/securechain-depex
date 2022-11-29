@@ -1,9 +1,11 @@
+from typing import Any
+
 from bson import ObjectId
 
 from app.services.dbs.databases import requirement_file_collection
 
 
-async def create_requirement_file(requirement_file_data: dict) -> dict:
+async def create_requirement_file(requirement_file_data: dict[str, Any]) -> dict[str, Any]:
     requirement_file = await requirement_file_collection.insert_one(requirement_file_data)
     new_requirement_file = await requirement_file_collection.find_one(
         {'_id': requirement_file.inserted_id}
@@ -11,7 +13,10 @@ async def create_requirement_file(requirement_file_data: dict) -> dict:
     return new_requirement_file
 
 
-async def read_requirement_file_by_id(requirement_file_id: ObjectId, fields: dict = None) -> dict:
+async def read_requirement_file_by_id(
+    requirement_file_id: ObjectId,
+    fields: dict[str, Any] | None = None
+) -> dict[str, Any]:
     if not fields:
         fields = {}
     requirement_file = await requirement_file_collection.find_one(

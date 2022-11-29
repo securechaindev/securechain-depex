@@ -1,29 +1,41 @@
+from typing import Any
+
 from bson import ObjectId
 
 from app.services.dbs.databases import version_collection
 from app.utils.get_query import get_complete_query
 
 
-async def create_version(version_data: dict) -> dict:
+async def create_version(version_data: dict[str, Any]) -> dict[str, Any]:
     version = await version_collection.insert_one(version_data)
     new_version = await version_collection.find_one({'_id': version.inserted_id})
     return new_version
 
 
-async def read_version_by_id(version_id: ObjectId, fields: dict = None) -> dict:
+async def read_version_by_id(
+    version_id: ObjectId,
+    fields: dict[str, int] | None = None
+) -> dict[str, Any]:
     if not fields:
         fields = {}
     version = await version_collection.find_one({'_id': version_id}, fields)
     return version
 
 
-async def read_version_by_count_package(package: str, count: str, fields: dict = None) -> dict:
+async def read_version_by_count_package(
+    package: str,
+    count: float | int,
+    fields: dict[str, int] | None = None
+) -> dict[str, Any]:
     if not fields:
         fields = {}
     version = await version_collection.find_one({'package': package, 'count': count}, fields)
     return version
 
-async def get_release_by_values(configs: list[dict[str, float | int]]) -> list[dict[str, float | int | str]]:
+
+async def get_release_by_values(
+    configs: list[dict[str, float | int]]
+) -> list[dict[str, float | int]]:
     for config in configs:
         for var, value in config.items():
             version = await read_version_by_count_package(var, value)
@@ -31,10 +43,11 @@ async def get_release_by_values(configs: list[dict[str, float | int]]) -> list[d
                 config[var] = version['release']
     return configs
 
+
 async def read_versions_by_constraints(
     constraints: dict[str, str] | str,
     package_name: str
-) -> list:
+) -> list[dict[str, Any]]:
     query = await get_complete_query(constraints, package_name)
     return [document async for document in version_collection.find(query)]
 
@@ -42,7 +55,7 @@ async def read_versions_by_constraints(
 async def read_versions_ids_by_constraints(
     constraints: dict[str, str] | str,
     package_name: str
-) -> list:
+) -> list[ObjectId]:
     query = await get_complete_query(constraints, package_name)
     return [document['_id'] async for document in version_collection.find(query, {'_id': 1})]
 
@@ -50,7 +63,7 @@ async def read_versions_ids_by_constraints(
 async def read_version_by_release_and_package(
     release: str,
     package_id: ObjectId
-) -> dict:
+) -> dict[str, Any]:
     version = await version_collection.find_one(
         {
             '$and': [
@@ -65,7 +78,7 @@ async def read_version_by_release_and_package(
 async def update_versions_cves_by_constraints(
     constraints: dict[str, str] | str,
     package_name: str,
-    cve: dict
+    cve: dict[str, Any]
 ) -> None:
     query = await get_complete_query(constraints, package_name)
     await version_collection.update_many(query, {'$addToSet': {'cves': cve}})

@@ -1,9 +1,11 @@
+from typing import Any
+
 from bson import ObjectId
 from app.services.dbs.databases import (depex_package_edge_collection,
                                         pypi_package_edge_collection)
 
 
-async def select_db(database: str):
+async def select_db(database: str) -> Any:
     match database:
         case 'depex':
             return depex_package_edge_collection
@@ -11,7 +13,7 @@ async def select_db(database: str):
             return pypi_package_edge_collection
 
 
-async def create_package_edge(package_edge_data: dict, database: str) -> dict:
+async def create_package_edge(package_edge_data: dict[str, Any], database: str) -> dict[str, Any]:
     collection = await select_db(database)
     package_edge = await collection.insert_one(package_edge_data)
     new_package_edge = await collection.find_one({'_id': package_edge.inserted_id})
@@ -21,8 +23,8 @@ async def create_package_edge(package_edge_data: dict, database: str) -> dict:
 async def read_package_edge_by_id(
     package_edge_id: ObjectId,
     database: str,
-    fields: dict = None
-) -> dict:
+    fields: dict[str, Any] | None = None
+) -> dict[str, Any]:
     if not fields:
         fields = {}
     collection = await select_db(database)
@@ -34,8 +36,8 @@ async def read_package_edge_by_name_constraints(
     package_name: str,
     constraints: dict[str, str] | str,
     database: str,
-    fields: dict = None
-) -> dict:
+    fields: dict[str, Any] | None = None
+) -> dict[str, Any] | None:
     if not fields:
         fields = {}
     collection = await select_db(database)
@@ -48,7 +50,7 @@ async def read_package_edge_by_name_constraints(
 
 async def update_package_edge(
     package_edge_id: ObjectId,
-    package_edge_data: dict,
+    package_edge_data: dict[str, Any],
     database: str
 ) -> None:
     collection = await select_db(database)

@@ -27,11 +27,11 @@ setup(
         'python-dotenv==0.21.0',
         'requests==2.28.1',
         'python-dateutil==2.8.2',
-        'flamapy-dn==1.1.1'
+        'flamapy-dn==1.1.2'
     ],
     tests_requires = [
         'prospector[with_everything]==1.7.7',
-        'mypy==0.982',
+        'mypy==0.991',
         'motor-stubs==1.7.1',
         'types-requests==2.28.11.1',
         'types-setuptools==65.4.0',

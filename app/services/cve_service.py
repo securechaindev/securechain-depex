@@ -1,30 +1,32 @@
+from typing import Any
+
 from bson import ObjectId
 from app.services.dbs.databases import cve_collection
 
 
-async def create_cve(cve_data: dict) -> dict:
+async def create_cve(cve_data: dict[str, Any]) -> dict[str, Any]:
     cve = await cve_collection.insert_one(cve_data)
     new_cve = await cve_collection.find_one({'_id': cve.inserted_id})
     return new_cve
 
 
-async def read_cve_by_id(cve_id: ObjectId, fields: dict = None) -> dict:
+async def read_cve_by_id(cve_id: ObjectId, fields: dict[str, Any] | None = None) -> dict[str, Any]:
     if not fields:
         fields = {}
     cve = await cve_collection.find_one({'_id': cve_id}, fields)
     return cve
 
 
-async def read_cve_by_cve_id(cve_id: str) -> dict:
+async def read_cve_by_cve_id(cve_id: str) -> dict[str, Any] | None:
     cve = await cve_collection.find_one({'id': cve_id})
     return cve
 
 
-async def bulk_write_cve_actions(actions: list, ordered: bool) -> None:
+async def bulk_write_cve_actions(actions: list[Any], ordered: bool) -> None:
     await cve_collection.bulk_write(actions, ordered=ordered)
 
 
-async def read_cpe_matches_by_package_name(package_name: str) -> list:
+async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, Any]]:
     pipeline = [
         {
             '$project': {

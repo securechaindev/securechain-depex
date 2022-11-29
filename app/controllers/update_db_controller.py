@@ -1,6 +1,8 @@
 from datetime import datetime
 from time import sleep
 
+from typing import Any
+
 from dateutil.parser import parse
 from fastapi_utils.tasks import repeat_every
 from pymongo import InsertOne, ReplaceOne
@@ -16,7 +18,7 @@ from app.utils.get_session import get_session
 
 # 24h = 216000
 @repeat_every(seconds=216000)
-async def db_updater():
+async def db_updater() -> None:
     env_variables = await read_env_variables()
     today = datetime.today()
 
@@ -109,8 +111,8 @@ async def get_end_day(today: datetime, last_year: int, last_month: int) -> int:
     return today.day
 
 
-async def update_db(raw_cves: dict) -> None:
-    actions: list = []
+async def update_db(raw_cves: dict[str, Any]) -> None:
+    actions: list[Any] = []
     for raw_cve in raw_cves['vulnerabilities']:
         raw_cve = raw_cve['cve']
         raw_cve['published'] = parse(raw_cve['published'])

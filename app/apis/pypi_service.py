@@ -1,3 +1,5 @@
+from typing import Any
+
 from dateutil.parser import parse
 
 from app.utils.ctc_parser import parse_constraints
@@ -5,7 +7,7 @@ from app.utils.get_first_pos import get_first_position
 from app.utils.get_session import get_session
 
 
-async def get_all_versions(pkg_name: str) -> list:
+async def get_all_versions(pkg_name: str) -> list[dict[str, Any]]:
     session = await get_session()
     response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
 
@@ -36,7 +38,7 @@ async def get_all_versions(pkg_name: str) -> list:
     return []
 
 
-async def requires_packages(pkg_name: str, version_dist: str) -> dict:
+async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[str, str] | str]:
     session = await get_session()
     response = session.get(
         f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
@@ -59,8 +61,8 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict:
                 pos_2 = await get_first_position(data[0], [']']) + 1
                 data[0] = data[0][:pos_1] + data[0][pos_2:]
 
-            if '.' not in data[0]:
-                continue
+            # if '.' not in data[0]:
+            #     continue
 
             data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
 

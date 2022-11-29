@@ -1,3 +1,5 @@
+from typing import Any
+
 from app.config import settings
 from app.utils.ctc_parser import parse_constraints
 from app.utils.get_session import get_session
@@ -9,7 +11,12 @@ headers = {
 }
 
 
-async def get_repo_data(owner: str, name: str, all_packages: dict = None, end_cursor: str = None):
+async def get_repo_data(
+    owner: str,
+    name: str,
+    all_packages: dict[str, Any] | None = None,
+    end_cursor: str | None = None
+) -> dict[str, Any]:
     if not all_packages:
         all_packages = {}
     if not end_cursor:
@@ -38,7 +45,10 @@ async def get_repo_data(owner: str, name: str, all_packages: dict = None, end_cu
     return await get_repo_data(owner, name, all_packages, page_info['endCursor'])
 
 
-async def json_reader(response, all_packages: dict) -> tuple:
+async def json_reader(
+    response: Any,
+    all_packages: dict[str, Any]
+) -> tuple[dict[str, Any], dict[str, Any]]:
     page_info = {'hasNextPage': None}
 
     for node in response['data']['repository']['dependencyGraphManifests']['nodes']:

@@ -32,7 +32,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements_mypy.txt
-          pip install mypy==0.982
+          pip install mypy==0.991
       - name: Running static types with mypy
         run: |
           mypy app

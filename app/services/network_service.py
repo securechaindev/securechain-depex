@@ -1,16 +1,21 @@
+from typing import Any
+
 from bson import ObjectId
 from fastapi import HTTPException
 
 from app.services.dbs.databases import network_collection
 
 
-async def create_network(network_data: dict) -> dict:
+async def create_network(network_data: dict[str, Any]) -> dict[str, Any]:
     network = await network_collection.insert_one(network_data)
     new_network = await network_collection.find_one({'_id': network.inserted_id})
     return new_network
 
 
-async def read_network_by_id(network_id: str, fields: dict = None) -> dict:
+async def read_network_by_id(
+    network_id: str,
+    fields: dict[str, Any] | None = None
+) -> dict[str, Any]:
     if not fields:
         fields = {}
     network = await network_collection.find_one({'_id': ObjectId(network_id)}, fields)
@@ -29,7 +34,7 @@ async def update_network_requirement_files(
     )
 
 
-async def update_network_is_completed(network_id: ObjectId) -> dict:
+async def update_network_is_completed(network_id: ObjectId) -> dict[str, Any]:
     updated_network = await network_collection.find_one_and_update(
         {'_id': network_id},
         {'$set': {'is_complete': True}}

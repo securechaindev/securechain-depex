@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from typing import Any
+
 from bson import ObjectId
 
 from app.apis.pypi_service import get_all_versions, requires_packages
@@ -75,7 +77,7 @@ async def no_exist_package(
     await generate_package_edge(new_package['name'], constraints, database, parent_id, parent_type)
 
 
-async def generate_packages(package_name: str, version: dict) -> None:
+async def generate_packages(package_name: str, version: dict[str, Any]) -> None:
     require_packages = await requires_packages(package_name, version['release'])
 
     if require_packages:
@@ -112,8 +114,8 @@ async def generate_packages(package_name: str, version: dict) -> None:
                 )
 
 
-async def generate_versions(package: dict) -> list:
-    no_existing_versions: list = []
+async def generate_versions(package: dict[str, Any]) -> list[dict[str, Any]]:
+    no_existing_versions: list[dict[str, Any]] = []
 
     all_versions = await get_all_versions(package['name'])
 
@@ -135,8 +137,8 @@ async def generate_versions(package: dict) -> list:
     return no_existing_versions
 
 
-async def search_new_versions(package: dict) -> None:
-    no_existing_versions: list = []
+async def search_new_versions(package: dict[str, Any]) -> None:
+    no_existing_versions: list[dict[str, Any]] = []
 
     all_versions = await get_all_versions(package['name'])
 
@@ -153,7 +155,7 @@ async def search_new_versions(package: dict) -> None:
 
                 await update_package_versions(package['_id'], new_version_id)
 
-                no_existing_versions.append([new_version_id, new_version['release']])
+                no_existing_versions.append(new_version)
 
                 counter += 1
 

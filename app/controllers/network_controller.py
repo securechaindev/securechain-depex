@@ -1,3 +1,5 @@
+from typing import Any
+
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, status
@@ -21,8 +23,6 @@ from app.services.package_service import read_package_by_name
 from app.services.requirement_file_service import create_requirement_file
 from app.utils.json_encoder import json_encoder
 
-import time
-
 router = APIRouter()
 
 
@@ -31,7 +31,7 @@ router = APIRouter()
     response_description='Get network',
     response_model=NetworkModel
 )
-async def read_network_data(network_id: str):
+async def read_network_data(network_id: str) -> JSONResponse:
     try:
         network = await read_network_by_id(network_id)
         return JSONResponse(
@@ -46,7 +46,10 @@ async def read_network_data(network_id: str):
 
 
 @router.post('/network', response_description='Init network', response_model=NetworkModel)
-async def init_network(background_tasks: BackgroundTasks, network: NetworkModel = Body(...)):
+async def init_network(
+    background_tasks: BackgroundTasks,
+    network: NetworkModel = Body(...)
+) -> JSONResponse:
     network_json = jsonable_encoder(network)
     try:
         new_network = await create_network(network_json)
@@ -63,7 +66,7 @@ async def init_network(background_tasks: BackgroundTasks, network: NetworkModel 
         )
 
 
-async def generate_network(network: dict) -> None:
+async def generate_network(network: dict[str, Any]) -> None:
     files = await get_repo_data(network['owner'], network['name'])
 
     for file in files.items():

@@ -1,17 +1,22 @@
 from copy import copy
 
+from typing import Any
 
-async def get_complete_query(constraints, package_name: str) -> dict:
-    query: dict = {'$and': [{'package': package_name}]}
 
-    if constraints != 'any':
+async def get_complete_query(
+    constraints: dict[str, str] | str,
+    package_name: str
+) -> dict[str, Any]:
+    query: dict[str, Any] = {'$and': [{'package': package_name}]}
+
+    if not isinstance(constraints, str):
         for operator, version in constraints.items():
             query['$and'].append(await get_partial_query(operator, version))
 
     return query
 
 
-async def get_partial_query(operator: str, version: str) -> dict:
+async def get_partial_query(operator: str, version: str) -> dict[str, Any]:
     number_of_points = version.count('.')
     number_of_elements = number_of_points + 1
     xyzd = await sanitize(version, number_of_points)
@@ -50,7 +55,7 @@ async def sanitize(version: str, number_of_points: int) -> list[int]:
     return [int(part) for part in version.split('.')]
 
 
-async def equal_query(xyzd: list[int]) -> dict:
+async def equal_query(xyzd: list[int]) -> dict[str, Any]:
     return {'$and': [
         {'mayor': {'$eq': xyzd[0]}},
         {'minor': {'$eq': xyzd[1]}},
@@ -59,7 +64,7 @@ async def equal_query(xyzd: list[int]) -> dict:
     ]}
 
 
-async def greater_than_query(xyzd: list[int]) -> dict:
+async def greater_than_query(xyzd: list[int]) -> dict[str, Any]:
     return {'$or': [
         {'mayor': {'$gt': xyzd[0]}},
         {'$and': [
@@ -80,7 +85,7 @@ async def greater_than_query(xyzd: list[int]) -> dict:
     ]}
 
 
-async def less_than_query(xyzd: list[int]) -> dict:
+async def less_than_query(xyzd: list[int]) -> dict[str, Any]:
     return {'$or': [
         {'mayor': {'$lt': xyzd[0]}}, 
         {'$and': [
@@ -101,7 +106,7 @@ async def less_than_query(xyzd: list[int]) -> dict:
     ]}
 
 
-async def not_equal_query(xyzd: list[int]) -> dict:
+async def not_equal_query(xyzd: list[int]) -> dict[str, Any]:
     return {'$or': [
         {'mayor': {'$ne': xyzd[0]}},
         {'minor': {'$ne': xyzd[1]}},
@@ -110,15 +115,15 @@ async def not_equal_query(xyzd: list[int]) -> dict:
     ]}
 
 
-async def greater_or_equal_than_query(xyzd: list[int]) -> dict:
+async def greater_or_equal_than_query(xyzd: list[int]) -> dict[str, Any]:
     return {'$or': [await equal_query(xyzd), await greater_than_query(xyzd)]}
 
 
-async def less_or_equal_than_query(xyzd: list[int]) -> dict:
+async def less_or_equal_than_query(xyzd: list[int]) -> dict[str, Any]:
     return {'$or': [await equal_query(xyzd), await less_than_query(xyzd)]}
 
 
-async def approx_greater_than(xyzd: list[int]) -> dict:
+async def approx_greater_than(xyzd: list[int]) -> dict[str, Any]:
     up_xyzd = await get_up(xyzd)
     return {'$and': [await greater_or_equal_than_query(xyzd), await less_than_query(up_xyzd)]}
 
@@ -132,7 +137,7 @@ async def get_up(xyzd: list[int]) -> list[int]:
     return xyzd
 
 
-async def approx_greater_than_minor(xyzd: list[int], number_of_elements: int) -> dict:
+async def approx_greater_than_minor(xyzd: list[int], number_of_elements: int) -> dict[str, Any]:
     up_xyzd = copy(xyzd)
     if number_of_elements != 1:
         up_xyzd[1] = up_xyzd[1] + 1

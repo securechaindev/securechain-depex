@@ -1,8 +1,10 @@
+from typing import Any
+
 from bson import ObjectId
 from app.services.dbs.databases import network_collection
 
 
-async def aggregate_network_by_id(network_id: str) -> dict:
+async def aggregate_network_by_id(network_id: str) -> dict[str, Any]:
     pipeline = [
         {
             '$match': {

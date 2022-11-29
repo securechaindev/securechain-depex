@@ -1,3 +1,5 @@
+from typing import Any
+
 from datetime import datetime
 
 from bson import ObjectId
@@ -15,7 +17,7 @@ class VersionModel(BaseModel):
     build_number: int | None = Field(...)
     release_date: datetime | None = Field(...)
     cves: list[ObjectId] | None = None
-    package: dict | None = None
+    package: dict[str, Any] | None = None
 
     class Config:
         allow_population_by_field_name = True

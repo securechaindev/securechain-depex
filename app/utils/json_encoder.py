@@ -8,7 +8,7 @@ from bson import ObjectId
 
 
 class JSONencoder(JSONEncoder):
-    def default(self, o):
+    def default(self, o: Any) -> Any:
         if isinstance(o, ObjectId):
             return str(o)
         if isinstance(o, datetime):

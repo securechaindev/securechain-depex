@@ -1,3 +1,5 @@
+from typing import Any
+
 from datetime import datetime
 
 from bson import ObjectId
@@ -5,20 +7,23 @@ from bson import ObjectId
 from app.services.dbs.databases import package_collection
 
 
-async def create_package(package_data: dict) -> dict:
+async def create_package(package_data: dict[str, Any]) -> dict[str, Any]:
     package = await package_collection.insert_one(package_data)
     new_package = await package_collection.find_one({'_id': package.inserted_id})
     return new_package
 
 
-async def read_package_by_id(package_id: ObjectId, fields: dict = None) -> dict:
+async def read_package_by_id(
+    package_id: ObjectId,
+    fields: dict[str, Any] | None = None
+) -> dict[str, Any]:
     if not fields:
         fields = {}
     package = await package_collection.find_one({'_id': package_id}, fields)
     return package
 
 
-async def read_package_by_name(package_name: str) -> dict:
+async def read_package_by_name(package_name: str) -> dict[str, Any] | None:
     package = await package_collection.find_one({'name': package_name})
     return package
 

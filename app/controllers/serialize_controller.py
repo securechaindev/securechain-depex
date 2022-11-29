@@ -1,3 +1,5 @@
+from typing import Any
+
 from bson import ObjectId
 from flamapy.metamodels.dn_metamodel.models import (DependencyNetwork, Package,
                                                     RequirementFile, Version)
@@ -6,11 +8,11 @@ from flamapy.metamodels.dn_metamodel.transformations import SerializeNetwork
 from app.services.package_edge_service import read_package_edge_by_id
 from app.services.serialize_service import aggregate_network_by_id
 
-all_package_edges: list[dict] = []
+all_package_edges: list[dict[str, Any]] = []
 all_package_edges_ids: list[ObjectId] = []
 
 
-async def serialize_network(network_id: str):
+async def serialize_network(network_id: str) -> DependencyNetwork | None:
     network = await aggregate_network_by_id(network_id)
     requirement_files = network['requirement_files']
     del network['_id']
@@ -22,7 +24,7 @@ async def serialize_network(network_id: str):
 
 
 async def read_requirement_files(
-    requirement_files: list[dict],
+    requirement_files: list[dict[str, Any]],
     dn_model: DependencyNetwork
 ) -> None:
     for requirement_file in requirement_files:
@@ -39,14 +41,17 @@ async def read_requirement_files(
         all_package_edges_ids.clear()
 
 
-async def read_packages(package_egdes: list[dict], parent: RequirementFile | Version) -> None:
+async def read_packages(
+    package_egdes: list[dict[str, Any]],
+    parent: RequirementFile | Version
+) -> None:
     for package_edge in package_egdes:
         package = Package(**{'name': package_edge['package_name'], 'versions': []})
         parent.packages.append(package)
         await read_versions(package_edge['versions'], package)
 
 
-async def read_versions(versions: list[dict], package: Package) -> None:
+async def read_versions(versions: list[dict[str, Any]], package: Package) -> None:
     for version in versions:
         if '_id' not in version:
             continue
@@ -59,7 +64,7 @@ async def read_versions(versions: list[dict], package: Package) -> None:
         await read_packages(package_edges, version)
 
 
-async def search_package_edge(package_edge_ids: list[ObjectId]):
+async def search_package_edge(package_edge_ids: list[ObjectId]) -> list[dict[str, Any]]:
     package_edges = []
     for package_edge_id in package_edge_ids:
         if package_edge_id not in all_package_edges_ids:
