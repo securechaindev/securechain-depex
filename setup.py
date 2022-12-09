@@ -20,10 +20,10 @@ setup(
     ],
     python_requires = '>=3.10',
     install_requires = [
-        'wheel==0.37.1',
-        'fastapi[all]==0.85.0',
+        'wheel==0.38.4',
+        'fastapi[all]==0.88.0',
         'fastapi-utils==0.2.1',
-        'motor==3.0.0',
+        'motor==3.1.1',
         'python-dotenv==0.21.0',
         'requests==2.28.1',
         'python-dateutil==2.8.2',
