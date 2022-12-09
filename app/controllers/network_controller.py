@@ -69,19 +69,19 @@ async def init_network(
 async def generate_network(network: dict[str, Any]) -> None:
     files = await get_repo_data(network['owner'], network['name'])
 
-    for file in files.items():
-        if file[1][0] != 'PIP':
+    for name, file in files.items():
+        if file['manager'] != 'PIP':
             continue
 
-        req_file = {'name': file[0], 'manager': file[1][0], 'package_edges': []}
+        req_file = {'name': name, 'manager': file['manager'], 'package_edges': []}
 
         new_req_file = await create_requirement_file(req_file)
 
         await update_network_requirement_files(network['_id'], new_req_file['_id'])
 
-        for dependencie in file[1][1]:
+        for dependencie, constraints in file['dependencies'].items():
 
-            package = await read_package_by_name(dependencie[0])
+            package = await read_package_by_name(dependencie)
 
             if package is not None:
 
@@ -92,7 +92,7 @@ async def generate_network(network: dict[str, Any]) -> None:
 
                 await generate_package_edge(
                     package['name'],
-                    dependencie[1],
+                    constraints,
                     'depex',
                     new_req_file['_id'],
                     'requirement_file'
@@ -100,10 +100,10 @@ async def generate_network(network: dict[str, Any]) -> None:
 
             else:
 
-                print(dependencie[0])
+                print(dependencie)
                 await no_exist_package(
-                    dependencie[0],
-                    dependencie[1],
+                    dependencie,
+                    constraints,
                     'depex',
                     new_req_file['_id'],
                     'requirement_file'

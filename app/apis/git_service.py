@@ -58,9 +58,9 @@ async def json_reader(
             continue
 
         if file not in all_packages:
-            all_packages[file] = [managers[file], []]
+            all_packages[file] = {'manager': managers[file], 'dependencies': {}}
         for node in node['dependencies']['nodes']:
             req = await parse_constraints(node['requirements'])
-            all_packages[file][1].append([node['packageName'], req])
+            all_packages[file]['dependencies'].update({node['packageName']: req})
 
     return (page_info, all_packages)
