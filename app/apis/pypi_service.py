@@ -50,19 +50,20 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
         for dist in response:
             data = dist.split(';')
 
-            # TODO: En el futuro sería interesante construir el grado teniendo en cuenta los extras
+            '''
+            TODO: En el futuro sería interesante construir el grado teniendo en cuenta los extras
+            '''
             if len(data) > 1:
                 if 'extra' in data[1]:
                     continue
 
-            # TODO: Eliminamos que se puedan requerir extras
+            '''
+            TODO: Eliminamos que se puedan requerir extras
+            '''
             if '[' in data[0]:
                 pos_1 = await get_first_position(data[0], ['['])
                 pos_2 = await get_first_position(data[0], [']']) + 1
                 data[0] = data[0][:pos_1] + data[0][pos_2:]
-
-            # if '.' not in data[0]:
-            #     continue
 
             data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
 
@@ -71,7 +72,11 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
             dist = data[:pos]
             raw_ctcs = data[pos:]
 
-            require_packages[dist] = await parse_constraints(raw_ctcs)
+            if dist in require_packages:
+                if not isinstance(require_packages[dist], str):
+                    require_packages[dist].update(await parse_constraints(raw_ctcs))
+            else:
+                require_packages[dist] = await parse_constraints(raw_ctcs)
 
         return require_packages
 
