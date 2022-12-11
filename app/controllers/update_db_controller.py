@@ -26,16 +26,6 @@ async def db_updater() -> None:
     session = await get_session()
 
     while True:
-        if (
-            env_variables['last_year_update'] == today.year and 
-            env_variables['last_month_update'] == today.month + 1
-        ):
-            env_variables['last_month_update'] = today.month
-            env_variables['last_day_update'] = today.day
-            env_variables['last_moment_update'] = datetime.now()
-            await replace_env_variables(env_variables)
-            break
-
         end_day = await get_end_day(
             today,
             env_variables['last_year_update'],
@@ -90,6 +80,16 @@ async def db_updater() -> None:
         ).json()
 
         await update_db(response)
+
+        if (
+            env_variables['last_year_update'] == today.year and 
+            env_variables['last_month_update'] == today.month
+        ):
+            env_variables['last_month_update'] = today.month
+            env_variables['last_day_update'] = today.day
+            env_variables['last_moment_update'] = datetime.now()
+            await replace_env_variables(env_variables)
+            break
 
         env_variables['last_month_update'] += 1
         env_variables['last_day_update'] = 1
