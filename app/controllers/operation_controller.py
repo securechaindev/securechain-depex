@@ -1,13 +1,15 @@
-from typing import Any
-
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from app.controllers.network_info import NetworkInfo
-from app.controllers.network_to_smt import NetworkToSMT
-from app.controllers.operations import (FilterConfigs, MaximizeImpact,
-                                        MinimizeImpact, NumberOfProducts,
-                                        ValidModel)
+from flamapy.metamodels.dn_metamodel.operations import NetworkInfo
+from flamapy.metamodels.smt_metamodel.transformations import NetworkToSMT
+from flamapy.metamodels.smt_metamodel.operations import (
+    FilterConfigs,
+    MaximizeImpact,
+    MinimizeImpact,
+    NumberOfProducts,
+    ValidModel
+)
 from app.controllers.serialize_controller import serialize_network
 from app.services.version_service import get_release_by_values
 from app.utils.json_encoder import json_encoder
@@ -32,25 +34,25 @@ async def valid_file(network_id: str, file_name: str, agregator: str) -> JSONRes
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = ValidModel()
-    operation.execute(smt_model, file_name)
+    operation = ValidModel(file_name)
+    operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
 
-@router.post(
-    '/operation/number_of_products/{network_id}',
-    response_description='Number of products operation'
-)
-async def number_of_products(network_id: str, file_name: str, agregator: str) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
-    smt_transform.transform()
-    smt_model = smt_transform.destination_model
-    operation = NumberOfProducts()
-    operation.execute(smt_model, file_name)
-    result = {'number_of_products': operation.get_result()}
-    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+# @router.post(
+#     '/operation/number_of_products/{network_id}',
+#     response_description='Number of products operation'
+# )
+# async def number_of_products(network_id: str, file_name: str, agregator: str) -> JSONResponse:
+#     dependency_network = await serialize_network(network_id)
+#     smt_transform = NetworkToSMT(dependency_network, agregator)
+#     smt_transform.transform()
+#     smt_model = smt_transform.destination_model
+#     operation = NumberOfProducts(file_name)
+#     operation.execute(smt_model)
+#     result = {'number_of_products': operation.get_result()}
+#     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
 
 @router.post(
@@ -59,16 +61,16 @@ async def number_of_products(network_id: str, file_name: str, agregator: str) ->
 )
 async def minimize_impact(
     network_id: str,
-    file_name: str,
     agregator: str,
-    op_configs: dict[str, int] = {'limit': 10}
+    file_name: str,
+    limit: int
 ) -> JSONResponse:
     dependency_network = await serialize_network(network_id)
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = MinimizeImpact(**op_configs)
-    operation.execute(smt_model, file_name)
+    operation = MinimizeImpact(file_name, limit)
+    operation.execute(smt_model)
     result = await get_release_by_values(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
@@ -79,16 +81,16 @@ async def minimize_impact(
 )
 async def maximize_impact(
     network_id: str,
-    file_name: str,
     agregator: str,
-    op_configs: dict[str, int] = {'limit': 10}
+    file_name: str,
+    limit: int
 ) -> JSONResponse:
     dependency_network = await serialize_network(network_id)
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = MaximizeImpact(**op_configs)
-    operation.execute(smt_model, file_name)
+    operation = MaximizeImpact(file_name, limit)
+    operation.execute(smt_model)
     result = await get_release_by_values(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
@@ -99,19 +101,17 @@ async def maximize_impact(
 )
 async def filter_configs(
     network_id: str,
-    file_name: str,
     agregator: str,
-    op_configs: dict[str, Any] = {
-        'max_threshold': 10.,
-        'min_threshold': 0.,
-        'limit': 10
-    }
+    file_name: str,
+    max_threshold: float,
+    min_threshold: float,
+    limit: int
 ) -> JSONResponse:
     dependency_network = await serialize_network(network_id)
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = FilterConfigs(**op_configs)
-    operation.execute(smt_model, file_name)
+    operation = FilterConfigs(file_name, max_threshold, min_threshold, limit)
+    operation.execute(smt_model)
     result = await get_release_by_values(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

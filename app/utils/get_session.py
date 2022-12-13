@@ -7,6 +7,5 @@ async def get_session() -> Session:
     session = Session()
     retry = Retry(connect=4, backoff_factor=0.5)
     adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
+    session.mount('http*://', adapter)
     return session

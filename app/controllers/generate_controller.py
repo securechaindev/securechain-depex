@@ -107,7 +107,8 @@ async def generate_packages(package_name: str, version: dict[str, Any]) -> None:
 
                 print(package_name)
                 await no_exist_package(
-                    package_name, constraints,
+                    package_name,
+                    constraints,
                     'pypi',
                     version['_id'],
                     'version'
