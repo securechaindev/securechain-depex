@@ -7,7 +7,6 @@ from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs,
     MaximizeImpact,
     MinimizeImpact,
-    NumberOfProducts,
     ValidModel
 )
 from app.controllers.serialize_controller import serialize_network

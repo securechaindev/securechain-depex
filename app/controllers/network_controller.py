@@ -53,8 +53,8 @@ async def init_network(
     network_json = jsonable_encoder(network)
     try:
         new_network = await create_network(network_json)
-        # background_tasks.add_task(generate_network, new_network)
-        await generate_network(new_network)
+        background_tasks.add_task(generate_network, new_network)
+        # await generate_network(new_network)
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
             content=json_encoder(new_network)
