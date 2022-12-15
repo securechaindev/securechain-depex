@@ -4,10 +4,11 @@ from fastapi.responses import JSONResponse
 from flamapy.metamodels.dn_metamodel.operations import NetworkInfo
 from flamapy.metamodels.smt_metamodel.transformations import NetworkToSMT
 from flamapy.metamodels.smt_metamodel.operations import (
-    FilterConfigs,
-    MaximizeImpact,
+    ValidModel,
+    NumberOfProducts,
     MinimizeImpact,
-    ValidModel
+    MaximizeImpact,
+    FilterConfigs
 )
 from app.controllers.serialize_controller import serialize_network
 from app.services.version_service import get_release_by_values
@@ -28,7 +29,7 @@ async def network_info(network_id: str) -> JSONResponse:
 
 
 @router.post('/operation/valid_model/{network_id}', response_description='Valid model operation')
-async def valid_file(network_id: str, file_name: str, agregator: str) -> JSONResponse:
+async def valid_file(network_id: str, agregator: str, file_name: str) -> JSONResponse:
     dependency_network = await serialize_network(network_id)
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
@@ -39,19 +40,19 @@ async def valid_file(network_id: str, file_name: str, agregator: str) -> JSONRes
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
 
-# @router.post(
-#     '/operation/number_of_products/{network_id}',
-#     response_description='Number of products operation'
-# )
-# async def number_of_products(network_id: str, file_name: str, agregator: str) -> JSONResponse:
-#     dependency_network = await serialize_network(network_id)
-#     smt_transform = NetworkToSMT(dependency_network, agregator)
-#     smt_transform.transform()
-#     smt_model = smt_transform.destination_model
-#     operation = NumberOfProducts(file_name)
-#     operation.execute(smt_model)
-#     result = {'number_of_products': operation.get_result()}
-#     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+@router.post(
+    '/operation/number_of_products/{network_id}',
+    response_description='Number of products operation. Not use in huge networks.'
+)
+async def number_of_products(network_id: str, agregator: str, file_name: str) -> JSONResponse:
+    dependency_network = await serialize_network(network_id)
+    smt_transform = NetworkToSMT(dependency_network, agregator)
+    smt_transform.transform()
+    smt_model = smt_transform.destination_model
+    operation = NumberOfProducts(file_name)
+    operation.execute(smt_model)
+    result = {'number_of_products': operation.get_result()}
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
 
 @router.post(
