@@ -27,8 +27,8 @@ setup(
         'python-dotenv==0.21.0',
         'requests==2.28.1',
         'python-dateutil==2.8.2',
-        'flamapy-dn==1.1.3',
-        'flamapy-smt==1.0.0'
+        'flamapy-dn==1.1.4',
+        'flamapy-smt==1.1.0'
     ],
     dev_requires=[
         'prospector[with_everything]==1.8.3',
