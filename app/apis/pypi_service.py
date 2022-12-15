@@ -74,7 +74,7 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
                     if isinstance(ctcs, dict):
                         require_packages[dist].update(ctcs)
             else:
-                if '.' not in raw_ctcs:
+                if '.' not in raw_ctcs and raw_ctcs != '':
                     continue
                 require_packages[dist] = await parse_constraints(raw_ctcs)
 
