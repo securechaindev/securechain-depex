@@ -1,6 +1,6 @@
 # Depex Proyect
 
-[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/germanmt/depex?color=blue)](https://hub.docker.com/repository/docker/germanmt/depex)
+[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/germanmt/depex?color=blue&label=dockerhub&logo=docker&sort=semver)](https://hub.docker.com/repository/docker/germanmt/depex) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/GermanMT/depex?color=green&logo=github)](https://github.com/GermanMT/depex/releases)
 
 ## Deployment with docker
 
@@ -18,10 +18,6 @@
 
 ## Extra information
 
-1. Here they are the [GitHub releases](https://github.com/GermanMT/depex/releases)
+1. How to get a GitHub [API key](https://github.com/settings/tokens)
 
-2. Here they are the [DockerHub releases](https://hub.docker.com/r/germanmt/depex/tags)
-
-3. How to get a GitHub [API key](https://github.com/settings/tokens)
-
-4. How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
+2. How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
