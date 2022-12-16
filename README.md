@@ -1,5 +1,7 @@
 # Depex Proyect
 
+[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/germanmt/depex?color=blue)](https://hub.docker.com/repository/docker/germanmt/depex)
+
 ## Deployment with docker
 
 1. It is necessary to run command 'export DOCKER_BUILDKIT=1' in Ubuntu before start working with docker. If you are using Windows run command 'set DOCKER_BUILDKIT=1'
