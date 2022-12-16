@@ -1,6 +1,6 @@
 # Depex Proyect
 
-[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/germanmt/depex?color=blue&label=dockerhub&logo=docker&sort=semver)](https://hub.docker.com/repository/docker/germanmt/depex) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/GermanMT/depex?color=green&logo=github)](https://github.com/GermanMT/depex/releases)
+[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/germanmt/depex?color=blue&label=dockerhub&logo=docker&sort=semver)](https://hub.docker.com/repository/docker/germanmt/depex) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/GermanMT/depex?color=green&logo=github)](https://github.com/GermanMT/depex/releases) [![GitHub](https://img.shields.io/github/license/GermanMT/depex?logo=gnu)](https://github.com/GermanMT/depex/blob/main/LICENSE.md)
 
 ## Deployment with docker
 
