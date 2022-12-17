@@ -1,6 +1,6 @@
-# Depex Proyect
-
 <p align="center">
+  # Depex Proyect
+  
   <a href="https://hub.docker.com/repository/docker/germanmt/depex" target="_blank">
       <img src="https://img.shields.io/docker/v/germanmt/depex?color=blue&label=dockerhub&logo=docker&sort=semver" alt="dockerhub">
   </a>
