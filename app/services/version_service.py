@@ -62,14 +62,12 @@ async def read_versions_ids_by_constraints(
 
 async def read_version_by_release_and_package(
     release: str,
-    package_id: ObjectId
+    package: str
 ) -> dict[str, Any]:
     version = await version_collection.find_one(
         {
-            '$and': [
-                {'release': release},
-                {'package': package_id}
-            ]
+            'release': release,
+            'package': package
         }
     )
     return version
