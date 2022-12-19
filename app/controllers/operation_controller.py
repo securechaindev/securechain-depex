@@ -159,3 +159,23 @@ async def complete_config(
     operation.execute(smt_model)
     result = await get_release_by_values(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+
+
+@router.post(
+    '/operation/config_by_impact/{network_id}',
+    response_description='Get a configuration by impact operation'
+)
+async def config_by_impact(
+    network_id: str,
+    agregator: str,
+    file_name: str,
+    impact: int
+) -> JSONResponse:
+    dependency_network = await serialize_network(network_id)
+    smt_transform = NetworkToSMT(dependency_network, agregator)
+    smt_transform.transform()
+    smt_model = smt_transform.destination_model
+    operation = ConfigByImpact(file_name, impact)
+    operation.execute(smt_model)
+    result = await get_release_by_values(operation.get_result())
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
