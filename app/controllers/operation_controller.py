@@ -11,11 +11,10 @@ from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs
 )
 
-from app.controllers.operations import ValidConfig
+from app.controllers.operations import ValidConfig, CompleteConfig, ConfigByImpact
 from app.controllers.serialize_controller import serialize_network
-from app.services.version_service import get_release_by_values
+from app.services.version_service import get_release_by_values, get_count_by_values
 from app.utils.json_encoder import json_encoder
-from app.utils.config_sanitizer import config_sanitizer
 
 router = APIRouter()
 
@@ -119,6 +118,7 @@ async def filter_configs(
     result = await get_release_by_values(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
+
 @router.post(
     '/operation/valid_config/{network_id}',
     response_description='Valid configuration operation'
@@ -133,8 +133,29 @@ async def valid_config(
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    config = await config_sanitizer(config)
+    config = await get_count_by_values(config)
     operation = ValidConfig(file_name, config)
     operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+
+
+@router.post(
+    '/operation/complete_config/{network_id}',
+    response_description='Complete configuration operation'
+)
+async def complete_config(
+    network_id: str,
+    agregator: str,
+    file_name: str,
+    config: dict[str, str]
+) -> JSONResponse:
+    dependency_network = await serialize_network(network_id)
+    smt_transform = NetworkToSMT(dependency_network, agregator)
+    smt_transform.transform()
+    smt_model = smt_transform.destination_model
+    config = await get_count_by_values(config)
+    operation = CompleteConfig(file_name, config)
+    operation.execute(smt_model)
+    result = await get_release_by_values(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))

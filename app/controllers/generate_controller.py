@@ -18,7 +18,7 @@ from app.services.package_service import (
 )
 from app.services.version_service import (
     create_version,
-    read_version_by_release_and_package,
+    read_version_by_release_package,
     read_versions_by_constraints,
     update_version_package_edges
 )
@@ -146,7 +146,7 @@ async def search_new_versions(package: dict[str, Any]) -> None:
     if len(package['versions']) < len(all_versions):
         counter = len(package['versions']) + 1
         for version in all_versions:
-            if not await read_version_by_release_and_package(version['release'], package['_id']):
+            if not await read_version_by_release_package(version['release'], package['_id']):
                 version['package'] = package['_id']
                 version['count'] = counter
 

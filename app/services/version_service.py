@@ -35,13 +35,24 @@ async def read_version_by_count_package(
 
 async def get_release_by_values(
     configs: list[dict[str, float | int]]
-) -> list[dict[str, float | int]]:
+) -> list[dict[str, str]]:
     for config in configs:
         for var, value in config.items():
             version = await read_version_by_count_package(var, value)
             if version:
                 config[var] = version['release']
     return configs
+
+
+async def get_count_by_values(
+    config: dict[str, str]
+) -> dict[str, int]:
+    sanitized_config: dict[str, int] = {}
+    for package, release in config.items():
+        version = await read_version_by_release_package(release, package)
+        if version:
+            sanitized_config[version['package']] = version['count']
+    return sanitized_config
 
 
 async def read_versions_by_constraints(
@@ -60,7 +71,7 @@ async def read_versions_ids_by_constraints(
     return [document['_id'] async for document in version_collection.find(query, {'_id': 1})]
 
 
-async def read_version_by_release_and_package(
+async def read_version_by_release_package(
     release: str,
     package: str
 ) -> dict[str, Any]:
