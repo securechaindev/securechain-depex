@@ -133,8 +133,7 @@ async def valid_config(
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    config = await get_count_by_values(config)
-    operation = ValidConfig(file_name, config)
+    operation = ValidConfig(file_name, await get_count_by_values(config))
     operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
@@ -154,11 +153,10 @@ async def complete_config(
     smt_transform = NetworkToSMT(dependency_network, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    config = await get_count_by_values(config)
-    operation = CompleteConfig(file_name, config)
+    operation = CompleteConfig(file_name, await get_count_by_values(config))
     operation.execute(smt_model)
     result = await get_release_by_values(operation.get_result())
-    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
 @router.post(
@@ -169,7 +167,7 @@ async def config_by_impact(
     network_id: str,
     agregator: str,
     file_name: str,
-    impact: int
+    impact: float
 ) -> JSONResponse:
     dependency_network = await serialize_network(network_id)
     smt_transform = NetworkToSMT(dependency_network, agregator)
@@ -178,4 +176,4 @@ async def config_by_impact(
     operation = ConfigByImpact(file_name, impact)
     operation.execute(smt_model)
     result = await get_release_by_values(operation.get_result())
-    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
