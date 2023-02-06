@@ -8,32 +8,34 @@ from flamapy.metamodels.smt_metamodel.operations import (
     NumberOfProducts,
     MinimizeImpact,
     MaximizeImpact,
-    FilterConfigs
+    FilterConfigs,
+    ValidConfig,
+    CompleteConfig,
+    ConfigByImpact
 )
 
-from app.controllers.operations import ValidConfig, CompleteConfig, ConfigByImpact
-from app.controllers.serialize_controller import serialize_network
+from app.controllers.serialize_controller import serialize_graph
 from app.services.version_service import get_release_by_values, get_count_by_values
 from app.utils.json_encoder import json_encoder
 
 router = APIRouter()
 
 
-@router.post('/operation/network_info/{network_id}', response_description='Network info operation')
-async def network_info(network_id: str) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
+@router.post('/operation/graph_info/{graph_id}', response_description='Graph info operation')
+async def graph_info(graph_id: str) -> JSONResponse:
+    dependency_graph = await serialize_graph(graph_id)
     operation = NetworkInfo()
-    operation.execute(dependency_network)
+    operation.execute(dependency_graph)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder(operation.get_result())
     )
 
 
-@router.post('/operation/valid_model/{network_id}', response_description='Valid model operation')
-async def valid_file(network_id: str, agregator: str, file_name: str) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+@router.post('/operation/valid_model/{graph_id}', response_description='Valid model operation')
+async def valid_file(graph_id: str, agregator: str, file_name: str) -> JSONResponse:
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = ValidModel(file_name)
@@ -43,12 +45,12 @@ async def valid_file(network_id: str, agregator: str, file_name: str) -> JSONRes
 
 
 @router.post(
-    '/operation/number_of_products/{network_id}',
-    response_description='Number of products operation. Not use in huge networks.'
+    '/operation/number_of_products/{graph_id}',
+    response_description='Number of products operation. Not use in huge graphs.'
 )
-async def number_of_products(network_id: str, agregator: str, file_name: str) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+async def number_of_products(graph_id: str, agregator: str, file_name: str) -> JSONResponse:
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = NumberOfProducts(file_name)
@@ -58,17 +60,17 @@ async def number_of_products(network_id: str, agregator: str, file_name: str) ->
 
 
 @router.post(
-    '/operation/minimize_impact/{network_id}',
+    '/operation/minimize_impact/{graph_id}',
     response_description='Minimize impact operation'
 )
 async def minimize_impact(
-    network_id: str,
+    graph_id: str,
     agregator: str,
     file_name: str,
     limit: int
 ) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = MinimizeImpact(file_name, limit)
@@ -78,17 +80,17 @@ async def minimize_impact(
 
 
 @router.post(
-    '/operation/maximize_impact/{network_id}',
+    '/operation/maximize_impact/{graph_id}',
     response_description='Maximize impact operation'
 )
 async def maximize_impact(
-    network_id: str,
+    graph_id: str,
     agregator: str,
     file_name: str,
     limit: int
 ) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = MaximizeImpact(file_name, limit)
@@ -98,19 +100,19 @@ async def maximize_impact(
 
 
 @router.post(
-    '/operation/filter_configs/{network_id}',
+    '/operation/filter_configs/{graph_id}',
     response_description='Filter configs operation'
 )
 async def filter_configs(
-    network_id: str,
+    graph_id: str,
     agregator: str,
     file_name: str,
     max_threshold: float,
     min_threshold: float,
     limit: int
 ) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = FilterConfigs(file_name, max_threshold, min_threshold, limit)
@@ -120,17 +122,17 @@ async def filter_configs(
 
 
 @router.post(
-    '/operation/valid_config/{network_id}',
+    '/operation/valid_config/{graph_id}',
     response_description='Valid configuration operation'
 )
 async def valid_config(
-    network_id: str,
+    graph_id: str,
     agregator: str,
     file_name: str,
     config: dict[str, str]
 ) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = ValidConfig(file_name, await get_count_by_values(config))
@@ -140,17 +142,17 @@ async def valid_config(
 
 
 @router.post(
-    '/operation/complete_config/{network_id}',
+    '/operation/complete_config/{graph_id}',
     response_description='Complete configuration operation'
 )
 async def complete_config(
-    network_id: str,
+    graph_id: str,
     agregator: str,
     file_name: str,
     config: dict[str, str]
 ) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = CompleteConfig(file_name, await get_count_by_values(config))
@@ -160,17 +162,17 @@ async def complete_config(
 
 
 @router.post(
-    '/operation/config_by_impact/{network_id}',
+    '/operation/config_by_impact/{graph_id}',
     response_description='Get a configuration by impact operation'
 )
 async def config_by_impact(
-    network_id: str,
+    graph_id: str,
     agregator: str,
     file_name: str,
     impact: float
 ) -> JSONResponse:
-    dependency_network = await serialize_network(network_id)
-    smt_transform = NetworkToSMT(dependency_network, agregator)
+    dependency_graph = await serialize_graph(graph_id)
+    smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = ConfigByImpact(file_name, impact)
