@@ -16,6 +16,10 @@
   <a href="https://github.com/GermanMT/depex/actions/workflows/analisys.yml" target="_blank">
       <img src="https://img.shields.io/github/actions/workflow/status/GermanMT/depex/analisys.yml?branch=main&event=push&label=code%20analisys" alt="code analisys">
   </a>
+  
+  <a href="https://doi.org/10.5281/zenodo.7612766">
+      <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.7612766.svg" alt="DOI">
+  </a>
 </p>
 
 ## Deployment with docker
