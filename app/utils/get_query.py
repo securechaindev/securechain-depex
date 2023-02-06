@@ -1,5 +1,3 @@
-from copy import copy
-
 from typing import Any
 
 
@@ -17,9 +15,7 @@ async def get_complete_query(
 
 
 async def get_partial_query(operator: str, version: str) -> dict[str, Any]:
-    number_of_points = version.count('.')
-    number_of_elements = number_of_points + 1
-    xyzd = await sanitize(version, number_of_points)
+    xyzd = await sanitize(version, version.count('.'))
 
     match operator:
         case '=' | '==':
@@ -34,10 +30,6 @@ async def get_partial_query(operator: str, version: str) -> dict[str, Any]:
             query = await less_or_equal_than_query(xyzd)
         case '!=':
             query = await not_equal_query(xyzd)
-        case '^':
-            query = await approx_greater_than(xyzd)
-        case '~>' | '~=' | '~':
-            query = await approx_greater_than_minor(xyzd, number_of_elements)
         case _:
             query = {}
 
@@ -121,26 +113,3 @@ async def greater_or_equal_than_query(xyzd: list[int]) -> dict[str, Any]:
 
 async def less_or_equal_than_query(xyzd: list[int]) -> dict[str, Any]:
     return {'$or': [await equal_query(xyzd), await less_than_query(xyzd)]}
-
-
-async def approx_greater_than(xyzd: list[int]) -> dict[str, Any]:
-    up_xyzd = await get_up(xyzd)
-    return {'$and': [await greater_or_equal_than_query(xyzd), await less_than_query(up_xyzd)]}
-
-
-async def get_up(xyzd: list[int]) -> list[int]:
-    for i in range(0, 4):
-        if xyzd[i] != 0:
-            up_xyzd = copy(xyzd)
-            up_xyzd[i] = up_xyzd[i] + 1
-            return up_xyzd
-    return xyzd
-
-
-async def approx_greater_than_minor(xyzd: list[int], number_of_elements: int) -> dict[str, Any]:
-    up_xyzd = copy(xyzd)
-    if number_of_elements != 1:
-        up_xyzd[1] = up_xyzd[1] + 1
-        return {'$and': [await greater_or_equal_than_query(xyzd), await less_than_query(up_xyzd)]}
-    up_xyzd[0] = up_xyzd[0] + 1
-    return {'$and': [await greater_or_equal_than_query(xyzd), await less_than_query(up_xyzd)]}
