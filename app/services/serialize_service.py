@@ -1,14 +1,14 @@
 from typing import Any
 
 from bson import ObjectId
-from app.services.dbs.databases import network_collection
+from app.services.dbs.databases import graph_collection
 
 
-async def aggregate_network_by_id(network_id: str) -> dict[str, Any]:
+async def aggregate_graph_by_id(graph_id: str) -> dict[str, Any]:
     pipeline = [
         {
             '$match': {
-                '_id': ObjectId(network_id)
+                '_id': ObjectId(graph_id)
             }
         },
         {
@@ -42,6 +42,6 @@ async def aggregate_network_by_id(network_id: str) -> dict[str, Any]:
             }
         }
     ]
-    async for network in network_collection.aggregate(pipeline):
-        return network
+    async for graph in graph_collection.aggregate(pipeline):
+        return graph
     return {}

@@ -13,11 +13,12 @@ from app.controllers.generate_controller import (
     no_exist_package,
     search_new_versions
 )
-from app.models.network_model import NetworkModel
-from app.services.network_service import (
-    create_network, read_network_by_id,
-    update_network_is_completed,
-    update_network_requirement_files
+from app.models.graph_model import GraphModel
+from app.services.graph_service import (
+    create_graph,
+    read_graph_by_id,
+    update_graph_is_completed,
+    update_graph_requirement_files
 )
 from app.services.package_service import read_package_by_name
 from app.services.requirement_file_service import create_requirement_file
@@ -27,16 +28,16 @@ router = APIRouter()
 
 
 @router.get(
-    '/network/{network_id}',
-    response_description='Get network',
-    response_model=NetworkModel
+    '/graph/{graph_id}',
+    response_description='Get graph',
+    response_model=GraphModel
 )
-async def read_network_data(network_id: str) -> JSONResponse:
+async def read_graph_data(graph_id: str) -> JSONResponse:
     try:
-        network = await read_network_by_id(network_id)
+        graph = await read_graph_by_id(graph_id)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(network)
+            content=json_encoder(graph)
         )
     except HTTPException as error:
         return JSONResponse(
@@ -45,19 +46,19 @@ async def read_network_data(network_id: str) -> JSONResponse:
         )
 
 
-@router.post('/network', response_description='Init network', response_model=NetworkModel)
-async def init_network(
+@router.post('/graph', response_description='Init graph', response_model=GraphModel)
+async def init_graph(
     background_tasks: BackgroundTasks,
-    network: NetworkModel = Body(...)
+    graph: GraphModel = Body(...)
 ) -> JSONResponse:
-    network_json = jsonable_encoder(network)
+    graph_json = jsonable_encoder(graph)
     try:
-        new_network = await create_network(network_json)
-        background_tasks.add_task(generate_network, new_network)
-        # await generate_network(new_network)
+        new_graph = await create_graph(graph_json)
+        background_tasks.add_task(generate_graph, new_graph)
+        # await generate_graph(new_graph)
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
-            content=json_encoder(new_network)
+            content=json_encoder(new_graph)
         )
     except HTTPException as error:
         return JSONResponse(
@@ -66,8 +67,8 @@ async def init_network(
         )
 
 
-async def generate_network(network: dict[str, Any]) -> None:
-    files = await get_repo_data(network['owner'], network['name'])
+async def generate_graph(graph: dict[str, Any]) -> None:
+    files = await get_repo_data(graph['owner'], graph['name'])
 
     for name, file in files.items():
         if file['manager'] != 'PIP':
@@ -77,7 +78,7 @@ async def generate_network(network: dict[str, Any]) -> None:
 
         new_req_file = await create_requirement_file(req_file)
 
-        await update_network_requirement_files(network['_id'], new_req_file['_id'])
+        await update_graph_requirement_files(graph['_id'], new_req_file['_id'])
 
         for dependencie, constraints in file['dependencies'].items():
 
@@ -109,4 +110,4 @@ async def generate_network(network: dict[str, Any]) -> None:
                     'requirement_file'
                 )
 
-    await update_network_is_completed(network['_id'])
+    await update_graph_is_completed(graph['_id'])

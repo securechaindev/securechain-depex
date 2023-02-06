@@ -51,8 +51,21 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
             data = dist.split(';')
 
             # TODO: En el futuro sería interesante construir el grado teniendo en cuenta los extras
+            # TODO: En el futuro sería interesante construir 
+            # el grado teniendo en cuenta la version de python
             if len(data) > 1:
                 if 'extra' in data[1]:
+                    continue
+                python_version = (
+                    '== \"3.9\"' in data[1] or
+                    '<= \"3.9\"' in data[1] or
+                    '>= \"3.9\"' in data[1] or
+                    '>= \"3\"' in data[1] or
+                    '<= \"3\"' in data[1] or
+                    '>= \"2' in data[1] or
+                    '> \"2' in data[1]
+                )
+                if 'python_version' in data[1] and not python_version:
                     continue
 
             # TODO: Eliminamos que se puedan requerir extras
@@ -63,20 +76,20 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
 
             data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
 
-            pos = await get_first_position(data, ['<', '>', '=', '!', '|', '^', '~'])
+            pos = await get_first_position(data, ['<', '>', '=', '!', '~'])
 
             dist = data[:pos]
             raw_ctcs = data[pos:]
+            ctcs = await parse_constraints(raw_ctcs, 'PIP')
 
             if dist in require_packages:
                 if isinstance(require_packages[dist], dict):
-                    ctcs = await parse_constraints(raw_ctcs)
                     if isinstance(ctcs, dict):
                         require_packages[dist].update(ctcs)
             else:
                 if '.' not in raw_ctcs and raw_ctcs != '':
                     continue
-                require_packages[dist] = await parse_constraints(raw_ctcs)
+                require_packages[dist] = ctcs
 
         return require_packages
 

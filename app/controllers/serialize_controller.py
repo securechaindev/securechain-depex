@@ -10,7 +10,7 @@ from flamapy.metamodels.dn_metamodel.models import (
 from flamapy.metamodels.dn_metamodel.transformations import SerializeNetwork
 
 from app.services.package_edge_service import read_package_edge_by_id
-from app.services.serialize_service import aggregate_network_by_id
+from app.services.serialize_service import aggregate_graph_by_id
 
 all_package_edges: dict[str, dict[str, Any]] = {}
 all_package_edges_ids: list[ObjectId] = []
@@ -18,11 +18,11 @@ all_versions: dict[str, Version] = {}
 all_packages: dict[str, Package] = {}
 
 
-async def serialize_network(network_id: str) -> DependencyNetwork | None:
-    network = await aggregate_network_by_id(network_id)
-    requirement_files = network['requirement_files']
-    network['requirement_files'] = []
-    serializer = SerializeNetwork(source_model=network)
+async def serialize_graph(graph_id: str) -> DependencyNetwork | None:
+    graph = await aggregate_graph_by_id(graph_id)
+    requirement_files = graph['requirement_files']
+    graph['requirement_files'] = []
+    serializer = SerializeNetwork(source_model=graph)
     serializer.transform()
     await read_requirement_files(requirement_files, serializer.destination_model)
     return serializer.destination_model

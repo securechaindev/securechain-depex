@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from app.models.requirement_file_model import RequirementFile
 
 
-class NetworkModel(BaseModel):
+class GraphModel(BaseModel):
     owner: str = Field(
         ...,
         min_length=1,

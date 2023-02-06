@@ -106,6 +106,7 @@ async def generate_packages(package_name: str, version: dict[str, Any]) -> None:
             else:
 
                 print(package_name)
+                print(version['release'])
                 await no_exist_package(
                     package_name,
                     constraints,

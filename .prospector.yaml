@@ -9,4 +9,6 @@ pylint:
     - too-many-arguments
 
 mccabe:
+  disable:
+    - MC0001
   run: true
