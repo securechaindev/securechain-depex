@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='depex',
-    version='0.4.0',
+    version='0.4.1',
     author='Antonio Germán Márquez Trujillo',
     author_email='amtrujillo@us.es',
     description='Una herramienta para el análisis de vulnerabilidades en proyectos software open-source',
@@ -27,8 +27,8 @@ setup(
         'python-dotenv==0.21.0',
         'requests==2.28.1',
         'python-dateutil==2.8.2',
-        'flamapy-dn==1.1.4',
-        'flamapy-smt==1.1.0'
+        'flamapy-dn==1.1.5',
+        'flamapy-smt==1.2.1'
     ],
     dev_requires=[
         'prospector[with_everything]==1.8.3',
