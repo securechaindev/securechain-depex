@@ -8,12 +8,15 @@ from fastapi_utils.tasks import repeat_every
 from pymongo import InsertOne, ReplaceOne
 
 from app.config import settings
-from app.services.cve_service import bulk_write_cve_actions, read_cve_by_cve_id
-from app.services.update_db_service import (
+from app.services import (
+    bulk_write_cve_actions,
+    read_cve_by_cve_id
+)
+from app.services import (
     read_env_variables,
     replace_env_variables
 )
-from app.utils.get_session import get_session
+from app.utils import get_session
 
 
 # 24h = 216000

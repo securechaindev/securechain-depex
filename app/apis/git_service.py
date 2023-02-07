@@ -1,9 +1,9 @@
 from typing import Any
 
 from app.config import settings
-from app.utils.ctc_parser import parse_constraints
-from app.utils.get_session import get_session
-from app.utils.managers import managers
+from app.utils import parse_constraints
+from app.utils import get_session
+from app.utils import managers
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',

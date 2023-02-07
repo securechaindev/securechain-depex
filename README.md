@@ -2,23 +2,23 @@
 
 <p>
   <a href="https://hub.docker.com/repository/docker/germanmt/depex" target="_blank">
-      <img src="https://img.shields.io/docker/v/germanmt/depex?color=blue&label=dockerhub&logo=docker&sort=semver" alt="dockerhub">
+    <img src="https://img.shields.io/docker/v/germanmt/depex?color=blue&label=dockerhub&logo=docker&sort=semver" alt="dockerhub">
   </a>
 
   <a href="https://github.com/GermanMT/depex/releases" target="_blank">
-      <img src="https://img.shields.io/github/v/release/GermanMT/depex?color=green&logo=github" alt="release">
+    <img src="https://img.shields.io/github/v/release/GermanMT/depex?color=green&logo=github" alt="release">
   </a>
 
   <a href="https://github.com/GermanMT/depex/blob/main/LICENSE.md" target="_blank">
-      <img src="https://img.shields.io/github/license/GermanMT/depex?logo=gnu" alt="license">
+    <img src="https://img.shields.io/github/license/GermanMT/depex?logo=gnu" alt="license">
   </a>
 
   <a href="https://github.com/GermanMT/depex/actions/workflows/analisys.yml" target="_blank">
-      <img src="https://img.shields.io/github/actions/workflow/status/GermanMT/depex/analisys.yml?branch=main&event=push&label=code%20analisys" alt="code analisys">
+    <img src="https://img.shields.io/github/actions/workflow/status/GermanMT/depex/analisys.yml?branch=main&event=push&label=code%20analisys" alt="code analisys">
   </a>
   
   <a href="https://doi.org/10.5281/zenodo.7612766">
-      <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.7612766.svg" alt="DOI">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.7612766.svg" alt="DOI">
   </a>
 </p>
 

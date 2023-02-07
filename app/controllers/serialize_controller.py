@@ -9,8 +9,8 @@ from flamapy.metamodels.dn_metamodel.models import (
 )
 from flamapy.metamodels.dn_metamodel.transformations import SerializeNetwork
 
-from app.services.package_edge_service import read_package_edge_by_id
-from app.services.serialize_service import aggregate_graph_by_id
+from app.services import read_package_edge_by_id
+from app.services import aggregate_graph_by_id
 
 all_package_edges: dict[str, dict[str, Any]] = {}
 all_package_edges_ids: list[ObjectId] = []

@@ -1,6 +1,6 @@
 from typing import Any
 
-from app.services.dbs.databases import env_variable_collection
+from app.services import env_variable_collection
 
 
 async def read_env_variables() -> dict[str, Any]:

@@ -1,8 +1,12 @@
 from pymongo import ASCENDING
 
-from app.services.dbs.databases import (cve_collection, package_collection,
-                                        version_collection, depex_package_edge_collection,
-                                        pypi_package_edge_collection)
+from app.services import (
+    cve_collection,
+    package_collection,
+    version_collection,
+    depex_package_edge_collection,
+    pypi_package_edge_collection
+)
 
 
 async def create_indexes() -> None:

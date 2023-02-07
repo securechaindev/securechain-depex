@@ -1,7 +1,7 @@
 from typing import Any
 
 from bson import ObjectId
-from app.services.dbs.databases import graph_collection
+from app.services import graph_collection
 
 
 async def aggregate_graph_by_id(graph_id: str) -> dict[str, Any]:

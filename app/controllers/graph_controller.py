@@ -6,23 +6,23 @@ from fastapi import APIRouter, BackgroundTasks, Body, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from app.apis.git_service import get_repo_data
-from app.controllers.cve_controller import relate_cves
-from app.controllers.generate_controller import (
+from app.apis import get_repo_data
+from app.controllers import relate_cves
+from app.controllers import (
     generate_package_edge,
     no_exist_package,
     search_new_versions
 )
 from app.models import GraphModel
-from app.services.graph_service import (
+from app.services import (
     create_graph,
     read_graph_by_id,
     update_graph_is_completed,
     update_graph_requirement_files
 )
-from app.services.package_service import read_package_by_name
-from app.services.requirement_file_service import create_requirement_file
-from app.utils.json_encoder import json_encoder
+from app.services import read_package_by_name
+from app.services import create_requirement_file
+from app.utils import json_encoder
 
 router = APIRouter()
 

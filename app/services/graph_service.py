@@ -3,7 +3,7 @@ from typing import Any
 from bson import ObjectId
 from fastapi import HTTPException
 
-from app.services.dbs.databases import graph_collection
+from app.services import graph_collection
 
 
 async def create_graph(graph_data: dict[str, Any]) -> dict[str, Any]:

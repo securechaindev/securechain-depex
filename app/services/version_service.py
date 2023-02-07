@@ -3,7 +3,7 @@ from typing import Any
 from bson import ObjectId
 
 from app.services.dbs.databases import version_collection
-from app.utils.get_query import get_complete_query
+from app.utils import get_complete_query
 
 
 async def create_version(version_data: dict[str, Any]) -> dict[str, Any]:

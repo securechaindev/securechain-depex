@@ -2,7 +2,7 @@ from typing import Any
 
 from bson import ObjectId
 
-from app.services.dbs.databases import requirement_file_collection
+from app.services import requirement_file_collection
 
 
 async def create_requirement_file(requirement_file_data: dict[str, Any]) -> dict[str, Any]:

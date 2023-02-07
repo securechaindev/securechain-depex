@@ -5,17 +5,17 @@ from fastapi.exceptions import RequestValidationError, ValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
-from app.controllers.update_db_controller import db_updater
+from app.controllers import db_updater
 from app.router import api_router
-from app.services.dbs.indexes import create_indexes
-from app.utils.json_encoder import json_encoder
+from app.services import create_indexes
+from app.utils import json_encoder
 
 DESCRIPTION = 'A simple backend for dependency extraction'
 
 app = FastAPI(
     title='Depex',
     description=DESCRIPTION,
-    version='0.3.0',
+    version='0.4.3',
     contact={
         'name': 'Antonio Germán Márquez Trujillo',
         'url': 'https://github.com/GermanMT',

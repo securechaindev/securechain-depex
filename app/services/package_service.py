@@ -4,7 +4,7 @@ from datetime import datetime
 
 from bson import ObjectId
 
-from app.services.dbs.databases import package_collection
+from app.services import package_collection
 
 
 async def create_package(package_data: dict[str, Any]) -> dict[str, Any]:

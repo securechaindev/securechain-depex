@@ -1,4 +1,4 @@
-from app.utils.pip.pip_parser import parse_pip_constraints
+from app.utils import parse_pip_constraints
 
 
 async def parse_constraints(raw_constraints: str, manager: str) -> dict[str, str] | str:

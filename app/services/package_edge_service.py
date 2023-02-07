@@ -1,8 +1,10 @@
 from typing import Any
 
 from bson import ObjectId
-from app.services.dbs.databases import (depex_package_edge_collection,
-                                        pypi_package_edge_collection)
+from app.services import (
+    depex_package_edge_collection,
+    pypi_package_edge_collection
+)
 
 
 async def select_db(database: str) -> Any:

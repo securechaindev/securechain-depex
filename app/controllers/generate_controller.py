@@ -4,25 +4,26 @@ from typing import Any
 
 from bson import ObjectId
 
-from app.apis.pypi_service import get_all_versions, requires_packages
-from app.controllers.cve_controller import relate_cves
-from app.services.package_edge_service import (
+from app.apis import get_all_versions, requires_packages
+from app.controllers import relate_cves
+from app.services import (
     create_package_edge,
     update_package_edge,
     read_package_edge_by_name_constraints
 )
-from app.services.package_service import (
-    create_package, read_package_by_name,
+from app.services import (
+    create_package,
+    read_package_by_name,
     update_package_moment,
     update_package_versions
 )
-from app.services.version_service import (
+from app.services import (
     create_version,
     read_version_by_release_package,
     read_versions_by_constraints,
     update_version_package_edges
 )
-from app.services.requirement_file_service import update_requirement_file_package_edges
+from app.services import update_requirement_file_package_edges
 
 
 async def generate_package_edge(

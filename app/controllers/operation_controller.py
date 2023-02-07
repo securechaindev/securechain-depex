@@ -14,9 +14,9 @@ from flamapy.metamodels.smt_metamodel.operations import (
     ConfigByImpact
 )
 
-from app.controllers.serialize_controller import serialize_graph
-from app.services.version_service import get_release_by_values, get_count_by_values
-from app.utils.json_encoder import json_encoder
+from app.controllers import serialize_graph
+from app.services import get_release_by_values, get_count_by_values
+from app.utils import json_encoder
 
 router = APIRouter()
 
