@@ -13,7 +13,7 @@ from app.controllers.generate_controller import (
     no_exist_package,
     search_new_versions
 )
-from app.models.graph_model import GraphModel
+from app.models import GraphModel
 from app.services.graph_service import (
     create_graph,
     read_graph_by_id,

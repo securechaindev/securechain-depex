@@ -50,9 +50,9 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
         for dist in response:
             data = dist.split(';')
 
-            # TODO: En el futuro sería interesante construir el grado teniendo en cuenta los extras
+            # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta los extras
             # TODO: En el futuro sería interesante construir 
-            # el grado teniendo en cuenta la version de python
+            # el grafo teniendo en cuenta la version de python
             if len(data) > 1:
                 if 'extra' in data[1]:
                     continue
