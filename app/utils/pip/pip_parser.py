@@ -1,3 +1,6 @@
+from app.utils import sanitize_version
+
+
 async def parse_pip_constraints(raw_constraints: str) -> dict[str, str] | str:
     if raw_constraints:
         raw_constraints = raw_constraints.replace(' ', '')
@@ -46,15 +49,3 @@ async def clean_pip_constraints(raw_constraints: dict[str, str]) -> dict[str, st
         constraints[operator] = version
 
     return constraints
-
-
-async def sanitize_version(version: str) -> str:
-    parts = []
-    for part in version.split('.'):
-        if part.isdigit():
-            parts.append(part)
-        elif part[0].isdigit():
-            parts.append(part[0])
-        else:
-            parts.append('0')
-    return '.'.join(parts)
