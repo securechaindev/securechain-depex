@@ -4,7 +4,6 @@ from .sanitize_version import sanitize_version
 from .ctc_parser import parse_constraints
 from .get_first_pos import get_first_position
 from .get_query import get_complete_query
-from .pip.pip_parser import parse_pip_constraints
 from .managers import managers
 
 __all__ = [
@@ -14,6 +13,5 @@ __all__ = [
     'parse_constraints',
     'managers',
     'get_first_position',
-    'get_complete_query',
-    'parse_pip_constraints'
+    'get_complete_query'
 ]

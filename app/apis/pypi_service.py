@@ -2,9 +2,11 @@ from typing import Any
 
 from dateutil.parser import parse
 
-from app.utils import parse_constraints
-from app.utils import get_first_position
-from app.utils import get_session
+from app.utils import (
+    parse_constraints,
+    get_first_position,
+    get_session
+)
 
 
 async def get_all_versions(pkg_name: str) -> list[dict[str, Any]]:

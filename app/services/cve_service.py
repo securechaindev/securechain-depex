@@ -1,7 +1,7 @@
 from typing import Any
 
 from bson import ObjectId
-from app.services import cve_collection
+from .dbs.databases import cve_collection
 
 
 async def create_cve(cve_data: dict[str, Any]) -> dict[str, Any]:

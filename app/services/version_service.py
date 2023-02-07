@@ -2,8 +2,9 @@ from typing import Any
 
 from bson import ObjectId
 
-from app.services.dbs.databases import version_collection
 from app.utils import get_complete_query
+
+from .dbs.databases import version_collection
 
 
 async def create_version(version_data: dict[str, Any]) -> dict[str, Any]:

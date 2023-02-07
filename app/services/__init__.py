@@ -40,16 +40,6 @@ from .update_db_service import (
     replace_env_variables
 )
 from .dbs.indexes import create_indexes
-from .dbs.databases import (
-    env_variable_collection,
-    graph_collection,
-    depex_package_edge_collection,
-    requirement_file_collection,
-    cve_collection,
-    pypi_package_edge_collection,
-    package_collection,
-    version_collection
-)
 
 __all__ = [
     'create_graph',
@@ -79,13 +69,5 @@ __all__ = [
     'aggregate_graph_by_id',
     'read_env_variables',
     'replace_env_variables',
-    'create_indexes',
-    'env_variable_collection',
-    'graph_collection',
-    'depex_package_edge_collection',
-    'requirement_file_collection',
-    'cve_collection',
-    'pypi_package_edge_collection',
-    'package_collection',
-    'version_collection'
+    'create_indexes'
 ]

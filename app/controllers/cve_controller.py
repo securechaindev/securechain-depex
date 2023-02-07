@@ -1,5 +1,7 @@
-from app.services import read_cpe_matches_by_package_name
-from app.services import update_versions_cves_by_constraints
+from app.services import (
+    read_cpe_matches_by_package_name,
+    update_versions_cves_by_constraints
+)
 from app.utils import sanitize_version
 
 

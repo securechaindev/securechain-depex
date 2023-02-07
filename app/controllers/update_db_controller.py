@@ -10,9 +10,7 @@ from pymongo import InsertOne, ReplaceOne
 from app.config import settings
 from app.services import (
     bulk_write_cve_actions,
-    read_cve_by_cve_id
-)
-from app.services import (
+    read_cve_by_cve_id,
     read_env_variables,
     replace_env_variables
 )

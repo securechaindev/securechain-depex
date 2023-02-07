@@ -1,7 +1,7 @@
 from typing import Any
 
 from bson import ObjectId
-from app.services import (
+from .dbs.databases import (
     depex_package_edge_collection,
     pypi_package_edge_collection
 )

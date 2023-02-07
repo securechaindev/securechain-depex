@@ -7,22 +7,23 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from app.apis import get_repo_data
-from app.controllers import relate_cves
-from app.controllers import (
-    generate_package_edge,
-    no_exist_package,
-    search_new_versions
-)
 from app.models import GraphModel
 from app.services import (
     create_graph,
     read_graph_by_id,
     update_graph_is_completed,
-    update_graph_requirement_files
+    update_graph_requirement_files,
+    read_package_by_name,
+    create_requirement_file
 )
-from app.services import read_package_by_name
-from app.services import create_requirement_file
 from app.utils import json_encoder
+
+from .cve_controller import relate_cves
+from .generate_controller import (
+    generate_package_edge,
+    no_exist_package,
+    search_new_versions
+)
 
 router = APIRouter()
 
