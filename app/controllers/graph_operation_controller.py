@@ -20,8 +20,17 @@ from .serialize_controller import serialize_graph
 router = APIRouter()
 
 
-@router.post('/operation/graph_info/{graph_id}', response_description='Graph info operation')
+@router.post(
+    '/operation/graph/graph_info/{graph_id}',
+    summary='Summarizes graph information',
+    response_description='Return graph information'
+)
 async def graph_info(graph_id: str) -> JSONResponse:
+    '''
+    Summarizes graph information regarding its dependencies, edges and vulnerabilities:
+
+    - **graph_id**: the id of a graph
+    '''
     dependency_graph = await serialize_graph(graph_id)
     # Modificar esta operacion para que devuelva edges como nombre y no constraints
     operation = NetworkInfo()
@@ -32,8 +41,23 @@ async def graph_info(graph_id: str) -> JSONResponse:
     )
 
 
-@router.post('/operation/valid_model/{graph_id}', response_description='Valid model operation')
-async def valid_file(graph_id: str, agregator: str, file_name: str) -> JSONResponse:
+@router.post(
+    '/operation/graph/valid_model/{graph_id}',
+    summary='Validates model satisfiability',
+    response_description='Return True if valid, False if not'
+)
+async def valid_file(
+    graph_id: str,
+    agregator: str,
+    file_name: str
+) -> JSONResponse:
+    '''
+    Summarizes graph information regarding its dependencies, edges and vulnerabilities:
+
+    - **graph_id**: the id of a graph
+    - **agregator**: agregator function to build the smt model
+    - **file_name**: name of requirement file belonging to graph
+    '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
@@ -45,10 +69,22 @@ async def valid_file(graph_id: str, agregator: str, file_name: str) -> JSONRespo
 
 
 @router.post(
-    '/operation/number_of_products/{graph_id}',
-    response_description='Number of products operation. Not use in huge graphs.'
+    '/operation/graph/number_of_products/{graph_id}',
+    summary='Count the number of configurations',
+    response_description='Return the number of products.'
 )
-async def number_of_products(graph_id: str, agregator: str, file_name: str) -> JSONResponse:
+async def number_of_products(
+    graph_id: str,
+    agregator: str,
+    file_name: str
+) -> JSONResponse:
+    '''
+    Count the number of configurations of a graph. Recommendatory to not use in massive graphs:
+
+    - **graph_id**: the id of a graph
+    - **agregator**: agregator function to build the smt model
+    - **file_name**: name of requirement file belonging to graph
+    '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
@@ -60,8 +96,9 @@ async def number_of_products(graph_id: str, agregator: str, file_name: str) -> J
 
 
 @router.post(
-    '/operation/minimize_impact/{graph_id}',
-    response_description='Minimize impact operation'
+    '/operation/graph/minimize_impact/{graph_id}',
+    summary='Minimize impact of a graph',
+    response_description='Return a list of configurations'
 )
 async def minimize_impact(
     graph_id: str,
@@ -69,6 +106,14 @@ async def minimize_impact(
     file_name: str,
     limit: int
 ) -> JSONResponse:
+    '''
+    Return a list of configurations ordered with the minimun posible impact:
+
+    - **graph_id**: the id of a graph
+    - **agregator**: agregator function to build the smt model
+    - **file_name**: name of requirement file belonging to graph
+    - **limit**: the number of configurations to return
+    '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
@@ -80,8 +125,9 @@ async def minimize_impact(
 
 
 @router.post(
-    '/operation/maximize_impact/{graph_id}',
-    response_description='Maximize impact operation'
+    '/operation/graph/maximize_impact/{graph_id}',
+    summary='Maximize impact of a graph',
+    response_description='Return a list of configurations'
 )
 async def maximize_impact(
     graph_id: str,
@@ -89,6 +135,14 @@ async def maximize_impact(
     file_name: str,
     limit: int
 ) -> JSONResponse:
+    '''
+    Return a list of configurations ordered with the maximun posible impact:
+
+    - **graph_id**: the id of a graph
+    - **agregator**: agregator function to build the smt model
+    - **file_name**: name of requirement file belonging to graph
+    - **limit**: the number of configurations to return
+    '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
@@ -100,8 +154,9 @@ async def maximize_impact(
 
 
 @router.post(
-    '/operation/filter_configs/{graph_id}',
-    response_description='Filter configs operation'
+    '/operation/graph/filter_configs/{graph_id}',
+    summary='Filter configurations of a graph',
+    response_description='Return a list of configurations'
 )
 async def filter_configs(
     graph_id: str,
@@ -111,6 +166,16 @@ async def filter_configs(
     min_threshold: float,
     limit: int
 ) -> JSONResponse:
+    '''
+    Return a list of configurations between a max and min impact:
+
+    - **graph_id**: the id of a graph
+    - **agregator**: agregator function to build the smt model
+    - **file_name**: name of requirement file belonging to graph
+    - **max_threshold**: max impact threshold
+    - **min_threshold**: min impact threshold
+    - **limit**: the number of configurations to return
+    '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()

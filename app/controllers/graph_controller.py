@@ -30,10 +30,16 @@ router = APIRouter()
 
 @router.get(
     '/graph/{graph_id}',
-    response_description='Get graph',
+    summary='Get a graph by an id',
+    response_description='Return a graph',
     response_model=GraphModel
 )
 async def read_graph_data(graph_id: str) -> JSONResponse:
+    '''
+    Return a graph by a given id. If attribute is_complete is True the graph is wholly built:
+
+    - **graph_id**: the id of a graph
+    '''
     try:
         graph = await read_graph_by_id(graph_id)
         return JSONResponse(
@@ -47,11 +53,21 @@ async def read_graph_data(graph_id: str) -> JSONResponse:
         )
 
 
-@router.post('/graph', response_description='Init graph', response_model=GraphModel)
+@router.post(
+    '/graph',
+    summary='Init the graph building',
+    response_description='Return a graph',
+    response_model=GraphModel
+)
 async def init_graph(
     background_tasks: BackgroundTasks,
     graph: GraphModel = Body(...)
 ) -> JSONResponse:
+    '''
+    Returns a graph in its initial state, i.e., not complete:
+
+    - **graph**: a json containing the owner and the name of a repository
+    '''
     graph_json = jsonable_encoder(graph)
     try:
         new_graph = await create_graph(graph_json)

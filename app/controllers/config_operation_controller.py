@@ -49,8 +49,9 @@ async def valid_config(
 
 
 @router.post(
-    '/operation/complete_config/{graph_id}',
-    response_description='Complete configuration operation'
+    '/operation/config/complete_config/{graph_id}',
+    summary='Complete a configuration',
+    response_description='Return a configuration of versions'
 )
 async def complete_config(
     graph_id: str,
@@ -58,6 +59,14 @@ async def complete_config(
     file_name: str,
     config: dict[str, str]
 ) -> JSONResponse:
+    '''
+    Complete a partial configuration with the minimun posible impact:
+
+    - **graph_id**: the id of a graph
+    - **agregator**: agregator function to build the smt model
+    - **file_name**: name of requirement file belonging to graph
+    - **config**: partial configuration containing the name of the dependency and the version to be chosen
+    '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
@@ -69,8 +78,9 @@ async def complete_config(
 
 
 @router.post(
-    '/operation/config_by_impact/{graph_id}',
-    response_description='Get a configuration by impact operation'
+    '/operation/config/config_by_impact/{graph_id}',
+    summary='Get a configuration by impact operation',
+    response_description='Return a configuration of versions'
 )
 async def config_by_impact(
     graph_id: str,
@@ -78,6 +88,14 @@ async def config_by_impact(
     file_name: str,
     impact: float
 ) -> JSONResponse:
+    '''
+    Return a configuration witn an impact as close as possible to the given impact:
+
+    - **graph_id**: the id of a graph
+    - **agregator**: agregator function to build the smt model
+    - **file_name**: name of requirement file belonging to graph
+    - **impact**: impact number between 0 and 10
+    '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
