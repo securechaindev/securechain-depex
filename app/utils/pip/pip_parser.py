@@ -7,9 +7,12 @@ async def parse_pip_constraints(raw_constraints: str) -> dict[str, str] | str:
         ctcs = {}
 
         for ctc in raw_constraints.split(','):
-            if ctc.isdigit():
-                pos: int = [ctc.index(char) for char in ctc if char.isdigit()][0]
-                ctcs[ctc[:pos]] = ctc[pos:]
+            positions: list[int] = [ctc.index(char) for char in ctc if char.isdigit()]
+            if not positions:
+                continue
+
+            pos: int = positions[0]
+            ctcs[ctc[:pos]] = ctc[pos:]
 
         if ctcs:
             return await clean_pip_constraints(ctcs)
