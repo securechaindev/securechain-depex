@@ -34,7 +34,7 @@ async def valid_config(
     Validates a configuration satisfiability into a graph by the constraints over dependencies:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **config**: configuration containing the name of the dependency and the version to be chosen
     '''
@@ -63,7 +63,7 @@ async def complete_config(
     Complete a partial configuration with the minimun posible impact:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **config**: partial configuration containing the name and the version of each dependency
     '''
@@ -92,7 +92,7 @@ async def config_by_impact(
     Return a configuration witn an impact as close as possible to the given impact:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **impact**: impact number between 0 and 10
     '''

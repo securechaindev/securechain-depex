@@ -55,7 +55,7 @@ async def valid_file(
     Summarizes graph information regarding its dependencies, edges and vulnerabilities:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     '''
     dependency_graph = await serialize_graph(graph_id)
@@ -82,7 +82,7 @@ async def number_of_products(
     Count the number of configurations of a graph. Recommendatory to not use in massive graphs:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     '''
     dependency_graph = await serialize_graph(graph_id)
@@ -110,7 +110,7 @@ async def minimize_impact(
     Return a list of configurations ordered with the minimun posible impact:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
     '''
@@ -139,7 +139,7 @@ async def maximize_impact(
     Return a list of configurations ordered with the maximun posible impact:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
     '''
@@ -170,7 +170,7 @@ async def filter_configs(
     Return a list of configurations between a max and min impact:
 
     - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model
+    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **max_threshold**: max impact threshold
     - **min_threshold**: min impact threshold
