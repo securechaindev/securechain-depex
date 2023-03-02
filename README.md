@@ -1,4 +1,4 @@
-# Depex Proyect
+# Depex Project
 
 <p>
   <a href="https://hub.docker.com/repository/docker/germanmt/depex" target="_blank">
