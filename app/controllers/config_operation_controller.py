@@ -9,8 +9,8 @@ from flamapy.metamodels.smt_metamodel.operations import (
 )
 
 from app.services import (
-    get_release_by_values,
-    get_count_by_values
+    get_release_by_count_one,
+    get_count_by_release
 )
 from app.utils import json_encoder
 
@@ -42,7 +42,7 @@ async def valid_config(
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = ValidConfig(file_name, await get_count_by_values(config))
+    operation = ValidConfig(file_name, await get_count_by_release(config))
     operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
@@ -65,15 +65,15 @@ async def complete_config(
     - **graph_id**: the id of a graph
     - **agregator**: agregator function to build the smt model
     - **file_name**: name of requirement file belonging to graph
-    - **config**: partial configuration containing the name of the dependency and the version to be chosen
+    - **config**: partial configuration containing the name and the version of each dependency
     '''
     dependency_graph = await serialize_graph(graph_id)
     smt_transform = NetworkToSMT(dependency_graph, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = CompleteConfig(file_name, await get_count_by_values(config))
+    operation = CompleteConfig(file_name, await get_count_by_release(config))
     operation.execute(smt_model)
-    result = await get_release_by_values(operation.get_result())
+    result = await get_release_by_count_one(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -102,5 +102,5 @@ async def config_by_impact(
     smt_model = smt_transform.destination_model
     operation = ConfigByImpact(file_name, impact)
     operation.execute(smt_model)
-    result = await get_release_by_values(operation.get_result())
+    result = await get_release_by_count_one(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

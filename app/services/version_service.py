@@ -34,7 +34,7 @@ async def read_version_by_count_package(
     return version
 
 
-async def get_release_by_values(
+async def get_release_by_count_many(
     configs: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
     sanitized_configs: list[dict[str, Any]] = []
@@ -50,7 +50,20 @@ async def get_release_by_values(
     return sanitized_configs
 
 
-async def get_count_by_values(
+async def get_release_by_count_one(
+    config: dict[str, Any]
+) -> dict[str, Any]:
+    sanitized_config: dict[str, Any] = {}
+    for var, value in config.items():
+        version = await read_version_by_count_package(var, value)
+        if version:
+            sanitized_config[var] = version['release']
+        else:
+            sanitized_config[var] = value
+    return sanitized_config
+
+
+async def get_count_by_release(
     config: dict[str, str]
 ) -> dict[str, int]:
     sanitized_config: dict[str, int] = {}

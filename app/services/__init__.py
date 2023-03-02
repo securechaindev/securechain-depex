@@ -22,8 +22,9 @@ from .version_service import (
     read_versions_by_constraints,
     update_version_package_edges,
     update_versions_cves_by_constraints,
-    get_release_by_values,
-    get_count_by_values
+    get_release_by_count_many,
+    get_release_by_count_one,
+    get_count_by_release
 )
 from .requirement_file_service import (
     create_requirement_file,
@@ -59,8 +60,9 @@ __all__ = [
     'read_versions_by_constraints',
     'update_version_package_edges',
     'update_versions_cves_by_constraints',
-    'get_release_by_values',
-    'get_count_by_values',
+    'get_release_by_count_many',
+    'get_release_by_count_one',
+    'get_count_by_release',
     'create_requirement_file',
     'update_requirement_file_package_edges',
     'read_cve_by_cve_id',

@@ -11,7 +11,7 @@ from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs
 )
 
-from app.services import get_release_by_values
+from app.services import get_release_by_count_many
 
 from app.utils import json_encoder
 
@@ -120,7 +120,7 @@ async def minimize_impact(
     smt_model = smt_transform.destination_model
     operation = MinimizeImpact(file_name, limit)
     operation.execute(smt_model)
-    result = await get_release_by_values(operation.get_result())
+    result = await get_release_by_count_many(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -149,7 +149,7 @@ async def maximize_impact(
     smt_model = smt_transform.destination_model
     operation = MaximizeImpact(file_name, limit)
     operation.execute(smt_model)
-    result = await get_release_by_values(operation.get_result())
+    result = await get_release_by_count_many(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -182,5 +182,5 @@ async def filter_configs(
     smt_model = smt_transform.destination_model
     operation = FilterConfigs(file_name, max_threshold, min_threshold, limit)
     operation.execute(smt_model)
-    result = await get_release_by_values(operation.get_result())
+    result = await get_release_by_count_many(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
