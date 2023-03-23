@@ -1,4 +1,4 @@
-from sanitize_version import sanitize_version
+from app.utils.sanitize_version import sanitize_version
 
 
 async def parse_pip_constraints(raw_constraints: str) -> dict[str, str] | str:
