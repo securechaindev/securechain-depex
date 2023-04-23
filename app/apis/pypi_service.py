@@ -1,5 +1,7 @@
 from typing import Any
 
+from time import sleep
+
 from dateutil.parser import parse
 
 from app.utils import (
@@ -11,7 +13,18 @@ from app.utils import (
 
 async def get_all_versions(pkg_name: str) -> list[dict[str, Any]]:
     session = await get_session()
-    response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
+
+    while True:
+        try:
+            response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
+            break
+        except:
+            # Actualmente la API JSON de PyPI no nos permite hacer llamadas para obtener toda
+            # la información. Esto hace que tenga que hacer una llamada por cada versión, si
+            # se satura la api tendremos que esperar a que vuelva a haber respueta.
+            # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
+            # estar atento a nuevas versiones.
+            sleep(5)
 
     if 'releases' in response:
         versions = []
@@ -22,29 +35,32 @@ async def get_all_versions(pkg_name: str) -> list[dict[str, Any]]:
             for item in releases[release]:
                 release_date = parse(item['upload_time_iso_8601'])
 
-            if release.replace('.', '').isdigit():
-                xyzd = release.split('.')
-                versions.append({
-                    'release': release,
-                    'mayor': int(xyzd[0]),
-                    'minor': int(xyzd[1]) if len(xyzd) >= 2 else 0,
-                    'patch': int(xyzd[2]) if len(xyzd) >= 3 else 0,
-                    'build_number': int(xyzd[3]) if len(xyzd) >= 4 else 0,
-                    'release_date': release_date,
-                    'package_edges': [],
-                    'cves': []
-                })
+            versions.append({
+                'name': release,
+                'release_date': release_date
+            })
 
         return versions
 
     return []
 
 
-async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[str, str] | str]:
+async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
     session = await get_session()
-    response = session.get(
-        f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-    ).json()['info']['requires_dist']
+
+    while True:
+        try:
+            response = session.get(
+                f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
+            ).json()['info']['requires_dist']
+            break
+        except:
+            # Actualmente la API JSON de PyPI no nos permite hacer llamadas para obtener toda
+            # la información. Esto hace que tenga que hacer una llamada por cada versión, si
+            # se satura la api tendremos que esperar a que vuelva a haber respueta.
+            # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
+            # estar atento a nuevas versiones.
+            sleep(5)
 
     if response:
         require_packages: dict[str, Any] = {}
@@ -52,9 +68,8 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
         for dist in response:
             data = dist.split(';')
 
-            # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta los extras
-            # TODO: En el futuro sería interesante construir 
-            # el grafo teniendo en cuenta la version de python
+            # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta la version 
+            # de python
             if len(data) > 1:
                 if 'extra' in data[1]:
                     continue
@@ -70,7 +85,8 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
                 if 'python_version' in data[1] and not python_version:
                     continue
 
-            # TODO: Eliminamos que se puedan requerir extras
+            # Eliminamos que se puedan requerir extras
+            # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta los extras
             if '[' in data[0]:
                 pos_1 = await get_first_position(data[0], ['['])
                 pos_2 = await get_first_position(data[0], [']']) + 1
@@ -84,10 +100,14 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, dict[
             raw_ctcs = data[pos:]
             ctcs = await parse_constraints(raw_ctcs, 'PIP')
 
-            if dist in require_packages:
-                if isinstance(require_packages[dist], dict):
-                    if isinstance(ctcs, dict):
-                        require_packages[dist].update(ctcs)
+            if (
+                dist in require_packages and
+                isinstance(require_packages[dist], dict) and
+                isinstance(ctcs, list)
+            ):
+                for ctc in ctcs:
+                    if ctc not in require_packages[dist]:
+                        require_packages[dist].append(ctcs)
             else:
                 if '.' not in raw_ctcs and raw_ctcs != '':
                     continue

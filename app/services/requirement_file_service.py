@@ -1,36 +1,16 @@
 from typing import Any
 
-from bson import ObjectId
-
-from .dbs.databases import requirement_file_collection
+from .dbs.databases import session
 
 
-async def create_requirement_file(requirement_file_data: dict[str, Any]) -> dict[str, Any]:
-    requirement_file = await requirement_file_collection.insert_one(requirement_file_data)
-    new_requirement_file = await requirement_file_collection.find_one(
-        {'_id': requirement_file.inserted_id}
-    )
-    return new_requirement_file
-
-
-async def read_requirement_file_by_id(
-    requirement_file_id: ObjectId,
-    fields: dict[str, Any] | None = None
-) -> dict[str, Any]:
-    if not fields:
-        fields = {}
-    requirement_file = await requirement_file_collection.find_one(
-        {'_id': requirement_file_id},
-        fields
-    )
-    return requirement_file
-
-
-async def update_requirement_file_package_edges(
-    requirement_file_id: ObjectId,
-    package_edge_id: ObjectId
-) -> None:
-    await requirement_file_collection.find_one_and_update(
-        {'_id': requirement_file_id},
-        {'$push': {'package_edges': package_edge_id}}
-    )
+async def create_requirement_file(requirement_file: dict[str, Any], owner: str, name: str) -> str:
+    query = """
+    match (r:Repository)
+    where r.owner = $owner and r.name = $reponame
+    create(rf:RequirementFile {name:$name,manager:$manager})
+    create (r)-[rel:USE]->(rf)
+    return elementid(rf) as id
+    """
+    result = await session.run(query, requirement_file, owner=owner, reponame=name)
+    record = await result.single()
+    return record[0] if record else None

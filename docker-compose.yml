@@ -5,15 +5,35 @@ services:
     container_name: depex_backend
     build: .
     depends_on:
-      - database
+      graph_database:
+        condition: service_started
+      vuln_database:
+        condition: service_started
     ports:
       - '8000:8000'
     networks:
       - depex
 
-  database:
+  graph_database:
+    env_file: .env
+    container_name: neo4j
+    image: neo4j:5.7.0
+    environment:
+      - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    networks:
+      - depex
+
+  vuln_database:
+    env_file: .env
     container_name: mongodb
-    image: mongo:6.0.2
+    image: mongo:6.0.5
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${VULN_DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${VULN_DB_PASSWORD}
     ports:
       - '27017:27017'
     networks:

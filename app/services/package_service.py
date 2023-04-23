@@ -2,41 +2,56 @@ from typing import Any
 
 from datetime import datetime
 
-from bson import ObjectId
-
-from .dbs.databases import package_collection
+from .dbs.databases import session
 
 
-async def create_package(package_data: dict[str, Any]) -> dict[str, Any]:
-    package = await package_collection.insert_one(package_data)
-    new_package = await package_collection.find_one({'_id': package.inserted_id})
-    return new_package
+async def create_package(
+    package: dict[str, Any],
+    constraints: list[str] | str,
+    parent_id: str
+) -> str:
+    query = """
+    match (parent:RequirementFile|Version)
+    where elementid(parent) = $parent_id
+    create(p:Package{name:$name,moment:$moment})
+    create (parent)-[rel:REQUIRES{constraints:$constraints}]->(p)
+    return p.name as name
+    """
+    result = await session.run(query, package, constraints=constraints, parent_id=parent_id)
+    record = await result.single()
+    return record[0] if record else None
 
 
-async def read_package_by_id(
-    package_id: ObjectId,
-    fields: dict[str, Any] | None = None
-) -> dict[str, Any]:
-    if not fields:
-        fields = {}
-    package = await package_collection.find_one({'_id': package_id}, fields)
-    return package
+async def read_package_by_name(package_name: str) -> dict[str, Any]:
+    query = """
+    match (p: Package)
+    where p.name = $package_name
+    return p{.*}
+    """
+    result = await session.run(query, package_name=package_name)
+    record = await result.single()
+    return record[0] if record else None
 
 
-async def read_package_by_name(package_name: str) -> dict[str, Any] | None:
-    package = await package_collection.find_one({'name': package_name})
-    return package
-
-
-async def update_package_versions(package_id: ObjectId, version_id: ObjectId) -> None:
-    await package_collection.find_one_and_update(
-        {'_id': package_id},
-        {'$push': {'versions': version_id}}
+async def relate_package(package_name: str, constraints: list[str] | str, parent_id: str) -> None:
+    query = """
+    match 
+        (p: Package),
+        (parent: RequirementFile|Version)
+    where p.name = $package_name and elementid(parent) = $parent_id
+    create (parent)-[rel: REQUIRES {constraints: $constraints}]->(p)
+    """
+    await session.run(
+        query,
+        package_name=package_name,
+        constraints=constraints,
+        parent_id=parent_id
     )
 
 
-async def update_package_moment(package_id: ObjectId) -> None:
-    await package_collection.find_one_and_update(
-        {'_id': package_id},
-        {'$set': {'moment': datetime.now()}}
-    )
+async def update_package_moment(package_name: str) -> None:
+    query = '''
+    match (p: Package) where p.name = $package_name
+    set p.moment = $moment
+    '''
+    await session.run(query, package_name=package_name, moment=datetime.now())

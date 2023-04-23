@@ -1,107 +1,101 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from flamapy.metamodels.dn_metamodel.operations import NetworkInfo
-from flamapy.metamodels.smt_metamodel.transformations import NetworkToSMT
+from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidModel,
     NumberOfProducts,
-    MaximizeImpact,
     MinimizeImpact,
+    MaximizeImpact,
     FilterConfigs
 )
 
-from app.services import get_release_by_count_many
+from app.services import read_data_for_smt_transform, get_releases_by_counts
 
 from app.utils import json_encoder
-
-from .serialize_controller import serialize_graph
 
 router = APIRouter()
 
 
+# @router.post(
+#     '/operation/graph/graph_info/{graph_id}',
+#     summary='Summarizes graph information',
+#     response_description='Return graph information'
+# )
+# async def graph_info(graph_id: str) -> JSONResponse:
+#     '''
+#     Summarizes graph information regarding its dependencies, edges and vulnerabilities:
+
+#     - **graph_id**: the id of a graph
+#     '''
+#     dependency_graph = await serialize_graph(graph_id)
+#     # Modificar esta operacion para que devuelva edges como nombre y no constraints
+#     operation = NetworkInfo()
+#     operation.execute(dependency_graph)
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK,
+#         content=json_encoder(operation.get_result())
+#     )
+
+
 @router.post(
-    '/operation/graph/graph_info/{graph_id}',
-    summary='Summarizes graph information',
-    response_description='Return graph information'
-)
-async def graph_info(graph_id: str) -> JSONResponse:
-    '''
-    Summarizes graph information regarding its dependencies, edges and vulnerabilities:
-
-    - **graph_id**: the id of a graph
-    '''
-    dependency_graph = await serialize_graph(graph_id)
-    # Modificar esta operacion para que devuelva edges como nombre y no constraints
-    operation = NetworkInfo()
-    operation.execute(dependency_graph)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=json_encoder(operation.get_result())
-    )
-
-
-@router.post(
-    '/operation/graph/valid_model/{graph_id}',
+    '/operation/graph/valid_file/{requirement_file_id}',
     summary='Validates model satisfiability',
     response_description='Return True if valid, False if not'
 )
 async def valid_file(
-    graph_id: str,
-    agregator: str,
+    requirement_file_id: str,
     file_name: str
 ) -> JSONResponse:
     '''
-    Summarizes graph information regarding its dependencies, edges and vulnerabilities:
+    Summarizes requirement file graph information regarding its dependencies,
+    edges and vulnerabilities:
 
-    - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
-    - **file_name**: name of requirement file belonging to graph
+    - **requirement_file_id**: the id of a requirement file
+    - **file_name**: name of requirement file belonging to a graph
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = ValidModel(file_name)
+    operation = ValidModel()
     operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
 
 @router.post(
-    '/operation/graph/number_of_products/{graph_id}',
+    '/operation/graph/number_of_configurations/{requirement_file_id}',
     summary='Count the number of configurations',
-    response_description='Return the number of products.'
+    response_description='Return the number of configurations.'
 )
-async def number_of_products(
-    graph_id: str,
-    agregator: str,
+async def number_of_configurations(
+    requirement_file_id: str,
     file_name: str
 ) -> JSONResponse:
     '''
     Count the number of configurations of a graph. Recommendatory to not use in massive graphs:
 
-    - **graph_id**: the id of a graph
-    - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
+    - **requirement_file_id**: the id of a requirement file
     - **file_name**: name of requirement file belonging to graph
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = NumberOfProducts(file_name)
+    operation = NumberOfProducts()
     operation.execute(smt_model)
     result = {'number_of_products': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
 
 @router.post(
-    '/operation/graph/minimize_impact/{graph_id}',
+    '/operation/graph/minimize_impact/{requirement_file_id}',
     summary='Minimize impact of a graph',
     response_description='Return a list of configurations'
 )
 async def minimize_impact(
-    graph_id: str,
+    requirement_file_id: str,
     agregator: str,
     file_name: str,
     limit: int
@@ -109,28 +103,28 @@ async def minimize_impact(
     '''
     Return a list of configurations ordered with the minimun posible impact:
 
-    - **graph_id**: the id of a graph
+    - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = MinimizeImpact(file_name, limit)
+    operation = MinimizeImpact(limit)
     operation.execute(smt_model)
-    result = await get_release_by_count_many(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
 @router.post(
-    '/operation/graph/maximize_impact/{graph_id}',
+    '/operation/graph/maximize_impact/{requirement_file_id}',
     summary='Maximize impact of a graph',
     response_description='Return a list of configurations'
 )
 async def maximize_impact(
-    graph_id: str,
+    requirement_file_id: str,
     agregator: str,
     file_name: str,
     limit: int
@@ -138,28 +132,28 @@ async def maximize_impact(
     '''
     Return a list of configurations ordered with the maximun posible impact:
 
-    - **graph_id**: the id of a graph
+    - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = MaximizeImpact(file_name, limit)
+    operation = MaximizeImpact(limit)
     operation.execute(smt_model)
-    result = await get_release_by_count_many(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
 @router.post(
-    '/operation/graph/filter_configs/{graph_id}',
+    '/operation/graph/filter_configs/{requirement_file_id}',
     summary='Filter configurations of a graph',
     response_description='Return a list of configurations'
 )
 async def filter_configs(
-    graph_id: str,
+    requirement_file_id: str,
     agregator: str,
     file_name: str,
     max_threshold: float,
@@ -169,18 +163,18 @@ async def filter_configs(
     '''
     Return a list of configurations between a max and min impact:
 
-    - **graph_id**: the id of a graph
+    - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **max_threshold**: max impact threshold
     - **min_threshold**: min impact threshold
     - **limit**: the number of configurations to return
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = FilterConfigs(file_name, max_threshold, min_threshold, limit)
+    operation = FilterConfigs(max_threshold, min_threshold, limit)
     operation.execute(smt_model)
-    result = await get_release_by_count_many(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

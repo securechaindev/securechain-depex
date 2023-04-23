@@ -1,3 +1,3 @@
-from .models import GraphModel, RequirementFile, PackageModel, VersionModel, PackageEdgeModel
+from .models import RepositoryModel, RequirementFile, PackageModel, VersionModel
 
-__all__ = ['GraphModel', 'RequirementFile', 'PackageModel', 'VersionModel', 'PackageEdgeModel']
+__all__ = ['RepositoryModel', 'RequirementFile', 'PackageModel', 'VersionModel']

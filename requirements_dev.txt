@@ -1,2 +1,2 @@
 prospector[with_everything]==1.9.0
-mypy==1.0.1
+mypy==1.2.0

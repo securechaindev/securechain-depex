@@ -1,20 +1,6 @@
 from typing import Any
 
-from bson import ObjectId
 from .dbs.databases import cve_collection
-
-
-async def create_cve(cve_data: dict[str, Any]) -> dict[str, Any]:
-    cve = await cve_collection.insert_one(cve_data)
-    new_cve = await cve_collection.find_one({'_id': cve.inserted_id})
-    return new_cve
-
-
-async def read_cve_by_id(cve_id: ObjectId, fields: dict[str, Any] | None = None) -> dict[str, Any]:
-    if not fields:
-        fields = {}
-    cve = await cve_collection.find_one({'_id': cve_id}, fields)
-    return cve
 
 
 async def read_cve_by_cve_id(cve_id: str) -> dict[str, Any] | None:

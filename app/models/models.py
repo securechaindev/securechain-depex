@@ -22,33 +22,10 @@ class VersionModel(BaseModel):
         arbitrary_types_allowed = True
         schema_extra = {
             'example': {
-                'release': 'urllib3',
-                'mayor': 1,
-                'minor': 26,
-                'patch': 5,
-                'build_number': 0,
+                'release': '1.26.5',
                 'release_date': datetime.now(),
-                'package_edges': [],
+                'count': 23,
                 'cves': [],
-                'package': 'request',
-                'count': 23
-            }
-        }
-
-
-class PackageEdgeModel(BaseModel):
-    package_name: str
-    constraints: list[list[str]] | str
-    versions: list[VersionModel] | None
-
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        schema_extra = {
-            'example': {
-                'package_name': 'urllib3',
-                'constraints': [['<=', '0.7.0'], ['==', '1.2.1'], ['>', '2.3']],
-                'versions': []
             }
         }
 
@@ -64,8 +41,7 @@ class PackageModel(BaseModel):
         schema_extra = {
             'example': {
                 'name': 'urllib3',
-                'moment': datetime.now(),
-                'versions': []
+                'moment': datetime.now()
             }
         }
 
@@ -73,7 +49,6 @@ class PackageModel(BaseModel):
 class RequirementFile(BaseModel):
     name: str
     manager: str
-    package_edges: list[PackageEdgeModel]
 
     class Config:
         allow_population_by_field_name = True
@@ -81,13 +56,12 @@ class RequirementFile(BaseModel):
         schema_extra = {
             'example': {
                 'name': 'requirements.txt',
-                'manager': 'PIP',
-                'package_edges': []
+                'manager': 'PIP'
             }
         }
 
 
-class GraphModel(BaseModel):
+class RepositoryModel(BaseModel):
     owner: str = Field(
         ...,
         min_length=1,
@@ -110,7 +84,6 @@ class GraphModel(BaseModel):
                 'owner': 'GermanMT',
                 'name': 'prueba',
                 'add_extras': False,
-                'is_complete': False,
-                'requirement_files': []
+                'is_complete': False
             }
         }

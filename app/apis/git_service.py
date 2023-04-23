@@ -4,7 +4,7 @@ from app.config import settings
 from app.utils import (
     parse_constraints,
     get_session,
-    managers
+    get_manager
 )
 
 headers = {
@@ -56,16 +56,14 @@ async def json_reader(
     for node in response['data']['repository']['dependencyGraphManifests']['nodes']:
         file = node['filename']
         page_info = node['dependencies']['pageInfo']
-        if file not in managers:
+        file_manager = await get_manager(file)
+        if not file_manager:
             continue
 
         if file not in all_packages:
-            all_packages[file] = {'manager': managers[file], 'dependencies': {}}
+            all_packages[file] = {'manager': file_manager, 'dependencies': {}}
         for node in node['dependencies']['nodes']:
-            print(node['requirements'])
-            req = await parse_constraints(node['requirements'], managers[file])
-            print(req)
-            print('*******************')
+            req = await parse_constraints(node['requirements'], file_manager)
             all_packages[file]['dependencies'].update({node['packageName']: req})
 
     return (page_info, all_packages)

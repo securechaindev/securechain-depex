@@ -7,6 +7,11 @@ pylint:
     - super-init-not-called
     - unsubscriptable-object
     - too-many-arguments
+    - bare-except
+
+pycodestyle:
+  disable:
+    - E722
 
 mccabe:
   disable:

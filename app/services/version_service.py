@@ -1,122 +1,103 @@
 from typing import Any
 
-from bson import ObjectId
+from app.utils import mean, weighted_mean
 
-from app.utils import get_complete_query
-
-from .dbs.databases import version_collection
+from .dbs.databases import session
 
 
-async def create_version(version_data: dict[str, Any]) -> dict[str, Any]:
-    version = await version_collection.insert_one(version_data)
-    new_version = await version_collection.find_one({'_id': version.inserted_id})
-    return new_version
+async def create_version(version: dict[str, Any], package_name: str) -> dict[str, Any]:
+    query = """
+    match (p: Package)
+    where p.name = $package_name
+    create(v: Version{
+        name: $name,
+        release_date: $release_date,
+        count: $count,
+        cves: [],
+        mean: 0,
+        weighted_mean: 0
+    })
+    create (p)-[rel: HAVE]->(v)
+    return v{.*, id: elementid(v)}
+    """
+    result = await session.run(query, version, package_name=package_name)
+    record = await result.single()
+    return record[0] if record else None
 
 
-async def read_version_by_id(
-    version_id: ObjectId,
-    fields: dict[str, int] | None = None
-) -> dict[str, Any]:
-    if not fields:
-        fields = {}
-    version = await version_collection.find_one({'_id': version_id}, fields)
-    return version
+async def count_number_of_versions_by_package(package_name: str) -> int:
+    query = '''
+    match (p: Package) where p.name = $package_name
+    match (p)-[r: HAVE]->(v: Version)
+    return count(v)
+    '''
+    result = await session.run(query, package_name=package_name)
+    record = await result.single()
+    return record[0] if record else None
 
 
-async def read_version_by_count_package(
-    package: str,
-    count: float | int,
-    fields: dict[str, int] | None = None
-) -> dict[str, Any]:
-    if not fields:
-        fields = {}
-    version = await version_collection.find_one({'package': package, 'count': count}, fields)
-    return version
+async def get_versions_names_by_package(package_name: str) -> list[str]:
+    query = """
+    match (p: Package) where p.name = $package_name
+    match (p)-[r: HAVE]->(v: Version)
+    return collect(v.name)
+    """
+    result = await session.run(query, package_name=package_name)
+    record = await result.single()
+    return record[0] if record else None
 
 
-async def get_release_by_count_many(
-    configs: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    sanitized_configs: list[dict[str, Any]] = []
+async def get_releases_by_counts(
+    configs: list[dict[str, int]]
+) -> list[dict[str, str | float | int]]:
+    sanitized_configs: list[dict[str, str | float | int]] = []
+    query = """
+    MATCH (v:Version)<-[:HAVE]-(parent:Package)
+    WHERE v.count = $count and parent.name = $package
+    RETURN v.name
+    """
+
     for config in configs:
-        sanitized_config: dict[str, Any] = {}
+        sanitized_config: dict[str, str | float | int] = {}
         for var, value in config.items():
-            version = await read_version_by_count_package(var, value)
-            if version:
-                sanitized_config[var] = version['release']
+            result = await session.run(query, package=var, count=value)
+            record = await result.single()
+            if record:
+                sanitized_config.update({var: record[0]})
             else:
-                sanitized_config[var] = value
+                sanitized_config.update({var: value})
         sanitized_configs.append(sanitized_config)
     return sanitized_configs
 
 
-async def get_release_by_count_one(
-    config: dict[str, Any]
-) -> dict[str, Any]:
-    sanitized_config: dict[str, Any] = {}
-    for var, value in config.items():
-        version = await read_version_by_count_package(var, value)
-        if version:
-            sanitized_config[var] = version['release']
-        else:
-            sanitized_config[var] = value
-    return sanitized_config
-
-
-async def get_count_by_release(
+async def get_counts_by_releases(
     config: dict[str, str]
 ) -> dict[str, int]:
     sanitized_config: dict[str, int] = {}
+    query = """
+    MATCH (v:Version)<-[:HAVE]-(parent:Package)
+    WHERE v.name = $release and parent.name = $package
+    RETURN v.count
+    """
+
     for package, release in config.items():
-        version = await read_version_by_release_package(release, package)
-        if version:
-            sanitized_config[version['package']] = version['count']
+        result = await session.run(query, package=package, release=release)
+        record = await result.single()
+        if record:
+            sanitized_config.update({package: record[0]})
     return sanitized_config
 
 
-async def read_versions_by_constraints(
-    constraints: dict[str, str] | str,
-    package_name: str
-) -> list[dict[str, Any]]:
-    query = await get_complete_query(constraints, package_name)
-    return [document async for document in version_collection.find(query)]
-
-
-async def read_versions_ids_by_constraints(
-    constraints: dict[str, str] | str,
-    package_name: str
-) -> list[ObjectId]:
-    query = await get_complete_query(constraints, package_name)
-    return [document['_id'] async for document in version_collection.find(query, {'_id': 1})]
-
-
-async def read_version_by_release_package(
-    release: str,
-    package: str
-) -> dict[str, Any]:
-    version = await version_collection.find_one(
-        {
-            'release': release,
-            'package': package
-        }
-    )
-    return version
-
-
-async def update_versions_cves_by_constraints(
-    constraints: dict[str, str] | str,
-    package_name: str,
-    cve: dict[str, Any]
-) -> None:
-    query = await get_complete_query(constraints, package_name)
-    await version_collection.update_many(query, {'$addToSet': {'cves': cve}})
-
-
-async def update_version_package_edges(
-    version_id: ObjectId,
-    package_edge_id: ObjectId
-) -> None:
-    await version_collection.find_one_and_update(
-        {'_id': version_id},
-        {'$push': {'package_edges': package_edge_id}}
+async def add_impacts_and_cves(impacts: list[float], cves: list[str], version_id: str) -> None:
+    query = """
+    match (v: Version)
+    where elementid(v) = $version_id
+    set v.cves = $cves, v.mean = $mean, v.weighted_mean = $weighted_mean
+    """
+    await session.run(
+        query,
+        version_id=version_id,
+        cves=cves,
+        mean=await mean(impacts),
+        weighted_mean=await weighted_mean(impacts)
     )

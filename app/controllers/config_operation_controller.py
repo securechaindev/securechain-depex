@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from flamapy.metamodels.smt_metamodel.transformations import NetworkToSMT
+from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidConfig,
     CompleteConfig,
@@ -9,23 +9,23 @@ from flamapy.metamodels.smt_metamodel.operations import (
 )
 
 from app.services import (
-    get_release_by_count_one,
-    get_count_by_release
+    read_data_for_smt_transform,
+    get_counts_by_releases,
+    get_releases_by_counts
 )
-from app.utils import json_encoder
 
-from .serialize_controller import serialize_graph
+from app.utils import json_encoder
 
 router = APIRouter()
 
 
 @router.post(
-    '/operation/config/valid_config/{graph_id}',
+    '/operation/config/valid_config/{requirement_file_id}',
     summary='Validates a configuration',
     response_description='Return True if valid, False if not'
 )
 async def valid_config(
-    graph_id: str,
+    requirement_file_id: str,
     agregator: str,
     file_name: str,
     config: dict[str, str]
@@ -33,28 +33,28 @@ async def valid_config(
     '''
     Validates a configuration satisfiability into a graph by the constraints over dependencies:
 
-    - **graph_id**: the id of a graph
+    - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **config**: configuration containing the name of the dependency and the version to be chosen
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = ValidConfig(file_name, await get_count_by_release(config))
+    operation = ValidConfig(await get_counts_by_releases(config))
     operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
 
 @router.post(
-    '/operation/config/complete_config/{graph_id}',
+    '/operation/config/complete_config/{requirement_file_id}',
     summary='Complete a configuration',
     response_description='Return a configuration of versions'
 )
 async def complete_config(
-    graph_id: str,
+    requirement_file_id: str,
     agregator: str,
     file_name: str,
     config: dict[str, str]
@@ -62,18 +62,18 @@ async def complete_config(
     '''
     Complete a partial configuration with the minimun posible impact:
 
-    - **graph_id**: the id of a graph
+    - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **config**: partial configuration containing the name and the version of each dependency
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = CompleteConfig(file_name, await get_count_by_release(config))
+    operation = CompleteConfig(await get_counts_by_releases(config))
     operation.execute(smt_model)
-    result = await get_release_by_count_one(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -83,7 +83,7 @@ async def complete_config(
     response_description='Return a configuration of versions'
 )
 async def config_by_impact(
-    graph_id: str,
+    requirement_file_id: str,
     agregator: str,
     file_name: str,
     impact: float
@@ -91,16 +91,16 @@ async def config_by_impact(
     '''
     Return a configuration witn an impact as close as possible to the given impact:
 
-    - **graph_id**: the id of a graph
+    - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **impact**: impact number between 0 and 10
     '''
-    dependency_graph = await serialize_graph(graph_id)
-    smt_transform = NetworkToSMT(dependency_graph, agregator)
+    graph_data = await read_data_for_smt_transform(requirement_file_id)
+    smt_transform = GraphToSMT(graph_data, file_name, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = ConfigByImpact(file_name, impact)
+    operation = ConfigByImpact(impact)
     operation.execute(smt_model)
-    result = await get_release_by_count_one(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result())
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

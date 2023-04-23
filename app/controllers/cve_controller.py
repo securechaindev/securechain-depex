@@ -1,40 +1,54 @@
-from app.services import (
-    read_cpe_matches_by_package_name,
-    update_versions_cves_by_constraints
-)
-from app.utils import sanitize_version
+from typing import Any
+
+from packaging.version import parse
+
+from app.services import add_impacts_and_cves
 
 
-async def relate_cves(package_name: str) -> None:
-    cpe_matches = await read_cpe_matches_by_package_name(package_name)
+async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]]) -> None:
+    impacts: list[float] = []
+    cves: list[str] = []
     for raw_cpe_match in cpe_matches:
-        cpe_match = raw_cpe_match['configurations']['nodes']['cpeMatch']
-        del raw_cpe_match['configurations']
+        cpe_match: dict[str, Any] = raw_cpe_match['configurations']['nodes']['cpeMatch']
         if (
             'versionStartIncluding' not in cpe_match and
             'versionEndIncluding' not in cpe_match and
             'versionStartExcluding' not in cpe_match and
             'versionEndExcluding' not in cpe_match 
         ):
-            version = cpe_match['criteria'].split(':')[5]
-            if '*' in version:
-                await update_versions_cves_by_constraints('any', package_name, raw_cpe_match)
+            cpe_version = cpe_match['criteria'].split(':')[5]
+            if '*' in cpe_version or '-' in cpe_version:
+                cves.append(raw_cpe_match['id'])
+                impacts.append(await get_impact(raw_cpe_match))
             else:
-                await update_versions_cves_by_constraints(
-                    {'=': await sanitize_version(version)},
-                    package_name,
-                    raw_cpe_match
-                )
+                if parse(version['name']) == parse(cpe_version):
+                    cves.append(raw_cpe_match['id'])
+                    impacts.append(await get_impact(raw_cpe_match))
         else:
-            ctcs = {}
+            check = True
 
             if 'versionStartIncluding' in cpe_match:
-                ctcs['>='] = await sanitize_version(cpe_match['versionStartIncluding'])
+                check = parse(version['name']) >= parse(cpe_match['versionStartIncluding'])
             if 'versionEndIncluding' in cpe_match:
-                ctcs['<='] = await sanitize_version(cpe_match['versionEndIncluding'])
+                check = parse(version['name']) <= parse(cpe_match['versionEndIncluding'])
             if 'versionStartExcluding' in cpe_match:
-                ctcs['>'] = await sanitize_version(cpe_match['versionStartExcluding'])
+                check = parse(version['name']) > parse(cpe_match['versionStartExcluding'])
             if 'versionEndExcluding' in cpe_match:
-                ctcs['<'] = await sanitize_version(cpe_match['versionEndExcluding'])
+                check = parse(version['name']) < parse(cpe_match['versionEndExcluding'])
 
-            await update_versions_cves_by_constraints(ctcs, package_name, raw_cpe_match)
+            if check:
+                cves.append(raw_cpe_match['id'])
+                impacts.append(await get_impact(raw_cpe_match))
+    await add_impacts_and_cves(impacts, cves, version['id'])
+
+
+async def get_impact(cve: dict[str, Any]) -> float:
+    for key, value in cve['metrics'].items():
+        match key:
+            case 'cvssMetricV31':
+                return float(value[0]['impactScore'])
+            case 'cvssMetricV30':
+                return float(value[0]['impactScore'])
+            case 'cvssMetricV2':
+                return float(value[0]['impactScore'])
+    return 0.

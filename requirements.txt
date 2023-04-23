@@ -1,9 +1,10 @@
-wheel==0.38.4
-fastapi[all]==0.92.0
+wheel==0.40.0
+fastapi[all]==0.95.1
 fastapi-utils==0.2.1
-motor==3.1.1
+motor==3.1.2
 python-dotenv==1.0.0
 requests==2.28.2
 python-dateutil==2.8.2
-flamapy-dn==1.1.6
-flamapy-smt==1.2.2
+flamapy-smt==1.2.3
+neo4j==5.7.0
+packaging==23.1
