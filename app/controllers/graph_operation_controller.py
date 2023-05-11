@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
+from app.controllers.transform import GraphToSMT
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidModel,
     NumberOfProducts,
@@ -12,7 +12,7 @@ from flamapy.metamodels.smt_metamodel.operations import (
 
 from app.services import read_data_for_smt_transform, get_releases_by_counts
 
-from app.utils import json_encoder
+from app.utils import json_encoder, get_manager
 
 router = APIRouter()
 
@@ -55,7 +55,8 @@ async def valid_file(
     - **file_name**: name of requirement file belonging to a graph
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, 'mean')
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = ValidModel()
@@ -80,7 +81,8 @@ async def number_of_configurations(
     - **file_name**: name of requirement file belonging to graph
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, 'mean')
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = NumberOfProducts()
@@ -109,7 +111,8 @@ async def minimize_impact(
     - **limit**: the number of configurations to return
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, agregator)
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = MinimizeImpact(limit)
@@ -138,7 +141,8 @@ async def maximize_impact(
     - **limit**: the number of configurations to return
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, agregator)
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = MaximizeImpact(limit)
@@ -171,7 +175,8 @@ async def filter_configs(
     - **limit**: the number of configurations to return
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, agregator)
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = FilterConfigs(max_threshold, min_threshold, limit)

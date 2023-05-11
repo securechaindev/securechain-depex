@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     VULN_DB_USER: str = ''
     VULN_DB_PASSWORD: str = ''
     GIT_GRAPHQL_API_KEY: str = ''
-    NVD_APY_KEY: str = ''
+    NVD_API_KEY: str = ''
 
     class Config:
         env_file = '.env'

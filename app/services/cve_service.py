@@ -17,21 +17,23 @@ async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, 
         {
             '$project': {
                 'id': 1,
-                'metrics.cvssMetricV2.impactScore': 1,
-                'metrics.cvssMetricV30.impactScore': 1,
-                'metrics.cvssMetricV31.impactScore': 1,
-                'configurations.nodes.cpeMatch': 1
+                'impact_score': {
+                    '$ifNull': ['$metrics.cvssMetricV31.impactScore', 
+                                '$metrics.cvssMetricV30.impactScore', 
+                                '$metrics.cvssMetricV2.impactScore', 
+                                0.]
+                },
+                'configurations.nodes.cpeMatch': 1,
+                'products': 1
             }
         },
-        {'$unwind': '$configurations'},
-        {'$unwind': '$configurations.nodes'},
-        {'$unwind': '$configurations.nodes.cpeMatch'},
         {
             '$match': {
-                'configurations.nodes.cpeMatch.criteria': {
-                    '$regex': f':{package_name}:'
-                }
+                'products': {'$in': [package_name]}
             }
         }
     ]
-    return [cpe_match async for cpe_match in cve_collection.aggregate(pipeline)]
+    try:
+        return [cpe_match async for cpe_match in cve_collection.aggregate(pipeline)]
+    except:
+        return []

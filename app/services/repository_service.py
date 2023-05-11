@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from .dbs.databases import session
 
 
-async def create_repository(repository: dict[str, Any]) -> None:
+async def create_repository(repository: dict[str, Any]) -> str:
     query = """
     create(r: Repository{
         owner: $owner,
@@ -13,8 +13,11 @@ async def create_repository(repository: dict[str, Any]) -> None:
         add_extras: $add_extras,
         is_complete: $is_complete
     })
+    return elementid(r) as id
     """
-    await session.run(query, repository)
+    result = await session.run(query, repository)
+    record = await result.single()
+    return record[0] if record else None
 
 
 async def read_graph_by_repository_id(

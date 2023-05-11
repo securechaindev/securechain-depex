@@ -1,11 +1,9 @@
 from typing import Any
 
 from app.config import settings
-from app.utils import (
-    parse_constraints,
-    get_session,
-    get_manager
-)
+from app.utils import get_manager
+
+from requests import post
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',
@@ -31,8 +29,7 @@ async def get_repo_data(
         query += end_cursor + '\"){pageInfo {hasNextPage endCursor}'
         query += 'nodes{packageName requirements}}}}}}'
 
-    session = await get_session()
-    response = session.post(
+    response = post(
         'https://api.github.com/graphql',
         json={'query': query},
         headers=headers,
@@ -55,6 +52,8 @@ async def json_reader(
 
     for node in response['data']['repository']['dependencyGraphManifests']['nodes']:
         file = node['filename']
+        if file == 'package-lock.json':
+            continue
         page_info = node['dependencies']['pageInfo']
         file_manager = await get_manager(file)
         if not file_manager:
@@ -63,7 +62,6 @@ async def json_reader(
         if file not in all_packages:
             all_packages[file] = {'manager': file_manager, 'dependencies': {}}
         for node in node['dependencies']['nodes']:
-            req = await parse_constraints(node['requirements'], file_manager)
-            all_packages[file]['dependencies'].update({node['packageName']: req})
+            all_packages[file]['dependencies'].update({node['packageName']: node['requirements']})
 
     return (page_info, all_packages)

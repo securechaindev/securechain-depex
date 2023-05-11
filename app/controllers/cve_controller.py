@@ -1,54 +1,65 @@
 from typing import Any
 
-from packaging.version import parse
-
 from app.services import add_impacts_and_cves
 
 
-async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]]) -> None:
+async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str) -> None:
     impacts: list[float] = []
     cves: list[str] = []
+
+    version_type = await get_version_type(package_manager)
+
     for raw_cpe_match in cpe_matches:
-        cpe_match: dict[str, Any] = raw_cpe_match['configurations']['nodes']['cpeMatch']
-        if (
-            'versionStartIncluding' not in cpe_match and
-            'versionEndIncluding' not in cpe_match and
-            'versionStartExcluding' not in cpe_match and
-            'versionEndExcluding' not in cpe_match 
-        ):
-            cpe_version = cpe_match['criteria'].split(':')[5]
-            if '*' in cpe_version or '-' in cpe_version:
-                cves.append(raw_cpe_match['id'])
-                impacts.append(await get_impact(raw_cpe_match))
-            else:
-                if parse(version['name']) == parse(cpe_version):
-                    cves.append(raw_cpe_match['id'])
-                    impacts.append(await get_impact(raw_cpe_match))
-        else:
-            check = True
+        for configuration in raw_cpe_match['configurations']:
+            for node in configuration['nodes']:
+                for cpe_match in node['cpeMatch']:
+                    cpe_parts = cpe_match['criteria'].split(':')
+                    if cpe_parts[4] == package_name:
+                        if (
+                            'versionStartIncluding' not in cpe_match and
+                            'versionEndIncluding' not in cpe_match and
+                            'versionStartExcluding' not in cpe_match and
+                            'versionEndExcluding' not in cpe_match
+                        ):
+                            cpe_version = cpe_parts[5]
+                            if '*' in cpe_version or '-' in cpe_version:
+                                cves.append(raw_cpe_match['id'])
+                                impacts.append(raw_cpe_match['impact_score'][0])
+                            else:
+                                try:
+                                    if version_type(version['name']) == version_type(cpe_version):
+                                        cves.append(raw_cpe_match['id'])
+                                        impacts.append(raw_cpe_match['impact_score'][0])
+                                except:
+                                    continue
+                        else:
+                            check = True
+                            try:
+                                if 'versionStartIncluding' in cpe_match:
+                                    check = version_type(version['name']) >= version_type(cpe_match['versionStartIncluding'])
+                                if 'versionEndIncluding' in cpe_match:
+                                    check = version_type(version['name']) <= version_type(cpe_match['versionEndIncluding'])
+                                if 'versionStartExcluding' in cpe_match:
+                                    check = version_type(version['name']) > version_type(cpe_match['versionStartExcluding'])
+                                if 'versionEndExcluding' in cpe_match:
+                                    check = version_type(version['name']) < version_type(cpe_match['versionEndExcluding'])
+                            except:
+                                continue
 
-            if 'versionStartIncluding' in cpe_match:
-                check = parse(version['name']) >= parse(cpe_match['versionStartIncluding'])
-            if 'versionEndIncluding' in cpe_match:
-                check = parse(version['name']) <= parse(cpe_match['versionEndIncluding'])
-            if 'versionStartExcluding' in cpe_match:
-                check = parse(version['name']) > parse(cpe_match['versionStartExcluding'])
-            if 'versionEndExcluding' in cpe_match:
-                check = parse(version['name']) < parse(cpe_match['versionEndExcluding'])
-
-            if check:
-                cves.append(raw_cpe_match['id'])
-                impacts.append(await get_impact(raw_cpe_match))
+                            if check:
+                                cves.append(raw_cpe_match['id'])
+                                impacts.append(raw_cpe_match['impact_score'][0])
     await add_impacts_and_cves(impacts, cves, version['id'])
 
 
-async def get_impact(cve: dict[str, Any]) -> float:
-    for key, value in cve['metrics'].items():
-        match key:
-            case 'cvssMetricV31':
-                return float(value[0]['impactScore'])
-            case 'cvssMetricV30':
-                return float(value[0]['impactScore'])
-            case 'cvssMetricV2':
-                return float(value[0]['impactScore'])
-    return 0.
+async def get_version_type(package_manager: str):
+    match package_manager:
+        case 'PIP':
+            from univers.versions import PypiVersion
+            return PypiVersion
+        case 'NPM':
+            from univers.versions import SemverVersion
+            return SemverVersion
+        case _:
+            from univers.versions import PypiVersion
+            return PypiVersion

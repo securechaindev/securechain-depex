@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
+from app.controllers.transform import GraphToSMT
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidConfig,
     CompleteConfig,
@@ -14,7 +14,7 @@ from app.services import (
     get_releases_by_counts
 )
 
-from app.utils import json_encoder
+from app.utils import json_encoder, get_manager
 
 router = APIRouter()
 
@@ -39,7 +39,8 @@ async def valid_config(
     - **config**: configuration containing the name of the dependency and the version to be chosen
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, agregator)
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = ValidConfig(await get_counts_by_releases(config))
@@ -68,7 +69,8 @@ async def complete_config(
     - **config**: partial configuration containing the name and the version of each dependency
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, agregator)
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = CompleteConfig(await get_counts_by_releases(config))
@@ -97,7 +99,8 @@ async def config_by_impact(
     - **impact**: impact number between 0 and 10
     '''
     graph_data = await read_data_for_smt_transform(requirement_file_id)
-    smt_transform = GraphToSMT(graph_data, file_name, agregator)
+    package_manager = await get_manager(file_name)
+    smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = ConfigByImpact(impact)

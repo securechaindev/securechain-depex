@@ -14,7 +14,8 @@ from app.services import (
     read_env_variables,
     replace_env_variables
 )
-from app.utils import get_session
+
+from requests import get
 
 
 # 24h = 216000
@@ -23,8 +24,7 @@ async def db_updater() -> None:
     env_variables = await read_env_variables()
     today = datetime.today()
 
-    headers = {'apiKey': settings.NVD_APY_KEY}
-    session = await get_session()
+    headers = {'apiKey': settings.NVD_API_KEY}
 
     while True:
         end_day = await get_end_day(
@@ -57,13 +57,17 @@ async def db_updater() -> None:
             'pubEndDate': str_end
         }
 
-        sleep(6)
-        response = session.get(
-            'https://services.nvd.nist.gov/rest/json/cves/2.0?',
-            params=params_pub,
-            headers=headers,
-            timeout=25
-        ).json()
+        while True:
+            try:
+                response = get(
+                    'https://services.nvd.nist.gov/rest/json/cves/2.0?',
+                    params=params_pub,
+                    headers=headers,
+                    timeout=25
+                ).json()
+                break
+            except:
+                sleep(6)
 
         await update_db(response)
 
@@ -72,13 +76,17 @@ async def db_updater() -> None:
             'lastModEndDate': str_end
         }
 
-        sleep(6)
-        response = session.get(
-            'https://services.nvd.nist.gov/rest/json/cves/2.0?',
-            params=params_mod,
-            headers=headers,
-            timeout=25
-        ).json()
+        while True:
+            try:
+                response = get(
+                    'https://services.nvd.nist.gov/rest/json/cves/2.0?',
+                    params=params_mod,
+                    headers=headers,
+                    timeout=25
+                ).json()
+                break
+            except:
+                sleep(6)
 
         await update_db(response)
 
@@ -120,9 +128,23 @@ async def update_db(raw_cves: dict[str, Any]) -> None:
         raw_cve['lastModified'] = parse(raw_cve['lastModified'])
         cve = await read_cve_by_cve_id(raw_cve['id'])
         if not cve:
+            raw_cve['products'] = await get_products(raw_cve)
             actions.append(InsertOne(raw_cve))
         else:
+            raw_cve['products'] = await get_products(raw_cve)
             actions.append(ReplaceOne({'id': raw_cve['id']}, raw_cve))
 
     if actions:
         await bulk_write_cve_actions(actions, True)
+
+
+async def get_products(raw_cve: dict[str, Any]) -> list[str]:
+    products: list[str] = []
+    if 'configurations' in raw_cve:
+        for configuration in raw_cve['configurations']:
+            for node in configuration['nodes']:
+                for cpeMatch in node['cpeMatch']:
+                    product = cpeMatch['criteria'].split(':')[4]
+                    if product not in products:
+                        products.append(product)
+    return products

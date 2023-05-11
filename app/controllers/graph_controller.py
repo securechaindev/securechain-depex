@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from app.services import create_repository, read_graph_by_repository_id
+from app.services import read_graph_by_repository_id
 from app.models import RepositoryModel
 from app.utils import json_encoder
 
@@ -48,9 +48,9 @@ async def init_graph(
 
     - **repository**: a json containing the owner and the name of a repository
     '''
+    # joszamama/xatkit-spl-frontend
     repository_json = jsonable_encoder(repository)
     try:
-        await create_repository(repository_json)
         await extract_graph(repository_json)
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,

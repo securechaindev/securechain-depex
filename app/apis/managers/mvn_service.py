@@ -4,19 +4,16 @@ from time import sleep
 
 from dateutil.parser import parse
 
-from app.utils import (
-    parse_constraints,
-    get_first_position,
-    get_session
-)
+from app.utils import get_first_position
+
+from requests import get
 
 
-async def get_all_versions(pkg_name: str) -> list[dict[str, Any]]:
-    session = await get_session()
-
+async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
+    pkg_url = pkg_name.replace('.', '/').replace(':', '/')
     while True:
         try:
-            response = session.get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
+            response = get(f'https://repo1.maven.org/maven2/{pkg_url}/maven-metadata.xml').json()
             break
         except:
             # Actualmente la API JSON de PyPI no nos permite hacer llamadas para obtener toda
@@ -25,6 +22,8 @@ async def get_all_versions(pkg_name: str) -> list[dict[str, Any]]:
             # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
             # estar atento a nuevas versiones.
             sleep(5)
+
+    
 
     if 'releases' in response:
         versions = []
@@ -45,12 +44,10 @@ async def get_all_versions(pkg_name: str) -> list[dict[str, Any]]:
     return []
 
 
-async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
-    session = await get_session()
-
+async def requires_pypi_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
     while True:
         try:
-            response = session.get(
+            response = get(
                 f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
             ).json()['info']['requires_dist']
             break
@@ -97,8 +94,9 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, list[
             pos = await get_first_position(data, ['<', '>', '=', '!', '~'])
 
             dist = data[:pos]
-            raw_ctcs = data[pos:]
-            ctcs = await parse_constraints(raw_ctcs, 'PIP')
+            ctcs = data[pos:]
+            if not ctcs:
+                ctcs = 'any'
 
             if (
                 dist in require_packages and
@@ -109,7 +107,7 @@ async def requires_packages(pkg_name: str, version_dist: str) -> dict[str, list[
                     if ctc not in require_packages[dist]:
                         require_packages[dist].append(ctcs)
             else:
-                if '.' not in raw_ctcs and raw_ctcs != '':
+                if '.' not in ctcs and ctcs != '':
                     continue
                 require_packages[dist] = ctcs
 
