@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError, ValidationException
+from fastapi.exceptions import RequestValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
@@ -35,17 +35,17 @@ async def startup_event() -> None:
     await db_updater()
 
 
-@app.exception_handler(RequestValidationError)
-@app.exception_handler(ValidationException)
-async def validation_exception_handler(
-    _: Request,
-    exc: ValidationException | RequestValidationError
-) -> JSONResponse:
-    response: dict[str, list[str]] = {'message': []}
-    for error in exc.errors():
-        response['message'].append(error['loc'][-1] + f": {error['msg']}")
+# TODO: Have changed in new versions
+# @app.exception_handler(RequestValidationError)
+# async def validation_exception_handler(
+#     _: Request,
+#     exc: RequestValidationError
+# ) -> JSONResponse:
+#     response: dict[str, list[str]] = {'message': []}
+#     for error in exc.errors():
+#         response['message'].append(error['loc'][-1] + f": {error['msg']}")
 
-    return JSONResponse(content=json_encoder(response), status_code=422)
+#     return JSONResponse(content=json_encoder(response), status_code=422)
 
 app.add_middleware(
     CORSMiddleware,
