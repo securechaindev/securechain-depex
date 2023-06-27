@@ -3,9 +3,9 @@ from typing import Any
 from app.utils import mean, weighted_mean
 
 
-async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str, artifact_id: str | None = None) -> dict[str, Any]:
+async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str, artifact_id: str | None = None) -> dict[str, Any]:
     impacts: list[float] = []
-    version['cves']: list[str] = []
+    version['cves'] = []
 
     version_type = await get_version_type(package_manager)
 

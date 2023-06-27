@@ -1,7 +1,6 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from app.controllers.transform import GraphToSMT
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidModel,
     NumberOfProducts,
@@ -10,8 +9,8 @@ from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs
 )
 
+from app.controllers.transform import GraphToSMT
 from app.services import read_data_for_smt_transform, get_releases_by_counts
-
 from app.utils import json_encoder, get_manager
 
 router = APIRouter()

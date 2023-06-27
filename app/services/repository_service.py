@@ -26,10 +26,14 @@ async def create_repositories(repository: dict[str, Any]) -> dict[str, str]:
     mvn_result = await mvn_session.run(query, repository)
     mvn_record = await mvn_result.single()
     repository_ids.update({'MVN': mvn_record[0]})
-    return repository_ids if repository_ids else None
+    return repository_ids
 
 
-async def read_repository_by_owner_name(owner: str, name: str, package_manager: str) -> dict[str, Any]:
+async def read_repository_by_owner_name(
+    owner: str,
+    name: str,
+    package_manager: str
+) -> dict[str, Any]:
     query = '''
     match(r: Repository{owner: $owner, name: $name}) return elementid(r)
     '''
@@ -66,7 +70,10 @@ async def read_graph_by_repository_id(
     raise HTTPException(status_code=404, detail=[f'Graph with id {requirement_file_id} not found'])
 
 
-async def read_data_for_smt_transform(requirement_file_id: str, package_manager: str) -> dict[str, Any]:
+async def read_data_for_smt_transform(
+    requirement_file_id: str,
+    package_manager: str
+) -> dict[str, Any]:
     query = '''
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
     call apoc.path.subgraphAll(rf, {relationshipFilter: '>'}) yield relationships

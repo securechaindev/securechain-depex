@@ -7,6 +7,8 @@ from dateutil.parser import parse
 from fastapi_utils.tasks import repeat_every
 from pymongo import InsertOne, ReplaceOne
 
+from requests import get
+
 from app.config import settings
 from app.services import (
     bulk_write_cve_actions,
@@ -14,8 +16,6 @@ from app.services import (
     read_env_variables,
     replace_env_variables
 )
-
-from requests import get
 
 
 # 24h = 216000
@@ -143,8 +143,8 @@ async def get_products(raw_cve: dict[str, Any]) -> list[str]:
     if 'configurations' in raw_cve:
         for configuration in raw_cve['configurations']:
             for node in configuration['nodes']:
-                for cpeMatch in node['cpeMatch']:
-                    product = cpeMatch['criteria'].split(':')[4]
+                for cpe_match in node['cpeMatch']:
+                    product = cpe_match['criteria'].split(':')[4]
                     if product not in products:
                         products.append(product)
     return products

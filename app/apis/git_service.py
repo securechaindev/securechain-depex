@@ -1,9 +1,9 @@
 from typing import Any
 
+from requests import post
+
 from app.config import settings
 from app.utils import get_manager
-
-from requests import post
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',

@@ -3,7 +3,7 @@ NPM = 'NPM'
 MVN = 'MVN'
 
 
-async def get_manager(file_name: str) -> str | None:
+async def get_manager(file_name: str) -> str:
     if '.txt' in file_name:
         return PIP
     match file_name:
@@ -20,4 +20,4 @@ async def get_manager(file_name: str) -> str | None:
         case 'pom.xml':
             return MVN
         case _:
-            return None
+            return ''

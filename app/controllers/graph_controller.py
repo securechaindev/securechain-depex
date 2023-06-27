@@ -24,7 +24,7 @@ async def get_graph(repository_id: str) -> JSONResponse:
     - **repository_id**: the id of a repository
     '''
     try:
-        graph = await read_graph_by_repository_id(repository_id)
+        graph = await read_graph_by_repository_id(repository_id, '_')
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=graph
@@ -50,7 +50,11 @@ async def init_graph(
     '''
     repository_json = jsonable_encoder(repository)
     try:
-        repository_id = await read_repository_by_owner_name(repository_json['owner'], repository_json['name'], '_')
+        repository_id = await read_repository_by_owner_name(
+            repository_json['owner'],
+            repository_json['name'],
+            '_'
+        )
         if not repository_id:
             await extract_graph(repository_json)
         else:

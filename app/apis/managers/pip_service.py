@@ -4,9 +4,9 @@ from time import sleep
 
 from dateutil.parser import parse
 
-from app.utils import get_first_position
-
 from requests import get
+
+from app.utils import get_first_position
 
 
 async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:

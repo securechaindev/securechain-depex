@@ -1,12 +1,13 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from app.controllers.transform import GraphToSMT
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidConfig,
     CompleteConfig,
     ConfigByImpact
 )
+
+from app.controllers.transform import GraphToSMT
 
 from app.services import (
     read_data_for_smt_transform,

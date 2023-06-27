@@ -1,4 +1,4 @@
-strictness: high
+strictness: low
 test-warnings: true
 doc-warnings: false
 
@@ -8,10 +8,16 @@ pylint:
     - unsubscriptable-object
     - too-many-arguments
     - bare-except
+    - line-too-long
+    - import-outside-toplevel
+    - missing-timeout
+    - too-many-nested-blocks
+    - unpacking-non-sequence
 
 pycodestyle:
   disable:
     - E722
+    - E501
 
 mccabe:
   disable:

@@ -72,7 +72,7 @@ async def no_exist_package(
             await generate_packages(new_version, require_packages)
 
 
-async def generate_packages(version: dict[str, Any], require_packages: dict[str, str]) -> None:
+async def generate_packages(version: dict[str, Any], require_packages: Any) -> None:
     if require_packages:
         for package_name, constraints in require_packages.items():
             package_name = package_name.lower()

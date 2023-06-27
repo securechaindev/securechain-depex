@@ -2,8 +2,6 @@ from typing import Any
 
 from time import sleep
 
-from dateutil.parser import parse
-
 from requests import get
 
 from xmltodict import parse
@@ -37,7 +35,7 @@ async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
             'release_date': None,
             'count': count
         })
-    
+
     return versions
 
 
@@ -46,9 +44,7 @@ async def requires_mvn_packages(pkg_name: str, version_dist: str) -> dict[str, l
     pkg_url = parts[0].replace('.', '/') + '/' + parts[1]
     while True:
         try:
-            response = get(
-                f'https://repo1.maven.org/maven2/{pkg_url}/{version_dist}/{parts[1]}-{version_dist}.pom'
-            )
+            response = get(f'https://repo1.maven.org/maven2/{pkg_url}/{version_dist}/{parts[1]}-{version_dist}.pom')
             break
         except:
             sleep(5)

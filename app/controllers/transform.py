@@ -172,11 +172,11 @@ class GraphToSMT(Transformation):
                 check = True
                 if self.package_manager == 'PIP':
                     for constraint in constraints.split(','):
-                        range = self.range_type.from_native(constraint)
-                        check = check and self.version_type(version['release']) in range
+                        versions_range = self.range_type.from_native(constraint)
+                        check = check and self.version_type(version['release']) in versions_range
                 else:
-                    range = self.range_type.from_native(constraints)
-                    check = check and self.version_type(version['release']) in range
+                    versions_range = self.range_type.from_native(constraints)
+                    check = check and self.version_type(version['release']) in versions_range
                 if check:
                     filtered_versions.append(version)
             return filtered_versions

@@ -5,7 +5,7 @@ from time import sleep
 from requests import get
 
 
-async def get_all_npm_versions(pkg_name: str) -> list[dict[str, Any]]:
+async def get_all_npm_versions(pkg_name: str) -> Any:
     while True:
         try:
             response = get(f'https://registry.npmjs.org/{pkg_name}').json()
@@ -31,4 +31,4 @@ async def get_all_npm_versions(pkg_name: str) -> list[dict[str, Any]]:
 
         return (versions, all_require_packages)
 
-    return ([],[])
+    return ([], [])

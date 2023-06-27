@@ -5,29 +5,13 @@ from datetime import datetime
 from .dbs.databases import get_graph_db_session
 
 
-# async def create_package(
-#     package: dict[str, Any],
-#     constraints: list[str] | str,
-#     parent_id: str,
-#     package_manager: str
-# ) -> None:
-#     query = '''
-#     match (parent:RequirementFile|Version)
-#     where elementid(parent) = $parent_id
-#     create(p:Package{name:$name,moment:$moment})
-#     create (parent)-[rel:REQUIRES{constraints:$constraints}]->(p)
-#     '''
-#     session = get_graph_db_session(package_manager)
-#     await session.run(query, package, constraints=constraints, parent_id=parent_id)
-
-
 async def create_package_and_versions(
     package: dict[str, Any],
     versions: list[dict[str, Any]],
     constraints: list[str] | str,
     parent_id: str,
     package_manager: str
-) -> None:
+) -> list[dict[str, str]]:
     query = '''
     match (parent:RequirementFile|Version)
     where elementid(parent) = $parent_id
@@ -47,7 +31,13 @@ async def create_package_and_versions(
     return collect({name: v.name, id: elementid(v)})
     '''
     session = get_graph_db_session(package_manager)
-    result = await session.run(query, package, constraints=constraints, parent_id=parent_id, versions=versions)
+    result = await session.run(
+        query,
+        package,
+        constraints=constraints,
+        parent_id=parent_id,
+        versions=versions
+    )
     record = await result.single()
     return record[0] if record else None
 
@@ -64,7 +54,12 @@ async def read_package_by_name(package_name: str, package_manager: str) -> dict[
     return record[0] if record else None
 
 
-async def relate_package(package_name: str, constraints: list[str] | str, parent_id: str, package_manager: str) -> None:
+async def relate_package(
+    package_name: str,
+    constraints: list[str] | str,
+    parent_id: str,
+    package_manager: str
+) -> None:
     query = '''
     match 
         (p:Package),

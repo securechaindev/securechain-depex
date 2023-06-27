@@ -3,7 +3,11 @@ from typing import Any
 from .dbs.databases import get_graph_db_session
 
 
-async def create_version(version: dict[str, Any], package_name: str, package_manager: str) -> dict[str, Any]:
+async def create_version(
+    version: dict[str, Any],
+    package_name: str,
+    package_manager: str
+) -> dict[str, Any]:
     query = '''
     match (p: Package)
     where p.name = $package_name

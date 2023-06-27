@@ -1,5 +1,3 @@
-from pymongo import ASCENDING
-
 from app.services.dbs.databases import get_graph_db_session, get_collection
 
 

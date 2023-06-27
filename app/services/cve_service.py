@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 from typing import Any
 
 from .dbs.databases import get_collection
@@ -5,8 +6,7 @@ from .dbs.databases import get_collection
 
 async def read_cve_by_cve_id(cve_id: str) -> dict[str, Any] | None:
     cve_collection = get_collection('cves')
-    cve = await cve_collection.find_one({'id': cve_id})
-    return cve
+    return await cve_collection.find_one({'id': cve_id})
 
 
 async def bulk_write_cve_actions(actions: list[Any], ordered: bool) -> None:

@@ -19,7 +19,7 @@ async def get_all_versions(package_name: str, manager: str) -> list[dict[str, An
             return await get_all_pip_versions(package_name)
 
 
-async def requires_packages(package_name: str, version_dist: str, manager: str) -> list[str] | str:
+async def requires_packages(package_name: str, version_dist: str, manager: str) -> dict[str, list[str] | str]:
     match manager:
         case 'PIP':
             return await requires_pip_packages(package_name, version_dist)
