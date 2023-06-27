@@ -15,16 +15,20 @@ async def get_all_npm_versions(pkg_name: str) -> list[dict[str, Any]]:
 
     if 'versions' in response:
         versions = []
-        releases = response['versions']
+        all_require_packages = []
+        raw_versions = response['versions']
 
-        for release in releases:
-
+        for count, version in enumerate(raw_versions):
             versions.append({
-                'name': release,
+                'name': version,
                 'release_date': None,
-                'require_packages': releases[release]['dependencies'] if 'dependencies' in releases[release] else {}
+                'count': count,
+                'require_packages': raw_versions[version]['dependencies'] if 'dependencies' in raw_versions[version] else {}
             })
+            all_require_packages.append(
+                raw_versions[version]['dependencies'] if 'dependencies' in raw_versions[version] else {}
+            )
 
-        return versions
+        return (versions, all_require_packages)
 
-    return []
+    return ([],[])

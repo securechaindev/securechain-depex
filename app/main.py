@@ -10,12 +10,15 @@ from app.router import api_router
 from app.services import create_indexes
 from app.utils import json_encoder
 
-DESCRIPTION = 'A simple backend for dependency extraction'
+DESCRIPTION = '''
+A backend for dependency graph building, atribution of vulnerabilities and reasoning
+over it.
+'''
 
 app = FastAPI(
     title='Depex',
     description=DESCRIPTION,
-    version='0.4.3',
+    version='0.5.0',
     contact={
         'name': 'Antonio Germán Márquez Trujillo',
         'url': 'https://github.com/GermanMT',

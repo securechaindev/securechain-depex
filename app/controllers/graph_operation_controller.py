@@ -54,8 +54,8 @@ async def valid_file(
     - **requirement_file_id**: the id of a requirement file
     - **file_name**: name of requirement file belonging to a graph
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
@@ -80,8 +80,8 @@ async def number_of_configurations(
     - **requirement_file_id**: the id of a requirement file
     - **file_name**: name of requirement file belonging to graph
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
@@ -110,14 +110,14 @@ async def minimize_impact(
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = MinimizeImpact(limit)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -140,14 +140,14 @@ async def maximize_impact(
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = MaximizeImpact(limit)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -174,12 +174,12 @@ async def filter_configs(
     - **min_threshold**: min impact threshold
     - **limit**: the number of configurations to return
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = FilterConfigs(max_threshold, min_threshold, limit)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

@@ -1,11 +1,11 @@
 from typing import Any
 
-from app.services import add_impacts_and_cves
+from app.utils import mean, weighted_mean
 
 
-async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str) -> None:
+async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str, artifact_id: str | None = None) -> dict[str, Any]:
     impacts: list[float] = []
-    cves: list[str] = []
+    version['cves']: list[str] = []
 
     version_type = await get_version_type(package_manager)
 
@@ -14,7 +14,7 @@ async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]]
             for node in configuration['nodes']:
                 for cpe_match in node['cpeMatch']:
                     cpe_parts = cpe_match['criteria'].split(':')
-                    if cpe_parts[4] == package_name:
+                    if cpe_parts[4] == package_name or cpe_parts[4] == artifact_id:
                         if (
                             'versionStartIncluding' not in cpe_match and
                             'versionEndIncluding' not in cpe_match and
@@ -23,12 +23,12 @@ async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]]
                         ):
                             cpe_version = cpe_parts[5]
                             if '*' in cpe_version or '-' in cpe_version:
-                                cves.append(raw_cpe_match['id'])
+                                version['cves'].append(raw_cpe_match['id'])
                                 impacts.append(raw_cpe_match['impact_score'][0])
                             else:
                                 try:
                                     if version_type(version['name']) == version_type(cpe_version):
-                                        cves.append(raw_cpe_match['id'])
+                                        version['cves'].append(raw_cpe_match['id'])
                                         impacts.append(raw_cpe_match['impact_score'][0])
                                 except:
                                     continue
@@ -47,9 +47,12 @@ async def relate_cves(version: dict[str, Any], cpe_matches: list[dict[str, Any]]
                                 continue
 
                             if check:
-                                cves.append(raw_cpe_match['id'])
+                                version['cves'].append(raw_cpe_match['id'])
                                 impacts.append(raw_cpe_match['impact_score'][0])
-    await add_impacts_and_cves(impacts, cves, version['id'])
+
+    version['mean'] = await mean(impacts)
+    version['weighted_mean'] = await weighted_mean(impacts)
+    return version
 
 
 async def get_version_type(package_manager: str):

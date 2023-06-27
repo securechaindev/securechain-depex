@@ -170,8 +170,12 @@ class GraphToSMT(Transformation):
         if constraints != 'any':
             for version in self.dependency_versions[dependency]:
                 check = True
-                for constraint in constraints.split(','):
-                    range = self.range_type.from_native(constraint)
+                if self.package_manager == 'PIP':
+                    for constraint in constraints.split(','):
+                        range = self.range_type.from_native(constraint)
+                        check = check and self.version_type(version['release']) in range
+                else:
+                    range = self.range_type.from_native(constraints)
                     check = check and self.version_type(version['release']) in range
                 if check:
                     filtered_versions.append(version)
@@ -193,7 +197,6 @@ class GraphToSMT(Transformation):
         parts = [var == version['count'] for version in versions]
         if parts:
             versions = Or(parts)
-
             if versions in self.childs:
                 self.childs[versions].append(parent == version)
             else:
@@ -221,6 +224,10 @@ class GraphToSMT(Transformation):
                 from univers.versions import SemverVersion
                 from univers.version_range import NpmVersionRange
                 return (SemverVersion, NpmVersionRange)
+            case 'MVN':
+                from univers.versions import MavenVersion
+                from univers.version_range import MavenVersionRange
+                return (MavenVersion, MavenVersionRange)
             case _:
                 from univers.versions import PypiVersion
                 from univers.version_range import PypiVersionRange

@@ -1,18 +1,21 @@
 from typing import Any
 
-from .dbs.databases import cve_collection
+from .dbs.databases import get_collection
 
 
 async def read_cve_by_cve_id(cve_id: str) -> dict[str, Any] | None:
+    cve_collection = get_collection('cves')
     cve = await cve_collection.find_one({'id': cve_id})
     return cve
 
 
 async def bulk_write_cve_actions(actions: list[Any], ordered: bool) -> None:
+    cve_collection = get_collection('cves')
     await cve_collection.bulk_write(actions, ordered=ordered)
 
 
 async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, Any]]:
+    cve_collection = get_collection('cves')
     pipeline = [
         {
             '$project': {

@@ -1,62 +1,64 @@
 from typing import Any
 
-from app.utils import mean, weighted_mean
-
-from .dbs.databases import session
+from .dbs.databases import get_graph_db_session
 
 
-async def create_version(version: dict[str, Any], package_name: str) -> dict[str, Any]:
-    query = """
+async def create_version(version: dict[str, Any], package_name: str, package_manager: str) -> dict[str, Any]:
+    query = '''
     match (p: Package)
     where p.name = $package_name
     create(v: Version{
         name: $name,
         release_date: $release_date,
         count: $count,
-        cves: [],
-        mean: 0,
-        weighted_mean: 0
+        cves: $cves,
+        mean: $mean,
+        weighted_mean: $weighted_mean
     })
     create (p)-[rel: HAVE]->(v)
-    return v{.*, id: elementid(v)}
-    """
+    return {name: v.name, id: elementid(v)}
+    '''
+    session = get_graph_db_session(package_manager)
     result = await session.run(query, version, package_name=package_name)
     record = await result.single()
     return record[0] if record else None
 
 
-async def count_number_of_versions_by_package(package_name: str) -> int:
+async def count_number_of_versions_by_package(package_name: str, package_manager: str) -> int:
     query = '''
     match (p: Package) where p.name = $package_name
     match (p)-[r: HAVE]->(v: Version)
     return count(v)
     '''
+    session = get_graph_db_session(package_manager)
     result = await session.run(query, package_name=package_name)
     record = await result.single()
     return record[0] if record else None
 
 
-async def get_versions_names_by_package(package_name: str) -> list[str]:
-    query = """
+async def get_versions_names_by_package(package_name: str, package_manager: str) -> list[str]:
+    query = '''
     match (p: Package) where p.name = $package_name
     match (p)-[r: HAVE]->(v: Version)
     return collect(v.name)
-    """
+    '''
+    session = get_graph_db_session(package_manager)
     result = await session.run(query, package_name=package_name)
     record = await result.single()
     return record[0] if record else None
 
 
 async def get_releases_by_counts(
-    configs: list[dict[str, int]]
+    configs: list[dict[str, int]],
+    package_manager: str
 ) -> list[dict[str, str | float | int]]:
     sanitized_configs: list[dict[str, str | float | int]] = []
-    query = """
+    query = '''
     MATCH (v:Version)<-[:HAVE]-(parent:Package)
     WHERE v.count = $count and parent.name = $package
     RETURN v.name
-    """
-
+    '''
+    session = get_graph_db_session(package_manager)
     for config in configs:
         sanitized_config: dict[str, str | float | int] = {}
         for var, value in config.items():
@@ -71,33 +73,19 @@ async def get_releases_by_counts(
 
 
 async def get_counts_by_releases(
-    config: dict[str, str]
+    config: dict[str, str],
+    package_manager: str
 ) -> dict[str, int]:
     sanitized_config: dict[str, int] = {}
-    query = """
+    query = '''
     MATCH (v:Version)<-[:HAVE]-(parent:Package)
     WHERE v.name = $release and parent.name = $package
     RETURN v.count
-    """
-
+    '''
+    session = get_graph_db_session(package_manager)
     for package, release in config.items():
         result = await session.run(query, package=package, release=release)
         record = await result.single()
         if record:
             sanitized_config.update({package: record[0]})
     return sanitized_config
-
-
-async def add_impacts_and_cves(impacts: list[float], cves: list[str], version_id: str) -> None:
-    query = """
-    match (v: Version)
-    where elementid(v) = $version_id
-    set v.cves = $cves, v.mean = $mean, v.weighted_mean = $weighted_mean
-    """
-    await session.run(
-        query,
-        version_id=version_id,
-        cves=cves,
-        mean=await mean(impacts),
-        weighted_mean=await weighted_mean(impacts)
-    )

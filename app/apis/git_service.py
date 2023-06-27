@@ -62,6 +62,9 @@ async def json_reader(
         if file not in all_packages:
             all_packages[file] = {'manager': file_manager, 'dependencies': {}}
         for node in node['dependencies']['nodes']:
+            if file_manager == 'MVN':
+                if '=' in node['requirements']:
+                    node['requirements'] = '[' + node['requirements'].replace('=', '').replace(' ', '') + ']'
             all_packages[file]['dependencies'].update({node['packageName']: node['requirements']})
 
     return (page_info, all_packages)

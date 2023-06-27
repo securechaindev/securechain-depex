@@ -4,112 +4,84 @@ from time import sleep
 
 from dateutil.parser import parse
 
-from app.utils import get_first_position
-
 from requests import get
 
+from xmltodict import parse
 
-async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
-    pkg_url = pkg_name.replace('.', '/').replace(':', '/')
+
+async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
+    parts = pkg_name.split(':')
+    pkg_url = parts[0].replace('.', '/') + '/' + parts[1]
     while True:
         try:
-            response = get(f'https://repo1.maven.org/maven2/{pkg_url}/maven-metadata.xml').json()
+            response = get(f'https://repo1.maven.org/maven2/{pkg_url}/maven-metadata.xml')
             break
         except:
-            # Actualmente la API JSON de PyPI no nos permite hacer llamadas para obtener toda
-            # la información. Esto hace que tenga que hacer una llamada por cada versión, si
-            # se satura la api tendremos que esperar a que vuelva a haber respueta.
-            # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
-            # estar atento a nuevas versiones.
             sleep(5)
 
+    xml_string = response.text
+    try:
+        python_dict = parse(xml_string)
+    except:
+        return []
+
+    if isinstance(python_dict['metadata']['versioning']['versions']['version'], list):
+        raw_versions = python_dict['metadata']['versioning']['versions']['version']
+    else:
+        raw_versions = [python_dict['metadata']['versioning']['versions']['version']]
+
+    versions: list[dict[str, Any]] = []
+    for count, version in enumerate(raw_versions):
+        versions.append({
+            'name': version,
+            'release_date': None,
+            'count': count
+        })
     
-
-    if 'releases' in response:
-        versions = []
-        releases = response['releases']
-
-        for release in releases:
-            release_date = None
-            for item in releases[release]:
-                release_date = parse(item['upload_time_iso_8601'])
-
-            versions.append({
-                'name': release,
-                'release_date': release_date
-            })
-
-        return versions
-
-    return []
+    return versions
 
 
-async def requires_pypi_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
+async def requires_mvn_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
+    parts = pkg_name.split(':')
+    pkg_url = parts[0].replace('.', '/') + '/' + parts[1]
     while True:
         try:
             response = get(
-                f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-            ).json()['info']['requires_dist']
+                f'https://repo1.maven.org/maven2/{pkg_url}/{version_dist}/{parts[1]}-{version_dist}.pom'
+            )
             break
         except:
-            # Actualmente la API JSON de PyPI no nos permite hacer llamadas para obtener toda
-            # la información. Esto hace que tenga que hacer una llamada por cada versión, si
-            # se satura la api tendremos que esperar a que vuelva a haber respueta.
-            # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
-            # estar atento a nuevas versiones.
             sleep(5)
 
-    if response:
+    xml_string = response.text
+    try:
+        python_dict = parse(xml_string)
+    except:
+        return {}
+
+    if 'dependencies' in python_dict['project'] and python_dict['project']['dependencies'] is not None:
         require_packages: dict[str, Any] = {}
 
-        for dist in response:
-            data = dist.split(';')
+        if isinstance(python_dict['project']['dependencies']['dependency'], list):
+            dists = python_dict['project']['dependencies']['dependency']
+        else:
+            dists = [python_dict['project']['dependencies']['dependency']]
 
-            # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta la version 
-            # de python
-            if len(data) > 1:
-                if 'extra' in data[1]:
+        for dist in dists:
+            if 'scope' not in dist or dist['scope'] != 'test':
+                pkg_name = dist['groupId'] + ':' + dist['artifactId']
+                version = dist['version'] if 'version' in dist else '[0.0,)'
+                # TODO: Ver como recuperar la info indexada con $
+                if '$' in version or '$' in pkg_name:
                     continue
-                python_version = (
-                    '== \"3.9\"' in data[1] or
-                    '<= \"3.9\"' in data[1] or
-                    '>= \"3.9\"' in data[1] or
-                    '>= \"3\"' in data[1] or
-                    '<= \"3\"' in data[1] or
-                    '>= \"2' in data[1] or
-                    '> \"2' in data[1]
-                )
-                if 'python_version' in data[1] and not python_version:
-                    continue
-
-            # Eliminamos que se puedan requerir extras
-            # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta los extras
-            if '[' in data[0]:
-                pos_1 = await get_first_position(data[0], ['['])
-                pos_2 = await get_first_position(data[0], [']']) + 1
-                data[0] = data[0][:pos_1] + data[0][pos_2:]
-
-            data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
-
-            pos = await get_first_position(data, ['<', '>', '=', '!', '~'])
-
-            dist = data[:pos]
-            ctcs = data[pos:]
-            if not ctcs:
-                ctcs = 'any'
-
-            if (
-                dist in require_packages and
-                isinstance(require_packages[dist], dict) and
-                isinstance(ctcs, list)
-            ):
-                for ctc in ctcs:
-                    if ctc not in require_packages[dist]:
-                        require_packages[dist].append(ctcs)
-            else:
-                if '.' not in ctcs and ctcs != '':
-                    continue
-                require_packages[dist] = ctcs
+                if (
+                    '[' not in version and
+                    ']' not in version and
+                    '(' not in version and
+                    ')' not in version
+                ):
+                    version = '[' + version + ']'
+                require_packages[pkg_name] = version
 
         return require_packages
 

@@ -38,12 +38,12 @@ async def valid_config(
     - **file_name**: name of requirement file belonging to graph
     - **config**: configuration containing the name of the dependency and the version to be chosen
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = ValidConfig(await get_counts_by_releases(config))
+    operation = ValidConfig(await get_counts_by_releases(config, package_manager))
     operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
@@ -68,14 +68,14 @@ async def complete_config(
     - **file_name**: name of requirement file belonging to graph
     - **config**: partial configuration containing the name and the version of each dependency
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = CompleteConfig(await get_counts_by_releases(config))
+    operation = CompleteConfig(await get_counts_by_releases(config, package_manager))
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -98,12 +98,12 @@ async def config_by_impact(
     - **file_name**: name of requirement file belonging to graph
     - **impact**: impact number between 0 and 10
     '''
-    graph_data = await read_data_for_smt_transform(requirement_file_id)
     package_manager = await get_manager(file_name)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
     operation = ConfigByImpact(impact)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result())
+    result = await get_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

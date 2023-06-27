@@ -9,7 +9,7 @@ from app.utils import get_first_position
 from requests import get
 
 
-async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
+async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
     while True:
         try:
             response = get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
@@ -20,20 +20,22 @@ async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
             # se satura la api tendremos que esperar a que vuelva a haber respueta.
             # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
             # estar atento a nuevas versiones.
+            print('error')
             sleep(5)
 
     if 'releases' in response:
-        versions = []
-        releases = response['releases']
+        versions: list[dict[str, Any]] = []
+        raw_versions = response['releases']
 
-        for release in releases:
+        for count, version in enumerate(raw_versions):
             release_date = None
-            for item in releases[release]:
+            for item in raw_versions[version]:
                 release_date = parse(item['upload_time_iso_8601'])
 
             versions.append({
-                'name': release,
-                'release_date': release_date
+                'name': version,
+                'release_date': release_date,
+                'count': count
             })
 
         return versions
@@ -41,7 +43,7 @@ async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
     return []
 
 
-async def requires_pypi_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
+async def requires_pip_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
     while True:
         try:
             response = get(
@@ -54,6 +56,7 @@ async def requires_pypi_packages(pkg_name: str, version_dist: str) -> dict[str, 
             # se satura la api tendremos que esperar a que vuelva a haber respueta.
             # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
             # estar atento a nuevas versiones.
+            print('error')
             sleep(5)
 
     if response:
@@ -61,12 +64,12 @@ async def requires_pypi_packages(pkg_name: str, version_dist: str) -> dict[str, 
 
         for dist in response:
             data = dist.split(';')
-
             # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta la version 
             # de python
             if len(data) > 1:
                 if 'extra' in data[1]:
                     continue
+
                 python_version = (
                     '== \"3.9\"' in data[1] or
                     '<= \"3.9\"' in data[1] or
@@ -76,10 +79,11 @@ async def requires_pypi_packages(pkg_name: str, version_dist: str) -> dict[str, 
                     '>= \"2' in data[1] or
                     '> \"2' in data[1]
                 )
+
                 if 'python_version' in data[1] and not python_version:
                     continue
 
-            # Eliminamos que se puedan requerir extras
+            # INFO: Eliminamos que se puedan requerir extras
             # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta los extras
             if '[' in data[0]:
                 pos_1 = await get_first_position(data[0], ['['])
@@ -87,11 +91,10 @@ async def requires_pypi_packages(pkg_name: str, version_dist: str) -> dict[str, 
                 data[0] = data[0][:pos_1] + data[0][pos_2:]
 
             data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
-
             pos = await get_first_position(data, ['<', '>', '=', '!', '~'])
-
             dist = data[:pos]
             ctcs = data[pos:]
+
             if not ctcs:
                 ctcs = 'any'
 

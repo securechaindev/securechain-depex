@@ -1,5 +1,6 @@
 PIP = 'PIP'
 NPM = 'NPM'
+MVN = 'MVN'
 
 
 async def get_manager(file_name: str) -> str | None:
@@ -16,5 +17,7 @@ async def get_manager(file_name: str) -> str | None:
             return NPM
         case 'package.json':
             return NPM
+        case 'pom.xml':
+            return MVN
         case _:
             return None

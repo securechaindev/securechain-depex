@@ -5,15 +5,17 @@ from .cve_service import (
 )
 
 from .package_service import (
-    create_package,
     read_package_by_name,
     relate_package,
-    update_package_moment
+    update_package_moment,
+    create_package_and_versions
 )
 
 from .repository_service import (
     read_graph_by_repository_id,
-    create_repository,
+    read_repository_files,
+    read_repository_by_owner_name,
+    create_repositories,
     read_data_for_smt_transform
 )
 
@@ -24,8 +26,7 @@ from .version_service import (
     count_number_of_versions_by_package,
     get_releases_by_counts,
     get_counts_by_releases,
-    get_versions_names_by_package,
-    add_impacts_and_cves
+    get_versions_names_by_package
 )
 
 from .update_db_service import (
@@ -38,13 +39,15 @@ __all__ = [
     'read_cve_by_cve_id',
     'read_cpe_matches_by_package_name',
     'bulk_write_cve_actions',
-    'create_package',
     'read_package_by_name',
     'relate_package',
     'update_package_moment',
+    'create_package_and_versions',
     'read_env_variables',
     'read_graph_by_repository_id',
-    'create_repository',
+    'read_repository_files',
+    'read_repository_by_owner_name',
+    'create_repositories',
     'read_data_for_smt_transform',
     'create_requirement_file',
     'create_version',
@@ -52,7 +55,6 @@ __all__ = [
     'get_releases_by_counts',
     'get_counts_by_releases',
     'get_versions_names_by_package',
-    'add_impacts_and_cves',
     'replace_env_variables',
     'create_indexes'
 ]
