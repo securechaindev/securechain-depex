@@ -7,7 +7,7 @@ from flamapy.metamodels.smt_metamodel.operations import (
     ConfigByImpact
 )
 
-from app.controllers.transform import GraphToSMT
+from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 
 from app.services import (
     read_data_for_smt_transform,
