@@ -30,11 +30,7 @@ async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
 
     versions: list[dict[str, Any]] = []
     for count, version in enumerate(raw_versions):
-        versions.append({
-            'name': version,
-            'release_date': None,
-            'count': count
-        })
+        versions.append({'name': version, 'release_date': None, 'count': count})
 
     return versions
 
@@ -70,12 +66,7 @@ async def requires_mvn_packages(pkg_name: str, version_dist: str) -> dict[str, l
                 # TODO: Ver como recuperar la info indexada con $
                 if '$' in version or '$' in pkg_name:
                     continue
-                if (
-                    '[' not in version and
-                    ']' not in version and
-                    '(' not in version and
-                    ')' not in version
-                ):
+                if not any(char in version for char in ['[', ']', '(', ')']):
                     version = '[' + version + ']'
                 require_packages[pkg_name] = version
 

@@ -9,18 +9,13 @@ from requests import get
 from app.utils import get_first_position
 
 
+# TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
 async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
     while True:
         try:
             response = get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
             break
         except:
-            # Actualmente la API JSON de PyPI no nos permite hacer llamadas para obtener toda
-            # la información. Esto hace que tenga que hacer una llamada por cada versión, si
-            # se satura la api tendremos que esperar a que vuelva a haber respueta.
-            # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
-            # estar atento a nuevas versiones.
-            print('error')
             sleep(5)
 
     if 'releases' in response:
@@ -31,13 +26,7 @@ async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
             release_date = None
             for item in raw_versions[version]:
                 release_date = parse(item['upload_time_iso_8601'])
-
-            versions.append({
-                'name': version,
-                'release_date': release_date,
-                'count': count
-            })
-
+            versions.append({'name': version,'release_date': release_date,'count': count})
         return versions
 
     return []
@@ -51,12 +40,6 @@ async def requires_pip_packages(pkg_name: str, version_dist: str) -> dict[str, l
             ).json()['info']['requires_dist']
             break
         except:
-            # Actualmente la API JSON de PyPI no nos permite hacer llamadas para obtener toda
-            # la información. Esto hace que tenga que hacer una llamada por cada versión, si
-            # se satura la api tendremos que esperar a que vuelva a haber respueta.
-            # TODO: En las nuevas actualizaciones de la API JSON se debería resolver esto,
-            # estar atento a nuevas versiones.
-            print('error')
             sleep(5)
 
     if response:

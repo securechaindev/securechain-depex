@@ -25,12 +25,7 @@ router = APIRouter()
     summary='Validates a configuration',
     response_description='Return True if valid, False if not'
 )
-async def valid_config(
-    requirement_file_id: str,
-    agregator: str,
-    file_name: str,
-    config: dict[str, str]
-) -> JSONResponse:
+async def valid_config(requirement_file_id: str, agregator: str, file_name: str, config: dict[str, str]) -> JSONResponse:
     '''
     Validates a configuration satisfiability into a graph by the constraints over dependencies:
 
@@ -55,12 +50,7 @@ async def valid_config(
     summary='Complete a configuration',
     response_description='Return a configuration of versions'
 )
-async def complete_config(
-    requirement_file_id: str,
-    agregator: str,
-    file_name: str,
-    config: dict[str, str]
-) -> JSONResponse:
+async def complete_config(requirement_file_id: str, agregator: str, file_name: str, config: dict[str, str]) -> JSONResponse:
     '''
     Complete a partial configuration with the minimun posible impact:
 
@@ -85,12 +75,7 @@ async def complete_config(
     summary='Get a configuration by impact operation',
     response_description='Return a configuration of versions'
 )
-async def config_by_impact(
-    requirement_file_id: str,
-    agregator: str,
-    file_name: str,
-    impact: float
-) -> JSONResponse:
+async def config_by_impact(requirement_file_id: str, agregator: str, file_name: str, impact: float) -> JSONResponse:
     '''
     Return a configuration witn an impact as close as possible to the given impact:
 

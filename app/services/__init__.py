@@ -16,6 +16,7 @@ from .repository_service import (
     read_repository_files,
     read_repository_by_owner_name,
     create_repositories,
+    read_info,
     read_data_for_smt_transform
 )
 
@@ -48,6 +49,7 @@ __all__ = [
     'read_repository_files',
     'read_repository_by_owner_name',
     'create_repositories',
+    'read_info',
     'read_data_for_smt_transform',
     'create_requirement_file',
     'create_version',

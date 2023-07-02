@@ -82,7 +82,7 @@ class RepositoryModel(BaseModel):
         schema_extra = {
             'example': {
                 'owner': 'GermanMT',
-                'name': 'prueba',
+                'name': 'prueba_pypi',
                 'add_extras': False,
                 'is_complete': False
             }

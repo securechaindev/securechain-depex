@@ -10,42 +10,39 @@ from flamapy.metamodels.smt_metamodel.operations import (
 )
 
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
-from app.services import read_data_for_smt_transform, get_releases_by_counts
+from app.services import (
+    read_data_for_smt_transform,
+    get_releases_by_counts,
+    read_info
+)
 from app.utils import json_encoder, get_manager
 
 router = APIRouter()
 
-
-# @router.post(
-#     '/operation/graph/graph_info/{graph_id}',
-#     summary='Summarizes graph information',
-#     response_description='Return graph information'
-# )
-# async def graph_info(graph_id: str) -> JSONResponse:
-#     '''
-#     Summarizes graph information regarding its dependencies, edges and vulnerabilities:
-
-#     - **graph_id**: the id of a graph
-#     '''
-#     dependency_graph = await serialize_graph(graph_id)
-#     # Modificar esta operacion para que devuelva edges como nombre y no constraints
-#     operation = NetworkInfo()
-#     operation.execute(dependency_graph)
-#     return JSONResponse(
-#         status_code=status.HTTP_200_OK,
-#         content=json_encoder(operation.get_result())
-#     )
-
+# TODO: Cambiar el nombre 'graph' por 'file' ya que nosotros lanzamos las operaciones sobre ficheros
+# de requisitos, no sobre todo el grafo en su conjunto.
 
 @router.post(
-    '/operation/graph/valid_file/{requirement_file_id}',
+    '/operation/file/file_info/{requirement_file_id}',
+    summary='Summarizes file information',
+    response_description='Return file information'
+)
+async def file_info(requirement_file_id: str, file_name: str) -> JSONResponse:
+    '''
+    Summarizes file information regarding its dependencies, edges and vulnerabilities:
+
+    - **file_id**: the id of a file
+    '''
+    package_manager = await get_manager(file_name)
+    graph_info = await read_info(requirement_file_id, package_manager)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graph_info))
+
+@router.post(
+    '/operation/file/valid_file/{requirement_file_id}',
     summary='Validates model satisfiability',
     response_description='Return True if valid, False if not'
 )
-async def valid_file(
-    requirement_file_id: str,
-    file_name: str
-) -> JSONResponse:
+async def valid_file(requirement_file_id: str, file_name: str) -> JSONResponse:
     '''
     Summarizes requirement file graph information regarding its dependencies,
     edges and vulnerabilities:
@@ -65,16 +62,13 @@ async def valid_file(
 
 
 @router.post(
-    '/operation/graph/number_of_configurations/{requirement_file_id}',
+    '/operation/file/number_of_configurations/{requirement_file_id}',
     summary='Count the number of configurations',
     response_description='Return the number of configurations.'
 )
-async def number_of_configurations(
-    requirement_file_id: str,
-    file_name: str
-) -> JSONResponse:
+async def number_of_configurations(requirement_file_id: str, file_name: str) -> JSONResponse:
     '''
-    Count the number of configurations of a graph. Recommendatory to not use in massive graphs:
+    Count the number of configurations of a file. Recommendatory to not use in massive graphs:
 
     - **requirement_file_id**: the id of a requirement file
     - **file_name**: name of requirement file belonging to graph
@@ -91,18 +85,13 @@ async def number_of_configurations(
 
 
 @router.post(
-    '/operation/graph/minimize_impact/{requirement_file_id}',
+    '/operation/file/minimize_impact/{requirement_file_id}',
     summary='Minimize impact of a graph',
     response_description='Return a list of configurations'
 )
-async def minimize_impact(
-    requirement_file_id: str,
-    agregator: str,
-    file_name: str,
-    limit: int
-) -> JSONResponse:
+async def minimize_impact(requirement_file_id: str, agregator: str, file_name: str, limit: int) -> JSONResponse:
     '''
-    Return a list of configurations ordered with the minimun posible impact:
+    Return a list of configurations of a file ordered with the minimun posible impact:
 
     - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
@@ -121,18 +110,13 @@ async def minimize_impact(
 
 
 @router.post(
-    '/operation/graph/maximize_impact/{requirement_file_id}',
+    '/operation/file/maximize_impact/{requirement_file_id}',
     summary='Maximize impact of a graph',
     response_description='Return a list of configurations'
 )
-async def maximize_impact(
-    requirement_file_id: str,
-    agregator: str,
-    file_name: str,
-    limit: int
-) -> JSONResponse:
+async def maximize_impact(requirement_file_id: str, agregator: str, file_name: str, limit: int) -> JSONResponse:
     '''
-    Return a list of configurations ordered with the maximun posible impact:
+    Return a list of configurations of a file ordered with the maximun posible impact:
 
     - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
@@ -151,20 +135,13 @@ async def maximize_impact(
 
 
 @router.post(
-    '/operation/graph/filter_configs/{requirement_file_id}',
+    '/operation/file/filter_configs/{requirement_file_id}',
     summary='Filter configurations of a graph',
     response_description='Return a list of configurations'
 )
-async def filter_configs(
-    requirement_file_id: str,
-    agregator: str,
-    file_name: str,
-    max_threshold: float,
-    min_threshold: float,
-    limit: int
-) -> JSONResponse:
+async def filter_configs(requirement_file_id: str, agregator: str, file_name: str, max_threshold: float, min_threshold: float, limit: int) -> JSONResponse:
     '''
-    Return a list of configurations between a max and min impact:
+    Return a list of configurations of a file between a max and min impact:
 
     - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')

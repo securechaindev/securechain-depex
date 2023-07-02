@@ -6,7 +6,6 @@ from app.utils import mean, weighted_mean
 async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str, artifact_id: str | None = None) -> dict[str, Any]:
     impacts: list[float] = []
     version['cves'] = []
-
     version_type = await get_version_type(package_manager)
 
     for raw_cpe_match in cpe_matches:
@@ -14,13 +13,9 @@ async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_m
             for node in configuration['nodes']:
                 for cpe_match in node['cpeMatch']:
                     cpe_parts = cpe_match['criteria'].split(':')
-                    if cpe_parts[4] == package_name or cpe_parts[4] == artifact_id:
-                        if (
-                            'versionStartIncluding' not in cpe_match and
-                            'versionEndIncluding' not in cpe_match and
-                            'versionStartExcluding' not in cpe_match and
-                            'versionEndExcluding' not in cpe_match
-                        ):
+                    if cpe_parts[4] in (package_name, artifact_id):
+                        version_keys = ['versionStartIncluding', 'versionEndIncluding', 'versionStartExcluding', 'versionEndExcluding']
+                        if not any(key in cpe_match for key in version_keys):
                             cpe_version = cpe_parts[5]
                             if '*' in cpe_version or '-' in cpe_version:
                                 version['cves'].append(raw_cpe_match['id'])

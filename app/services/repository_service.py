@@ -29,11 +29,7 @@ async def create_repositories(repository: dict[str, Any]) -> dict[str, str]:
     return repository_ids
 
 
-async def read_repository_by_owner_name(
-    owner: str,
-    name: str,
-    package_manager: str
-) -> dict[str, Any]:
+async def read_repository_by_owner_name(owner: str, name: str, package_manager: str) -> dict[str, Any]:
     query = '''
     match(r: Repository{owner: $owner, name: $name}) return elementid(r)
     '''
@@ -53,10 +49,7 @@ async def read_repository_files(repository_id: str, package_manager: str) -> lis
     return record[0] if record else None
 
 
-async def read_graph_by_repository_id(
-    requirement_file_id: str,
-    package_manager: str
-) -> dict[str, Any]:
+async def read_graph_by_repository_id(requirement_file_id: str, package_manager: str) -> dict[str, Any]:
     query = '''
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
     call apoc.path.subgraphAll(rf, {relationshipFilter: '>'}) yield nodes, relationships
@@ -70,16 +63,33 @@ async def read_graph_by_repository_id(
     raise HTTPException(status_code=404, detail=[f'Graph with id {requirement_file_id} not found'])
 
 
-async def read_data_for_smt_transform(
-    requirement_file_id: str,
-    package_manager: str
-) -> dict[str, Any]:
+async def read_info(requirement_file_id: str, package_manager: str) -> dict[str, Any]:
+    query = '''
+    match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
+    call apoc.path.subgraphAll(rf, {relationshipFilter: '>'}) yield nodes, relationships
+    with nodes, relationships
+    unwind nodes as node
+    with case when labels(node)[0] = 'Package' then node end as deps,
+    case when labels(node)[0] = 'Version' then node.cves end as cves, relationships
+    with collect(deps) as deps, apoc.coll.flatten(collect(cves)) as cves, relationships
+    unwind relationships as relationship
+    with case when type(relationship) = 'REQUIRES' then relationship end as rels, deps, cves
+    with deps, cves, collect(rels) as rels
+    return {dependencies: size(deps), edges: size(rels), cves: apoc.coll.toSet(cves)}
+    '''
+    session = get_graph_db_session(package_manager)
+    result = await session.run(query, requirement_file_id=requirement_file_id)
+    record = await result.single()
+    return record[0] if record else None
+
+
+async def read_data_for_smt_transform(requirement_file_id: str, package_manager: str) -> dict[str, Any]:
     query = '''
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
     call apoc.path.subgraphAll(rf, {relationshipFilter: '>'}) yield relationships
     unwind relationships as relationship
     with case type(relationship)
-    when 'REQUIRES'  then {
+    when 'Requires' then {
         parent_type: labels(startnode(relationship))[0],
         parent_id: elementid(startnode(relationship)),
         parent_name: startnode(relationship).name,
@@ -89,7 +99,7 @@ async def read_data_for_smt_transform(
     }
     end as requires,
     case type(relationship)
-    when 'HAVE' then {
+    when 'Have' then {
         dependency: startnode(relationship).name,
         id: elementid(endnode(relationship)),
         release: endnode(relationship).name,

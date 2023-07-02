@@ -50,11 +50,7 @@ async def pip_extract_graph(name: str, file: Any, repository_ids: dict[str, str]
             )
 
 
-async def no_exist_package(
-    package_name: str,
-    constraints: list[str] | str,
-    parent_id: str
-) -> None:
+async def no_exist_package(package_name: str, constraints: list[str] | str, parent_id: str) -> None:
     all_versions = await get_all_versions(package_name, 'PIP')
 
     if all_versions:

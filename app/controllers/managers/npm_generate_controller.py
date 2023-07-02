@@ -47,11 +47,7 @@ async def npm_extract_graph(name: str, file: Any, repository_ids: dict[str, str]
             )
 
 
-async def no_exist_package(
-    package_name: str,
-    constraints: list[str] | str,
-    parent_id: str
-) -> None:
+async def no_exist_package(package_name: str, constraints: list[str] | str, parent_id: str) -> None:
     all_versions, all_require_packages = await get_all_versions(package_name, 'NPM')
 
     if all_versions:

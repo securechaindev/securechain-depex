@@ -25,24 +25,17 @@ async def get_graph(repository_id: str) -> JSONResponse:
     '''
     try:
         graph = await read_graph_by_repository_id(repository_id, '_')
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=graph
-        )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=graph)
     except HTTPException as error:
-        return JSONResponse(
-            status_code=error.status_code,
-            content=json_encoder({'message': error.detail})
-        )
+        return JSONResponse(status_code=error.status_code, content=json_encoder({'message': error.detail}))
 
 
 @router.post(
     '/graph/init',
     summary='Init a graph',
+    response_description='Initialize a graph'
 )
-async def init_graph(
-    repository: RepositoryModel
-) -> JSONResponse:
+async def init_graph(repository: RepositoryModel) -> JSONResponse:
     '''
     Starts graph extraction in its initial state, i.e., not complete:
 
@@ -50,22 +43,12 @@ async def init_graph(
     '''
     repository_json = jsonable_encoder(repository)
     try:
-        repository_id = await read_repository_by_owner_name(
-            repository_json['owner'],
-            repository_json['name'],
-            '_'
-        )
+        repository_id = await read_repository_by_owner_name(repository_json['owner'], repository_json['name'], '_')
         if not repository_id:
             await extract_graph(repository_json)
         else:
             # TODO: Hacer un método que actualize el grafo existente en la base de datos
             pass
-        return JSONResponse(
-            status_code=status.HTTP_201_CREATED,
-            content=json_encoder({'message': 'created'})
-        )
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=json_encoder({'message': 'created'}))
     except HTTPException as error:
-        return JSONResponse(
-            status_code=error.status_code,
-            content=json_encoder({'message': error.detail})
-        )
+        return JSONResponse(status_code=error.status_code, content=json_encoder({'message': error.detail}))

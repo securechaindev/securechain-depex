@@ -3,11 +3,7 @@ from typing import Any
 from .dbs.databases import get_graph_db_session
 
 
-async def create_version(
-    version: dict[str, Any],
-    package_name: str,
-    package_manager: str
-) -> dict[str, Any]:
+async def create_version(version: dict[str, Any], package_name: str, package_manager: str) -> dict[str, Any]:
     query = '''
     match (p: Package)
     where p.name = $package_name
@@ -19,7 +15,7 @@ async def create_version(
         mean: $mean,
         weighted_mean: $weighted_mean
     })
-    create (p)-[rel: HAVE]->(v)
+    create (p)-[rel:Have]->(v)
     return {name: v.name, id: elementid(v)}
     '''
     session = get_graph_db_session(package_manager)
@@ -31,7 +27,7 @@ async def create_version(
 async def count_number_of_versions_by_package(package_name: str, package_manager: str) -> int:
     query = '''
     match (p: Package) where p.name = $package_name
-    match (p)-[r: HAVE]->(v: Version)
+    match (p)-[r:Have]->(v: Version)
     return count(v)
     '''
     session = get_graph_db_session(package_manager)
@@ -43,7 +39,7 @@ async def count_number_of_versions_by_package(package_name: str, package_manager
 async def get_versions_names_by_package(package_name: str, package_manager: str) -> list[str]:
     query = '''
     match (p: Package) where p.name = $package_name
-    match (p)-[r: HAVE]->(v: Version)
+    match (p)-[r:Have]->(v: Version)
     return collect(v.name)
     '''
     session = get_graph_db_session(package_manager)
@@ -52,13 +48,10 @@ async def get_versions_names_by_package(package_name: str, package_manager: str)
     return record[0] if record else None
 
 
-async def get_releases_by_counts(
-    configs: list[dict[str, int]],
-    package_manager: str
-) -> list[dict[str, str | float | int]]:
+async def get_releases_by_counts(configs: list[dict[str, int]], package_manager: str) -> list[dict[str, str | float | int]]:
     sanitized_configs: list[dict[str, str | float | int]] = []
     query = '''
-    MATCH (v:Version)<-[:HAVE]-(parent:Package)
+    MATCH (v:Version)<-[:Have]-(parent:Package)
     WHERE v.count = $count and parent.name = $package
     RETURN v.name
     '''
@@ -76,13 +69,10 @@ async def get_releases_by_counts(
     return sanitized_configs
 
 
-async def get_counts_by_releases(
-    config: dict[str, str],
-    package_manager: str
-) -> dict[str, int]:
+async def get_counts_by_releases(config: dict[str, str], package_manager: str) -> dict[str, int]:
     sanitized_config: dict[str, int] = {}
     query = '''
-    MATCH (v:Version)<-[:HAVE]-(parent:Package)
+    MATCH (v:Version)<-[:Have]-(parent:Package)
     WHERE v.name = $release and parent.name = $package
     RETURN v.count
     '''
