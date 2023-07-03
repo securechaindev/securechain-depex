@@ -1,6 +1,5 @@
 # mypy: ignore-errors
 from typing import Any
-
 from .dbs.databases import get_collection
 
 

@@ -4,20 +4,13 @@ MVN = 'MVN'
 
 
 async def get_manager(file_name: str) -> str:
-    if '.txt' in file_name:
+    pip_files = ('.txt', 'setup.py', 'pipfile.lock', 'pipfile')
+    npm_files = ('package-lock.json', 'package.json')
+    mvn_files = ('pom.xml')
+    if any(extension in file_name for extension in pip_files):
         return PIP
-    match file_name:
-        case 'setup.py':
-            return PIP
-        case 'pipfile.lock':
-            return PIP
-        case 'pipfile':
-            return PIP
-        case 'package-lock.json':
-            return NPM
-        case 'package.json':
-            return NPM
-        case 'pom.xml':
-            return MVN
-        case _:
-            return ''
+    if any(extension in file_name for extension in npm_files):
+        return NPM
+    if any(extension in file_name for extension in mvn_files):
+        return MVN
+    return ''

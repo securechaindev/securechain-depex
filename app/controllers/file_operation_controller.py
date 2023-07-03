@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
-
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidModel,
     NumberOfProducts,

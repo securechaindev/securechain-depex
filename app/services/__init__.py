@@ -3,14 +3,12 @@ from .cve_service import (
     read_cpe_matches_by_package_name,
     bulk_write_cve_actions
 )
-
 from .package_service import (
     read_package_by_name,
     relate_package,
     update_package_moment,
     create_package_and_versions
 )
-
 from .repository_service import (
     read_graph_by_repository_id,
     read_repository_files,
@@ -19,9 +17,7 @@ from .repository_service import (
     read_info,
     read_data_for_smt_transform
 )
-
 from .requirement_file_service import create_requirement_file
-
 from .version_service import (
     create_version,
     count_number_of_versions_by_package,
@@ -29,7 +25,6 @@ from .version_service import (
     get_counts_by_releases,
     get_versions_names_by_package
 )
-
 from .update_db_service import (
     read_env_variables,
     replace_env_variables

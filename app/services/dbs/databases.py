@@ -1,11 +1,7 @@
 from typing import Any
-
 from functools import lru_cache
-
 from neo4j import AsyncGraphDatabase
-
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
-
 from app.config import settings
 
 

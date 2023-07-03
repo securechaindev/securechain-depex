@@ -1,10 +1,8 @@
 from json import loads
-
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError, ValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
-
 from app.controllers import db_updater
 from app.router import api_router
 from app.services import create_indexes
@@ -39,10 +37,7 @@ async def startup_event() -> None:
 
 @app.exception_handler(RequestValidationError)
 @app.exception_handler(ValidationError)
-async def validation_exception_handler(
-    _: Request,
-    exc: ValidationError | RequestValidationError
-) -> JSONResponse:
+async def validation_exception_handler(_: Request,exc: ValidationError | RequestValidationError) -> JSONResponse:
     exc_json = loads(exc.json())
     response: dict[str, list[str]] = {'message': []}
     for error in exc_json:

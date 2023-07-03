@@ -1,20 +1,16 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
-
 from flamapy.metamodels.smt_metamodel.operations import (
     ValidConfig,
     CompleteConfig,
     ConfigByImpact
 )
-
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
-
 from app.services import (
     read_data_for_smt_transform,
     get_counts_by_releases,
     get_releases_by_counts
 )
-
 from app.utils import json_encoder, get_manager
 
 router = APIRouter()

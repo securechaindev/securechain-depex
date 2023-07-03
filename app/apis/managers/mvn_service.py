@@ -1,9 +1,6 @@
 from typing import Any
-
 from time import sleep
-
 from requests import get
-
 from xmltodict import parse
 
 
@@ -16,22 +13,18 @@ async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
             break
         except:
             sleep(5)
-
     xml_string = response.text
     try:
         python_dict = parse(xml_string)
     except:
         return []
-
     if isinstance(python_dict['metadata']['versioning']['versions']['version'], list):
         raw_versions = python_dict['metadata']['versioning']['versions']['version']
     else:
         raw_versions = [python_dict['metadata']['versioning']['versions']['version']]
-
     versions: list[dict[str, Any]] = []
     for count, version in enumerate(raw_versions):
         versions.append({'name': version, 'release_date': None, 'count': count})
-
     return versions
 
 
@@ -44,21 +37,17 @@ async def requires_mvn_packages(pkg_name: str, version_dist: str) -> dict[str, l
             break
         except:
             sleep(5)
-
     xml_string = response.text
     try:
         python_dict = parse(xml_string)
     except:
         return {}
-
     if 'dependencies' in python_dict['project'] and python_dict['project']['dependencies'] is not None:
         require_packages: dict[str, Any] = {}
-
         if isinstance(python_dict['project']['dependencies']['dependency'], list):
             dists = python_dict['project']['dependencies']['dependency']
         else:
             dists = [python_dict['project']['dependencies']['dependency']]
-
         for dist in dists:
             if 'scope' not in dist or dist['scope'] != 'test':
                 pkg_name = dist['groupId'] + ':' + dist['artifactId']
@@ -69,7 +58,5 @@ async def requires_mvn_packages(pkg_name: str, version_dist: str) -> dict[str, l
                 if not any(char in version for char in ['[', ']', '(', ')']):
                     version = '[' + version + ']'
                 require_packages[pkg_name] = version
-
         return require_packages
-
     return {}

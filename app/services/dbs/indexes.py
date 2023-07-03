@@ -7,7 +7,6 @@ async def create_indexes() -> None:
     await cve_collection.create_index('id', unique=True)
     await cve_collection.create_index('products', unique=False)
     await exploits_collection.create_index('cves', unique=False)
-
     pypi_session = get_graph_db_session('PIP')
     npm_session = get_graph_db_session('NPM')
     mvn_session = get_graph_db_session('MVN')

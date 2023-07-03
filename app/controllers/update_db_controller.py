@@ -1,14 +1,10 @@
 from datetime import datetime
 from time import sleep
-
 from typing import Any
-
 from dateutil.parser import parse
 from fastapi_utils.tasks import repeat_every
 from pymongo import InsertOne, ReplaceOne
-
 from requests import get
-
 from app.config import settings
 from app.services import (
     bulk_write_cve_actions,
@@ -23,16 +19,13 @@ from app.services import (
 async def db_updater() -> None:
     env_variables = await read_env_variables()
     today = datetime.today()
-
     headers = {'apiKey': settings.NVD_API_KEY}
-
     while True:
         end_day = await get_end_day(
             today,
             env_variables['last_year_update'],
             env_variables['last_month_update']
         )
-
         str_month = (
             str(env_variables['last_month_update']) if env_variables['last_month_update'] > 9
             else '0' + str(env_variables['last_month_update'])
@@ -42,7 +35,6 @@ async def db_updater() -> None:
             else '0' + str(env_variables['last_day_update'])
         )
         str_end_day = str(end_day) if end_day > 9 else '0' + str(end_day)
-
         str_begin = (
             str(env_variables['last_year_update']) +
             '-' + str_month + '-' + str_begin_day + 'T00:00:00'
@@ -51,12 +43,10 @@ async def db_updater() -> None:
             str(env_variables['last_year_update']) +
             '-' + str_month + '-' + str_end_day + 'T23:59:59'
         )
-
         params_pub = {
             'pubStartDate': str_begin,
             'pubEndDate': str_end
         }
-
         while True:
             try:
                 response = get(
@@ -68,14 +58,11 @@ async def db_updater() -> None:
                 break
             except:
                 sleep(6)
-
         await update_db(response)
-
         params_mod = {
             'lastModStartDate': str_begin,
             'lastModEndDate': str_end
         }
-
         while True:
             try:
                 response = get(
@@ -87,9 +74,7 @@ async def db_updater() -> None:
                 break
             except:
                 sleep(6)
-
         await update_db(response)
-
         if (
             env_variables['last_year_update'] == today.year and 
             env_variables['last_month_update'] == today.month
@@ -99,7 +84,6 @@ async def db_updater() -> None:
             env_variables['last_moment_update'] = datetime.now()
             await replace_env_variables(env_variables)
             break
-
         env_variables['last_month_update'] += 1
         env_variables['last_day_update'] = 1
         if env_variables['last_month_update'] == 13:
@@ -133,7 +117,6 @@ async def update_db(raw_cves: dict[str, Any]) -> None:
         else:
             raw_cve['products'] = await get_products(raw_cve)
             actions.append(ReplaceOne({'id': raw_cve['id']}, raw_cve))
-
     if actions:
         await bulk_write_cve_actions(actions, True)
 

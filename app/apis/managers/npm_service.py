@@ -1,7 +1,5 @@
 from typing import Any
-
 from time import sleep
-
 from requests import get
 
 
@@ -12,12 +10,10 @@ async def get_all_npm_versions(pkg_name: str) -> Any:
             break
         except:
             sleep(5)
-
     if 'versions' in response:
         versions = []
         all_require_packages = []
         raw_versions = response['versions']
-
         for count, version in enumerate(raw_versions):
             versions.append({
                 'name': version,
@@ -28,7 +24,5 @@ async def get_all_npm_versions(pkg_name: str) -> Any:
             all_require_packages.append(
                 raw_versions[version]['dependencies'] if 'dependencies' in raw_versions[version] else {}
             )
-
         return (versions, all_require_packages)
-
     return ([], [])

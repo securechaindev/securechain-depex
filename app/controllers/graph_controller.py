@@ -1,15 +1,12 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-
 from app.services import read_graph_by_repository_id, read_repository_by_owner_name
 from app.models import RepositoryModel
 from app.utils import json_encoder
-
 from .generate_controller import extract_graph
 
 router = APIRouter()
-
 
 @router.get(
     '/graph/{repository_id}',
