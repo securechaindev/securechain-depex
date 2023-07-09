@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError, ValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
+from apscheduler.schedulers.background import BackgroundScheduler
 from app.controllers import db_updater
 from app.router import api_router
 from app.services import create_indexes
@@ -33,11 +34,14 @@ app = FastAPI(
 async def startup_event() -> None:
     await create_indexes()
     await db_updater()
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(db_updater, 'interval', seconds=216000)
+    scheduler.start()
 
 
 @app.exception_handler(RequestValidationError)
 @app.exception_handler(ValidationError)
-async def validation_exception_handler(_: Request,exc: ValidationError | RequestValidationError) -> JSONResponse:
+async def validation_exception_handler(_: Request, exc: ValidationError | RequestValidationError) -> JSONResponse:
     exc_json = loads(exc.json())
     response: dict[str, list[str]] = {'message': []}
     for error in exc_json:

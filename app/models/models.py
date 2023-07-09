@@ -79,8 +79,8 @@ class RepositoryModel(BaseModel):
         arbitrary_types_allowed = True
         schema_extra = {
             'example': {
-                'owner': 'GermanMT',
-                'name': 'prueba_pypi',
+                'owner': 'depexorg',
+                'name': 'pip_test',
                 'add_extras': False,
                 'is_complete': False
             }
