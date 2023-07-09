@@ -1,5 +1,6 @@
 wheel==0.40.0
-fastapi[all]==0.98.0
+fastapi[all]==0.100.0
+pydantic-settings==2.0.1
 apscheduler==3.10.1
 motor==3.1.2
 python-dotenv==1.0.0

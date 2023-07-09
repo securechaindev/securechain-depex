@@ -16,9 +16,9 @@ class VersionModel(BaseModel):
     count: int
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
-        schema_extra = {
+        json_schema_extra = {
             'example': {
                 'release': '1.26.5',
                 'release_date': datetime.now(),
@@ -34,9 +34,9 @@ class PackageModel(BaseModel):
     versions: list[VersionModel] | None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
-        schema_extra = {
+        json_schema_extra = {
             'example': {
                 'name': 'urllib3',
                 'moment': datetime.now()
@@ -49,9 +49,9 @@ class RequirementFile(BaseModel):
     manager: str
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
-        schema_extra = {
+        json_schema_extra = {
             'example': {
                 'name': 'requirements.txt',
                 'manager': 'PIP'
@@ -75,9 +75,9 @@ class RepositoryModel(BaseModel):
     requirement_files: list[RequirementFile] | None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
-        schema_extra = {
+        json_schema_extra = {
             'example': {
                 'owner': 'depexorg',
                 'name': 'pip_test',

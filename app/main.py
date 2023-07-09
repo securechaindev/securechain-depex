@@ -1,13 +1,16 @@
-from json import loads
 from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError, ValidationError
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import (
+    http_exception_handler,
+    request_validation_exception_handler,
+)
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import JSONResponse
+from starlette.exceptions import HTTPException
+from starlette.responses import Response
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.controllers import db_updater
 from app.router import api_router
 from app.services import create_indexes
-from app.utils import json_encoder
 
 DESCRIPTION = '''
 A backend for dependency graph building, atribution of vulnerabilities and reasoning
@@ -39,15 +42,14 @@ async def startup_event() -> None:
     scheduler.start()
 
 
-@app.exception_handler(RequestValidationError)
-@app.exception_handler(ValidationError)
-async def validation_exception_handler(_: Request, exc: ValidationError | RequestValidationError) -> JSONResponse:
-    exc_json = loads(exc.json())
-    response: dict[str, list[str]] = {'message': []}
-    for error in exc_json:
-        response['message'].append(error['loc'][-1] + f": {error['msg']}")
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException) -> Response:
+    return await http_exception_handler(request, exc)
 
-    return JSONResponse(content=json_encoder(response), status_code=422)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> Response:
+    return await request_validation_exception_handler(request, exc)
 
 app.add_middleware(
     CORSMiddleware,
