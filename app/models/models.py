@@ -5,15 +5,11 @@ from pydantic import BaseModel, Field
 
 class VersionModel(BaseModel):
     release: str
-    mayor: int
-    minor: int
-    patch: int | None
-    build_number: int | None
     release_date: datetime | None
-    package_eges: list[dict[Any, Any]] | None
-    cves: list[dict[Any, Any]] | None
-    package: str
     count: int
+    cves: list[dict[Any, Any]] | None
+    mean: int
+    weighted_mean: int
 
     class Config:
         populate_by_name = True
@@ -24,6 +20,8 @@ class VersionModel(BaseModel):
                 'release_date': datetime.now(),
                 'count': 23,
                 'cves': [],
+                'mean': 0, 
+                'weighted_mean': 0
             }
         }
 
@@ -31,7 +29,6 @@ class VersionModel(BaseModel):
 class PackageModel(BaseModel):
     name: str
     moment: datetime
-    versions: list[VersionModel] | None
 
     class Config:
         populate_by_name = True
@@ -72,7 +69,6 @@ class RepositoryModel(BaseModel):
     )
     add_extras: bool
     is_complete: bool
-    requirement_files: list[RequirementFile] | None
 
     class Config:
         populate_by_name = True
