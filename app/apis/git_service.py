@@ -2,6 +2,8 @@ from typing import Any
 from requests import post
 from app.config import settings
 from app.utils import get_manager
+from dateutil.parser import parse
+from datetime import datetime
 
 headers = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',
@@ -43,10 +45,41 @@ async def json_reader(response: Any, all_packages: dict[str, Any]) -> tuple[dict
         if not file_manager:
             continue
         if file not in all_packages:
-            all_packages[file] = {'manager': file_manager, 'dependencies': {}}
+            all_packages[file] = {'package_manager': file_manager, 'dependencies': {}}
         for node in node['dependencies']['nodes']:
             if file_manager == 'MVN':
                 if '=' in node['requirements']:
                     node['requirements'] = '[' + node['requirements'].replace('=', '').replace(' ', '') + ']'
             all_packages[file]['dependencies'].update({node['packageName']: node['requirements']})
     return (page_info, all_packages)
+
+
+async def get_last_commit_date(owner: str, name: str) -> datetime:
+    query = '''
+    {
+        repository(owner: "%s", name: "%s") {
+            defaultBranchRef {
+                target {
+                    ... on Commit {
+                        history(first: 1) {
+                            edges {
+                                node {
+                                    author {
+                                    date
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ''' % (owner, name)
+    response = post(
+        'https://api.github.com/graphql',
+        json={'query': query},
+        headers=headers,
+        timeout=50
+    ).json()
+    return parse(response["data"]["repository"]["defaultBranchRef"]["target"]["history"]["edges"][0]["node"]["author"]["date"])

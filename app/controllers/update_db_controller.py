@@ -13,7 +13,7 @@ from app.services import (
 )
 
 
-async def db_updater() -> None:
+async def nvd_updater() -> None:
     env_variables = await read_env_variables()
     today = datetime.today()
     headers = {'apiKey': settings.NVD_API_KEY}

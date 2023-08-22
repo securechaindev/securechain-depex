@@ -1,5 +1,5 @@
-from .update_db_controller import db_updater
+from .update_db_controller import nvd_updater
 
 __all__ = [
-    'db_updater'
+    'nvd_updater'
 ]

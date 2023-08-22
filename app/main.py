@@ -1,3 +1,4 @@
+from time import sleep
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.exception_handlers import (
@@ -8,7 +9,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 from starlette.responses import Response
 from apscheduler.schedulers.background import BackgroundScheduler
-from app.controllers import db_updater
+from app.controllers import nvd_updater
 from app.router import api_router
 from app.services import create_indexes
 
@@ -35,11 +36,16 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def startup_event() -> None:
-    await create_indexes()
-    await db_updater()
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(db_updater, 'interval', seconds=216000)
-    scheduler.start()
+    while True:
+        try:
+            await create_indexes()
+            await nvd_updater()
+            scheduler = BackgroundScheduler()
+            scheduler.add_job(nvd_updater, 'interval', seconds=216000)
+            scheduler.start()
+            break
+        except:
+            sleep(5)
 
 
 @app.exception_handler(HTTPException)

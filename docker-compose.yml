@@ -1,9 +1,5 @@
 version: '3'
 
-networks:
-  depex:
-    driver: bridge
-
 services:
   backend:
     container_name: depex_backend
@@ -16,7 +12,7 @@ services:
       mvn_graph_database:
         condition: service_healthy
       vuln_database:
-        condition: service_healthy
+        condition: service_started
     ports:
       - '8000:8000'
     networks:
@@ -25,7 +21,7 @@ services:
   pip_graph_database:
     env_file: .env
     container_name: pip_neo4j
-    image: neo4j:5.7.0
+    image: neo4j:5.11.0
     environment:
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_PIP}
       - NEO4J_PLUGINS=["apoc"]
@@ -33,9 +29,12 @@ services:
       - NEO4J_server_http_advertised__address=:7474
       - NEO4J_server_bolt_listen__address=:7687
       - NEO4J_server_bolt_advertised__address=:7687
+      - NEO4J_apoc_export_file_enabled=true
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
+    volumes:
+      - ./seeds/graphs/pip_neo4j.cypher.gz:/backups/pip_neo4j.cypher.gz
     networks:
       - depex
     healthcheck:
@@ -48,7 +47,7 @@ services:
   npm_graph_database:
     env_file: .env
     container_name: npm_neo4j
-    image: neo4j:5.7.0
+    image: neo4j:5.11.0
     environment:
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_NPM}
       - NEO4J_PLUGINS=["apoc"]
@@ -56,9 +55,12 @@ services:
       - NEO4J_server_http_advertised__address=:7473
       - NEO4J_server_bolt_listen__address=:7686
       - NEO4J_server_bolt_advertised__address=:7686
+      - NEO4J_apoc_export_file_enabled=true
     ports:
       - '7473:7473'
-      - "7686:7686"
+      - '7686:7686'
+    volumes:
+      - ./seeds/graphs/npm_neo4j.cypher.gz:/backups/npm_neo4j.cypher.gz
     networks:
       - depex
     healthcheck:
@@ -71,7 +73,7 @@ services:
   mvn_graph_database:
     env_file: .env
     container_name: mvn_neo4j
-    image: neo4j:5.7.0
+    image: neo4j:5.11.0
     environment:
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_MVN}
       - NEO4J_PLUGINS=["apoc"]
@@ -79,9 +81,12 @@ services:
       - NEO4J_server_http_advertised__address=:7472
       - NEO4J_server_bolt_listen__address=:7685
       - NEO4J_server_bolt_advertised__address=:7685
+      - NEO4J_apoc_export_file_enabled=true
     ports:
       - '7472:7472'
       - '7685:7685'
+    volumes:
+      - ./seeds/graphs/mvn_neo4j.cypher.gz:/backups/mvn_neo4j.cypher.gz
     networks:
       - depex
     healthcheck:
@@ -94,7 +99,7 @@ services:
   vuln_database:
     env_file: .env
     container_name: mongodb
-    image: mongo:6.0.5
+    image: mongo:6.0.8
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${VULN_DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${VULN_DB_PASSWORD}
@@ -102,9 +107,7 @@ services:
       - '27017:27017'
     networks:
       - depex
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 3s
+
+networks:
+  depex:
+    driver: bridge

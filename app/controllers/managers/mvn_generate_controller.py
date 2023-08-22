@@ -12,13 +12,14 @@ from app.services import (
     update_package_moment,
     count_number_of_versions_by_package,
     get_versions_names_by_package,
-    create_package_and_versions
+    create_package_and_versions,
+    create_repository
 )
 from app.controllers.cve_controller import relate_cves
 
 
-async def mvn_extract_graph(name: str, file: Any, repository_ids: dict[str, str]) -> None:
-    repository_id = repository_ids['MVN']
+async def mvn_extract_graph(name: str, file: Any, repository: dict[str, Any]) -> None:
+    repository_id = await create_repository(repository, 'MVN')
     new_req_file_id = await create_requirement_file(
         {'name': name, 'manager': 'MVN'},
         repository_id,

@@ -24,18 +24,28 @@
 
 ## Deployment with docker
 
-1. Create a .env file from template.env
+### Step 1
+ Create a .env file from template.env
 
-2. Deploy
-- First time --> Run command 'docker compose -f docker-compose-init.yml up --build' (Init dockerfile will seed MongoDB database with vulnerabilities and modeled package managers)
-- After first Time --> Run command 'docker compose up --build'
+#### Get API Keys
 
-3. Enter [here](http://0.0.0.0:8000/docs)
+- How to get a GitHub [API key](https://github.com/settings/tokens)
 
-(It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass) to see what information is being indexed)
+- How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
 
-## Extra information
+### Step 2
+Run command 'docker compose up --build'
 
-1. How to get a GitHub [API key](https://github.com/settings/tokens)
+#### Seeders
 
-2. How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
+- To use the API you need to load the database with vulnerabilities and exploits, using the command script "seeds/vulndb_seeder.sh" on Linux systems or "seeds/vulndb_seeder.bat" on Windows systems.
+
+- You can create your graphs from scratch or load existing ones used in the experimentation of other articles or simply built and that can help in the creation of new graphs (this task can be time consuming). To do this use the script "seeds/graphdb_seeder.sh" if you are on Linux or "graphdb_seeder.bat" if you are on Windows.
+
+### Step 3 
+Enter [here](http://0.0.0.0:8000/docs)
+
+#### Other tools
+1. It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass) to see what information is being indexed in vulnerability database
+   
+2. You can see the created graph built for [pip](http://0.0.0.0:7474/browser/), [npm](http://localhost:7473/browser/) and [mvn](http://localhost:7472/browser/) clicking in this names

@@ -67,6 +67,7 @@ class RepositoryModel(BaseModel):
         min_length=1,
         description='The name repository size must be greater than zero'
     )
+    moment: datetime
     add_extras: bool
     is_complete: bool
 
@@ -77,6 +78,7 @@ class RepositoryModel(BaseModel):
             'example': {
                 'owner': 'depexorg',
                 'name': 'pip_test',
+                'moment': datetime.now(),
                 'add_extras': False,
                 'is_complete': False
             }
