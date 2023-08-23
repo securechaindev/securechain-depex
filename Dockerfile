@@ -2,7 +2,9 @@ FROM python:3.11.4
 
 WORKDIR /depex
 
-COPY ./ /depex/
+COPY app/ /depex/app/
+COPY requirements.txt /depex/
+COPY .env /depex/
 
 RUN pip install --upgrade pip
 

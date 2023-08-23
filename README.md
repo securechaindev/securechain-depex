@@ -1,10 +1,6 @@
 # Depex Project
 
 <p>
-  <a href="https://hub.docker.com/repository/docker/germanmt/depex" target="_blank">
-    <img src="https://img.shields.io/docker/v/germanmt/depex?color=blue&label=dockerhub&logo=docker&sort=semver" alt="dockerhub">
-  </a>
-
   <a href="https://github.com/GermanMT/depex/releases" target="_blank">
     <img src="https://img.shields.io/github/v/release/GermanMT/depex?color=green&logo=github" alt="release">
   </a>
