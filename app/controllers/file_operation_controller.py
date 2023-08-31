@@ -8,7 +8,7 @@ from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs
 )
 
-from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
+from app.controllers.graph_to_smt import GraphToSMT
 from app.services import (
     read_data_for_smt_transform,
     get_releases_by_counts,
@@ -17,9 +17,6 @@ from app.services import (
 from app.utils import json_encoder, get_manager
 
 router = APIRouter()
-
-# TODO: Cambiar el nombre 'graph' por 'file' ya que nosotros lanzamos las operaciones sobre ficheros
-# de requisitos, no sobre todo el grafo en su conjunto.
 
 @router.post(
     '/operation/file/file_info/{requirement_file_id}',
@@ -50,7 +47,7 @@ async def valid_file(requirement_file_id: str, file_name: str) -> JSONResponse:
     - **file_name**: name of requirement file belonging to a graph
     '''
     package_manager = await get_manager(file_name)
-    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, -1)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
@@ -65,7 +62,7 @@ async def valid_file(requirement_file_id: str, file_name: str) -> JSONResponse:
     summary='Count the number of configurations',
     response_description='Return the number of configurations.'
 )
-async def number_of_configurations(requirement_file_id: str, file_name: str) -> JSONResponse:
+async def number_of_configurations(requirement_file_id: str, file_name: str, max_level: int) -> JSONResponse:
     '''
     Count the number of configurations of a file. Recommendatory to not use in massive graphs:
 
@@ -73,7 +70,7 @@ async def number_of_configurations(requirement_file_id: str, file_name: str) -> 
     - **file_name**: name of requirement file belonging to graph
     '''
     package_manager = await get_manager(file_name)
-    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, 'mean')
     smt_transform.transform()
     smt_model = smt_transform.destination_model
@@ -88,7 +85,7 @@ async def number_of_configurations(requirement_file_id: str, file_name: str) -> 
     summary='Minimize impact of a graph',
     response_description='Return a list of configurations'
 )
-async def minimize_impact(requirement_file_id: str, agregator: str, file_name: str, limit: int) -> JSONResponse:
+async def minimize_impact(requirement_file_id: str, agregator: str, file_name: str, limit: int, max_level: int) -> JSONResponse:
     '''
     Return a list of configurations of a file ordered with the minimun posible impact:
 
@@ -98,7 +95,7 @@ async def minimize_impact(requirement_file_id: str, agregator: str, file_name: s
     - **limit**: the number of configurations to return
     '''
     package_manager = await get_manager(file_name)
-    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
@@ -113,7 +110,7 @@ async def minimize_impact(requirement_file_id: str, agregator: str, file_name: s
     summary='Maximize impact of a graph',
     response_description='Return a list of configurations'
 )
-async def maximize_impact(requirement_file_id: str, agregator: str, file_name: str, limit: int) -> JSONResponse:
+async def maximize_impact(requirement_file_id: str, agregator: str, file_name: str, limit: int, max_level: int) -> JSONResponse:
     '''
     Return a list of configurations of a file ordered with the maximun posible impact:
 
@@ -123,7 +120,7 @@ async def maximize_impact(requirement_file_id: str, agregator: str, file_name: s
     - **limit**: the number of configurations to return
     '''
     package_manager = await get_manager(file_name)
-    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
@@ -138,7 +135,7 @@ async def maximize_impact(requirement_file_id: str, agregator: str, file_name: s
     summary='Filter configurations of a graph',
     response_description='Return a list of configurations'
 )
-async def filter_configs(requirement_file_id: str, agregator: str, file_name: str, max_threshold: float, min_threshold: float, limit: int) -> JSONResponse:
+async def filter_configs(requirement_file_id: str, agregator: str, file_name: str, max_threshold: float, min_threshold: float, limit: int, max_level: int) -> JSONResponse:
     '''
     Return a list of configurations of a file between a max and min impact:
 
@@ -150,7 +147,7 @@ async def filter_configs(requirement_file_id: str, agregator: str, file_name: st
     - **limit**: the number of configurations to return
     '''
     package_manager = await get_manager(file_name)
-    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model

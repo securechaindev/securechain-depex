@@ -3,7 +3,7 @@ from time import sleep
 from typing import Any
 from dateutil.parser import parse
 from pymongo import InsertOne, ReplaceOne
-from requests import get
+from requests import get, ConnectTimeout
 from app.config import settings
 from app.services import (
     bulk_write_cve_actions,
@@ -18,64 +18,27 @@ async def nvd_updater() -> None:
     today = datetime.today()
     headers = {'apiKey': settings.NVD_API_KEY}
     while True:
-        end_day = await get_end_day(
-            today,
-            env_variables['last_year_update'],
-            env_variables['last_month_update']
-        )
-        str_month = (
-            str(env_variables['last_month_update']) if env_variables['last_month_update'] > 9
-            else '0' + str(env_variables['last_month_update'])
-        )
-        str_begin_day = (
-            str(env_variables['last_day_update']) if env_variables['last_day_update'] > 9
-            else '0' + str(env_variables['last_day_update'])
-        )
+        end_day = await get_end_day(today, env_variables['last_year_update'], env_variables['last_month_update'])
+        str_month = str(env_variables['last_month_update']) if env_variables['last_month_update'] > 9 else '0' + str(env_variables['last_month_update'])
+        str_begin_day = str(env_variables['last_day_update']) if env_variables['last_day_update'] > 9 else '0' + str(env_variables['last_day_update'])
         str_end_day = str(end_day) if end_day > 9 else '0' + str(end_day)
-        str_begin = (
-            str(env_variables['last_year_update']) +
-            '-' + str_month + '-' + str_begin_day + 'T00:00:00'
-        )
-        str_end = (
-            str(env_variables['last_year_update']) +
-            '-' + str_month + '-' + str_end_day + 'T23:59:59'
-        )
-        params_pub = {
-            'pubStartDate': str_begin,
-            'pubEndDate': str_end
-        }
+        str_begin = str(env_variables['last_year_update']) + '-' + str_month + '-' + str_begin_day + 'T00:00:00'
+        str_end = str(env_variables['last_year_update']) + '-' + str_month + '-' + str_end_day + 'T23:59:59'
         while True:
             try:
-                response = get(
-                    'https://services.nvd.nist.gov/rest/json/cves/2.0?',
-                    params=params_pub,
-                    headers=headers,
-                    timeout=25
-                ).json()
+                response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'pubStartDate': str_begin,'pubEndDate': str_end}, headers=headers).json()
                 break
-            except:
+            except ConnectTimeout:
                 sleep(6)
         await update_db(response)
-        params_mod = {
-            'lastModStartDate': str_begin,
-            'lastModEndDate': str_end
-        }
         while True:
             try:
-                response = get(
-                    'https://services.nvd.nist.gov/rest/json/cves/2.0?',
-                    params=params_mod,
-                    headers=headers,
-                    timeout=25
-                ).json()
+                response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'lastModStartDate': str_begin, 'lastModEndDate': str_end}, headers=headers).json()
                 break
-            except:
+            except ConnectTimeout:
                 sleep(6)
         await update_db(response)
-        if (
-            env_variables['last_year_update'] == today.year and 
-            env_variables['last_month_update'] == today.month
-        ):
+        if env_variables['last_month_update'] == today.month and env_variables['last_year_update'] == today.year:
             env_variables['last_month_update'] = today.month
             env_variables['last_day_update'] = today.day
             env_variables['last_moment_update'] = datetime.now()

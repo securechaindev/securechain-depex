@@ -6,8 +6,5 @@ async def mean(impacts: list[float]) -> float:
 
 async def weighted_mean(impacts: list[float]) -> float:
     if impacts:
-        dividends = [var**2 * 0.1 for var in impacts]
-        divisors = [var * 0.1 for var in impacts]
-
-        return sum(dividends) / sum(divisors)
+        return sum([var**2 * 0.1 for var in impacts]) / sum([var * 0.1 for var in impacts])
     return 0.

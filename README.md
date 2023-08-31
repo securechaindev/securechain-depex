@@ -30,11 +30,11 @@
 - How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
 
 ### Step 2
-Run command 'docker compose up --build'
+Run command 'docker compose up --build' and seed the database with vulnerability info
 
 #### Seeders
 
-- To use the API you need to load the database with vulnerabilities and exploits, using the command script "seeds/vulndb_seeder.sh" on Linux systems or "seeds/vulndb_seeder.bat" on Windows systems.
+- To use the API is mandatory to load the database with vulnerabilities and exploits, using the command script "seeds/vulndb_seeder.sh" on Linux systems or "seeds/vulndb_seeder.bat" on Windows systems.
 
 - You can create your graphs from scratch or load existing ones used in the experimentation of other articles or simply built and that can help in the creation of new graphs (this task can be time consuming). To do this use the script "seeds/graphdb_seeder.sh" if you are on Linux or "graphdb_seeder.bat" if you are on Windows.
 

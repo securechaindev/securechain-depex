@@ -1,6 +1,6 @@
 from typing import Any
 from time import sleep
-from requests import get
+from requests import get, ConnectTimeout
 
 
 async def get_all_npm_versions(pkg_name: str) -> Any:
@@ -8,7 +8,7 @@ async def get_all_npm_versions(pkg_name: str) -> Any:
         try:
             response = get(f'https://registry.npmjs.org/{pkg_name}').json()
             break
-        except:
+        except ConnectTimeout:
             sleep(5)
     if 'versions' in response:
         versions = []

@@ -1,18 +1,19 @@
 from typing import Any
 from time import sleep
 from dateutil.parser import parse
-from requests import get
-from app.utils import get_first_position
+from requests import get, ConnectTimeout
+from app.utils import get_first_position, parse_pip_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
 async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
-    while True:
-        try:
-            response = get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
-            break
-        except:
-            sleep(5)
+    # while True:
+    #     try:
+    print(f'https://pypi.python.org/pypi/{pkg_name}/json')
+    response = get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
+        #     break
+        # except ConnectTimeout:
+        #     sleep(5)
     if 'releases' in response:
         versions: list[dict[str, Any]] = []
         raw_versions = response['releases']
@@ -26,14 +27,15 @@ async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
 
 
 async def requires_pip_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
-    while True:
-        try:
-            response = get(
-                f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-            ).json()['info']['requires_dist']
-            break
-        except:
-            sleep(5)
+    # while True:
+    #     try:
+    print(f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json')
+    response = get(
+        f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
+    ).json()['info']['requires_dist']
+        #     break
+        # except ConnectTimeout:
+        #     sleep(5)
     if response:
         require_packages: dict[str, Any] = {}
         for dist in response:
@@ -63,10 +65,7 @@ async def requires_pip_packages(pkg_name: str, version_dist: str) -> dict[str, l
             data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
             pos = await get_first_position(data, ['<', '>', '=', '!', '~'])
             dist = data[:pos]
-            ctcs = data[pos:]
-            if not ctcs:
-                ctcs = 'any'
-
+            ctcs = await parse_pip_constraints(data[pos:])
             if (
                 dist in require_packages and
                 isinstance(require_packages[dist], dict) and

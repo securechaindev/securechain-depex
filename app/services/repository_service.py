@@ -30,7 +30,7 @@ async def create_repositories(repository: dict[str, Any]) -> dict[str, str]:
 
 async def create_repository(repository: dict[str, Any], package_manager: str) -> dict[str, str]:
     query = '''
-    create(r: Repository{
+    merge(r: Repository{
         owner: $owner,
         name: $name,
         moment: $moment,
@@ -54,7 +54,7 @@ async def read_repositories_moment(owner: str, name: str) -> datetime:
         record = await result.single()
         if record:
             break
-    return record[0]
+    return record[0] if record else None
 
 
 async def read_repositories(owner: str, name: str) -> dict[str, str]:
@@ -139,10 +139,10 @@ async def read_info(requirement_file_id: str, package_manager: str) -> dict[str,
     return record[0] if record else None
 
 
-async def read_data_for_smt_transform(requirement_file_id: str, package_manager: str) -> dict[str, Any]:
+async def read_data_for_smt_transform(requirement_file_id: str, package_manager: str, max_level: int) -> dict[str, Any]:
     query = '''
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
-    call apoc.path.subgraphAll(rf, {relationshipFilter: '>'}) yield relationships
+    call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield relationships
     unwind relationships as relationship
     with case type(relationship)
     when 'Requires' then {
@@ -167,7 +167,7 @@ async def read_data_for_smt_transform(requirement_file_id: str, package_manager:
     return {requires: collect(requires), have: collect(have)}
     '''
     session = get_graph_db_session(package_manager)
-    result = await session.run(query, requirement_file_id=requirement_file_id)
+    result = await session.run(query, requirement_file_id=requirement_file_id, max_level=max_level*2)
     record = await result.single()
     return record[0] if record else None
 

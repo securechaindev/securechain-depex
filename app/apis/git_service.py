@@ -1,7 +1,7 @@
 from typing import Any
 from requests import post
 from app.config import settings
-from app.utils import get_manager
+from app.utils import get_manager, parse_pip_constraints
 from dateutil.parser import parse
 from datetime import datetime
 
@@ -50,6 +50,8 @@ async def json_reader(response: Any, all_packages: dict[str, Any]) -> tuple[dict
             if file_manager == 'MVN':
                 if '=' in node['requirements']:
                     node['requirements'] = '[' + node['requirements'].replace('=', '').replace(' ', '') + ']'
+            if file_manager == 'PIP':
+                node['requirements'] = await parse_pip_constraints(node['requirements'])
             all_packages[file]['dependencies'].update({node['packageName']: node['requirements']})
     return (page_info, all_packages)
 
