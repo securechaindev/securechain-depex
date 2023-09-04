@@ -1,5 +1,6 @@
 from typing import Any
-from requests import post
+from time import sleep
+from requests import post, ConnectTimeout, ConnectionError
 from app.config import settings
 from app.utils import get_manager, parse_pip_constraints
 from dateutil.parser import parse
@@ -22,12 +23,16 @@ async def get_repo_data(owner: str, name: str, all_packages: dict[str, Any] | No
         query += '{dependencyGraphManifests{nodes{filename dependencies(after: \"'
         query += end_cursor + '\"){pageInfo {hasNextPage endCursor}'
         query += 'nodes{packageName requirements}}}}}}'
-    response = post(
-        'https://api.github.com/graphql',
-        json={'query': query},
-        headers=headers,
-        timeout=50
-    ).json()
+    while True:
+        try:
+            response = post(
+                'https://api.github.com/graphql',
+                json={'query': query},
+                headers=headers
+            ).json()
+            break
+        except (ConnectTimeout, ConnectionError):
+            sleep(5)
     page_info, all_packages = await json_reader(response, all_packages)
     if not page_info['hasNextPage']:
         return all_packages
@@ -78,10 +83,14 @@ async def get_last_commit_date(owner: str, name: str) -> datetime:
         }
     }
     ''' % (owner, name)
-    response = post(
-        'https://api.github.com/graphql',
-        json={'query': query},
-        headers=headers,
-        timeout=50
-    ).json()
+    while True:
+        try:
+            response = post(
+                'https://api.github.com/graphql',
+                json={'query': query},
+                headers=headers
+            ).json()
+            break
+        except (ConnectTimeout, ConnectionError):
+            sleep(5)
     return parse(response["data"]["repository"]["defaultBranchRef"]["target"]["history"]["edges"][0]["node"]["author"]["date"])

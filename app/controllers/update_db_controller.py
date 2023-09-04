@@ -3,7 +3,7 @@ from time import sleep
 from typing import Any
 from dateutil.parser import parse
 from pymongo import InsertOne, ReplaceOne
-from requests import get, ConnectTimeout
+from requests import get, ConnectTimeout, ConnectionError
 from app.config import settings
 from app.services import (
     bulk_write_cve_actions,
@@ -28,14 +28,14 @@ async def nvd_updater() -> None:
             try:
                 response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'pubStartDate': str_begin,'pubEndDate': str_end}, headers=headers).json()
                 break
-            except ConnectTimeout:
+            except (ConnectTimeout, ConnectionError):
                 sleep(6)
         await update_db(response)
         while True:
             try:
                 response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'lastModStartDate': str_begin, 'lastModEndDate': str_end}, headers=headers).json()
                 break
-            except ConnectTimeout:
+            except (ConnectTimeout, ConnectionError):
                 sleep(6)
         await update_db(response)
         if env_variables['last_month_update'] == today.month and env_variables['last_year_update'] == today.year:

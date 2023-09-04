@@ -1,6 +1,6 @@
 from typing import Any
 from time import sleep
-from requests import get, ConnectTimeout
+from requests import get, ConnectTimeout, ConnectionError
 from xmltodict import parse
 
 
@@ -11,7 +11,7 @@ async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
         try:
             response = get(f'https://repo1.maven.org/maven2/{pkg_url}/maven-metadata.xml')
             break
-        except ConnectTimeout:
+        except (ConnectTimeout, ConnectionError):
             sleep(5)
     xml_string = response.text
     try:
@@ -35,7 +35,7 @@ async def requires_mvn_packages(pkg_name: str, version_dist: str) -> dict[str, l
         try:
             response = get(f'https://repo1.maven.org/maven2/{pkg_url}/{version_dist}/{parts[1]}-{version_dist}.pom')
             break
-        except ConnectTimeout:
+        except (ConnectTimeout, ConnectionError):
             sleep(5)
     xml_string = response.text
     try:

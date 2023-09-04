@@ -1,19 +1,18 @@
 from typing import Any
 from time import sleep
 from dateutil.parser import parse
-from requests import get, ConnectTimeout
+from requests import get, ConnectTimeout, ConnectionError
 from app.utils import get_first_position, parse_pip_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
 async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
-    # while True:
-    #     try:
-    print(f'https://pypi.python.org/pypi/{pkg_name}/json')
-    response = get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
-        #     break
-        # except ConnectTimeout:
-        #     sleep(5)
+    while True:
+        try:
+            response = get(f'https://pypi.python.org/pypi/{pkg_name}/json').json()
+            break
+        except (ConnectTimeout, ConnectionError):
+            sleep(5)
     if 'releases' in response:
         versions: list[dict[str, Any]] = []
         raw_versions = response['releases']
@@ -27,15 +26,14 @@ async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
 
 
 async def requires_pip_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
-    # while True:
-    #     try:
-    print(f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json')
-    response = get(
-        f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
-    ).json()['info']['requires_dist']
-        #     break
-        # except ConnectTimeout:
-        #     sleep(5)
+    while True:
+        try:
+            response = get(
+                f'https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json'
+            ).json()['info']['requires_dist']
+            break
+        except (ConnectTimeout, ConnectionError):
+            sleep(5)
     if response:
         require_packages: dict[str, Any] = {}
         for dist in response:
