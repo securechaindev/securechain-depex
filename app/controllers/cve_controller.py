@@ -1,5 +1,6 @@
 from typing import Any
 from app.utils import mean, weighted_mean
+from univers.versions import PypiVersion, SemverVersion, MavenVersion
 
 
 async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str, artifact_id: str | None = None) -> dict[str, Any]:
@@ -29,13 +30,13 @@ async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_m
                             check = True
                             try:
                                 if 'versionStartIncluding' in cpe_match:
-                                    check = version_type(version['name']) >= version_type(cpe_match['versionStartIncluding'])
+                                    check = check and version_type(version['name']) >= version_type(cpe_match['versionStartIncluding'])
                                 if 'versionEndIncluding' in cpe_match:
-                                    check = version_type(version['name']) <= version_type(cpe_match['versionEndIncluding'])
+                                    check = check and version_type(version['name']) <= version_type(cpe_match['versionEndIncluding'])
                                 if 'versionStartExcluding' in cpe_match:
-                                    check = version_type(version['name']) > version_type(cpe_match['versionStartExcluding'])
+                                    check = check and version_type(version['name']) > version_type(cpe_match['versionStartExcluding'])
                                 if 'versionEndExcluding' in cpe_match:
-                                    check = version_type(version['name']) < version_type(cpe_match['versionEndExcluding'])
+                                    check = check and version_type(version['name']) < version_type(cpe_match['versionEndExcluding'])
                             except:
                                 continue
                             if check:
@@ -49,11 +50,8 @@ async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_m
 async def get_version_type(package_manager: str):
     match package_manager:
         case 'PIP':
-            from univers.versions import PypiVersion
             return PypiVersion
         case 'NPM':
-            from univers.versions import SemverVersion
             return SemverVersion
-        case _:
-            from univers.versions import PypiVersion
-            return PypiVersion
+        case 'MVN':
+            return MavenVersion
