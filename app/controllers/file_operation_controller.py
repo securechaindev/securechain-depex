@@ -11,8 +11,8 @@ from flamapy.metamodels.smt_metamodel.operations import (
 from app.controllers.graph_to_smt import GraphToSMT
 from app.services import (
     read_data_for_smt_transform,
-    get_releases_by_counts,
-    read_info
+    read_releases_by_counts,
+    read_graph_for_info_operation
 )
 from app.utils import json_encoder, get_manager
 
@@ -30,7 +30,7 @@ async def file_info(requirement_file_id: str, file_name: str) -> JSONResponse:
     - **file_id**: the id of a file
     '''
     package_manager = await get_manager(file_name)
-    graph_info = await read_info(requirement_file_id, package_manager)
+    graph_info = await read_graph_for_info_operation(requirement_file_id, package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graph_info))
 
 @router.post(
@@ -101,7 +101,7 @@ async def minimize_impact(requirement_file_id: str, agregator: str, file_name: s
     smt_model = smt_transform.destination_model
     operation = MinimizeImpact(limit)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result(), package_manager)
+    result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -126,7 +126,7 @@ async def maximize_impact(requirement_file_id: str, agregator: str, file_name: s
     smt_model = smt_transform.destination_model
     operation = MaximizeImpact(limit)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result(), package_manager)
+    result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -153,5 +153,5 @@ async def filter_configs(requirement_file_id: str, agregator: str, file_name: st
     smt_model = smt_transform.destination_model
     operation = FilterConfigs(max_threshold, min_threshold, limit)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result(), package_manager)
+    result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

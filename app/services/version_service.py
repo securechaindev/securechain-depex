@@ -23,18 +23,6 @@ async def create_version(version: dict[str, Any], package_name: str, package_man
     return record[0] if record else None
 
 
-async def count_number_of_versions_by_package(package_name: str, package_manager: str) -> int:
-    query = '''
-    match (p: Package) where p.name = $package_name
-    match (p)-[r:Have]->(v: Version)
-    return count(v)
-    '''
-    session = get_graph_db_session(package_manager)
-    result = await session.run(query, package_name=package_name)
-    record = await result.single()
-    return record[0] if record else None
-
-
 async def read_cve_ids_by_version_and_package(version: str, package_name: str, package_manager: str) -> list[str]:
     query = '''
     match (p: Package) where p.name = $package_name
@@ -47,8 +35,7 @@ async def read_cve_ids_by_version_and_package(version: str, package_name: str, p
     return record[0] if record else None
 
 
-# TODO: Cambiar los gets por reads
-async def get_versions_names_by_package(package_name: str, package_manager: str) -> list[str]:
+async def read_versions_names_by_package(package_name: str, package_manager: str) -> list[str]:
     query = '''
     match (p: Package) where p.name = $package_name
     match (p)-[r:Have]->(v: Version)
@@ -60,7 +47,7 @@ async def get_versions_names_by_package(package_name: str, package_manager: str)
     return record[0] if record else None
 
 
-async def get_releases_by_counts(configs: list[dict[str, int]], package_manager: str) -> list[dict[str, str | float | int]]:
+async def read_releases_by_counts(configs: list[dict[str, int]], package_manager: str) -> list[dict[str, str | float | int]]:
     sanitized_configs: list[dict[str, str | float | int]] = []
     query = '''
     MATCH (v:Version)<-[:Have]-(parent:Package)
@@ -81,7 +68,7 @@ async def get_releases_by_counts(configs: list[dict[str, int]], package_manager:
     return sanitized_configs
 
 
-async def get_counts_by_releases(config: dict[str, str], package_manager: str) -> dict[str, int]:
+async def read_counts_by_releases(config: dict[str, str], package_manager: str) -> dict[str, int]:
     sanitized_config: dict[str, int] = {}
     query = '''
     MATCH (v:Version)<-[:Have]-(parent:Package)
@@ -95,3 +82,14 @@ async def get_counts_by_releases(config: dict[str, str], package_manager: str) -
         if record:
             sanitized_config.update({package: record[0]})
     return sanitized_config
+
+async def count_number_of_versions_by_package(package_name: str, package_manager: str) -> int:
+    query = '''
+    match (p: Package) where p.name = $package_name
+    match (p)-[r:Have]->(v: Version)
+    return count(v)
+    '''
+    session = get_graph_db_session(package_manager)
+    result = await session.run(query, package_name=package_name)
+    record = await result.single()
+    return record[0] if record else None

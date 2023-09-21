@@ -8,8 +8,8 @@ from flamapy.metamodels.smt_metamodel.operations import (
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from app.services import (
     read_data_for_smt_transform,
-    get_counts_by_releases,
-    get_releases_by_counts
+    read_counts_by_releases,
+    read_releases_by_counts
 )
 from app.utils import json_encoder, get_manager
 
@@ -35,7 +35,7 @@ async def valid_config(requirement_file_id: str, agregator: str, file_name: str,
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = ValidConfig(await get_counts_by_releases(config, package_manager))
+    operation = ValidConfig(await read_counts_by_releases(config, package_manager))
     operation.execute(smt_model)
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
@@ -60,9 +60,9 @@ async def complete_config(requirement_file_id: str, agregator: str, file_name: s
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
     smt_model = smt_transform.destination_model
-    operation = CompleteConfig(await get_counts_by_releases(config, package_manager))
+    operation = CompleteConfig(await read_counts_by_releases(config, package_manager))
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result(), package_manager)
+    result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
 
@@ -87,5 +87,5 @@ async def config_by_impact(requirement_file_id: str, agregator: str, file_name: 
     smt_model = smt_transform.destination_model
     operation = ConfigByImpact(impact)
     operation.execute(smt_model)
-    result = await get_releases_by_counts(operation.get_result(), package_manager)
+    result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))

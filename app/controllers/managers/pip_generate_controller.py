@@ -11,7 +11,7 @@ from app.services import (
     relate_package,
     update_package_moment,
     count_number_of_versions_by_package,
-    get_versions_names_by_package,
+    read_versions_names_by_package,
     create_package_and_versions
 )
 from app.controllers.cve_controller import relate_cves
@@ -73,7 +73,7 @@ async def search_new_versions(package: dict[str, Any]) -> None:
     counter = await count_number_of_versions_by_package(package['name'], 'PIP')
     if counter < len(all_versions):
         cpe_matches = await read_cpe_matches_by_package_name(package['name'])
-        actual_versions = await get_versions_names_by_package(package['name'], 'PIP')
+        actual_versions = await read_versions_names_by_package(package['name'], 'PIP')
         for version in all_versions:
             if not version['release'] in actual_versions:
                 version['count'] = counter

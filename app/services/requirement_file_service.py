@@ -49,7 +49,7 @@ async def delete_requirement_file(repository_id: str, requirement_file_name: str
     session = get_graph_db_session(package_manager)
     await session.run(query, repository_id=repository_id, requirement_file_name=requirement_file_name)
 
-async def delete_requirement_rel(requirement_file_id: str, package_name: str, package_manager: str) -> None:
+async def delete_requirement_file_rel(requirement_file_id: str, package_name: str, package_manager: str) -> None:
     query = '''
     match (rf:RequirementFile) where elementid(rf) = $requirement_file_id
     match (rf)-[requirement_rel]->(package)

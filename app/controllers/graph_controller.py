@@ -13,7 +13,7 @@ from app.services import (
     delete_requirement_file,
     read_packages_by_requirement_file,
     update_requirement_rel_constraints,
-    delete_requirement_rel,
+    delete_requirement_file_rel,
     update_repository_moment
 )
 from app.models import RepositoryModel
@@ -78,7 +78,7 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
                                     await update_requirement_rel_constraints(requirement_file_id, package, files[file_name]['dependencies'][package], package_manager)
                                 files[file_name]['dependencies'].pop(package)
                             else:
-                                await delete_requirement_rel(requirement_file_id, package, package_manager)
+                                await delete_requirement_file_rel(requirement_file_id, package, package_manager)
                         if files[file_name]['dependencies']:
                             for package, constraints in files[file_name]['dependencies'].items():
                                 match package_manager:

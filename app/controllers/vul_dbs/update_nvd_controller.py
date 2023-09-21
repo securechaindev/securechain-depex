@@ -30,14 +30,14 @@ async def nvd_updater() -> None:
                 break
             except (ConnectTimeout, ConnectionError):
                 sleep(6)
-        await update_db(response)
+        await bulk_update_db(response)
         while True:
             try:
                 response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'lastModStartDate': str_begin, 'lastModEndDate': str_end}, headers=headers).json()
                 break
             except (ConnectTimeout, ConnectionError):
                 sleep(6)
-        await update_db(response)
+        await bulk_update_db(response)
         if env_variables['last_month_update'] == today.month and env_variables['last_year_update'] == today.year:
             env_variables['last_month_update'] = today.month
             env_variables['last_day_update'] = today.day
@@ -64,7 +64,7 @@ async def get_end_day(today: datetime, last_year: int, last_month: int) -> int:
     return today.day
 
 
-async def update_db(raw_cves: dict[str, Any]) -> None:
+async def bulk_update_db(raw_cves: dict[str, Any]) -> None:
     actions: list[Any] = []
     for raw_cve in raw_cves['vulnerabilities']:
         raw_cve = raw_cve['cve']
