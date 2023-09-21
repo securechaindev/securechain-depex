@@ -58,29 +58,29 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
     last_commit_date = await get_last_commit_date(repository_json['owner'], repository_json['name'])
     if not last_repository_moment or last_repository_moment < last_commit_date:
         repository_ids = await read_repositories(repository_json['owner'], repository_json['name'])
-        files = await get_repo_data(repository_json['owner'], repository_json['name'])
+        raw_requirement_files = await get_repo_data(repository_json['owner'], repository_json['name'])
         for package_manager, repository_id in repository_ids.items():
             if not repository_id:
-                for name, file in files.items():
+                for name, file in raw_requirement_files.items():
                     if file['package_manager'] == package_manager:
                         await select_manager(package_manager, name, file, repository_json=repository_json)
             else:
                 requirement_files = await read_requirement_files_by_repository(repository_id, package_manager)
                 for file_name, requirement_file_id in requirement_files.items():
-                    if file_name not in files:
+                    if file_name not in raw_requirement_files:
                         await delete_requirement_file(repository_id, file_name, package_manager)
                     else:
                         packages = await read_packages_by_requirement_file(requirement_file_id, package_manager)
                         for package, constraints in packages.items():
-                            keys = files[file_name]['dependencies'].keys()
+                            keys = raw_requirement_files[file_name]['dependencies'].keys()
                             if package in keys:
-                                if constraints != files[file_name]['dependencies'][package]:
-                                    await update_requirement_rel_constraints(requirement_file_id, package, files[file_name]['dependencies'][package], package_manager)
-                                files[file_name]['dependencies'].pop(package)
+                                if constraints != raw_requirement_files[file_name]['dependencies'][package]:
+                                    await update_requirement_rel_constraints(requirement_file_id, package, raw_requirement_files[file_name]['dependencies'][package], package_manager)
+                                raw_requirement_files[file_name]['dependencies'].pop(package)
                             else:
                                 await delete_requirement_file_rel(requirement_file_id, package, package_manager)
-                        if files[file_name]['dependencies']:
-                            for package, constraints in files[file_name]['dependencies'].items():
+                        if raw_requirement_files[file_name]['dependencies']:
+                            for package, constraints in raw_requirement_files[file_name]['dependencies'].items():
                                 match package_manager:
                                     case 'PIP':
                                         await pip_exist_package(package, constraints, requirement_file_id)
@@ -88,9 +88,9 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
                                         await npm_exist_package(package, constraints, requirement_file_id)
                                     case 'MVN':
                                         await mvn_exist_package(package, constraints, requirement_file_id)
-                        files.pop(file_name)
-                if files:
-                    for name, file in files.items():
+                        raw_requirement_files.pop(file_name)
+                if raw_requirement_files:
+                    for name, file in raw_requirement_files.items():
                         if file['package_manager'] == package_manager:
                             await select_manager(package_manager, name, file, repository_id=repository_id)
                 await update_repository_moment(repository_id, package_manager)
