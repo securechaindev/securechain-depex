@@ -42,22 +42,22 @@ async def get_repo_data(owner: str, name: str, all_packages: dict[str, Any] | No
 async def json_reader(response: Any, all_packages: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     page_info = {'hasNextPage': None}
     for node in response['data']['repository']['dependencyGraphManifests']['nodes']:
-        file = node['filename']
-        if file == 'package-lock.json':
+        file_name = node['filename']
+        if file_name == 'package-lock.json':
             continue
         page_info = node['dependencies']['pageInfo']
-        file_manager = await get_manager(file)
+        file_manager = await get_manager(file_name)
         if not file_manager:
             continue
-        if file not in all_packages:
-            all_packages[file] = {'package_manager': file_manager, 'dependencies': {}}
+        if file_name not in all_packages:
+            all_packages[file_name] = {'package_manager': file_manager, 'dependencies': {}}
         for node in node['dependencies']['nodes']:
             if file_manager == 'MVN':
                 if '=' in node['requirements']:
                     node['requirements'] = '[' + node['requirements'].replace('=', '').replace(' ', '') + ']'
             if file_manager == 'PIP':
                 node['requirements'] = await parse_pip_constraints(node['requirements'])
-            all_packages[file]['dependencies'].update({node['packageName']: node['requirements']})
+            all_packages[file_name]['dependencies'].update({node['packageName']: node['requirements']})
     return (page_info, all_packages)
 
 

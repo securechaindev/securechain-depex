@@ -10,26 +10,28 @@ from app.services import (
     count_number_of_versions_by_package,
     get_versions_names_by_package,
     create_package_and_versions,
-    create_repository
 )
 from app.controllers.cve_controller import relate_cves
 
 
-async def npm_extract_graph(name: str, file: Any, repository: dict[str, Any]) -> None:
-    repository_id = await create_repository(repository, 'NPM')
+async def npm_extract_graph(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
         {'name': name, 'manager': 'NPM'},
         repository_id,
         'NPM'
     )
     for dependencie, constraints in file['dependencies'].items():
-        package = await read_package_by_name(dependencie, 'NPM')
-        if package:
-            if package['moment'] < datetime.now() - timedelta(days=10):
-                await search_new_versions(package)
-            await relate_package(dependencie, constraints, new_req_file_id, 'NPM')
-        else:
-            await no_exist_package(dependencie, constraints, new_req_file_id)
+        await npm_exist_package(dependencie, constraints, new_req_file_id)
+
+
+async def npm_exist_package(package_name: str, constraints: str, requirement_file_id: str) -> None:
+    package = await read_package_by_name(package_name, 'NPM')
+    if package:
+        if package['moment'] < datetime.now() - timedelta(days=10):
+            await search_new_versions(package)
+        await relate_package(package_name, constraints, requirement_file_id, 'NPM')
+    else:
+        await no_exist_package(package_name, constraints, requirement_file_id)
 
 
 async def no_exist_package(package_name: str, constraints: list[str] | str, parent_id: str) -> None:

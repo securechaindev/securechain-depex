@@ -12,27 +12,29 @@ from app.services import (
     update_package_moment,
     count_number_of_versions_by_package,
     get_versions_names_by_package,
-    create_package_and_versions,
-    create_repository
+    create_package_and_versions
 )
 from app.controllers.cve_controller import relate_cves
 
 
-async def pip_extract_graph(name: str, file: Any, repository: dict[str, Any]) -> None:
-    repository_id = await create_repository(repository, 'PIP')
+async def pip_extract_graph(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
         {'name': name, 'manager': 'PIP'},
         repository_id,
         'PIP'
     )
     for dependencie, constraints in file['dependencies'].items():
-        package = await read_package_by_name(dependencie, 'PIP')
-        if package:
-            if package['moment'] < datetime.now() - timedelta(days=10):
-                await search_new_versions(package)
-            await relate_package(dependencie, constraints, new_req_file_id, 'PIP')
-        else:
-            await no_exist_package(dependencie, constraints, new_req_file_id)
+        await pip_exist_package(dependencie, constraints, new_req_file_id)
+
+
+async def pip_exist_package(package_name: str, constraints: str, requirement_file_id: str) -> None:
+    package = await read_package_by_name(package_name, 'PIP')
+    if package:
+        if package['moment'] < datetime.now() - timedelta(days=10):
+            await search_new_versions(package)
+        await relate_package(package_name, constraints, requirement_file_id, 'PIP')
+    else:
+        await no_exist_package(package_name, constraints, requirement_file_id)
 
 
 async def no_exist_package(package_name: str, constraints: list[str] | str, parent_id: str) -> None:

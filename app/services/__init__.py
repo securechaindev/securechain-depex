@@ -11,7 +11,8 @@ from .package_service import (
     read_package_by_name,
     relate_package,
     update_package_moment,
-    create_package_and_versions
+    create_package_and_versions,
+    read_packages_by_requirement_file
 )
 from .repository_service import (
     read_repository_by_id,
@@ -23,9 +24,16 @@ from .repository_service import (
     create_repositories,
     create_repository,
     read_info,
-    read_data_for_smt_transform
+    read_data_for_smt_transform,
+    update_repository_moment
 )
-from .requirement_file_service import create_requirement_file
+from .requirement_file_service import (
+    create_requirement_file,
+    read_requirement_files_by_repository,
+    delete_requirement_file,
+    update_requirement_rel_constraints,
+    delete_requirement_rel
+)
 from .version_service import (
     create_version,
     count_number_of_versions_by_package,
@@ -50,6 +58,7 @@ __all__ = [
     'relate_package',
     'update_package_moment',
     'create_package_and_versions',
+    'read_packages_by_requirement_file',
     'read_env_variables',
     'read_graph_by_repository_id',
     'read_repository_files',
@@ -61,7 +70,12 @@ __all__ = [
     'create_repository',
     'read_info',
     'read_data_for_smt_transform',
+    'update_repository_moment',
     'create_requirement_file',
+    'read_requirement_files_by_repository',
+    'delete_requirement_file',
+    'update_requirement_rel_constraints',
+    'delete_requirement_rel',
     'create_version',
     'count_number_of_versions_by_package',
     'get_releases_by_counts',

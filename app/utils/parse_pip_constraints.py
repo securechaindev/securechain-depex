@@ -17,6 +17,8 @@ async def parse_pip_constraints(raw_constraints: str) -> str:
 async def clean_pip_constraints(raw_constraints: list[str]) -> str:
     constraints = []
     for raw_constraint in raw_constraints:
+        if  ' ' not in raw_constraint:
+            continue
         if ' ' not in raw_constraint:
             for index, char in enumerate(raw_constraint):
                 if char.isdigit():

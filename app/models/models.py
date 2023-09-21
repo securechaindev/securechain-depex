@@ -1,6 +1,7 @@
 from typing import Any
 from datetime import datetime
 from pydantic import BaseModel, Field
+from pytz import timezone
 
 
 class VersionModel(BaseModel):
@@ -78,7 +79,7 @@ class RepositoryModel(BaseModel):
             'example': {
                 'owner': 'depexorg',
                 'name': 'pip_test',
-                'moment': datetime.now(),
+                'moment': datetime.now(timezone('Europe/Madrid')),
                 'add_extras': False,
                 'is_complete': False
             }

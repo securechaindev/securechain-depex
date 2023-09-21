@@ -1,5 +1,6 @@
 from typing import Any
 from datetime import datetime
+from pytz import timezone
 from fastapi import HTTPException
 from .dbs.databases import get_graph_db_session
 
@@ -179,3 +180,12 @@ async def update_repository_is_completed(repository_id: str, package_manager: st
     '''
     session = get_graph_db_session(package_manager)
     await session.run(query, repository_id=repository_id)
+
+async def update_repository_moment(repository_id: str, package_manager: str) -> None:
+    query = '''
+    match (r: Repository) where elementid(r) = $repository_id
+    set r.moment = $moment
+    '''
+    session = get_graph_db_session(package_manager)
+    moment = datetime.now(timezone('Europe/Madrid'))
+    await session.run(query, repository_id=repository_id, moment=moment)

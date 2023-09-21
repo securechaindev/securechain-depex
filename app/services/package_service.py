@@ -40,6 +40,18 @@ async def read_package_by_name(package_name: str, package_manager: str) -> dict[
     return record[0] if record else None
 
 
+async def read_packages_by_requirement_file(requirement_file_id: str, package_manager: str) -> list[str]:
+    query = '''
+    match (rf:RequirementFile) where elementid(rf) = $requirement_file_id
+    match (rf)-[requirement_rel]->(package)
+    return apoc.map.fromPairs(collect([package.name, requirement_rel.constraints]))
+    '''
+    session = get_graph_db_session(package_manager)
+    result = await session.run(query, requirement_file_id=requirement_file_id)
+    record = await result.single()
+    return record[0] if record else None
+
+
 async def relate_package(package_name: str, constraints: list[str] | str, parent_id: str, package_manager: str) -> None:
     query = '''
     match 
