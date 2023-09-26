@@ -10,11 +10,12 @@ from app.services import (
     read_repositories,
     read_repositories_moment,
     read_requirement_files_by_repository,
-    delete_requirement_file,
     read_packages_by_requirement_file,
     update_requirement_rel_constraints,
-    delete_requirement_file_rel,
-    update_repository_moment
+    update_repository_moment,
+    update_repository_is_complete,
+    delete_requirement_file,
+    delete_requirement_file_rel
 )
 from app.models import RepositoryModel
 from app.utils import json_encoder
@@ -55,51 +56,61 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
     repository_json = jsonable_encoder(repository)
     repository_json['moment'] = datetime.now(timezone('Europe/Madrid'))
     last_repository_moment = await read_repositories_moment(repository_json['owner'], repository_json['name'])
-    last_commit_date = await get_last_commit_date(repository_json['owner'], repository_json['name'])
-    if not last_repository_moment or last_repository_moment < last_commit_date:
-        repository_ids = await read_repositories(repository_json['owner'], repository_json['name'])
-        raw_requirement_files = await get_repo_data(repository_json['owner'], repository_json['name'])
-        for package_manager, repository_id in repository_ids.items():
-            if not repository_id:
-                for name, file in raw_requirement_files.items():
-                    if file['package_manager'] == package_manager:
-                        await select_manager(package_manager, name, file, repository_json=repository_json)
-            else:
-                requirement_files = await read_requirement_files_by_repository(repository_id, package_manager)
-                for file_name, requirement_file_id in requirement_files.items():
-                    if file_name not in raw_requirement_files:
-                        await delete_requirement_file(repository_id, file_name, package_manager)
-                    else:
-                        packages = await read_packages_by_requirement_file(requirement_file_id, package_manager)
-                        for package, constraints in packages.items():
-                            keys = raw_requirement_files[file_name]['dependencies'].keys()
-                            if package in keys:
-                                if constraints != raw_requirement_files[file_name]['dependencies'][package]:
-                                    await update_requirement_rel_constraints(requirement_file_id, package, raw_requirement_files[file_name]['dependencies'][package], package_manager)
-                                raw_requirement_files[file_name]['dependencies'].pop(package)
-                            else:
-                                await delete_requirement_file_rel(requirement_file_id, package, package_manager)
-                        if raw_requirement_files[file_name]['dependencies']:
-                            for package, constraints in raw_requirement_files[file_name]['dependencies'].items():
-                                match package_manager:
-                                    case 'PIP':
-                                        await pip_exist_package(package, constraints, requirement_file_id)
-                                    case 'NPM':
-                                        await npm_exist_package(package, constraints, requirement_file_id)
-                                    case 'MVN':
-                                        await mvn_exist_package(package, constraints, requirement_file_id)
-                        raw_requirement_files.pop(file_name)
-                if raw_requirement_files:
-                    for name, file in raw_requirement_files.items():
-                        if file['package_manager'] == package_manager:
-                            await select_manager(package_manager, name, file, repository_id=repository_id)
-                await update_repository_moment(repository_id, package_manager)
+    if last_repository_moment['is_complete']:
+        last_commit_date = await get_last_commit_date(repository_json['owner'], repository_json['name'])
+        if not last_repository_moment['moment'] or last_repository_moment['moment'] < last_commit_date:
+            repository_ids = await read_repositories(repository_json['owner'], repository_json['name'])
+            raw_requirement_files = await get_repo_data(repository_json['owner'], repository_json['name'])
+            for package_manager, repository_id in repository_ids.items():
+                if not repository_id:
+                    repository_id = await create_repository(repository_json, package_manager)
+                    await extract_repository(raw_requirement_files, repository_id, package_manager)
+                else:
+                    await update_repository_is_complete(repository_id, False, package_manager)
+                    await replace_repository(raw_requirement_files, repository_id, package_manager)
+                await update_repository_is_complete(repository_id, True, package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'message': 'created'}))
 
 
-async def select_manager(package_manager: str, name: str, file: dict[str, Any], repository_json: dict[str, Any] | None = None, repository_id: str | None = None) -> None:
-    if not repository_id:
-        repository_id = await create_repository(repository_json, package_manager)
+async def extract_repository(raw_requirement_files: dict[str, Any], repository_id: str, package_manager: str) -> None:
+    for name, file in raw_requirement_files.items():
+        if file['package_manager'] == package_manager:
+            await select_manager(package_manager, name, file, repository_id)
+
+
+async def replace_repository(raw_requirement_files: dict[str, Any], repository_id:str, package_manager: str) -> None:
+    requirement_files = await read_requirement_files_by_repository(repository_id, package_manager)
+    for file_name, requirement_file_id in requirement_files.items():
+        if file_name not in raw_requirement_files:
+            await delete_requirement_file(repository_id, file_name, package_manager)
+        else:
+            packages = await read_packages_by_requirement_file(requirement_file_id, package_manager)
+            for package, constraints in packages.items():
+                keys = raw_requirement_files[file_name]['dependencies'].keys()
+                if package in keys:
+                    if constraints != raw_requirement_files[file_name]['dependencies'][package]:
+                        await update_requirement_rel_constraints(requirement_file_id, package, raw_requirement_files[file_name]['dependencies'][package], package_manager)
+                        raw_requirement_files[file_name]['dependencies'].pop(package)
+                    else:
+                        await delete_requirement_file_rel(requirement_file_id, package, package_manager)
+                if raw_requirement_files[file_name]['dependencies']:
+                    for package, constraints in raw_requirement_files[file_name]['dependencies'].items():
+                        match package_manager:
+                            case 'PIP':
+                                await pip_exist_package(package, constraints, requirement_file_id)
+                            case 'NPM':
+                                await npm_exist_package(package, constraints, requirement_file_id)
+                            case 'MVN':
+                                await mvn_exist_package(package, constraints, requirement_file_id)
+                raw_requirement_files.pop(file_name)
+        if raw_requirement_files:
+            for name, file in raw_requirement_files.items():
+                if file['package_manager'] == package_manager:
+                    await select_manager(package_manager, name, file, repository_id)
+        await update_repository_moment(repository_id, package_manager)
+
+
+async def select_manager(package_manager: str, name: str, file: dict[str, Any], repository_id: str) -> None:
     match package_manager:
         case 'PIP':
             await pip_extract_graph(name, file, repository_id)

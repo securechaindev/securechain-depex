@@ -3,7 +3,7 @@ from typing import Any
 from z3 import And, ArithRef, BoolRef, Implies, Int, Or, Real, Not, If
 
 from univers.versions import Version, PypiVersion, SemverVersion, MavenVersion, InvalidVersion
-from univers.version_range import VersionRange, PypiVersionRange, NpmVersionRange, MavenVersionRange
+from univers.version_range import VersionRange, PypiVersionRange, NpmVersionRange, MavenVersionRange, InvalidVersionRange
 
 from flamapy.core.transformations import Transformation
 from flamapy.metamodels.smt_metamodel.models.pysmt_model import PySMTModel
@@ -157,11 +157,17 @@ class GraphToSMT(Transformation):
                 check = True
                 if self.package_manager == 'PIP':
                     for constraint in constraints.split(','):
-                        versions_range = self.range_type.from_native(constraint)
-                        check = check and univers_version in versions_range
+                        try:
+                            versions_range = self.range_type.from_native(constraint)
+                            check = check and univers_version in versions_range
+                        except InvalidVersionRange:
+                            continue
                 else:
-                    versions_range = self.range_type.from_native(constraints)
-                    check = check and univers_version in versions_range
+                    try:
+                        versions_range = self.range_type.from_native(constraints)
+                        check = check and univers_version in versions_range
+                    except InvalidVersionRange:
+                        continue
                 if check:
                     filtered_versions.append(version)
             return filtered_versions

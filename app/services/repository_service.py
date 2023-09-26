@@ -24,14 +24,14 @@ async def create_repository(repository: dict[str, Any], package_manager: str) ->
 
 async def read_repositories_moment(owner: str, name: str) -> datetime:
     query = '''
-    match(r: Repository{owner: $owner, name: $name}) return r.moment
+    match(r: Repository{owner: $owner, name: $name}) return {moment: r.moment, is_complete: r.is_complete}
     '''
     for session in get_graph_db_session('ALL'):
         result = await session.run(query, owner=owner, name=name)
         record = await result.single()
         if record:
             break
-    return record[0] if record else None
+    return record[0] if record else {'moment': None, 'is_complete': True}
 
 
 async def read_repositories(owner: str, name: str) -> dict[str, str]:
@@ -149,13 +149,13 @@ async def read_data_for_smt_transform(requirement_file_id: str, package_manager:
     return record[0] if record else None
 
 
-async def update_repository_is_completed(repository_id: str, package_manager: str) -> None:
+async def update_repository_is_complete(repository_id: str, is_complete: bool, package_manager: str) -> None:
     query = '''
     match (r: Repository) where elementid(r) = $repository_id
-    set r.is_complete = true
+    set r.is_complete = $is_complete
     '''
     session = get_graph_db_session(package_manager)
-    await session.run(query, repository_id=repository_id)
+    await session.run(query, repository_id=repository_id, is_complete=is_complete)
 
 async def update_repository_moment(repository_id: str, package_manager: str) -> None:
     query = '''

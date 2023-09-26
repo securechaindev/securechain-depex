@@ -25,7 +25,7 @@ from .repository_service import (
     read_graph_by_repository_id,
     read_graph_for_info_operation,
     read_data_for_smt_transform,
-    update_repository_is_completed,
+    update_repository_is_complete,
     update_repository_moment
 )
 from .requirement_file_service import (
@@ -69,7 +69,7 @@ __all__ = [
     'read_graph_by_repository_id',
     'read_graph_for_info_operation',
     'read_data_for_smt_transform',
-    'update_repository_is_completed',
+    'update_repository_is_complete',
     'update_repository_moment',
     'create_requirement_file',
     'read_requirement_files_by_repository',
