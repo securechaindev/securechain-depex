@@ -55,10 +55,10 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
     '''
     repository_json = jsonable_encoder(repository)
     repository_json['moment'] = datetime.now(timezone('Europe/Madrid'))
-    last_repository_moment = await read_repositories_moment(repository_json['owner'], repository_json['name'])
-    if last_repository_moment['is_complete']:
+    last_repository = await read_repositories_moment(repository_json['owner'], repository_json['name'])
+    if last_repository['is_complete']:
         last_commit_date = await get_last_commit_date(repository_json['owner'], repository_json['name'])
-        if not last_repository_moment['moment'] or last_repository_moment['moment'] < last_commit_date:
+        if not last_repository['moment'] or last_repository['moment'] < last_commit_date:
             repository_ids = await read_repositories(repository_json['owner'], repository_json['name'])
             raw_requirement_files = await get_repo_data(repository_json['owner'], repository_json['name'])
             for package_manager, repository_id in repository_ids.items():
@@ -69,7 +69,7 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
                     await update_repository_is_complete(repository_id, False, package_manager)
                     await replace_repository(raw_requirement_files, repository_id, package_manager)
                 await update_repository_is_complete(repository_id, True, package_manager)
-    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'message': 'created'}))
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'message': 'initializing'}))
 
 
 async def extract_repository(raw_requirement_files: dict[str, Any], repository_id: str, package_manager: str) -> None:

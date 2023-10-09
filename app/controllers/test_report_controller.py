@@ -2,7 +2,7 @@ from typing import Any
 from os import system, makedirs
 from os.path import isdir, exists
 from glob import glob
-from git import Repo
+from git import Repo, GitCommandError
 from re import findall, search
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
@@ -31,7 +31,7 @@ async def create_test_report(repository_id: str, configuration: dict[str, str | 
     package_manager = await get_manager(file_name)
     repository = await read_repository_by_id(repository_id, package_manager)
     carpeta_descarga = await download_repository(repository['owner'], repository['name'])
-    paths = await get_files_path('repositories/' + repository['name'] + '/main/')
+    paths = await get_files_path('repositories/' + repository['name'])
     raw_report = await get_raw_report(configuration, package_manager)
     test_report: dict[str, list[Any]] = {'tests': []}
     number = 0
@@ -104,55 +104,60 @@ async def get_raw_report(configuration: dict[str, str | int], package_manager: s
 
 
 async def download_repository(owner:str, name: str) -> str:
-    carpeta_descarga = "repositories/" + name
-    ramas = ["main"]
+    carpeta_descarga = 'repositories/' + name
+    branches = ['main', 'master']
     makedirs(carpeta_descarga)
-    for i in ramas:
-        if not exists(carpeta_descarga + "/" + i):
-            makedirs(carpeta_descarga + "/" + i)
-    for i in ramas:
-        nuevo_directorio = carpeta_descarga + "/" + i
-        Repo.clone_from(f"https://github.com/{owner}/{name}.git", nuevo_directorio, branch = i)
+    for branch in branches:
+        branch_dir = carpeta_descarga + "/" + branch
+        if not exists(branch_dir):
+            makedirs(branch_dir)
+        try:
+            Repo.clone_from(f'https://github.com/{owner}/{name}.git', branch_dir, branch=branch)
+        except GitCommandError:
+            continue
     return carpeta_descarga
 
 
 async def is_imported(file_path: str, dependency: str) -> int:
     with open(file_path, 'r', encoding='utf-8') as file:
-        codigo = file.read()
-        return search(rf'from\s+{dependency}', codigo) or search(rf'import\s+{dependency}', codigo)
+        code = file.read()
+        return search(rf'from\s+{dependency}', code) or search(rf'import\s+{dependency}', code)
 
 
 async def get_files_path(directory_path: str) -> list[str]:
-    paths = glob(directory_path + '/**', recursive=True)
+    branches = ['/main', '/master']
     files = []
-    for _path in paths:
-        if not isdir(_path) and '.py' in _path:
-            files.append(_path)
+    for branch in branches:
+        paths = glob(directory_path + branch + '/**', recursive=True)
+        for _path in paths:
+            if not isdir(_path) and '.py' in _path:
+                files.append(_path)
     return files
-
+    
 
 async def get_used_artifacts(filename: str, dependency: str) -> dict[str, list[int]]:
     with open(filename, 'r', encoding='utf-8') as file:
         used_artifacts: dict[str, list[int]] = {}
-        codigo = file.read()
-        linea_actual = 1
-        all_artifacts = []
-        for linea in codigo.split('\n'):
+        code = file.read()
+        current_line = 1
+        imported_artifacts = []
+        for linea in code.split('\n'):
             if search(rf'from\s+{dependency}', linea):
-                imports_in_line = findall(rf'from\s+{dependency}\.[^\(\)\s:]+\s+import\s+\w+(?:\s*,\s*\w+)*', linea)
-                imports_in_line.extend(findall(rf'from\s+{dependency}\s+import\s+\w+(?:\s*,\s*\w+)*', linea))
-                for _import in imports_in_line:
-                    artifacs = _import.split('import')[1].strip().split(',')
-                    all_artifacts.extend(artifacs)
+                line_imports = findall(rf'from\s+{dependency}\.[^\(\)\s:]+\s+import\s+\w+(?:\s*,\s*\w+)*', linea)
+                line_imports.extend(findall(rf'from\s+{dependency}\s+import\s+\w+(?:\s*,\s*\w+)*', linea))
+                for line_import in line_imports:
+                    artifacs = line_import.split('import')[1].strip().split(',')
+                    imported_artifacts.extend(artifacs)
                     for artifact in artifacs:
-                        used_artifacts.setdefault(artifact, []).append(linea_actual)
+                        used_artifacts.setdefault(artifact, []).append(current_line)
+                current_line += 1
                 continue
             if search(rf'{dependency}\.[^\(\)\s:]+', linea):
                 for artifact in findall(rf'{dependency}\.[^\(\)\s:]+', linea):
                     artifact = artifact.replace(f'{dependency}.', '')
-                    used_artifacts.setdefault(artifact, []).append(linea_actual)
-            for artifact in all_artifacts:
-                if search(rf'{artifact}', linea):
-                    used_artifacts[artifact].append(linea_actual)
-            linea_actual += 1
+                    used_artifacts.setdefault(artifact, []).append(current_line)
+            for imported_artifact in imported_artifacts:
+                if search(rf'{imported_artifact}[.(]', linea):
+                    used_artifacts[imported_artifact].append(current_line)
+            current_line += 1
         return used_artifacts
