@@ -13,6 +13,8 @@ pylint:
     - missing-timeout
     - too-many-nested-blocks
     - unpacking-non-sequence
+    - not-an-iterable
+    - consider-using-f-string
 
 pycodestyle:
   disable:

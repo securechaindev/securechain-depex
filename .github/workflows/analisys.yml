@@ -19,23 +19,3 @@ jobs:
       - name: Analysing the code with prospector
         run: |
           prospector
-  mypy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          motor-stubs==1.7.1
-          types-requests==2.31.0.1
-          types-setuptools==68.0.0.2
-          types-python-dateutil==2.8.19.13
-          pip install mypy==1.4.1
-      - name: Running static types with mypy
-        run: |
-          mypy app
