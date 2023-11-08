@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     GRAPH_DB_PASSWORD_MVN: str = ''
     VULN_DB_USER: str = ''
     VULN_DB_PASSWORD: str = ''
-    GIT_GRAPHQL_API_KEY: str = ''
+    GITHUB_GRAPHQL_API_KEY: str = ''
+    GITLAB_GRAPHQL_API_KEY: str = ''
     NVD_API_KEY: str = ''
 
     class Config:

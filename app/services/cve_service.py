@@ -47,8 +47,3 @@ async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, 
         return [cpe_match async for cpe_match in cves_collection.aggregate(pipeline)]
     except:
         return []
-
-
-async def bulk_write_actions(actions: list[Any], collection_name: str, ordered: bool) -> None:
-    collection = get_collection(collection_name)
-    await collection.bulk_write(actions, ordered=ordered)

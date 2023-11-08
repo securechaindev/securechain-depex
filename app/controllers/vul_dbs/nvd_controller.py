@@ -6,35 +6,36 @@ from pymongo import ReplaceOne
 from requests import get, ConnectTimeout, ConnectionError
 from app.config import settings
 from app.services import (
-    bulk_write_actions,
     read_env_variables,
-    update_env_variables
+    update_env_variables_by_nvd,
+    bulk_write_actions
 )
 
 
-async def nvd_updater() -> None:
+async def nvd_update() -> None:
     env_variables = await read_env_variables()
-    last_update_format = env_variables['last_update'].isoformat()
+    print(env_variables)
+    last_update_format = env_variables['nvd_last_update'].isoformat()
     now = datetime.now()
     now_format = datetime.now().isoformat()
     headers = {'apiKey': settings.NVD_API_KEY}
     await update_cves(last_update_format, now_format, headers)
     await update_cpe_matchs(last_update_format, now_format, headers)
     await update_cpes(last_update_format, now_format, headers)
-    await update_env_variables(env_variables['_id'], now)
+    await update_env_variables_by_nvd(env_variables['_id'], now)
 
 
 async def update_cves(last_update: str, now: str, headers: dict[str, str]) -> None:
     while True:
         try:
-            response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'pubStartDate': str(last_update),'pubEndDate': str(now)}, headers=headers).json()
+            response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'pubStartDate': last_update,'pubEndDate': now}, headers=headers).json()
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)
     actions = await sanitize_cves(response)
     while True:
         try:
-            response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'lastModStartDate': str(last_update), 'lastModEndDate': str(now)}, headers=headers).json()
+            response = get('https://services.nvd.nist.gov/rest/json/cves/2.0?', params={'lastModStartDate': last_update, 'lastModEndDate': now}, headers=headers).json()
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)
@@ -45,8 +46,7 @@ async def update_cves(last_update: str, now: str, headers: dict[str, str]) -> No
 async def update_cpe_matchs(last_update: str, now: str, headers: dict[str, str]) -> None:
     while True:
         try:
-            params={'lastModStartDate': str(last_update),'lastModEndDate': str(now)}
-            response = get('https://services.nvd.nist.gov/rest/json/cpematch/2.0?', params={'lastModStartDate': str(last_update),'lastModEndDate': str(now)}, headers=headers).json()
+            response = get('https://services.nvd.nist.gov/rest/json/cpematch/2.0?', params={'lastModStartDate': last_update,'lastModEndDate': now}, headers=headers).json()
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)
@@ -58,7 +58,7 @@ async def update_cpe_matchs(last_update: str, now: str, headers: dict[str, str])
 async def update_cpes(last_update: str, now: str, headers: dict[str, str]) -> None:
     while True:
         try:
-            response = get('https://services.nvd.nist.gov/rest/json/cpes/2.0?', params={'lastModStartDate': str(last_update),'lastModEndDate': str(now)}, headers=headers).json()
+            response = get('https://services.nvd.nist.gov/rest/json/cpes/2.0?', params={'lastModStartDate': last_update,'lastModEndDate': now}, headers=headers).json()
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)

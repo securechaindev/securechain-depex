@@ -6,9 +6,9 @@ from app.utils import get_manager, parse_pip_constraints
 from dateutil.parser import parse
 from datetime import datetime
 
-headers = {
+headers_github = {
     'Accept': 'application/vnd.github.hawkgirl-preview+json',
-    'Authorization': f'Bearer {settings.GIT_GRAPHQL_API_KEY}'
+    'Authorization': f'Bearer {settings.GITHUB_GRAPHQL_API_KEY}'
 }
 
 async def get_repo_data(owner: str, name: str, all_packages: dict[str, Any] | None = None, end_cursor: str | None = None) -> dict[str, Any]:
@@ -28,7 +28,7 @@ async def get_repo_data(owner: str, name: str, all_packages: dict[str, Any] | No
             response = post(
                 'https://api.github.com/graphql',
                 json={'query': query},
-                headers=headers
+                headers=headers_github
             ).json()
             break
         except (ConnectTimeout, ConnectionError):
@@ -37,7 +37,6 @@ async def get_repo_data(owner: str, name: str, all_packages: dict[str, Any] | No
     if not page_info['hasNextPage']:
         return all_packages
     return await get_repo_data(owner, name, all_packages, page_info['endCursor'])
-
 
 async def json_reader(response: Any, all_packages: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     page_info = {'hasNextPage': None}
@@ -60,8 +59,7 @@ async def json_reader(response: Any, all_packages: dict[str, Any]) -> tuple[dict
             all_packages[requirement_file_name]['dependencies'].update({node['packageName']: node['requirements']})
     return (page_info, all_packages)
 
-
-async def get_last_commit_date(owner: str, name: str) -> datetime:
+async def get_last_commit_date_github(owner: str, name: str) -> datetime:
     query = '''
     {
         repository(owner: "%s", name: "%s") {
@@ -88,7 +86,7 @@ async def get_last_commit_date(owner: str, name: str) -> datetime:
             response = post(
                 'https://api.github.com/graphql',
                 json={'query': query},
-                headers=headers
+                headers=headers_github
             ).json()
             break
         except (ConnectTimeout, ConnectionError):

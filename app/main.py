@@ -9,7 +9,7 @@ from starlette.exceptions import HTTPException
 from starlette.responses import Response
 from apscheduler.schedulers.background import BackgroundScheduler
 from time import sleep
-from app.controllers import nvd_updater
+from app.controllers import exploit_db_update, nvd_update
 from app.router import api_router
 from app.services import create_indexes
 
@@ -41,11 +41,11 @@ async def startup_event() -> None:
     while True:
         try:
             await create_indexes()
-            await nvd_updater()
+            await exploit_db_update()
+            await nvd_update()
             scheduler = BackgroundScheduler()
-            scheduler.add_job(nvd_updater, 'interval', seconds=7200)
-            # TODO: Create a job for updating exploit database
-            # scheduler.add_job(exploit_db_updater, 'interval', seconds=86400)
+            scheduler.add_job(nvd_update, 'interval', seconds=7200)
+            scheduler.add_job(exploit_db_update, 'interval', seconds=86400)
             scheduler.start()
             break
         except:

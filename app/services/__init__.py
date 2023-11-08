@@ -1,8 +1,8 @@
 from .dbs.indexes import create_indexes
+from .bulk_write_service import bulk_write_actions
 from .cve_service import (
     read_cve_impact_by_id,
-    read_cpe_matches_by_package_name,
-    bulk_write_actions
+    read_cpe_matches_by_package_name
 )
 from .exploit_service import read_exploits_by_cve_id
 from .package_service import (
@@ -32,7 +32,8 @@ from .requirement_file_service import (
 )
 from .env_variables_service import (
     read_env_variables,
-    update_env_variables
+    update_env_variables_by_nvd,
+    update_env_variables_by_exploit_db
 )
 from .version_service import (
     read_cve_ids_by_version_and_package,
@@ -43,10 +44,10 @@ from .version_service import (
 )
 
 __all__ = [
+    'bulk_write_actions',
     'create_indexes',
     'read_cve_impact_by_id',
     'read_cpe_matches_by_package_name',
-    'bulk_write_actions',
     'read_exploits_by_cve_id',
     'create_package_and_versions',
     'read_package_by_name',
@@ -68,7 +69,8 @@ __all__ = [
     'delete_requirement_file',
     'delete_requirement_file_rel',
     'read_env_variables',
-    'update_env_variables',
+    'update_env_variables_by_nvd',
+    'update_env_variables_by_exploit_db',
     'read_cve_ids_by_version_and_package',
     'read_versions_names_by_package',
     'read_releases_by_counts',

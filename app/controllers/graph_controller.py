@@ -19,7 +19,7 @@ from app.services import (
 )
 from app.models import RepositoryModel
 from app.utils import json_encoder
-from app.apis import get_repo_data, get_last_commit_date
+from app.apis import get_repo_data, get_last_commit_date_github
 from .managers.pip_generate_controller import pip_extract_graph, pip_exist_package
 from .managers.npm_generate_controller import npm_extract_graph, npm_exist_package
 from .managers.mvn_generate_controller import mvn_extract_graph, mvn_exist_package
@@ -60,7 +60,7 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
     repository_json['moment'] = datetime.now(timezone('Europe/Madrid'))
     last_repository = await read_repositories_moment(repository_json['owner'], repository_json['name'])
     if last_repository['is_complete']:
-        last_commit_date = await get_last_commit_date(repository_json['owner'], repository_json['name'])
+        last_commit_date = await get_last_commit_date_github(repository_json['owner'], repository_json['name'])
         if not last_repository['moment'] or last_repository['moment'] < last_commit_date:
             repository_ids = await read_repositories(repository_json['owner'], repository_json['name'])
             raw_requirement_files = await get_repo_data(repository_json['owner'], repository_json['name'])
