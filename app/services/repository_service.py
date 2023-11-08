@@ -1,11 +1,10 @@
 from typing import Any
 from datetime import datetime
 from pytz import timezone
-from fastapi import HTTPException
 from .dbs.databases import get_graph_db_session
 
 
-async def create_repository(repository: dict[str, Any], package_manager: str) -> dict[str, str]:
+async def create_repository(repository: dict[str, Any], package_manager: str) -> str:
     query = '''
     merge(r: Repository{
         owner: $owner,
@@ -62,38 +61,53 @@ async def read_repository_by_id(repository_id: str, package_manager: str) -> dic
     return record[0] if record else None
 
 
-async def read_repository_by_owner_name(owner: str, name: str, package_manager: str) -> dict[str, Any]:
+# async def read_repository_files(repository_id: str, package_manager: str) -> list[dict[str, Any]]:
+#     query = '''
+#     match(r: Repository)-[*1]->(s:RequirementFile) where elementid(r) = $repository_id return s{.*}
+#     '''
+#     session = get_graph_db_session(package_manager)
+#     result = await session.run(query, repository_id=repository_id)
+#     record = await result.single()
+#     return record[0] if record else None
+
+
+async def read_graphs_by_owner_name_for_sigma(owner: str, name: str) -> dict[str, Any]:
     query = '''
-    match(r: Repository{owner: $owner, name: $name}) return elementid(r)
+    match (r: Repository{owner: $owner, name: $name})
+    call apoc.path.subgraphAll(r, {relationshipFilter: '>', limit: 20}) yield nodes, relationships
+    unwind nodes as node
+        with case labels(node)[0]
+            when 'Version' then {
+                id: elementid(node),
+                label: node.name + '\n' + apoc.text.join(node.cves, ' ')
+            }
+            else {
+                id: elementid(node),
+                label: node.name
+            }
+        end as sigma_nodes, relationships
+    unwind relationships as relationship
+        with case type(relationship)
+            when 'Requires' then {
+                source: elementid(startnode(relationship)),
+                target: elementid(endnode(relationship)),
+                label: relationship.constraints
+            }
+            else {
+                source: elementid(startnode(relationship)),
+                target: elementid(endnode(relationship)),
+                label: type(relationship)
+            }
+        end as sigma_relationships, sigma_nodes
+    return {nodes: apoc.coll.toSet(collect(sigma_nodes)), relationships: apoc.coll.toSet(collect(sigma_relationships))}
     '''
-    session = get_graph_db_session(package_manager)
-    result = await session.run(query, owner=owner, name=name)
-    record = await result.single()
-    return record[0] if record else None
-
-
-async def read_repository_files(repository_id: str, package_manager: str) -> list[dict[str, Any]]:
-    query = '''
-    match(r: Repository)-[*1]->(s:RequirementFile) where elementid(r) = $repository_id return s{.*}
-    '''
-    session = get_graph_db_session(package_manager)
-    result = await session.run(query, repository_id=repository_id)
-    record = await result.single()
-    return record[0] if record else None
-
-
-async def read_graph_by_repository_id(requirement_file_id: str, package_manager: str) -> dict[str, Any]:
-    query = '''
-    match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
-    call apoc.path.subgraphAll(rf, {relationshipFilter: '>'}) yield nodes, relationships
-    return nodes, relationships
-    '''
-    session = get_graph_db_session(package_manager)
-    result = await session.run(query, requirement_file_id=requirement_file_id)
-    record = await result.single()
-    if record:
-        return record[0]
-    raise HTTPException(status_code=404, detail=[f'Graph with id {requirement_file_id} not found'])
+    graphs: dict[str, Any] = {}
+    for package_manager in ('PIP'):
+        session = get_graph_db_session(package_manager)
+        result = await session.run(query, owner=owner, name=name)
+        record = await result.single()
+        graphs[package_manager] = record if record else None
+    return graphs
 
 
 async def read_graph_for_info_operation(requirement_file_id: str, package_manager: str) -> dict[str, Any]:

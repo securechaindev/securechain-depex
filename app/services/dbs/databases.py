@@ -1,4 +1,3 @@
-from typing import Any
 from functools import lru_cache
 from neo4j import AsyncGraphDatabase, AsyncSession
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
@@ -19,19 +18,19 @@ def get_graph_db_session(package_manager: str) -> AsyncSession | tuple[AsyncSess
             return mvn_session
         case 'ALL':
             return pip_session, npm_session, mvn_session
-        case _:
-            return pip_session
 
 
 @lru_cache
 def get_collection(collection_name: str) -> AsyncIOMotorCollection:
-    client = AsyncIOMotorClient(settings.VULN_DB_URI)
+    client: AsyncIOMotorClient  = AsyncIOMotorClient(settings.VULN_DB_URI)
     match collection_name:
         case 'env_variables':
             return client.depex.get_collection('env_variables')
-        case 'nvd':
-            return client.cves.get_collection('nvd')
-        case 'exploit_db':
-            return client.exploits.get_collection('exploit_db')
-        case _:
-            return client.exploits.get_collection('exploits')
+        case 'cves':
+            return client.nvd.get_collection('cves')
+        case 'cpe_matchs':
+            return client.nvd.get_collection('cpe_matchs')
+        case 'cpes':
+            return client.nvd.get_collection('cpes')
+        case 'exploits':
+            return client.exploit_db.get_collection('exploits')

@@ -40,7 +40,7 @@ async def read_package_by_name(package_name: str, package_manager: str) -> dict[
     return record[0] if record else None
 
 
-async def read_packages_by_requirement_file(requirement_file_id: str, package_manager: str) -> list[str]:
+async def read_packages_by_requirement_file(requirement_file_id: str, package_manager: str) -> dict[str, str]:
     query = '''
     match (rf:RequirementFile) where elementid(rf) = $requirement_file_id
     match (rf)-[requirement_rel]->(package)

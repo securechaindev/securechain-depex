@@ -3,14 +3,9 @@ from typing import Any
 from .dbs.databases import get_collection
 
 
-async def read_cve_by_cve_id(cve_id: str) -> dict[str, Any] | None:
-    nvd_collection = get_collection('nvd')
-    return await nvd_collection.find_one({'id': cve_id})
-
-
-async def read_cve_impact_by_cve_id(cve_id: str) -> dict[str, list[str]]:
-    nvd_collection = get_collection('nvd')
-    return await nvd_collection.find_one(
+async def read_cve_impact_by_id(cve_id: str) -> dict[str, list[str]]:
+    cves_collection = get_collection('cves')
+    return await cves_collection.find_one(
         {
             'id': cve_id
         },
@@ -27,7 +22,7 @@ async def read_cve_impact_by_cve_id(cve_id: str) -> dict[str, list[str]]:
 
 
 async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, Any]]:
-    nvd_collection = get_collection('nvd')
+    cves_collection = get_collection('cves')
     pipeline = [
         {
             '$project': {
@@ -49,11 +44,11 @@ async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, 
         }
     ]
     try:
-        return [cpe_match async for cpe_match in nvd_collection.aggregate(pipeline)]
+        return [cpe_match async for cpe_match in cves_collection.aggregate(pipeline)]
     except:
         return []
 
 
-async def bulk_write_cve_actions(actions: list[Any], ordered: bool) -> None:
-    nvd_collection = get_collection('nvd')
-    await nvd_collection.bulk_write(actions, ordered=ordered)
+async def bulk_write_actions(actions: list[Any], collection_name: str, ordered: bool) -> None:
+    collection = get_collection(collection_name)
+    await collection.bulk_write(actions, ordered=ordered)

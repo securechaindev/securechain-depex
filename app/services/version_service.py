@@ -2,27 +2,6 @@ from typing import Any
 from .dbs.databases import get_graph_db_session
 
 
-async def create_version(version: dict[str, Any], package_name: str, package_manager: str) -> dict[str, Any]:
-    query = '''
-    match (p: Package)
-    where p.name = $package_name
-    create(v: Version{
-        name: $name,
-        release_date: $release_date,
-        count: $count,
-        cves: $cves,
-        mean: $mean,
-        weighted_mean: $weighted_mean
-    })
-    create (p)-[rel:Have]->(v)
-    return {name: v.name, id: elementid(v)}
-    '''
-    session = get_graph_db_session(package_manager)
-    result = await session.run(query, version, package_name=package_name)
-    record = await result.single()
-    return record[0] if record else None
-
-
 async def read_cve_ids_by_version_and_package(version: str, package_name: str, package_manager: str) -> list[str]:
     query = '''
     match (p: Package) where p.name = $package_name
