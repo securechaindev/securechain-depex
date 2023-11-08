@@ -1,6 +1,7 @@
 from json import JSONEncoder, loads
 from typing import Any
 from datetime import datetime
+from neo4j.time import DateTime
 from bson import ObjectId
 
 
@@ -9,6 +10,8 @@ class JSONencoder(JSONEncoder):
         if isinstance(o, ObjectId):
             return str(o)
         if isinstance(o, datetime):
+            return str(o)
+        if isinstance(o, DateTime):
             return str(o)
         return JSONEncoder.default(self, o)
 

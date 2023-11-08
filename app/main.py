@@ -1,4 +1,3 @@
-from time import sleep
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.exception_handlers import (
@@ -9,19 +8,22 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 from starlette.responses import Response
 from apscheduler.schedulers.background import BackgroundScheduler
+from time import sleep
 from app.controllers import nvd_updater
 from app.router import api_router
 from app.services import create_indexes
+
 
 DESCRIPTION = '''
 A backend for dependency graph building, atribution of vulnerabilities and reasoning
 over it.
 '''
 
+
 app = FastAPI(
     title='Depex',
     description=DESCRIPTION,
-    version='0.5.0',
+    version='0.6.0',
     contact={
         'name': 'Antonio Germán Márquez Trujillo',
         'url': 'https://github.com/GermanMT',
@@ -41,7 +43,9 @@ async def startup_event() -> None:
             await create_indexes()
             await nvd_updater()
             scheduler = BackgroundScheduler()
-            scheduler.add_job(nvd_updater, 'interval', seconds=216000)
+            scheduler.add_job(nvd_updater, 'interval', seconds=7200)
+            # TODO: Create a job for updating exploit database
+            # scheduler.add_job(exploit_db_updater, 'interval', seconds=86400)
             scheduler.start()
             break
         except:
@@ -57,6 +61,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException) ->
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> Response:
     return await request_validation_exception_handler(request, exc)
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[],
@@ -64,5 +69,6 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*']
 )
+
 
 app.include_router(api_router)

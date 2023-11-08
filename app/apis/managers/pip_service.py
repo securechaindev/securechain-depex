@@ -63,18 +63,6 @@ async def requires_pip_packages(pkg_name: str, version_dist: str) -> dict[str, l
             data = data[0].replace('(', '').replace(')', '').replace(' ', '').replace("'", '')
             pos = await get_first_position(data, ['<', '>', '=', '!', '~'])
             dist = data[:pos]
-            ctcs = await parse_pip_constraints(data[pos:])
-            if (
-                dist in require_packages and
-                isinstance(require_packages[dist], dict) and
-                isinstance(ctcs, list)
-            ):
-                for ctc in ctcs:
-                    if ctc not in require_packages[dist]:
-                        require_packages[dist].append(ctcs)
-            else:
-                if '.' not in ctcs and ctcs != '':
-                    continue
-                require_packages[dist] = ctcs
+            require_packages[dist] = await parse_pip_constraints(data[pos:])
         return require_packages
     return {}
