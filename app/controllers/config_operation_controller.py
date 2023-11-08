@@ -28,6 +28,7 @@ async def valid_config(requirement_file_id: str, agregator: str, file_name: str,
     - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
+    - **max_level**: the depth of the graph to be analysed
     - **config**: configuration containing the name of the dependency and the version to be chosen
     '''
     package_manager = await get_manager(file_name)
@@ -53,6 +54,7 @@ async def complete_config(requirement_file_id: str, agregator: str, file_name: s
     - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
+    - **max_level**: the depth of the graph to be analysed
     - **config**: partial configuration containing the name and the version of each dependency
     '''
     package_manager = await get_manager(file_name)
@@ -78,6 +80,7 @@ async def config_by_impact(requirement_file_id: str, agregator: str, file_name: 
     - **requirement_file_id**: the id of a requirement file
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
+    - **max_level**: the depth of the graph to be analysed
     - **impact**: impact number between 0 and 10
     '''
     package_manager = await get_manager(file_name)

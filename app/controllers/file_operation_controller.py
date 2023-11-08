@@ -67,6 +67,7 @@ async def number_of_configurations(requirement_file_id: str, file_name: str, max
 
     - **requirement_file_id**: the id of a requirement file
     - **file_name**: name of requirement file belonging to graph
+    - **max_level**: the depth of the graph to be analysed
     '''
     package_manager = await get_manager(file_name)
     graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
@@ -117,6 +118,7 @@ async def maximize_impact(requirement_file_id: str, agregator: str, file_name: s
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
+    - **max_level**: the depth of the graph to be analysed
     '''
     package_manager = await get_manager(file_name)
     graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
@@ -143,6 +145,7 @@ async def filter_configs(requirement_file_id: str, agregator: str, file_name: st
     - **max_threshold**: max impact threshold
     - **min_threshold**: min impact threshold
     - **limit**: the number of configurations to return
+    - **max_level**: the depth of the graph to be analysed
     '''
     package_manager = await get_manager(file_name)
     graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
