@@ -8,7 +8,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from app.services import (
     read_cve_ids_by_version_and_package,
-    read_cve_impact_by_cve_id,
+    read_cve_impact_by_id,
     read_exploits_by_cve_id,
     read_repository_by_id
 )
@@ -50,7 +50,7 @@ async def create_test_report(repository_id: str, configuration: dict[str, str | 
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(test_report))
 
 
-async def create_tests(number: int, paths: list[str], dependency, cve, exploit_id: str = None) -> list[dict[str, Any]]:
+async def create_tests(number: int, paths: list[str], dependency, cve, exploit_id: str | None = None) -> tuple[list[Any], int]:
     tests = []
     for _path in paths:
         if await is_imported(_path, dependency['name']):
@@ -72,18 +72,18 @@ async def create_tests(number: int, paths: list[str], dependency, cve, exploit_i
     return (tests, number)
 
 
-async def get_raw_report(configuration: dict[str, str | int], package_manager: str) -> list[dict[str, int]]:
+async def get_raw_report(configuration: dict[str, str | int | float], package_manager: str) -> list[dict[str, Any]]:
     raw_report = []
     aux = {}
     for dependency in configuration:
         if 'CVSS' in dependency:
             aux[dependency.replace('CVSS', '')] = configuration[dependency]
     for dependency, version in configuration.items():
-        if version != -1 and all(key not in dependency for key in ('CVSS', 'func_obj')):
+        if isinstance(version, str):
             cves = []
             cve_ids = await read_cve_ids_by_version_and_package(version, dependency, package_manager)
             for cve_id in cve_ids:
-                impact = await read_cve_impact_by_cve_id(cve_id)
+                impact = await read_cve_impact_by_id(cve_id)
                 exploits = await read_exploits_by_cve_id(cve_id)
                 cves.append(
                     {
@@ -118,7 +118,7 @@ async def download_repository(owner:str, name: str) -> str:
     return carpeta_descarga
 
 
-async def is_imported(file_path: str, dependency: str) -> int:
+async def is_imported(file_path: str, dependency: str) -> Any:
     with open(file_path, 'r', encoding='utf-8') as file:
         code = file.read()
         return search(rf'from\s+{dependency}', code) or search(rf'import\s+{dependency}', code)

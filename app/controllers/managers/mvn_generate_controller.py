@@ -4,8 +4,8 @@ from app.apis import (
     get_all_versions,
     requires_packages
 )
-from app.services import read_cpe_matches_by_package_name
 from app.services import (
+    read_cpe_matches_by_package_name,
     read_package_by_name,
     create_requirement_file,
     relate_package,

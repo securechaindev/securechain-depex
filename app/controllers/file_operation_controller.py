@@ -7,8 +7,7 @@ from flamapy.metamodels.smt_metamodel.operations import (
     MaximizeImpact,
     FilterConfigs
 )
-
-from app.controllers.graph_to_smt import GraphToSMT
+from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from app.services import (
     read_data_for_smt_transform,
     read_releases_by_counts,
@@ -93,14 +92,14 @@ async def minimize_impact(requirement_file_id: str, agregator: str, file_name: s
     - **agregator**: agregator function to build the smt model ('mean' or 'weighted_mean')
     - **file_name**: name of requirement file belonging to graph
     - **limit**: the number of configurations to return
+    - **max_level**: the depth of the graph to be analysed
     '''
     package_manager = await get_manager(file_name)
-    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level)
+    graph_data = await read_data_for_smt_transform(requirement_file_id, package_manager, max_level*2)
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
-    smt_model = smt_transform.destination_model
     operation = MinimizeImpact(limit)
-    operation.execute(smt_model)
+    operation.execute(smt_transform.destination_model)
     result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
 
@@ -128,7 +127,6 @@ async def maximize_impact(requirement_file_id: str, agregator: str, file_name: s
     operation.execute(smt_model)
     result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
-
 
 @router.post(
     '/operation/file/filter_configs/{requirement_file_id}',

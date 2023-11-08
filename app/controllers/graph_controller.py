@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from app.services import (
     create_repository,
-    read_graph_by_repository_id,
+    read_graphs_by_owner_name_for_sigma,
     read_repositories,
     read_repositories_moment,
     read_requirement_files_by_repository,
@@ -27,19 +27,22 @@ from .managers.mvn_generate_controller import mvn_extract_graph, mvn_exist_packa
 router = APIRouter()
 
 @router.get(
-    '/graph/{repository_id}',
-    summary='Get a graph by a repository id',
+    '/graph/{owner}/{name}',
+    summary='Get each package manager graph by the owner and name of a repository',
     response_description='Return a graph'
 )
-async def get_graph(repository_id: str) -> JSONResponse:
+async def get_graphs(owner: str, name: str) -> JSONResponse:
     '''
-    Return a graph by a given repository id. If attribute is_complete is True
-    the graph is wholly built:
+    Get each package manager graph by the owner and name of a repository:
 
-    - **repository_id**: the id of a repository
+    - **owner**: the owner of a repository
+    - **name**: the name of a repository
     '''
-    graph = await read_graph_by_repository_id(repository_id, '_')
-    return JSONResponse(status_code=status.HTTP_200_OK, content=graph)
+    # TODO: Hacer un servicio que devuelva todos los grafos por owner y name para mostrarlos en el FrontEnd
+    # TODO: Añadir a Neo4J owner y name como un índice
+    # TODO: Cambiar en los servicios la palabra relationships por edges
+    graphs = await read_graphs_by_owner_name_for_sigma(owner, name)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graphs))
 
 
 @router.post(
@@ -69,6 +72,9 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
                     await update_repository_is_complete(repository_id, False, package_manager)
                     await replace_repository(raw_requirement_files, repository_id, package_manager)
                 await update_repository_is_complete(repository_id, True, package_manager)
+        else:
+            # TODO: Devolver el grafo actual de la misma forma que en get_graphs
+            pass
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'message': 'initializing'}))
 
 
@@ -114,7 +120,7 @@ async def select_manager(package_manager: str, name: str, file: dict[str, Any], 
     match package_manager:
         case 'PIP':
             await pip_extract_graph(name, file, repository_id)
-        # case 'NPM':
-        #     await npm_extract_graph(name, file, repository_json, repository_id)
-        # case 'MVN':
-        #     await mvn_extract_graph(name, file, repository_json, repository_id)
+        case 'NPM':
+            await npm_extract_graph(name, file, repository_id)
+        case 'MVN':
+            await mvn_extract_graph(name, file, repository_id)
