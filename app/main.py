@@ -7,18 +7,33 @@ from fastapi.exception_handlers import (
 from starlette.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 from starlette.responses import Response
+from contextlib import asynccontextmanager
 from apscheduler.schedulers.background import BackgroundScheduler
 from time import sleep
 from app.controllers import exploit_db_update, nvd_update
 from app.router import api_router
 from app.services import create_indexes
 
-
 DESCRIPTION = '''
 A backend for dependency graph building, atribution of vulnerabilities and reasoning
 over it.
 '''
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> None:
+    while True:
+        try:
+            await create_indexes()
+            await exploit_db_update()
+            await nvd_update()
+            scheduler = BackgroundScheduler()
+            scheduler.add_job(nvd_update, 'interval', seconds=7200)
+            scheduler.add_job(exploit_db_update, 'interval', seconds=86400)
+            scheduler.start()
+            break
+        except:
+            sleep(5)
+    yield
 
 app = FastAPI(
     title='Depex',
@@ -33,23 +48,8 @@ app = FastAPI(
         'name': 'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'url': 'https://www.gnu.org/licenses/gpl-3.0.html',
     },
+    lifespan=lifespan
 )
-
-
-@app.on_event("startup")
-async def startup_event() -> None:
-    while True:
-        try:
-            await create_indexes()
-            await exploit_db_update()
-            await nvd_update()
-            scheduler = BackgroundScheduler()
-            scheduler.add_job(nvd_update, 'interval', seconds=7200)
-            scheduler.add_job(exploit_db_update, 'interval', seconds=86400)
-            scheduler.start()
-            break
-        except:
-            sleep(5)
 
 
 @app.exception_handler(HTTPException)
