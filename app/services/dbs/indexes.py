@@ -1,6 +1,5 @@
 from app.services.dbs.databases import get_graph_db_session, get_collection
 
-
 async def create_indexes() -> None:
     cves_collection = get_collection('cves')
     cpe_matchs_collection = get_collection('cpe_matchs')

@@ -51,16 +51,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException) -> Response:
     return await http_exception_handler(request, exc)
 
-
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> Response:
     return await request_validation_exception_handler(request, exc)
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -69,6 +66,5 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*']
 )
-
 
 app.include_router(api_router)

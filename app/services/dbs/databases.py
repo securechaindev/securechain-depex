@@ -3,7 +3,6 @@ from neo4j import AsyncGraphDatabase, AsyncSession
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from app.config import settings
 
-
 @lru_cache
 def get_graph_db_session(package_manager: str) -> AsyncSession | tuple[AsyncSession]:
     pip_session = AsyncGraphDatabase.driver(uri=settings.GRAPH_DB_URI_PIP, auth=(settings.GRAPH_DB_USER, settings.GRAPH_DB_PASSWORD_PIP)).session()
@@ -18,7 +17,6 @@ def get_graph_db_session(package_manager: str) -> AsyncSession | tuple[AsyncSess
             return mvn_session
         case 'ALL':
             return pip_session, npm_session, mvn_session
-
 
 @lru_cache
 def get_collection(collection_name: str) -> AsyncIOMotorCollection:

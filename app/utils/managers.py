@@ -2,7 +2,6 @@ PIP = 'PIP'
 NPM = 'NPM'
 MVN = 'MVN'
 
-
 async def get_manager(file_name: str) -> str:
     pip_files = ('.txt', 'setup.py', 'pipfile.lock', 'pipfile', 'pyproject.toml')
     npm_files = ('package-lock.json', 'package.json')

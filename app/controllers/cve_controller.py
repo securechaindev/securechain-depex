@@ -2,7 +2,6 @@ from typing import Any
 from app.utils import mean, weighted_mean
 from univers.versions import PypiVersion, SemverVersion, MavenVersion
 
-
 async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_manager: str, package_name: str, artifact_id: str | None = None) -> dict[str, Any]:
     impacts: list[float] = []
     version['cves'] = []
@@ -45,7 +44,6 @@ async def relate_cves(version: Any, cpe_matches: list[dict[str, Any]], package_m
     version['mean'] = await mean(impacts)
     version['weighted_mean'] = await weighted_mean(impacts)
     return version
-
 
 async def get_version_type(package_manager: str):
     match package_manager:

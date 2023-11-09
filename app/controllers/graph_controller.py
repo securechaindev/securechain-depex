@@ -44,7 +44,6 @@ async def get_graphs(owner: str, name: str) -> JSONResponse:
     graphs = await read_graphs_by_owner_name_for_sigma(owner, name)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graphs))
 
-
 @router.post(
     '/graph/init',
     summary='Init a graph',
@@ -77,12 +76,10 @@ async def init_graph(repository: RepositoryModel) -> JSONResponse:
             pass
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'message': 'initializing'}))
 
-
 async def extract_repository(raw_requirement_files: dict[str, Any], repository_id: str, package_manager: str) -> None:
     for name, file in raw_requirement_files.items():
         if file['package_manager'] == package_manager:
             await select_manager(package_manager, name, file, repository_id)
-
 
 async def replace_repository(raw_requirement_files: dict[str, Any], repository_id:str, package_manager: str) -> None:
     requirement_files = await read_requirement_files_by_repository(repository_id, package_manager)
@@ -114,7 +111,6 @@ async def replace_repository(raw_requirement_files: dict[str, Any], repository_i
                 if file['package_manager'] == package_manager:
                     await select_manager(package_manager, name, file, repository_id)
         await update_repository_moment(repository_id, package_manager)
-
 
 async def select_manager(package_manager: str, name: str, file: dict[str, Any], repository_id: str) -> None:
     match package_manager:

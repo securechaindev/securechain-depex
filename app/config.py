@@ -1,7 +1,6 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings
 
-
 class Settings(BaseSettings):
 
     GRAPH_DB_URI_PIP: str = ''
@@ -20,7 +19,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = '.env'
-
 
 @lru_cache
 def get_settings() -> Settings:

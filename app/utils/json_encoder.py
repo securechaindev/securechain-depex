@@ -4,7 +4,6 @@ from datetime import datetime
 from neo4j.time import DateTime
 from bson import ObjectId
 
-
 class JSONencoder(JSONEncoder):
     def default(self, o: Any) -> Any:
         if isinstance(o, ObjectId):
@@ -14,7 +13,6 @@ class JSONencoder(JSONEncoder):
         if isinstance(o, DateTime):
             return str(o)
         return JSONEncoder.default(self, o)
-
 
 def json_encoder(raw_response: dict[str, Any]) -> Any:
     return loads(JSONencoder().encode(raw_response))

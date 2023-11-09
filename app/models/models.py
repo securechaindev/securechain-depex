@@ -3,7 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from pytz import timezone
 
-
 class VersionModel(BaseModel):
     release: str
     release_date: datetime | None
@@ -26,7 +25,6 @@ class VersionModel(BaseModel):
             }
         }
 
-
 class PackageModel(BaseModel):
     name: str
     moment: datetime
@@ -41,7 +39,6 @@ class PackageModel(BaseModel):
             }
         }
 
-
 class RequirementFile(BaseModel):
     name: str
     manager: str
@@ -55,7 +52,6 @@ class RequirementFile(BaseModel):
                 'manager': 'PIP'
             }
         }
-
 
 class RepositoryModel(BaseModel):
     owner: str = Field(

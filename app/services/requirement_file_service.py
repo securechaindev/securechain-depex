@@ -1,7 +1,6 @@
 from typing import Any
 from .dbs.databases import get_graph_db_session
 
-
 async def create_requirement_file(requirement_file: dict[str, Any], repository_id: str, package_manager: str) -> str:
     query = '''
     match (r:Repository)
@@ -15,7 +14,6 @@ async def create_requirement_file(requirement_file: dict[str, Any], repository_i
     record = await result.single()
     return record[0] if record else None
 
-
 async def read_requirement_files_by_repository(repository_id: str, package_manager: str) -> dict[str, str]:
     query = '''
     match (r:Repository) where elementid(r) = $repository_id
@@ -27,7 +25,6 @@ async def read_requirement_files_by_repository(repository_id: str, package_manag
     record = await result.single()
     return record[0] if record else None
 
-
 async def update_requirement_rel_constraints(requirement_file_id: str, package_name: str, constraints: str, package_manager: str) -> None:
     query = '''
     match (rf:RequirementFile) where elementid(rf) = $requirement_file_id
@@ -37,7 +34,6 @@ async def update_requirement_rel_constraints(requirement_file_id: str, package_n
     '''
     session = get_graph_db_session(package_manager)
     await session.run(query, requirement_file_id=requirement_file_id, package_name=package_name, constraints=constraints)
-
 
 async def delete_requirement_file(repository_id: str, requirement_file_name: str, package_manager: str) -> None:
     query = '''

@@ -2,7 +2,6 @@ from typing import Any
 from time import sleep
 from requests import get, ConnectTimeout, ConnectionError
 
-
 async def get_all_npm_versions(pkg_name: str) -> Any:
     while True:
         try:

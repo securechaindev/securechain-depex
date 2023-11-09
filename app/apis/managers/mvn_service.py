@@ -3,7 +3,6 @@ from time import sleep
 from requests import get, ConnectTimeout, ConnectionError
 from xmltodict import parse
 
-
 async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
     parts = pkg_name.split(':')
     pkg_url = parts[0].replace('.', '/') + '/' + parts[1]
@@ -26,7 +25,6 @@ async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
     for count, version in enumerate(raw_versions):
         versions.append({'name': version, 'release_date': None, 'count': count})
     return versions
-
 
 async def requires_mvn_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
     parts = pkg_name.split(':')

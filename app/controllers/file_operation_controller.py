@@ -55,7 +55,6 @@ async def valid_file(requirement_file_id: str, file_name: str) -> JSONResponse:
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
-
 @router.post(
     '/operation/file/number_of_configurations/{requirement_file_id}',
     summary='Count the number of configurations',
@@ -78,7 +77,6 @@ async def number_of_configurations(requirement_file_id: str, file_name: str, max
     operation.execute(smt_model)
     result = {'number_of_products': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
-
 
 @router.post(
     '/operation/file/minimize_impact/{requirement_file_id}',
@@ -103,7 +101,6 @@ async def minimize_impact(requirement_file_id: str, agregator: str, file_name: s
     operation.execute(smt_transform.destination_model)
     result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
-
 
 @router.post(
     '/operation/file/maximize_impact/{requirement_file_id}',

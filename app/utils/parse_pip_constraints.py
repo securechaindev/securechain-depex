@@ -15,7 +15,6 @@ async def parse_pip_constraints(raw_constraints: str) -> str:
                 return clean_ctcs
     return 'any'
 
-
 async def clean_pip_constraints(raw_constraints: list[str]) -> str:
     constraints = []
     for raw_constraint in raw_constraints:

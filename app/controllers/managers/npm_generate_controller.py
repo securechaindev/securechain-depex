@@ -13,7 +13,6 @@ from app.services import (
 )
 from app.controllers.cve_controller import relate_cves
 
-
 async def npm_extract_graph(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
         {'name': name, 'manager': 'NPM'},
@@ -23,7 +22,6 @@ async def npm_extract_graph(name: str, file: Any, repository_id: str) -> None:
     for dependencie, constraints in file['dependencies'].items():
         await npm_exist_package(dependencie, constraints, new_req_file_id)
 
-
 async def npm_exist_package(package_name: str, constraints: str, requirement_file_id: str) -> None:
     package = await read_package_by_name(package_name, 'NPM')
     if package:
@@ -32,7 +30,6 @@ async def npm_exist_package(package_name: str, constraints: str, requirement_fil
         await relate_package(package_name, constraints, requirement_file_id, 'NPM')
     else:
         await no_exist_package(package_name, constraints, requirement_file_id)
-
 
 async def no_exist_package(package_name: str, constraints: list[str] | str, parent_id: str) -> None:
     all_versions, all_require_packages = await get_all_versions(package_name, 'NPM')
@@ -49,7 +46,6 @@ async def no_exist_package(package_name: str, constraints: list[str] | str, pare
         for new_version, require_packages in zip(new_versions, all_require_packages):
             await generate_packages(new_version, require_packages)
 
-
 async def generate_packages(version: dict[str, Any], require_packages: Any) -> None:
     if require_packages:
         for package_name, constraints in require_packages.items():
@@ -61,7 +57,6 @@ async def generate_packages(version: dict[str, Any], require_packages: Any) -> N
                 await relate_package(package_name, constraints, version['id'], 'NPM')
             else:
                 await no_exist_package(package_name, constraints, version['id'])
-
 
 async def search_new_versions(package: dict[str, Any]) -> None:
     no_existing_versions: list[dict[str, Any]] = []

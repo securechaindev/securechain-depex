@@ -11,7 +11,6 @@ from app.services import (
     bulk_write_actions
 )
 
-
 async def nvd_update() -> None:
     env_variables = await read_env_variables()
     print(env_variables)
@@ -23,7 +22,6 @@ async def nvd_update() -> None:
     await update_cpe_matchs(last_update_format, now_format, headers)
     await update_cpes(last_update_format, now_format, headers)
     await update_env_variables_by_nvd(env_variables['_id'], now)
-
 
 async def update_cves(last_update: str, now: str, headers: dict[str, str]) -> None:
     while True:
@@ -54,7 +52,6 @@ async def update_cpe_matchs(last_update: str, now: str, headers: dict[str, str])
     if actions:
         await bulk_write_actions(actions, 'cpe_matchs', True)
 
-
 async def update_cpes(last_update: str, now: str, headers: dict[str, str]) -> None:
     while True:
         try:
@@ -66,7 +63,6 @@ async def update_cpes(last_update: str, now: str, headers: dict[str, str]) -> No
     if actions:
         await bulk_write_actions(actions, 'cpes', True)
 
-
 async def sanitize_cves(response: dict[str, Any]) -> list[Any]:
     actions: list[Any] = []
     for cve in response['vulnerabilities']:
@@ -76,7 +72,6 @@ async def sanitize_cves(response: dict[str, Any]) -> list[Any]:
         cve['products'] = await get_products(cve)
         actions.append(ReplaceOne({'id': cve['id']}, cve, upsert=True))
     return actions
-
 
 async def sanitize_cpe_matchs(response: dict[str, Any]) -> list[Any]:
     actions: list[Any] = []
@@ -88,7 +83,6 @@ async def sanitize_cpe_matchs(response: dict[str, Any]) -> list[Any]:
         actions.append(ReplaceOne({'matchCriteriaId': cpe_match['matchCriteriaId']}, cpe_match, upsert=True))
     return actions
 
-
 async def sanitize_cpes(response: dict[str, Any]) -> list[Any]:
     actions: list[Any] = []
     for cpe in response['products']:
@@ -97,7 +91,6 @@ async def sanitize_cpes(response: dict[str, Any]) -> list[Any]:
         cpe['created'] = parse(cpe['created'])
         actions.append(ReplaceOne({'cpeNameId': cpe['cpeNameId']}, cpe, upsert=True))
     return actions
-
 
 async def get_products(raw_cve: dict[str, Any]) -> list[str]:
     products: list[str] = []

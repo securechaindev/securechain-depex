@@ -15,7 +15,6 @@ from app.utils import json_encoder, get_manager
 
 router = APIRouter()
 
-
 @router.post(
     '/operation/config/valid_config/{requirement_file_id}',
     summary='Validates a configuration',
@@ -41,7 +40,6 @@ async def valid_config(requirement_file_id: str, agregator: str, file_name: str,
     result = {'is_valid': operation.get_result()}
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
 
-
 @router.post(
     '/operation/config/complete_config/{requirement_file_id}',
     summary='Complete a configuration',
@@ -66,7 +64,6 @@ async def complete_config(requirement_file_id: str, agregator: str, file_name: s
     operation.execute(smt_model)
     result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({'result': result}))
-
 
 @router.post(
     '/operation/config/config_by_impact/{graph_id}',

@@ -45,10 +45,8 @@ async def create_test_report(repository_id: str, configuration: dict[str, str | 
                 else:
                     tests, number = await create_tests(number, paths, dependency, cve)
                     test_report['tests'].extend(tests)
-
     system('rm -rf ' + carpeta_descarga)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(test_report))
-
 
 async def create_tests(number: int, paths: list[str], dependency, cve, exploit_id: str | None = None) -> tuple[list[Any], int]:
     tests = []
@@ -70,7 +68,6 @@ async def create_tests(number: int, paths: list[str], dependency, cve, exploit_i
                 }
             })
     return (tests, number)
-
 
 async def get_raw_report(configuration: dict[str, str | int | float], package_manager: str) -> list[dict[str, Any]]:
     raw_report = []
@@ -102,7 +99,6 @@ async def get_raw_report(configuration: dict[str, str | int | float], package_ma
                 )
     return raw_report
 
-
 async def download_repository(owner:str, name: str) -> str:
     carpeta_descarga = 'repositories/' + name
     branches = ['main', 'master']
@@ -117,12 +113,10 @@ async def download_repository(owner:str, name: str) -> str:
             continue
     return carpeta_descarga
 
-
 async def is_imported(file_path: str, dependency: str) -> Any:
     with open(file_path, 'r', encoding='utf-8') as file:
         code = file.read()
         return search(rf'from\s+{dependency}', code) or search(rf'import\s+{dependency}', code)
-
 
 async def get_files_path(directory_path: str) -> list[str]:
     branches = ['/main', '/master']
@@ -133,7 +127,6 @@ async def get_files_path(directory_path: str) -> list[str]:
             if not isdir(_path) and '.py' in _path:
                 files.append(_path)
     return files
-    
 
 async def get_used_artifacts(filename: str, dependency: str) -> dict[str, list[int]]:
     with open(filename, 'r', encoding='utf-8') as file:

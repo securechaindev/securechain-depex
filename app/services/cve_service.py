@@ -1,7 +1,5 @@
-# mypy: ignore-errors
 from typing import Any
 from .dbs.databases import get_collection
-
 
 async def read_cve_impact_by_id(cve_id: str) -> dict[str, list[str]]:
     cves_collection = get_collection('cves')
@@ -19,7 +17,6 @@ async def read_cve_impact_by_id(cve_id: str) -> dict[str, list[str]]:
             }
         }
     )
-
 
 async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, Any]]:
     cves_collection = get_collection('cves')

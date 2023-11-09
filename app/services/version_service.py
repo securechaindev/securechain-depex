@@ -1,6 +1,4 @@
-from typing import Any
 from .dbs.databases import get_graph_db_session
-
 
 async def read_cve_ids_by_version_and_package(version: str, package_name: str, package_manager: str) -> list[str]:
     query = '''
@@ -13,7 +11,6 @@ async def read_cve_ids_by_version_and_package(version: str, package_name: str, p
     record = await result.single()
     return record[0] if record else None
 
-
 async def read_versions_names_by_package(package_name: str, package_manager: str) -> list[str]:
     query = '''
     match (p: Package) where p.name = $package_name
@@ -24,7 +21,6 @@ async def read_versions_names_by_package(package_name: str, package_manager: str
     result = await session.run(query, package_name=package_name)
     record = await result.single()
     return record[0] if record else None
-
 
 async def read_releases_by_counts(configs: list[dict[str, int]], package_manager: str) -> list[dict[str, str | float | int]]:
     sanitized_configs: list[dict[str, str | float | int]] = []
@@ -45,7 +41,6 @@ async def read_releases_by_counts(configs: list[dict[str, int]], package_manager
                 sanitized_config.update({var: value})
         sanitized_configs.append(sanitized_config)
     return sanitized_configs
-
 
 async def read_counts_by_releases(config: dict[str, str], package_manager: str) -> dict[str, int]:
     sanitized_config: dict[str, int] = {}

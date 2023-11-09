@@ -3,7 +3,6 @@ from datetime import datetime
 from pytz import timezone
 from .dbs.databases import get_graph_db_session
 
-
 async def create_repository(repository: dict[str, Any], package_manager: str) -> str:
     query = '''
     merge(r: Repository{
@@ -20,7 +19,6 @@ async def create_repository(repository: dict[str, Any], package_manager: str) ->
     record = await result.single()
     return record[0]
 
-
 async def read_repositories_moment(owner: str, name: str) -> datetime:
     query = '''
     match(r: Repository{owner: $owner, name: $name}) return {moment: r.moment, is_complete: r.is_complete}
@@ -31,7 +29,6 @@ async def read_repositories_moment(owner: str, name: str) -> datetime:
         if record:
             break
     return record[0] if record else {'moment': None, 'is_complete': True}
-
 
 async def read_repositories(owner: str, name: str) -> dict[str, str]:
     repository_ids: dict[str, str] = {}
@@ -50,7 +47,6 @@ async def read_repositories(owner: str, name: str) -> dict[str, str]:
     repository_ids.update({'MVN': mvn_record[0] if mvn_record else None})
     return repository_ids
 
-
 async def read_repository_by_id(repository_id: str, package_manager: str) -> dict[str, str]:
     query = '''
     match(r: Repository) where elementid(r)=$repository_id return {name: r.name, owner: r.owner}
@@ -59,17 +55,6 @@ async def read_repository_by_id(repository_id: str, package_manager: str) -> dic
     result = await session.run(query, repository_id=repository_id)
     record = await result.single()
     return record[0] if record else None
-
-
-# async def read_repository_files(repository_id: str, package_manager: str) -> list[dict[str, Any]]:
-#     query = '''
-#     match(r: Repository)-[*1]->(s:RequirementFile) where elementid(r) = $repository_id return s{.*}
-#     '''
-#     session = get_graph_db_session(package_manager)
-#     result = await session.run(query, repository_id=repository_id)
-#     record = await result.single()
-#     return record[0] if record else None
-
 
 async def read_graphs_by_owner_name_for_sigma(owner: str, name: str) -> dict[str, Any]:
     query = '''
@@ -109,7 +94,6 @@ async def read_graphs_by_owner_name_for_sigma(owner: str, name: str) -> dict[str
         graphs[package_manager] = record if record else None
     return graphs
 
-
 async def read_graph_for_info_operation(requirement_file_id: str, package_manager: str) -> dict[str, Any]:
     query = '''
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
@@ -128,7 +112,6 @@ async def read_graph_for_info_operation(requirement_file_id: str, package_manage
     result = await session.run(query, requirement_file_id=requirement_file_id)
     record = await result.single()
     return record[0] if record else None
-
 
 async def read_data_for_smt_transform(requirement_file_id: str, package_manager: str, max_level: int) -> dict[str, Any]:
     query = '''
@@ -161,7 +144,6 @@ async def read_data_for_smt_transform(requirement_file_id: str, package_manager:
     result = await session.run(query, requirement_file_id=requirement_file_id, max_level=max_level*2)
     record = await result.single()
     return record[0] if record else None
-
 
 async def update_repository_is_complete(repository_id: str, is_complete: bool, package_manager: str) -> None:
     query = '''

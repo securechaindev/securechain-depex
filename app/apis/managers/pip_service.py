@@ -4,7 +4,6 @@ from dateutil.parser import parse
 from requests import get, ConnectTimeout, ConnectionError
 from app.utils import get_first_position, parse_pip_constraints
 
-
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
 async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
     while True:
@@ -23,7 +22,6 @@ async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
             versions.append({'name': version,'release_date': release_date,'count': count})
         return versions
     return []
-
 
 async def requires_pip_packages(pkg_name: str, version_dist: str) -> dict[str, list[str] | str]:
     while True:
