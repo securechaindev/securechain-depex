@@ -19,7 +19,7 @@ async def get_all_mvn_versions(pkg_name: str) -> list[dict[str, Any]]:
     xml_string = response.text
     try:
         python_dict = parse(xml_string)
-    except:
+    except Exception as _:
         return []
     if isinstance(python_dict["metadata"]["versioning"]["versions"]["version"], list):
         raw_versions = python_dict["metadata"]["versioning"]["versions"]["version"]
@@ -47,7 +47,7 @@ async def requires_mvn_packages(
     xml_string = response.text
     try:
         python_dict = parse(xml_string)
-    except:
+    except Exception as _:
         return {}
     if (
         "dependencies" in python_dict["project"]

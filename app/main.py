@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI) -> None:
             scheduler.add_job(exploit_db_update, "interval", seconds=86400)
             scheduler.start()
             break
-        except:
+        except Exception as _:
             sleep(5)
     yield
 

@@ -39,7 +39,7 @@ async def relate_cves(
                                     ):
                                         version["cves"].append(raw_cpe_match["id"])
                                         impacts.append(raw_cpe_match["impact_score"][0])
-                                except:
+                                except Exception as _:
                                     continue
                         else:
                             check = True
@@ -62,7 +62,7 @@ async def relate_cves(
                                     check = check and version_type(
                                         version["name"]
                                     ) < version_type(cpe_match["versionEndExcluding"])
-                            except:
+                            except Exception as _:
                                 continue
                             if check:
                                 version["cves"].append(raw_cpe_match["id"])

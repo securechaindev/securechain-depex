@@ -43,5 +43,5 @@ async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, 
     ]
     try:
         return [cpe_match async for cpe_match in cves_collection.aggregate(pipeline)]
-    except:
+    except Exception as _:
         return []
