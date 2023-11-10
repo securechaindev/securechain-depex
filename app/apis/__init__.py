@@ -1,9 +1,11 @@
+from .github_service import get_last_commit_date_github, get_repo_data
+from .gitlab_service import get_last_commit_date_gitlab
 from .manager_service import get_all_versions, requires_packages
-from .git_service import get_repo_data, get_last_commit_date
 
 __all__ = [
-    'get_all_versions',
-    'requires_packages',
-    'get_repo_data',
-    'get_last_commit_date'
+    "get_all_versions",
+    "requires_packages",
+    "get_repo_data",
+    "get_last_commit_date_github",
+    "get_last_commit_date_gitlab",
 ]
