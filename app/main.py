@@ -22,29 +22,8 @@ over it.
 """
 
 
-<<<<<<< HEAD
-app = FastAPI(
-    title='Depex',
-    description=DESCRIPTION,
-    version='0.6.1',
-    contact={
-        'name': 'Antonio Germán Márquez Trujillo',
-        'url': 'https://github.com/GermanMT',
-        'email': 'amtrujillo@us.es',
-    },
-    license_info={
-        'name': 'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'url': 'https://www.gnu.org/licenses/gpl-3.0.html',
-    },
-)
-
-
-@app.on_event("startup")
-async def startup_event() -> None:
-=======
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> None:
->>>>>>> develop
     while True:
         try:
             await create_indexes()
@@ -63,7 +42,7 @@ async def lifespan(app: FastAPI) -> None:
 app = FastAPI(
     title="Depex",
     description=DESCRIPTION,
-    version="0.6.0",
+    version="0.6.1",
     contact={
         "name": "Antonio Germán Márquez Trujillo",
         "url": "https://github.com/GermanMT",
