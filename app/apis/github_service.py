@@ -23,14 +23,49 @@ async def get_repo_data(
     if not all_packages:
         all_packages = {}
     if not end_cursor:
-        query = '{repository(owner: "' + owner + '", name: "' + name + '")'
-        query += "{dependencyGraphManifests{nodes{filename dependencies{pageInfo {"
-        query += "hasNextPage endCursor} nodes{packageName requirements}}}}}}"
+        query = f"""
+        {{
+            repository(owner: "{owner}", name: "{name}") {{
+                dependencyGraphManifests {{
+                    nodes {{
+                        filename
+                        dependencies {{
+                            pageInfo {{
+                                hasNextPage
+                                endCursor
+                            }}
+                            nodes {{
+                                packageName
+                                requirements
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        }}
+        """
     else:
-        query = '{repository(owner: "' + owner + '", name: "' + name + '")'
-        query += '{dependencyGraphManifests{nodes{filename dependencies(after: "'
-        query += end_cursor + '"){pageInfo {hasNextPage endCursor}'
-        query += "nodes{packageName requirements}}}}}}"
+        query = f"""
+        {{
+            repository(owner: "{owner}", name: "{name}") {{
+                dependencyGraphManifests {{
+                    nodes {{
+                        filename
+                        dependencies (after: "{end_cursor}") {{
+                            pageInfo {{
+                                hasNextPage
+                                endCursor
+                            }}
+                            nodes {{
+                                packageName
+                                requirements
+                            }}
+                        }}
+                    }}
+                }}
+            }}
+        }}
+        """
     while True:
         try:
             response = post(
