@@ -51,11 +51,13 @@ async def json_reader(
     response: Any, all_packages: dict[str, Any]
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     page_info = {"hasNextPage": None}
-    for node in response["data"]["repository"]["dependencyGraphManifests"]["nodes"]:
-        requirement_file_name = node["filename"]
+    for file_node in response["data"]["repository"]["dependencyGraphManifests"][
+        "nodes"
+    ]:
+        requirement_file_name = file_node["filename"]
         if requirement_file_name == "package-lock.json":
             continue
-        page_info = node["dependencies"]["pageInfo"]
+        page_info = file_node["dependencies"]["pageInfo"]
         requirement_file_manager = await get_manager(requirement_file_name)
         if not requirement_file_manager:
             continue
@@ -64,18 +66,22 @@ async def json_reader(
                 "package_manager": requirement_file_manager,
                 "dependencies": {},
             }
-        for node in node["dependencies"]["nodes"]:
+        for depependency_node in file_node["dependencies"]["nodes"]:
             if requirement_file_manager == "MVN":
-                if "=" in node["requirements"]:
-                    node["requirements"] = (
+                if "=" in depependency_node["requirements"]:
+                    depependency_node["requirements"] = (
                         "["
-                        + node["requirements"].replace("=", "").replace(" ", "")
+                        + depependency_node["requirements"]
+                        .replace("=", "")
+                        .replace(" ", "")
                         + "]"
                     )
             if requirement_file_manager == "PIP":
-                node["requirements"] = await parse_pip_constraints(node["requirements"])
+                depependency_node["requirements"] = await parse_pip_constraints(
+                    depependency_node["requirements"]
+                )
             all_packages[requirement_file_name]["dependencies"].update(
-                {node["packageName"]: node["requirements"]}
+                {depependency_node["packageName"]: depependency_node["requirements"]}
             )
     return (page_info, all_packages)
 

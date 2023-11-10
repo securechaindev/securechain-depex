@@ -1,8 +1,10 @@
+from datetime import datetime
 from json import JSONEncoder, loads
 from typing import Any
-from datetime import datetime
-from neo4j.time import DateTime
+
 from bson import ObjectId
+from neo4j.time import DateTime
+
 
 class JSONencoder(JSONEncoder):
     def default(self, o: Any) -> Any:
@@ -13,6 +15,7 @@ class JSONencoder(JSONEncoder):
         if isinstance(o, DateTime):
             return str(o)
         return JSONEncoder.default(self, o)
+
 
 def json_encoder(raw_response: dict[str, Any]) -> Any:
     return loads(JSONencoder().encode(raw_response))
