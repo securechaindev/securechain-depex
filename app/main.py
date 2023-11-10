@@ -23,7 +23,7 @@ over it.
 app = FastAPI(
     title='Depex',
     description=DESCRIPTION,
-    version='0.6.0',
+    version='0.6.1',
     contact={
         'name': 'Antonio Germán Márquez Trujillo',
         'url': 'https://github.com/GermanMT',
