@@ -20,7 +20,8 @@ jobs:
         with:
           token: ${{secrets.GIT_TOKEN}}
           tag: ${{github.ref_name}}
-          writeToFile: 'false'
+          writeToFile: false
+          excludeTypes: []
 
       - name: Get variables
         id: get_variables
