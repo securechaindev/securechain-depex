@@ -16,7 +16,6 @@ from app.services import (
 
 async def nvd_update() -> None:
     env_variables = await read_env_variables()
-    print(env_variables)
     last_update_format = env_variables["nvd_last_update"].isoformat()
     now = datetime.now()
     now_format = datetime.now().isoformat()

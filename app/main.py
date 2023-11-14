@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from time import sleep
 
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import (
     http_exception_handler,
@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI) -> None:
             await create_indexes()
             await exploit_db_update()
             await nvd_update()
-            scheduler = BackgroundScheduler()
+            scheduler = AsyncIOScheduler()
             scheduler.add_job(nvd_update, "interval", seconds=7200)
             scheduler.add_job(exploit_db_update, "interval", seconds=86400)
             scheduler.start()
@@ -37,6 +37,7 @@ async def lifespan(app: FastAPI) -> None:
         except Exception as _:
             sleep(5)
     yield
+    scheduler.shutdown()
 
 
 app = FastAPI(
