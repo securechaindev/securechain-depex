@@ -55,7 +55,7 @@ async def get_graphs(owner: str, name: str) -> JSONResponse:
 )
 async def init_pypi_package(package_name: str) -> JSONResponse:
     """
-    Starts graph extraction from a Python Package Index (PyPI) package
+    Starts graph extraction from a Python Package Index (PyPI) package:
 
     - **package_name**: the name of the package as it appears in PyPI
     """
@@ -71,7 +71,7 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
 )
 async def init_npm_package(package_name: str) -> JSONResponse:
     """
-    Starts graph extraction from a Node Package Manager (NPM) package
+    Starts graph extraction from a Node Package Manager (NPM) package:
 
     - **package_name**: the name of the package as it appears in NPM
     """
@@ -88,7 +88,7 @@ async def init_npm_package(package_name: str) -> JSONResponse:
 )
 async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     """
-    Starts graph extraction from a Maven Central package
+    Starts graph extraction from a Maven Central package:
 
     - **group_id**: the group_id of the package as it appears in Maven Central
     - **artifact_id**: the artifact_id of the package as it appears in Maven Central
@@ -104,35 +104,41 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
 @router.post(
     "/graph/init", summary="Init a graph", response_description="Initialize a graph"
 )
-async def init_graph(repository: RepositoryModel) -> JSONResponse:
+async def init_graph(owner: str, name: str) -> JSONResponse:
     """
-    Starts graph extraction in its initial state, i.e., not complete:
+    Starts graph extraction from a GitHub repository:
 
-    - **repository**: a json containing the owner and the name of a repository
+    - **owner**: the owner of a repository
+    - **name**: the name of a repository
     """
-    repository_json = jsonable_encoder(repository)
-    repository_json["moment"] = datetime.now(timezone("Europe/Madrid"))
+    repository = {
+        "owner": owner,
+        "name": name,
+        "moment": datetime.now(timezone("Europe/Madrid")),
+        "add_extras": False,
+        "is_complete": False,
+    }
     last_repository = await read_repositories_moment(
-        repository_json["owner"], repository_json["name"]
+        repository["owner"], repository["name"]
     )
     if last_repository["is_complete"]:
         last_commit_date = await get_last_commit_date_github(
-            repository_json["owner"], repository_json["name"]
+            repository["owner"], repository["name"]
         )
         if (
             not last_repository["moment"]
             or last_repository["moment"] < last_commit_date
         ):
             repository_ids = await read_repositories(
-                repository_json["owner"], repository_json["name"]
+                repository["owner"], repository["name"]
             )
             raw_requirement_files = await get_repo_data(
-                repository_json["owner"], repository_json["name"]
+                repository["owner"], repository["name"]
             )
             for package_manager, repository_id in repository_ids.items():
                 if not repository_id:
                     repository_id = await create_repository(
-                        repository_json, package_manager
+                        repository, package_manager
                     )
                     await extract_repository(
                         raw_requirement_files, repository_id, package_manager
