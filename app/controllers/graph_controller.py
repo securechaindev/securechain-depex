@@ -6,10 +6,11 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pytz import timezone
 
-from app.apis import get_last_commit_date_github, get_repo_data
-from app.models import RepositoryModel
+from app.apis import get_last_commit_date_github, get_repo_data, get_all_versions
+from app.models import RepositoryModel, PackageModel
 from app.services import (
     create_repository,
+    create_package_and_versions,
     delete_requirement_file,
     delete_requirement_file_rel,
     read_graphs_by_owner_name_for_sigma,
@@ -47,6 +48,57 @@ async def get_graphs(owner: str, name: str) -> JSONResponse:
     # TODO: Cambiar en los servicios la palabra relationships por edges
     graphs = await read_graphs_by_owner_name_for_sigma(owner, name)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graphs))
+
+
+@router.post(
+    "/pypi/package/init", summary="Init a PyPI package", response_description="Initialize a PyPI package"
+)
+async def init_pypi_package(package_name: str) -> JSONResponse:
+    """
+    Starts graph extraction from a Python Package Index (PyPI) package
+
+    - **package_name**: the name of the package as it appears in PyPI
+    """
+    all_versions = get_all_versions("PIP", package_name=package_name)
+    await create_package_and_versions({"name": package_name, "moment": datetime.now()}, all_versions, "PIP")
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder({"message": "initializing"}),
+    )
+
+@router.post(
+    "/npm/package/init", summary="Init a NPM package", response_description="Initialize a NPM package"
+)
+async def init_npm_package(package_name: str) -> JSONResponse:
+    """
+    Starts graph extraction from a Node Package Manager (NPM) package
+
+    - **package_name**: the name of the package as it appears in NPM
+    """
+    all_versions = get_all_versions("NPM", package_name=package_name)
+    await create_package_and_versions({"name": package_name, "moment": datetime.now()}, all_versions, "NPM")
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder({"message": "initializing"}),
+    )
+
+
+@router.post(
+    "/mvn/package/init", summary="Init a Maven Central package", response_description="Initialize a Maven Central package"
+)
+async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
+    """
+    Starts graph extraction from a Maven Central package
+
+    - **group_id**: the group_id of the package as it appears in Maven Central
+    - **artifact_id**: the artifact_id of the package as it appears in Maven Central
+    """
+    all_versions = get_all_versions("MVN", package_artifact_id=artifact_id ,package_group_id=group_id)
+    await create_package_and_versions({"name": artifact_id, "group_id": group_id, "moment": datetime.now()}, all_versions, "MVN")
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder({"message": "initializing"}),
+    )
 
 
 @router.post(

@@ -7,6 +7,35 @@ from .dbs.databases import get_graph_db_session
 async def create_package_and_versions(
     package: dict[str, Any],
     versions: list[dict[str, Any]],
+    package_manager: str,
+) -> list[dict[str, str]]:
+    query_part = f"{{name:$name,{"group_id:$group_id," if package_manager == "MVN" else ""}moment:$moment}}"
+    query = f"""
+    create(p:Package{query_part})
+    with p as package
+    unwind $versions as version
+    create(v:Version{{
+        name: version.name,
+        release_date: version.release_date,
+        count: version.count,
+        cves: version.cves,
+        mean: version.mean,
+        weighted_mean: version.weighted_mean
+    }})
+    create (package)-[rel_v:Have]->(v)
+    return collect({{name: v.name, id: elementid(v)}})
+    """
+    session = get_graph_db_session(package_manager)
+    result = await session.run(
+        query, package, versions=versions
+    )
+    record = await result.single()
+    return record[0] if record else None
+
+
+async def create_package_and_versions_with_parent(
+    package: dict[str, Any],
+    versions: list[dict[str, Any]],
     constraints: list[str] | str,
     parent_id: str,
     package_manager: str,

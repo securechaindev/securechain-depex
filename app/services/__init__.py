@@ -9,6 +9,7 @@ from .env_variables_service import (
 from .exploit_service import read_exploits_by_cve_id
 from .package_service import (
     create_package_and_versions,
+    create_package_and_versions_with_parent,
     read_package_by_name,
     read_packages_by_requirement_file,
     relate_package,
@@ -47,6 +48,7 @@ __all__ = [
     "read_cpe_matches_by_package_name",
     "read_exploits_by_cve_id",
     "create_package_and_versions",
+    "create_package_and_versions_with_parent",
     "read_package_by_name",
     "read_packages_by_requirement_file",
     "relate_package",

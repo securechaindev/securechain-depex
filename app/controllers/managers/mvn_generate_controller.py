@@ -5,7 +5,7 @@ from app.apis import get_all_versions, requires_packages
 from app.controllers.cve_controller import relate_cves
 from app.services import (
     count_number_of_versions_by_package,
-    create_package_and_versions,
+    create_package_and_versions_with_parent,
     create_requirement_file,
     read_cpe_matches_by_package_name,
     read_package_by_name,
@@ -48,7 +48,7 @@ async def no_exist_package(
             await relate_cves(version, cpe_matches, "MVN", artifact_id)
             for version in all_versions
         ]
-        new_versions = await create_package_and_versions(
+        new_versions = await create_package_and_versions_with_parent(
             {"name": artifact_id, "group_id": group_id, "moment": datetime.now()},
             versions,
             constraints,

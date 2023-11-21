@@ -13,7 +13,7 @@ async def parse_pip_constraints(raw_constraints: str) -> str:
             clean_ctcs = await clean_pip_constraints(ctcs)
             if clean_ctcs:
                 return clean_ctcs
-    return "any"
+    return ""
 
 
 async def clean_pip_constraints(raw_constraints: list[str]) -> str:
