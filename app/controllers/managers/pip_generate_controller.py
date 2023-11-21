@@ -19,11 +19,11 @@ async def pip_extract_graph(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
         {"name": name, "manager": "PIP"}, repository_id, "PIP"
     )
-    for dependencie, constraints in file["dependencies"].items():
-        await pip_exist_package(dependencie, constraints, new_req_file_id)
+    for dependency, constraints in file["dependencies"].items():
+        await pip_extract_package(dependency, constraints, new_req_file_id)
 
 
-async def pip_exist_package(
+async def pip_extract_package(
     package_name: str, constraints: str, requirement_file_id: str
 ) -> None:
     package = await read_package_by_name(package_name, "PIP")

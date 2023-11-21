@@ -10,7 +10,6 @@ async def relate_cves(
     cpe_matches: list[dict[str, Any]],
     package_manager: str,
     package_name: str,
-    artifact_id: str | None = None,
 ) -> dict[str, Any]:
     impacts: list[float] = []
     version["cves"] = []
@@ -20,7 +19,7 @@ async def relate_cves(
             for node in configuration["nodes"]:
                 for cpe_match in node["cpeMatch"]:
                     cpe_parts = cpe_match["criteria"].split(":")
-                    if cpe_parts[4] in (package_name, artifact_id):
+                    if cpe_parts[4] in package_name:
                         version_keys = (
                             "versionStartIncluding",
                             "versionEndIncluding",

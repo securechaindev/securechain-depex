@@ -30,13 +30,14 @@ class VersionModel(BaseModel):
 
 class PackageModel(BaseModel):
     name: str
+    group_id: str | None
     moment: datetime
 
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
         json_schema_extra: ClassVar[dict[str, Any]] = {
-            "example": {"name": "urllib3", "moment": datetime.now()}
+            "example": {"name": "urllib3", "group_id": None, "moment": datetime.now()}
         }
 
 

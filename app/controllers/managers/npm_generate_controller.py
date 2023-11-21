@@ -19,11 +19,11 @@ async def npm_extract_graph(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
         {"name": name, "manager": "NPM"}, repository_id, "NPM"
     )
-    for dependencie, constraints in file["dependencies"].items():
-        await npm_exist_package(dependencie, constraints, new_req_file_id)
+    for dependency, constraints in file["dependencies"].items():
+        await npm_extract_package(dependency, constraints, new_req_file_id)
 
 
-async def npm_exist_package(
+async def npm_extract_package(
     package_name: str, constraints: str, requirement_file_id: str
 ) -> None:
     package = await read_package_by_name(package_name, "NPM")

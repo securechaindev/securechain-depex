@@ -23,9 +23,9 @@ from app.services import (
 )
 from app.utils import json_encoder
 
-from .managers.mvn_generate_controller import mvn_exist_package, mvn_extract_graph
-from .managers.npm_generate_controller import npm_exist_package, npm_extract_graph
-from .managers.pip_generate_controller import pip_exist_package, pip_extract_graph
+from .managers.mvn_generate_controller import mvn_extract_graph, mvn_extract_package
+from .managers.npm_generate_controller import npm_extract_graph, npm_extract_package
+from .managers.pip_generate_controller import pip_extract_graph, pip_extract_package
 
 router = APIRouter()
 
@@ -149,15 +149,15 @@ async def replace_repository(
                     ].items():
                         match package_manager:
                             case "PIP":
-                                await pip_exist_package(
+                                await pip_extract_package(
                                     package, constraints, requirement_file_id
                                 )
                             case "NPM":
-                                await npm_exist_package(
+                                await npm_extract_package(
                                     package, constraints, requirement_file_id
                                 )
                             case "MVN":
-                                await mvn_exist_package(
+                                await mvn_extract_package(
                                     package, constraints, requirement_file_id
                                 )
                 raw_requirement_files.pop(file_name)

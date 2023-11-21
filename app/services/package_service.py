@@ -11,23 +11,24 @@ async def create_package_and_versions(
     parent_id: str,
     package_manager: str,
 ) -> list[dict[str, str]]:
-    query = """
+    query_part = f"{{name:$name,{"group_id:$group_id," if package_manager == "MVN" else ""}moment:$moment}}"
+    query = f"""
     match (parent:RequirementFile|Version)
     where elementid(parent) = $parent_id
-    create(p:Package{name:$name,moment:$moment})
-    create (parent)-[rel_p:Requires{constraints:$constraints}]->(p)
+    create(p:Package{query_part})
+    create (parent)-[rel_p:Requires{{constraints:$constraints}}]->(p)
     with p as package
     unwind $versions as version
-    create(v:Version{
+    create(v:Version{{
         name: version.name,
         release_date: version.release_date,
         count: version.count,
         cves: version.cves,
         mean: version.mean,
         weighted_mean: version.weighted_mean
-    })
+    }})
     create (package)-[rel_v:Have]->(v)
-    return collect({name: v.name, id: elementid(v)})
+    return collect({{name: v.name, id: elementid(v)}})
     """
     session = get_graph_db_session(package_manager)
     result = await session.run(
