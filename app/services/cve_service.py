@@ -21,27 +21,15 @@ async def read_cve_impact_by_id(cve_id: str) -> dict[str, list[str]]:
     )
 
 
-async def read_cpe_matches_by_package_name(package_name: str) -> list[dict[str, Any]]:
-    cves_collection = get_collection("cves")
-    pipeline = [
-        {
-            "$project": {
-                "id": 1,
-                "impact_score": {
-                    "$ifNull": [
-                        "$metrics.cvssMetricV31.impactScore",
-                        "$metrics.cvssMetricV30.impactScore",
-                        "$metrics.cvssMetricV2.impactScore",
-                        0.0,
-                    ]
-                },
-                "configurations.nodes.cpeMatch": 1,
-                "products": 1,
-            }
-        },
-        {"$match": {"products": {"$in": [package_name]}}},
-    ]
-    try:
-        return [cpe_match async for cpe_match in cves_collection.aggregate(pipeline)]
-    except Exception as _:
-        return []
+async def read_cpe_product_by_package_name(package_name: str) -> dict[str, Any]:
+    cpe_products_collection = get_collection("cpe_products")
+    return await cpe_products_collection.find_one({"product": package_name})
+
+
+async def update_cpe_products(product: str, cve: dict[str, Any]) -> None:
+    cpe_products_collection = get_collection("cpe_products")
+    await cpe_products_collection.update_one(
+        {"product": product},
+        {"$addToSet": {"cves": cve}},
+        upsert=True,
+    )

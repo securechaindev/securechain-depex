@@ -11,6 +11,7 @@ from app.services import (
     bulk_write_actions,
     read_env_variables,
     update_env_variables_by_nvd,
+    update_cpe_products,
 )
 
 
@@ -93,7 +94,7 @@ async def sanitize_cves(response: dict[str, Any]) -> list[Any]:
         cve = cve["cve"]
         cve["published"] = parse(cve["published"])
         cve["lastModified"] = parse(cve["lastModified"])
-        cve["products"] = await get_products(cve)
+        await get_products(cve)
         actions.append(ReplaceOne({"id": cve["id"]}, cve, upsert=True))
     return actions
 
@@ -125,14 +126,48 @@ async def sanitize_cpes(response: dict[str, Any]) -> list[Any]:
     return actions
 
 
-async def get_products(raw_cve: dict[str, Any]) -> list[str]:
-    products: list[str] = []
-    if "configurations" in raw_cve:
-        for configuration in raw_cve["configurations"]:
+async def get_products(cve: dict[str, Any]) -> None:
+    version_keys = (
+        "versionStartIncluding",
+        "versionEndIncluding",
+        "versionStartExcluding",
+        "versionEndExcluding",
+    )
+    if "cvssMetricV31" in cve["metrics"]:
+        impact_score = cve["metrics"]["cvssMetricV31"][0]["impactScore"]
+    elif "cvssMetricV30" in cve["metrics"]:
+        impact_score = cve["metrics"]["cvssMetricV30"][0]["impactScore"]
+    elif "cvssMetricV2" in cve["metrics"]:
+        impact_score = cve["metrics"]["cvssMetricV2"][0]["impactScore"]
+    else:
+        impact_score = 0.0
+    if "configurations" in cve:
+        for configuration in cve["configurations"]:
             for node in configuration["nodes"]:
                 if "cpeMatch" in node:
                     for cpe_match in node["cpeMatch"]:
-                        product = cpe_match["criteria"].split(":")[4]
-                        if product not in products:
-                            products.append(product)
-    return products
+                        cve_ = {
+                            "id": cve["id"],
+                            "version": cpe_match["criteria"].split(":")[5],
+                            "impact_score": impact_score,
+                        }
+                        if any(key in cpe_match for key in version_keys):
+                            if "versionStartIncluding" in cpe_match:
+                                cve_["versionStartIncluding"] = cpe_match[
+                                    "versionStartIncluding"
+                                ]
+                            if "versionEndIncluding" in cpe_match:
+                                cve_["versionEndIncluding"] = cpe_match[
+                                    "versionEndIncluding"
+                                ]
+                            if "versionStartExcluding" in cpe_match:
+                                cve_["versionStartExcluding"] = cpe_match[
+                                    "versionStartExcluding"
+                                ]
+                            if "versionEndExcluding" in cpe_match:
+                                cve_["versionEndExcluding"] = cpe_match[
+                                    "versionEndExcluding"
+                                ]
+                        await update_cpe_products(
+                            cpe_match["criteria"].split(":")[4], cve_
+                        )

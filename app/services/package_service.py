@@ -26,9 +26,7 @@ async def create_package_and_versions(
     return collect({{name: v.name, id: elementid(v)}})
     """
     session = get_graph_db_session(package_manager)
-    result = await session.run(
-        query, package, versions=versions
-    )
+    result = await session.run(query, package, versions=versions)
     record = await result.single()
     return record[0] if record else None
 
@@ -93,6 +91,17 @@ async def read_packages_by_requirement_file(
     result = await session.run(query, requirement_file_id=requirement_file_id)
     record = await result.single()
     return record[0] if record else None
+
+
+async def relate_packages(packages, package_manager: str) -> None:
+    query = """
+    unwind $packages as package
+    match (p: Package), (parent:RequirementFile|Version)
+    where p.name = package.package_name and elementid(parent) = package.parent_id
+    create (parent)-[rel:Requires{constraints: package.constraints}]->(p)
+    """
+    session = get_graph_db_session(package_manager)
+    await session.run(query, packages=packages)
 
 
 async def relate_package(

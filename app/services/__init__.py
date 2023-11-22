@@ -1,5 +1,9 @@
 from .bulk_write_service import bulk_write_actions
-from .cve_service import read_cpe_matches_by_package_name, read_cve_impact_by_id
+from .cve_service import (
+    read_cpe_product_by_package_name,
+    read_cve_impact_by_id,
+    update_cpe_products,
+)
 from .dbs.indexes import create_indexes
 from .env_variables_service import (
     read_env_variables,
@@ -12,6 +16,7 @@ from .package_service import (
     create_package_and_versions_with_parent,
     read_package_by_name,
     read_packages_by_requirement_file,
+    relate_packages,
     relate_package,
     update_package_moment,
 )
@@ -45,12 +50,14 @@ __all__ = [
     "bulk_write_actions",
     "create_indexes",
     "read_cve_impact_by_id",
-    "read_cpe_matches_by_package_name",
+    "update_cpe_products",
+    "read_cpe_product_by_package_name",
     "read_exploits_by_cve_id",
     "create_package_and_versions",
     "create_package_and_versions_with_parent",
     "read_package_by_name",
     "read_packages_by_requirement_file",
+    "relate_packages",
     "relate_package",
     "update_package_moment",
     "create_repository",

@@ -51,7 +51,9 @@ async def get_graphs(owner: str, name: str) -> JSONResponse:
 
 
 @router.post(
-    "/pypi/package/init", summary="Init a PyPI package", response_description="Initialize a PyPI package"
+    "/pypi/package/init",
+    summary="Init a PyPI package",
+    response_description="Initialize a PyPI package",
 )
 async def init_pypi_package(package_name: str) -> JSONResponse:
     """
@@ -60,14 +62,19 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
     - **package_name**: the name of the package as it appears in PyPI
     """
     all_versions = get_all_versions("PIP", package_name=package_name)
-    await create_package_and_versions({"name": package_name, "moment": datetime.now()}, all_versions, "PIP")
+    await create_package_and_versions(
+        {"name": package_name, "moment": datetime.now()}, all_versions, "PIP"
+    )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
     )
 
+
 @router.post(
-    "/npm/package/init", summary="Init a NPM package", response_description="Initialize a NPM package"
+    "/npm/package/init",
+    summary="Init a NPM package",
+    response_description="Initialize a NPM package",
 )
 async def init_npm_package(package_name: str) -> JSONResponse:
     """
@@ -76,7 +83,9 @@ async def init_npm_package(package_name: str) -> JSONResponse:
     - **package_name**: the name of the package as it appears in NPM
     """
     all_versions = get_all_versions("NPM", package_name=package_name)
-    await create_package_and_versions({"name": package_name, "moment": datetime.now()}, all_versions, "NPM")
+    await create_package_and_versions(
+        {"name": package_name, "moment": datetime.now()}, all_versions, "NPM"
+    )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
@@ -84,7 +93,9 @@ async def init_npm_package(package_name: str) -> JSONResponse:
 
 
 @router.post(
-    "/mvn/package/init", summary="Init a Maven Central package", response_description="Initialize a Maven Central package"
+    "/mvn/package/init",
+    summary="Init a Maven Central package",
+    response_description="Initialize a Maven Central package",
 )
 async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     """
@@ -93,8 +104,14 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     - **group_id**: the group_id of the package as it appears in Maven Central
     - **artifact_id**: the artifact_id of the package as it appears in Maven Central
     """
-    all_versions = get_all_versions("MVN", package_artifact_id=artifact_id ,package_group_id=group_id)
-    await create_package_and_versions({"name": artifact_id, "group_id": group_id, "moment": datetime.now()}, all_versions, "MVN")
+    all_versions = get_all_versions(
+        "MVN", package_artifact_id=artifact_id, package_group_id=group_id
+    )
+    await create_package_and_versions(
+        {"name": artifact_id, "group_id": group_id, "moment": datetime.now()},
+        all_versions,
+        "MVN",
+    )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
@@ -137,9 +154,7 @@ async def init_graph(owner: str, name: str) -> JSONResponse:
             )
             for package_manager, repository_id in repository_ids.items():
                 if not repository_id:
-                    repository_id = await create_repository(
-                        repository, package_manager
-                    )
+                    repository_id = await create_repository(repository, package_manager)
                     await extract_repository(
                         raw_requirement_files, repository_id, package_manager
                     )
