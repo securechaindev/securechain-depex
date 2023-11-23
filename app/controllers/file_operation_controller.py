@@ -3,11 +3,11 @@ from fastapi.responses import JSONResponse
 from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs,
     MaximizeImpact,
-    MinimizeImpact,
-    NumberOfProducts,
-    ValidModel,
+    NumberOfProducts
 )
-from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
+from app.controllers.minimize import MinimizeImpact
+from app.controllers.valid import ValidModel
+from app.controllers.graph_to_smt import GraphToSMT
 
 from app.services import (
     read_data_for_smt_transform,
@@ -44,17 +44,18 @@ async def file_info(requirement_file_id: str, file_name: str) -> JSONResponse:
     summary="Validates model satisfiability",
     response_description="Return True if valid, False if not",
 )
-async def valid_file(requirement_file_id: str, file_name: str) -> JSONResponse:
+async def valid_file(requirement_file_id: str, file_name: str, max_level: int) -> JSONResponse:
     """
     Summarizes requirement file graph information regarding its dependencies,
     edges and vulnerabilities:
 
     - **requirement_file_id**: the id of a requirement file
     - **file_name**: name of requirement file belonging to a graph
+    - **max_level**: the depth of the graph to be analysed
     """
     package_manager = await get_manager(file_name)
     graph_data = await read_data_for_smt_transform(
-        requirement_file_id, package_manager, -1
+        requirement_file_id, package_manager, max_level
     )
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, "mean")
     smt_transform.transform()
@@ -112,7 +113,7 @@ async def minimize_impact(
     """
     package_manager = await get_manager(file_name)
     graph_data = await read_data_for_smt_transform(
-        requirement_file_id, package_manager, max_level * 2
+        requirement_file_id, package_manager, max_level
     )
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
