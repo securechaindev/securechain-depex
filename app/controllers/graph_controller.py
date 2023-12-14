@@ -2,15 +2,12 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from pytz import timezone
+from pytz import timezone, UTC
 
-from app.apis import get_last_commit_date_github, get_repo_data, get_all_versions
-from app.models import RepositoryModel, PackageModel
+from app.apis import get_last_commit_date_github, get_all_versions
 from app.services import (
     create_repository,
-    create_package_and_versions,
     delete_requirement_file,
     delete_requirement_file_rel,
     read_graphs_by_owner_name_for_sigma,
@@ -18,15 +15,16 @@ from app.services import (
     read_repositories,
     read_repositories_moment,
     read_requirement_files_by_repository,
+    read_package_by_name,
     update_repository_is_complete,
     update_repository_moment,
     update_requirement_rel_constraints,
 )
-from app.utils import json_encoder
+from app.utils import json_encoder, repo_analyzer
 
-from .managers.mvn_generate_controller import mvn_extract_graph, mvn_extract_package
-from .managers.npm_generate_controller import npm_extract_graph, npm_extract_package
-from .managers.pip_generate_controller import pip_extract_graph, pip_extract_package
+from .managers.mvn_generate_controller import mvn_create_requirement_file, mvn_generate_packages, mvn_create_package
+from .managers.npm_generate_controller import npm_create_requirement_file, npm_generate_packages, npm_create_package
+from .managers.pip_generate_controller import pip_create_requirement_file, pip_generate_packages, pip_create_package
 
 router = APIRouter()
 
@@ -61,10 +59,9 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
 
     - **package_name**: the name of the package as it appears in PyPI
     """
-    all_versions = get_all_versions("PIP", package_name=package_name)
-    await create_package_and_versions(
-        {"name": package_name, "moment": datetime.now()}, all_versions, "PIP"
-    )
+    package = await read_package_by_name(package_name, "PIP")
+    if not package:
+        await pip_create_package(package_name)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
@@ -82,10 +79,9 @@ async def init_npm_package(package_name: str) -> JSONResponse:
 
     - **package_name**: the name of the package as it appears in NPM
     """
-    all_versions = get_all_versions("NPM", package_name=package_name)
-    await create_package_and_versions(
-        {"name": package_name, "moment": datetime.now()}, all_versions, "NPM"
-    )
+    package = await read_package_by_name(package_name, "NPM")
+    if not package:
+        await npm_create_package(package_name)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
@@ -104,20 +100,16 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     - **group_id**: the group_id of the package as it appears in Maven Central
     - **artifact_id**: the artifact_id of the package as it appears in Maven Central
     """
-    all_versions = get_all_versions(
-        "MVN", package_artifact_id=artifact_id, package_group_id=group_id
-    )
-    await create_package_and_versions(
-        {"name": artifact_id, "group_id": group_id, "moment": datetime.now()},
-        all_versions,
-        "MVN",
-    )
+    package = await read_package_by_name(artifact_id, "MVN")
+    if not package:
+        await mvn_create_package(group_id, artifact_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
     )
 
 
+# TODO: Introducir todos los cambios de mejora en los demás extractores de paquetes
 @router.post(
     "/graph/init", summary="Init a graph", response_description="Initialize a graph"
 )
@@ -144,12 +136,12 @@ async def init_graph(owner: str, name: str) -> JSONResponse:
         )
         if (
             not last_repository["moment"]
-            or last_repository["moment"] < last_commit_date
+            or last_repository["moment"].replace(tzinfo=UTC) < last_commit_date.replace(tzinfo=UTC)
         ):
             repository_ids = await read_repositories(
                 repository["owner"], repository["name"]
             )
-            raw_requirement_files = await get_repo_data(
+            raw_requirement_files = await repo_analyzer(
                 repository["owner"], repository["name"]
             )
             for package_manager, repository_id in repository_ids.items():
@@ -198,8 +190,9 @@ async def replace_repository(
             packages = await read_packages_by_requirement_file(
                 requirement_file_id, package_manager
             )
-            for package, constraints in packages.items():
-                keys = raw_requirement_files[file_name]["dependencies"].keys()
+            keys = raw_requirement_files[file_name]["dependencies"].keys()
+            for group_package, constraints in packages.items():
+                group_id, package = group_package.split(':')
                 if package in keys:
                     if (
                         constraints
@@ -211,34 +204,31 @@ async def replace_repository(
                             raw_requirement_files[file_name]["dependencies"][package],
                             package_manager,
                         )
-                        raw_requirement_files[file_name]["dependencies"].pop(package)
-                    else:
-                        await delete_requirement_file_rel(
-                            requirement_file_id, package, package_manager
+                else:
+                    await delete_requirement_file_rel(
+                        requirement_file_id, package, package_manager
+                    )
+                raw_requirement_files[file_name]["dependencies"].pop((group_id, package))
+            if raw_requirement_files[file_name]["dependencies"]:
+                match package_manager:
+                    case "PIP":
+                        await pip_generate_packages(
+                            raw_requirement_files[file_name]["dependencies"], requirement_file_id
                         )
-                if raw_requirement_files[file_name]["dependencies"]:
-                    for package, constraints in raw_requirement_files[file_name][
-                        "dependencies"
-                    ].items():
-                        match package_manager:
-                            case "PIP":
-                                await pip_extract_package(
-                                    package, constraints, requirement_file_id
-                                )
-                            case "NPM":
-                                await npm_extract_package(
-                                    package, constraints, requirement_file_id
-                                )
-                            case "MVN":
-                                await mvn_extract_package(
-                                    package, constraints, requirement_file_id
-                                )
-                raw_requirement_files.pop(file_name)
-        if raw_requirement_files:
-            for name, file in raw_requirement_files.items():
-                if file["package_manager"] == package_manager:
-                    await select_manager(package_manager, name, file, repository_id)
-        await update_repository_moment(repository_id, package_manager)
+                    case "NPM":
+                        await npm_generate_packages(
+                            raw_requirement_files[file_name]["dependencies"], requirement_file_id
+                        )
+                    case "MVN":
+                        await mvn_generate_packages(
+                            raw_requirement_files[file_name]["dependencies"], requirement_file_id
+                        )
+        raw_requirement_files.pop(file_name)
+    if raw_requirement_files:
+        for name, file in raw_requirement_files.items():
+            if file["package_manager"] == package_manager:
+                await select_manager(package_manager, name, file, repository_id)
+    await update_repository_moment(repository_id, package_manager)
 
 
 async def select_manager(
@@ -246,8 +236,8 @@ async def select_manager(
 ) -> None:
     match package_manager:
         case "PIP":
-            await pip_extract_graph(name, file, repository_id)
+            await pip_create_requirement_file(name, file, repository_id)
         case "NPM":
-            await npm_extract_graph(name, file, repository_id)
+            await npm_create_requirement_file(name, file, repository_id)
         case "MVN":
-            await mvn_extract_graph(name, file, repository_id)
+            await mvn_create_requirement_file(name, file, repository_id)

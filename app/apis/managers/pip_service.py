@@ -42,8 +42,8 @@ async def requires_pip_packages(
             sleep(5)
     if response:
         require_packages: dict[str, Any] = {}
-        for dist in response:
-            data = dist.split(";")
+        for dependency in response:
+            data = dependency.split(";")
             # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta la version
             # de python
             if len(data) > 1:
@@ -74,7 +74,7 @@ async def requires_pip_packages(
                 .replace("'", "")
             )
             pos = await get_first_position(data, ["<", ">", "=", "!", "~"])
-            dist = data[:pos]
-            require_packages[dist] = await parse_pip_constraints(data[pos:])
+            dependency = data[:pos]
+            require_packages[dependency] = await parse_pip_constraints(data[pos:])
         return require_packages
     return {}

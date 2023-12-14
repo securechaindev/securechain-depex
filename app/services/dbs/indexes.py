@@ -17,6 +17,3 @@ async def create_indexes() -> None:
         await session.run(
             "CREATE CONSTRAINT IF NOT EXISTS FOR (p:Package) REQUIRE p.name IS UNIQUE"
         )
-        await session.run(
-            "CREATE TEXT INDEX IF NOT EXISTS FOR (p: Package) ON (p.name)"
-        )

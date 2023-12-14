@@ -23,7 +23,7 @@ async def create_repository(repository: dict[str, Any], package_manager: str) ->
     return record[0]
 
 
-async def read_repositories_moment(owner: str, name: str) -> datetime:
+async def read_repositories_moment(owner: str, name: str) -> dict[str, datetime | bool]:
     query = """
     match(r: Repository{owner: $owner, name: $name}) return {moment: r.moment, is_complete: r.is_complete}
     """
@@ -129,39 +129,69 @@ async def read_graph_for_info_operation(
 async def read_data_for_smt_transform(
     requirement_file_id: str, package_manager: str, max_level: int
 ) -> dict[str, Any]:
-    query_part = f", maxLevel: {max_level * 2}" if max_level != -1 else ""
-    query = f"""
+    query = """
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
-    call apoc.path.subgraphAll(rf, {{relationshipFilter: '>'{query_part}}}) yield relationships
+    call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield relationships
     unwind relationships as relationship
     with case type(relationship)
-    when 'Requires' then {{
-        parent_type: labels(startnode(relationship))[0],
-        parent_id: elementid(startnode(relationship)),
-        parent_name: startnode(relationship).name,
+    when 'Requires' then {
         parent_count: startnode(relationship).count,
         dependency: endnode(relationship).name,
-        constraints: relationship.constraints
-    }}
+        constraints: relationship.constraints,
+        parent_version_name: relationship.parent_version_name
+    }
     end as requires,
     case type(relationship)
-    when 'Have' then {{
-        dependency: startnode(relationship).name,
-        id: elementid(endnode(relationship)),
-        release: endnode(relationship).name,
-        count: endnode(relationship).count,
-        mean: endnode(relationship).mean,
-        weighted_mean: endnode(relationship).weighted_mean
-    }}
+    when 'Have' then {
+            dependency: startnode(relationship).name,
+            release: endnode(relationship).name,
+            count: endnode(relationship).count,
+            mean: endnode(relationship).mean,
+            weighted_mean: endnode(relationship).weighted_mean
+        
+    }
     end as have
-    return {{requires: collect(requires), have: collect(have)}}
+    return {requires: apoc.coll.sortMaps(collect(requires), "parent_count"), have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")}
     """
     session = get_graph_db_session(package_manager)
-    result = await session.run(
-        query, requirement_file_id=requirement_file_id
-    )
+    result = await session.run(query, requirement_file_id=requirement_file_id, max_level=max_level * 2 if max_level != -1 else max_level)
     record = await result.single()
     return record[0] if record else None
+
+
+# async def read_data_for_smt_transform(
+#     requirement_file_id: str, package_manager: str, max_level: int
+# ) -> dict[str, Any]:
+#     query = """
+#     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
+#     call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield relationships
+#     unwind relationships as relationship
+#     with case type(relationship)
+#     when 'Requires' then {
+#         parent_type: labels(startnode(relationship))[0],
+#         parent_id: elementid(startnode(relationship)),
+#         parent_name: startnode(relationship).name,
+#         parent_count: startnode(relationship).count,
+#         dependency: endnode(relationship).name,
+#         constraints: relationship.constraints
+#     }
+#     end as requires,
+#     case type(relationship)
+#     when 'Have' then {
+#         dependency: startnode(relationship).name,
+#         id: elementid(endnode(relationship)),
+#         release: endnode(relationship).name,
+#         count: endnode(relationship).count,
+#         mean: endnode(relationship).mean,
+#         weighted_mean: endnode(relationship).weighted_mean
+#     }
+#     end as have
+#     return {requires: collect(requires), have: collect(have)}
+#     """
+#     session = get_graph_db_session(package_manager)
+#     result = await session.run(query, requirement_file_id=requirement_file_id, max_level=max_level * 2 if max_level != -1 else max_level)
+#     record = await result.single()
+#     return record[0] if record else None
 
 
 async def update_repository_is_complete(

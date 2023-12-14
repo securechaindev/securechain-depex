@@ -5,7 +5,7 @@ from univers.versions import MavenVersion, PypiVersion, SemverVersion
 from app.utils import mean, weighted_mean
 
 
-async def relate_cves(
+async def attribute_cves(
     version: Any, cpe_product: dict[str, Any], package_manager: str
 ) -> dict[str, Any]:
     impacts: list[float] = []

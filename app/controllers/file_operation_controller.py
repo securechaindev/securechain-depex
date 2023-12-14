@@ -2,12 +2,13 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs,
+    # MinimizeImpact,
     MaximizeImpact,
+    ValidModel,
     NumberOfProducts
 )
 from app.controllers.minimize import MinimizeImpact
-from app.controllers.valid import ValidModel
-from app.controllers.graph_to_smt import GraphToSMT
+from app.controllers.graph_to_smt2 import GraphToSMT
 
 from app.services import (
     read_data_for_smt_transform,
@@ -15,7 +16,7 @@ from app.services import (
     read_releases_by_counts,
 )
 from app.utils import get_manager, json_encoder
-
+import time
 router = APIRouter()
 
 
@@ -28,7 +29,8 @@ async def file_info(requirement_file_id: str, file_name: str) -> JSONResponse:
     """
     Summarizes file information regarding its dependencies, edges and vulnerabilities:
 
-    - **file_id**: the id of a file
+    - **requirement_file_id**: the id of a requirement file
+    - **file_name**: name of requirement file belonging to a graph
     """
     package_manager = await get_manager(file_name)
     graph_info = await read_graph_for_info_operation(
@@ -112,13 +114,19 @@ async def minimize_impact(
     - **max_level**: the depth of the graph to be analysed
     """
     package_manager = await get_manager(file_name)
+    begin = time.time()
     graph_data = await read_data_for_smt_transform(
         requirement_file_id, package_manager, max_level
     )
+    print("Tiempo de Extracción: " + str(time.time()-begin))
+    begin = time.time()
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
+    print("Tiempo de Transformación: " + str(time.time()-begin))
+    begin = time.time()
     operation = MinimizeImpact(limit)
     operation.execute(smt_transform.destination_model)
+    print("Tiempo de Ejecución de la Operación: " + str(time.time()-begin))
     result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({"result": result})
