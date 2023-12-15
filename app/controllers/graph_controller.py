@@ -113,7 +113,7 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
 @router.post(
     "/graph/init", summary="Init a graph", response_description="Initialize a graph"
 )
-async def init_graph(owner: str, name: str) -> JSONResponse:
+async def init_graph(owner: str, name: str, manager: str) -> JSONResponse:
     """
     Starts graph extraction from a GitHub repository:
 
@@ -142,7 +142,7 @@ async def init_graph(owner: str, name: str) -> JSONResponse:
                 repository["owner"], repository["name"]
             )
             raw_requirement_files = await repo_analyzer(
-                repository["owner"], repository["name"]
+                repository["owner"], repository["name"], manager
             )
             for package_manager, repository_id in repository_ids.items():
                 if not repository_id:

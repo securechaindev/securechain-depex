@@ -40,7 +40,7 @@ async def get_csv():
         writer = csv.writer(file)
         head = [
             'published',
-            'impact',
+            'exploit-id',
             'av-attack-vector',
             'av-attack-complexity',
             'av-privileges-required',
@@ -59,39 +59,44 @@ async def get_csv():
             print(cve_id)
 
             # Impact
-            if 'cvssMetricV31' in cve['metrics']:
-                impact = cve['metrics']['cvssMetricV31'][0]['impactScore']
-            elif 'cvssMetricV30' in cve['metrics']:
-                impact = cve['metrics']['cvssMetricV30'][0]['impactScore']
-            elif 'cvssMetricV2' in cve['metrics']:
-                impact = cve['metrics']['cvssMetricV2'][0]['impactScore']
+            # if 'cvssMetricV31' in cve['metrics']:
+            #     impact = cve['metrics']['cvssMetricV31'][0]['impactScore']
+            # elif 'cvssMetricV30' in cve['metrics']:
+            #     impact = cve['metrics']['cvssMetricV30'][0]['impactScore']
+            # elif 'cvssMetricV2' in cve['metrics']:
+            #     impact = cve['metrics']['cvssMetricV2'][0]['impactScore']
 
             # Attack vector
             if 'cvssMetricV31' in cve['metrics']:
                 attack_vector = cve['metrics']['cvssMetricV31'][0]['cvssData']['vectorString']
             elif 'cvssMetricV30' in cve['metrics']:
                 attack_vector = cve['metrics']['cvssMetricV30'][0]['cvssData']['vectorString']
-            elif 'cvssMetricV2' in cve['metrics']:
-                attack_vector = cve['metrics']['cvssMetricV2'][0]['cvssData']['vectorString']
+            else:
+                continue
+            # elif 'cvssMetricV2' in cve['metrics']:
+                # attack_vector = cve['metrics']['cvssMetricV2'][0]['cvssData']['vectorString']
 
             av, ac, pr, ui, s, c, i , a = await satinize_attack_vector(attack_vector)
             published = cve['published']
+            cve_serial = int(cve['id'].replace('CVE-', '').split('-')[1])
 
             # CSV generation
-            data: list[list[str]] = []
-            data.append([
-                published,
-                impact,
-                av,
-                ac,
-                pr,
-                ui,
-                s,
-                c,
-                i,
-                a
-            ])
-            writer.writerows(data)
+            if 'exploits' in cve:
+                for exploit in cve['exploits']:
+                    data: list[list[str]] = []
+                    data.append([
+                        published,
+                        exploit,
+                        av,
+                        ac,
+                        pr,
+                        ui,
+                        s,
+                        c,
+                        i,
+                        a
+                    ])
+                    writer.writerows(data)
     print('Tiempo tardado en generar el CSV: ' + str(time.time() - begin))
 
 asyncio.run(get_csv())

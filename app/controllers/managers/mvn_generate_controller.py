@@ -72,7 +72,7 @@ async def mvn_extract_packages(
     parent_group_id: str, parent_artifact_id: str, version: dict[str, Any]
 ) -> None:
     depth = await parent_depth(new_req_file_id, parent_artifact_id, 'MVN')
-    if depth and depth < 9:
+    if depth and depth < 7:
         require_packages = await requires_packages(
             version["name"],
             "MVN",
