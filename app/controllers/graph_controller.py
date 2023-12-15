@@ -135,8 +135,9 @@ async def init_graph(owner: str, name: str, manager: str) -> JSONResponse:
             repository["owner"], repository["name"]
         )
         if (
-            not last_repository["moment"]
-            or last_repository["moment"].replace(tzinfo=UTC) < last_commit_date.replace(tzinfo=UTC)
+            last_commit_date is not None and
+            (not last_repository["moment"]
+            or last_repository["moment"].replace(tzinfo=UTC) < last_commit_date.replace(tzinfo=UTC))
         ):
             repository_ids = await read_repositories(
                 repository["owner"], repository["name"]

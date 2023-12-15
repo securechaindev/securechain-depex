@@ -69,7 +69,7 @@ async def pip_extract_packages(
     parent_package_name: str, version: dict[str, Any]
 ) -> None:
     depth = await parent_depth(new_req_file_id, parent_package_name, 'MVN')
-    if depth and depth < 7:
+    if depth and depth < 9:
         require_packages = await requires_packages(
             "PIP", version["name"], package_name=parent_package_name
         )
