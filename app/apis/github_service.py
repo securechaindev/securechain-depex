@@ -153,10 +153,6 @@ async def get_last_commit_date_github(owner: str, name: str) -> datetime:
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)
-    print(owner)
-    print(name)
-    print(query)
-    print(response)
     if "defaultBranchRef" in response["data"]["repository"]:
         return parse(
             response["data"]["repository"]["defaultBranchRef"]["target"]["history"][
