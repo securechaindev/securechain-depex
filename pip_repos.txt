@@ -1,7 +1,6 @@
 django/django
 saleor/saleor
 pydanny/cookiecutter-django
-posthog/posthog
 django-cms/django-cms
 stephenmcd/mezzanine
 strawberry-graphql/strawberry
@@ -98,3 +97,4 @@ mkdocs/mkdocs
 sanic-org/sanic
 ArchiveBox/ArchiveBox
 kovidgoyal/calibre
+pydantic/pydantic
