@@ -40,7 +40,7 @@ async def pip_generate_packages(
                     await search_new_versions(package)
                 packages.append(package)
             else:
-                await pip_create_package(dependency, constraints, parent_id)
+                await pip_create_package(dependency, constraints, parent_id, parent_version_name)
         await relate_packages(packages, "PIP")
 
 
@@ -68,12 +68,10 @@ async def pip_create_package(
 async def pip_extract_packages(
     parent_package_name: str, version: dict[str, Any]
 ) -> None:
-    depth = await parent_depth(new_req_file_id, parent_package_name, 'PIP')
-    if depth and depth < 7:
-        require_packages = await requires_packages(
-            "PIP", version["name"], package_name=parent_package_name
-        )
-        await pip_generate_packages(require_packages, version["id"], parent_package_name)
+    require_packages = await requires_packages(
+        "PIP", version["name"], package_name=parent_package_name
+    )
+    await pip_generate_packages(require_packages, version["id"], parent_package_name)
 
 
 async def search_new_versions(package: dict[str, Any]) -> None:
