@@ -151,16 +151,16 @@ async def read_packages_by_requirement_file(
 # TODO: Probar nueva query transformación a smt
 # TODO: Probar algoritmo creación en anchura
 
-async def relate_packages2(packages, package_manager: str) -> None:
-    query = """
-    unwind keys(packages) as package
-    match (p:Package) where p.name = package.package_name
-    with p, package unwind packages[package] as parent_id
-    match (parent:Version) where elementid(parent) = parent_id
-    create (parent)-[rel:Requires{constraints: package.constraints}]->(p:Package)
-    """
-    session = get_graph_db_session(package_manager)
-    await session.run(query, packages=packages)
+# async def relate_packages2(packages: list[dict(str, str)], package_manager: str) -> None:
+#     query = """
+#     unwind keys($packages) as package
+#     match (p:Package) where p.name = package.package_name
+#     with p, package unwind $packages[package] as parent_id
+#     match (parent:Version) where elementid(parent) = parent_id
+#     create (parent)-[rel:Requires{constraints: package.constraints}]->(p:Package)
+#     """
+#     session = get_graph_db_session(package_manager)
+#     await session.run(query, packages=packages)
 
 
 async def relate_packages(packages: list[dict[str, Any]], package_manager: str) -> None:

@@ -105,23 +105,23 @@ async def read_graphs_by_owner_name_for_sigma(owner: str, name: str) -> dict[str
 
 
 async def read_graph_for_info_operation(
-    requirement_file_id: str, package_manager: str
+    requirement_file_id: str, package_manager: str, max_level: int
 ) -> dict[str, Any]:
     query = """
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
-    call apoc.path.subgraphAll(rf, {relationshipFilter: '>'}) yield nodes, relationships
+    call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield nodes, relationships
     with nodes, relationships
     unwind nodes as node
     with case when labels(node)[0] = 'Package' then node end as deps,
     case when labels(node)[0] = 'Version' then node.cves end as cves, relationships
     with collect(deps) as deps, apoc.coll.flatten(collect(cves)) as cves, relationships
     unwind relationships as relationship
-    with case when type(relationship) = 'REQUIRES' then relationship end as rels, deps, cves
+    with case when type(relationship) = 'Requires' then relationship end as rels, deps, cves
     with deps, cves, collect(rels) as rels
     return {dependencies: size(deps), edges: size(rels), cves: apoc.coll.toSet(cves)}
     """
     session = get_graph_db_session(package_manager)
-    result = await session.run(query, requirement_file_id=requirement_file_id)
+    result = await session.run(query, requirement_file_id=requirement_file_id, max_level=max_level * 2 if max_level != -1 else max_level)
     record = await result.single()
     return record[0] if record else None
 

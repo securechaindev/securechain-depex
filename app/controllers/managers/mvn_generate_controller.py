@@ -28,21 +28,20 @@ async def mvn_create_requirement_file(name: str, file: Any, repository_id: str) 
 async def mvn_generate_packages(
     dependencies: dict[str, str], parent_id: str, parent_version_name: str | None = None
 ) -> None:
-    if dependencies:
-        packages: list[dict[str, str]] = []
-        for dependency, constraints in dependencies.items():
-            group_id, artifact_id = dependency
-            package = await read_package_by_name(artifact_id, "MVN")
-            if package:
-                package["parent_id"] = parent_id
-                package["parent_version_name"] = parent_version_name
-                package["constraints"] = constraints
-                if package["moment"] < datetime.now() - timedelta(days=10):
-                    await search_new_versions(package)
-                packages.append(package)
-            else:
-                await mvn_create_package(group_id, artifact_id, constraints, parent_id, parent_version_name)
-        await relate_packages(packages, "MVN")
+    packages: list[dict[str, str]] = []
+    for dependency, constraints in dependencies.items():
+        group_id, artifact_id = dependency
+        package = await read_package_by_name(artifact_id, "MVN")
+        if package:
+            package["parent_id"] = parent_id
+            package["parent_version_name"] = parent_version_name
+            package["constraints"] = constraints
+            if package["moment"] < datetime.now() - timedelta(days=10):
+                await search_new_versions(package)
+            packages.append(package)
+        else:
+            await mvn_create_package(group_id, artifact_id, constraints, parent_id, parent_version_name)
+    await relate_packages(packages, "MVN")
 
 
 async def mvn_create_package(
@@ -71,15 +70,13 @@ async def mvn_create_package(
 async def mvn_extract_packages(
     parent_group_id: str, parent_artifact_id: str, version: dict[str, Any]
 ) -> None:
-    depth = await parent_depth(new_req_file_id, parent_artifact_id, 'MVN')
-    if depth and depth < 7:
-        require_packages = await requires_packages(
-            version["name"],
-            "MVN",
-            package_group_id=parent_group_id,
-            package_artifact_id=parent_artifact_id,
-        )
-        await mvn_generate_packages(require_packages, version["id"], parent_artifact_id)
+    require_packages = await requires_packages(
+        version["name"],
+        "MVN",
+        package_group_id=parent_group_id,
+        package_artifact_id=parent_artifact_id,
+    )
+    await mvn_generate_packages(require_packages, version["id"], parent_artifact_id)
 
 
 async def search_new_versions(package: dict[str, Any]) -> None:

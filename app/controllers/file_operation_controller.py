@@ -25,7 +25,7 @@ router = APIRouter()
     summary="Summarizes file information",
     response_description="Return file information",
 )
-async def file_info(requirement_file_id: str, file_name: str) -> JSONResponse:
+async def file_info(requirement_file_id: str, file_name: str, max_level: int) -> JSONResponse:
     """
     Summarizes file information regarding its dependencies, edges and vulnerabilities:
 
@@ -34,7 +34,7 @@ async def file_info(requirement_file_id: str, file_name: str) -> JSONResponse:
     """
     package_manager = await get_manager(file_name)
     graph_info = await read_graph_for_info_operation(
-        requirement_file_id, package_manager
+        requirement_file_id, package_manager, max_level
     )
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder(graph_info)

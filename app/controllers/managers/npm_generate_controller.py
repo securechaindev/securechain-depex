@@ -26,21 +26,20 @@ async def npm_create_requirement_file(name: str, file: Any, repository_id: str) 
 
 
 async def npm_generate_packages(dependencies: dict[str, str], parent_id: str, parent_version_name: str | None = None) -> None:
-    if dependencies:
-        packages: list[dict[str, str]] = []
-        for package_name, constraints in dependencies.items():
-            package_name = package_name.lower()
-            package = await read_package_by_name(package_name, "NPM")
-            if package:
-                package["parent_id"] = parent_id
-                package["parent_version_name"] = parent_version_name
-                package["constraints"] = constraints
-                # if package["moment"] < datetime.now() - timedelta(days=10):
-                #     await search_new_versions(package)
-                packages.append(package)
-            else:
-                await npm_create_package(package_name, constraints, parent_id)
-        await relate_packages(packages, "NPM")
+    packages: list[dict[str, str]] = []
+    for package_name, constraints in dependencies.items():
+        package_name = package_name.lower()
+        package = await read_package_by_name(package_name, "NPM")
+        if package:
+            package["parent_id"] = parent_id
+            package["parent_version_name"] = parent_version_name
+            package["constraints"] = constraints
+            # if package["moment"] < datetime.now() - timedelta(days=10):
+            #     await search_new_versions(package)
+            packages.append(package)
+        else:
+            await npm_create_package(package_name, constraints, parent_id, parent_version_name)
+    await relate_packages(packages, "NPM")
 
 
 async def npm_create_package(
@@ -52,6 +51,8 @@ async def npm_create_package(
         versions = [
             await attribute_cves(version, cpe_product, "NPM") for version in all_versions
         ]
+        if package_name == "strip-ansi":
+            print(parent_version_name)
         new_versions = await create_package_and_versions(
             {"name": package_name, "moment": datetime.now()},
             versions,
@@ -60,10 +61,8 @@ async def npm_create_package(
             parent_id,
             parent_version_name
         )
-        depth = await parent_depth(new_req_file_id, package_name, 'NPM')
-        if depth and depth < 7:
-            for require_packages, new_version in zip(all_require_packages, new_versions):
-                await npm_generate_packages(require_packages, new_version["id"], package_name)
+        for require_packages, new_version in zip(all_require_packages, new_versions):
+            await npm_generate_packages(require_packages, new_version["id"], package_name)
 
 
 # TODO: Implementar llamada para nuevas versiones

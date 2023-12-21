@@ -22,9 +22,11 @@ from app.services import (
 )
 from app.utils import json_encoder, repo_analyzer
 
-from .managers.mvn_generate_controller import mvn_create_requirement_file, mvn_generate_packages, mvn_create_package
+# from .managers.mvn_generate_controller import mvn_create_requirement_file, mvn_generate_packages, mvn_create_package
 from .managers.npm_generate_controller import npm_create_requirement_file, npm_generate_packages, npm_create_package
 from .managers.pip_generate_controller import pip_create_requirement_file, pip_generate_packages, pip_create_package
+
+from .managers.mvn_in_width import mvn_create_requirement_file, mvn_generate_packages
 
 router = APIRouter()
 
@@ -88,32 +90,32 @@ async def init_npm_package(package_name: str) -> JSONResponse:
     )
 
 
-@router.post(
-    "/mvn/package/init",
-    summary="Init a Maven Central package",
-    response_description="Initialize a Maven Central package",
-)
-async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
-    """
-    Starts graph extraction from a Maven Central package:
+# @router.post(
+#     "/mvn/package/init",
+#     summary="Init a Maven Central package",
+#     response_description="Initialize a Maven Central package",
+# )
+# async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
+#     """
+#     Starts graph extraction from a Maven Central package:
 
-    - **group_id**: the group_id of the package as it appears in Maven Central
-    - **artifact_id**: the artifact_id of the package as it appears in Maven Central
-    """
-    package = await read_package_by_name(artifact_id, "MVN")
-    if not package:
-        await mvn_create_package(group_id, artifact_id)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "initializing"}),
-    )
+#     - **group_id**: the group_id of the package as it appears in Maven Central
+#     - **artifact_id**: the artifact_id of the package as it appears in Maven Central
+#     """
+#     package = await read_package_by_name(artifact_id, "MVN")
+#     if not package:
+#         await mvn_create_package(group_id, artifact_id)
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK,
+#         content=json_encoder({"message": "initializing"}),
+#     )
 
 
 # TODO: Introducir todos los cambios de mejora en los demás extractores de paquetes
 @router.post(
     "/graph/init", summary="Init a graph", response_description="Initialize a graph"
 )
-async def init_graph(owner: str, name: str, manager: str) -> JSONResponse:
+async def init_graph(owner: str, name: str) -> JSONResponse:
     """
     Starts graph extraction from a GitHub repository:
 
@@ -143,7 +145,7 @@ async def init_graph(owner: str, name: str, manager: str) -> JSONResponse:
                 repository["owner"], repository["name"]
             )
             raw_requirement_files = await repo_analyzer(
-                repository["owner"], repository["name"], manager
+                repository["owner"], repository["name"]
             )
             for package_manager, repository_id in repository_ids.items():
                 if not repository_id:

@@ -8,15 +8,15 @@ from app.config import settings
 
 @lru_cache
 def get_graph_db_session(package_manager: str) -> AsyncSession | tuple[AsyncSession]:
-    pip_session = AsyncGraphDatabase.driver(
+    pip_session: AsyncSession = AsyncGraphDatabase.driver(
         uri=settings.GRAPH_DB_URI_PIP,
         auth=(settings.GRAPH_DB_USER, settings.GRAPH_DB_PASSWORD_PIP),
     ).session()
-    npm_session = AsyncGraphDatabase.driver(
+    npm_session: AsyncSession = AsyncGraphDatabase.driver(
         uri=settings.GRAPH_DB_URI_NPM,
         auth=(settings.GRAPH_DB_USER, settings.GRAPH_DB_PASSWORD_NPM),
     ).session()
-    mvn_session = AsyncGraphDatabase.driver(
+    mvn_session: AsyncSession = AsyncGraphDatabase.driver(
         uri=settings.GRAPH_DB_URI_MVN,
         auth=(settings.GRAPH_DB_USER, settings.GRAPH_DB_PASSWORD_MVN),
     ).session()

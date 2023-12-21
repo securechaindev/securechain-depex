@@ -28,20 +28,19 @@ async def pip_create_requirement_file(name: str, file: Any, repository_id: str) 
 async def pip_generate_packages(
     dependencies: dict[str, str], parent_id: str, parent_version_name: str | None = None
 ) -> None:
-    if dependencies:
-        packages: list[dict[str, Any]] = []
-        for dependency, constraints in dependencies.items():
-            package = await read_package_by_name(dependency, "PIP")
-            if package:
-                package["parent_id"] = parent_id
-                package["parent_version_name"] = parent_version_name
-                package["constraints"] = constraints
-                if package["moment"] < datetime.now() - timedelta(days=10):
-                    await search_new_versions(package)
-                packages.append(package)
-            else:
-                await pip_create_package(dependency, constraints, parent_id, parent_version_name)
-        await relate_packages(packages, "PIP")
+    packages: list[dict[str, Any]] = []
+    for dependency, constraints in dependencies.items():
+        package = await read_package_by_name(dependency, "PIP")
+        if package:
+            package["parent_id"] = parent_id
+            package["parent_version_name"] = parent_version_name
+            package["constraints"] = constraints
+            if package["moment"] < datetime.now() - timedelta(days=10):
+                await search_new_versions(package)
+            packages.append(package)
+        else:
+            await pip_create_package(dependency, constraints, parent_id, parent_version_name)
+    await relate_packages(packages, "PIP")
 
 
 async def pip_create_package(
