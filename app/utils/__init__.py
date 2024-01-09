@@ -12,5 +12,5 @@ __all__ = [
     "mean",
     "weighted_mean",
     "parse_pip_constraints",
-    "repo_analyzer"
+    "repo_analyzer",
 ]

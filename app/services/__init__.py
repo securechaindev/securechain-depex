@@ -17,7 +17,6 @@ from .package_service import (
     read_packages_by_requirement_file,
     relate_packages,
     update_package_moment,
-    parent_depth
 )
 from .repository_service import (
     create_repository,
@@ -57,7 +56,6 @@ __all__ = [
     "read_packages_by_requirement_file",
     "relate_packages",
     "update_package_moment",
-    "parent_depth",
     "create_repository",
     "read_repositories_moment",
     "read_repositories",
