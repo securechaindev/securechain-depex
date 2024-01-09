@@ -74,7 +74,6 @@ async def requires_pip_packages(
                 .replace("'", "")
             )
             pos = await get_first_position(data, ["<", ">", "=", "!", "~"])
-            dependency = data[:pos]
-            require_packages[dependency] = await parse_pip_constraints(data[pos:])
+            require_packages[data[:pos]] = await parse_pip_constraints(data[pos:])
         return require_packages
     return {}
