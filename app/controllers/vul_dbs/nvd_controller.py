@@ -10,8 +10,8 @@ from app.config import settings
 from app.services import (
     bulk_write_actions,
     read_env_variables,
-    update_env_variables_by_nvd,
     update_cpe_products,
+    update_env_variables_by_nvd,
 )
 
 

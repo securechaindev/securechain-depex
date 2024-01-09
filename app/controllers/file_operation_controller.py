@@ -2,13 +2,12 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs,
-    # MinimizeImpact,
     MaximizeImpact,
+    MinimizeImpact,
+    NumberOfProducts,
     ValidModel,
-    NumberOfProducts
 )
-from app.controllers.minimize import MinimizeImpact
-from app.controllers.graph_to_smt2 import GraphToSMT
+from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 
 from app.services import (
     read_data_for_smt_transform,
@@ -16,7 +15,7 @@ from app.services import (
     read_releases_by_counts,
 )
 from app.utils import get_manager, json_encoder
-import time
+
 router = APIRouter()
 
 
@@ -25,7 +24,9 @@ router = APIRouter()
     summary="Summarizes file information",
     response_description="Return file information",
 )
-async def file_info(requirement_file_id: str, file_name: str, max_level: int) -> JSONResponse:
+async def file_info(
+    requirement_file_id: str, file_name: str, max_level: int
+) -> JSONResponse:
     """
     Summarizes file information regarding its dependencies, edges and vulnerabilities:
 
@@ -46,7 +47,9 @@ async def file_info(requirement_file_id: str, file_name: str, max_level: int) ->
     summary="Validates model satisfiability",
     response_description="Return True if valid, False if not",
 )
-async def valid_file(requirement_file_id: str, file_name: str, max_level: int) -> JSONResponse:
+async def valid_file(
+    requirement_file_id: str, file_name: str, max_level: int
+) -> JSONResponse:
     """
     Summarizes requirement file graph information regarding its dependencies,
     edges and vulnerabilities:
@@ -114,19 +117,13 @@ async def minimize_impact(
     - **max_level**: the depth of the graph to be analysed
     """
     package_manager = await get_manager(file_name)
-    begin = time.time()
     graph_data = await read_data_for_smt_transform(
         requirement_file_id, package_manager, max_level
     )
-    print("Tiempo de Extracción: " + str(time.time()-begin))
-    begin = time.time()
     smt_transform = GraphToSMT(graph_data, file_name, package_manager, agregator)
     smt_transform.transform()
-    print("Tiempo de Transformación: " + str(time.time()-begin))
-    begin = time.time()
     operation = MinimizeImpact(limit)
     operation.execute(smt_transform.destination_model)
-    print("Tiempo de Ejecución de la Operación: " + str(time.time()-begin))
     result = await read_releases_by_counts(operation.get_result(), package_manager)
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({"result": result})
