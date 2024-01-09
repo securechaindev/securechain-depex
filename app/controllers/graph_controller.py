@@ -3,30 +3,40 @@ from typing import Any
 
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
-from pytz import timezone, UTC
+from pytz import UTC, timezone
 
-from app.apis import get_last_commit_date_github, get_all_versions
+from app.apis import get_last_commit_date_github
 from app.services import (
     create_repository,
     delete_requirement_file,
     delete_requirement_file_rel,
     read_graphs_by_owner_name_for_sigma,
+    read_package_by_name,
     read_packages_by_requirement_file,
     read_repositories,
     read_repositories_moment,
     read_requirement_files_by_repository,
-    read_package_by_name,
     update_repository_is_complete,
     update_repository_moment,
     update_requirement_rel_constraints,
 )
 from app.utils import json_encoder, repo_analyzer
 
-# from .managers.mvn_generate_controller import mvn_create_requirement_file, mvn_generate_packages, mvn_create_package
-from .managers.npm_generate_controller import npm_create_requirement_file, npm_generate_packages, npm_create_package
-from .managers.pip_generate_controller import pip_create_requirement_file, pip_generate_packages, pip_create_package
-
-from .managers.mvn_in_width import mvn_create_requirement_file, mvn_generate_packages
+from .managers.mvn_generate_controller import (
+    mvn_create_package,
+    mvn_create_requirement_file,
+    mvn_generate_packages,
+)
+from .managers.npm_generate_controller import (
+    npm_create_package,
+    npm_create_requirement_file,
+    npm_generate_packages,
+)
+from .managers.pip_generate_controller import (
+    pip_create_package,
+    pip_create_requirement_file,
+    pip_generate_packages,
+)
 
 router = APIRouter()
 
@@ -90,25 +100,25 @@ async def init_npm_package(package_name: str) -> JSONResponse:
     )
 
 
-# @router.post(
-#     "/mvn/package/init",
-#     summary="Init a Maven Central package",
-#     response_description="Initialize a Maven Central package",
-# )
-# async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
-#     """
-#     Starts graph extraction from a Maven Central package:
+@router.post(
+    "/mvn/package/init",
+    summary="Init a Maven Central package",
+    response_description="Initialize a Maven Central package",
+)
+async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
+    """
+    Starts graph extraction from a Maven Central package:
 
-#     - **group_id**: the group_id of the package as it appears in Maven Central
-#     - **artifact_id**: the artifact_id of the package as it appears in Maven Central
-#     """
-#     package = await read_package_by_name(artifact_id, "MVN")
-#     if not package:
-#         await mvn_create_package(group_id, artifact_id)
-#     return JSONResponse(
-#         status_code=status.HTTP_200_OK,
-#         content=json_encoder({"message": "initializing"}),
-#     )
+    - **group_id**: the group_id of the package as it appears in Maven Central
+    - **artifact_id**: the artifact_id of the package as it appears in Maven Central
+    """
+    package = await read_package_by_name(artifact_id, "MVN")
+    if not package:
+        await mvn_create_package(group_id, artifact_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder({"message": "initializing"}),
+    )
 
 
 # TODO: Introducir todos los cambios de mejora en los demás extractores de paquetes
@@ -136,10 +146,10 @@ async def init_graph(owner: str, name: str) -> JSONResponse:
         last_commit_date = await get_last_commit_date_github(
             repository["owner"], repository["name"]
         )
-        if (
-            last_commit_date is not None and
-            (not last_repository["moment"]
-            or last_repository["moment"].replace(tzinfo=UTC) < last_commit_date.replace(tzinfo=UTC))
+        if last_commit_date is not None and (
+            not last_repository["moment"]
+            or last_repository["moment"].replace(tzinfo=UTC)
+            < last_commit_date.replace(tzinfo=UTC)
         ):
             repository_ids = await read_repositories(
                 repository["owner"], repository["name"]
@@ -195,7 +205,7 @@ async def replace_repository(
             )
             keys = raw_requirement_files[file_name]["dependencies"].keys()
             for group_package, constraints in packages.items():
-                group_id, package = group_package.split(':')
+                group_id, package = group_package.split(":")
                 if package in keys:
                     if (
                         constraints
@@ -211,20 +221,25 @@ async def replace_repository(
                     await delete_requirement_file_rel(
                         requirement_file_id, package, package_manager
                     )
-                raw_requirement_files[file_name]["dependencies"].pop((group_id, package))
+                raw_requirement_files[file_name]["dependencies"].pop(
+                    (group_id, package)
+                )
             if raw_requirement_files[file_name]["dependencies"]:
                 match package_manager:
                     case "PIP":
                         await pip_generate_packages(
-                            raw_requirement_files[file_name]["dependencies"], requirement_file_id
+                            raw_requirement_files[file_name]["dependencies"],
+                            requirement_file_id,
                         )
                     case "NPM":
                         await npm_generate_packages(
-                            raw_requirement_files[file_name]["dependencies"], requirement_file_id
+                            raw_requirement_files[file_name]["dependencies"],
+                            requirement_file_id,
                         )
                     case "MVN":
                         await mvn_generate_packages(
-                            raw_requirement_files[file_name]["dependencies"], requirement_file_id
+                            raw_requirement_files[file_name]["dependencies"],
+                            requirement_file_id,
                         )
         raw_requirement_files.pop(file_name)
     if raw_requirement_files:

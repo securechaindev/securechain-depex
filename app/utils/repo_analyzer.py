@@ -1,26 +1,45 @@
-from git import GitCommandError, Repo
+from glob import glob
 from os import makedirs, system
 from os.path import exists, isdir
-from glob import glob
-from typing import Any
 
-from .files.pom_xml_analyzer import analyze_pom_xml
+from git import GitCommandError, Repo
+
 from .files.package_json_analyzer import analyze_package_json
+from .files.pom_xml_analyzer import analyze_pom_xml
+from .files.pyproject_toml_analyzer import analyze_pyproject_toml
+from .files.setup_cfg_analyzer import analyze_setup_cfg
+from .files.setup_py_analyzer import analyze_setup_py
 
-pip_files = ["pyproject.toml"]
+pip_files = ["pyproject.toml", "setup.cfg", "setup.py"]
 npm_files = ["package.json"]
 mvn_files = ["pom.xml"]
 
 
-async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict|str]]:
-    requirement_files: dict[str, dict[str, dict|str]] = {}
+async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str]]:
+    requirement_files: dict[str, dict[str, dict | str]] = {}
     repository_path = await download_repository(owner, name)
     requirement_file_names = await get_req_files_names(repository_path)
     for requirement_file_name in requirement_file_names:
         if "pom.xml" in requirement_file_name:
-            requirement_files = await analyze_pom_xml(requirement_files, repository_path, requirement_file_name)
+            requirement_files = await analyze_pom_xml(
+                requirement_files, repository_path, requirement_file_name
+            )
         elif "package.json" in requirement_file_name:
-            requirement_files = await analyze_package_json(requirement_files, repository_path, requirement_file_name)
+            requirement_files = await analyze_package_json(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "pyproject.toml" in requirement_file_name:
+            requirement_files = await analyze_pyproject_toml(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "setup.cfg" in requirement_file_name:
+            requirement_files = await analyze_setup_cfg(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "setup.py" in requirement_file_name:
+            requirement_files = await analyze_setup_py(
+                requirement_files, repository_path, requirement_file_name
+            )
     system("rm -rf " + repository_path)
     return requirement_files
 
@@ -49,7 +68,9 @@ async def get_req_files_names(directory_path: str) -> list[str]:
         paths = glob(directory_path + branch + "/**", recursive=True)
         for _path in paths:
             if not isdir(_path) and await is_req_file(_path):
-                requirement_files.append(_path.replace(directory_path, "").replace(directory_path, ""))
+                requirement_files.append(
+                    _path.replace(directory_path, "").replace(directory_path, "")
+                )
     return requirement_files
 
 
