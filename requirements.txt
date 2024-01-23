@@ -1,4 +1,4 @@
-fastapi[all]==0.108.0
+fastapi[all]==0.109.0
 pydantic-settings==2.1.0
 apscheduler==3.10.4
 motor==3.3.2

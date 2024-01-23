@@ -25,7 +25,9 @@
 
 #### Get API Keys
 
-- How to get a GitHub [API key](https://github.com/settings/tokens)
+- How to get a GitHub [API key](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+
+- How to get a GitLab [API key](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
 
 - How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
 
@@ -44,4 +46,4 @@ Enter [here](http://0.0.0.0:8000/docs)
 #### Other tools
 1. It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass) to see what information is being indexed in vulnerability database
    
-2. You can see the created graph built for [pip](http://0.0.0.0:7474/browser/), [npm](http://localhost:7473/browser/) and [mvn](http://localhost:7472/browser/) clicking in this names
+2. You can see the created graph built for [pip](http://0.0.0.0:7474/browser/), [npm](http://localhost:7473/browser/) and [mvn](http://localhost:7472/browser/) clicking in this names. Using the Neo4J browser interfaces.
