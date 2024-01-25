@@ -8,12 +8,12 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from git import GitCommandError, Repo
 
+from app.models import PackageManager
 from app.services import (
     read_cve_ids_by_version_and_package,
     read_cve_impact_by_id,
-    read_exploits_by_cve_id
+    read_exploits_by_cve_id,
 )
-from app.models import PackageManager
 from app.utils import json_encoder
 
 router = APIRouter()

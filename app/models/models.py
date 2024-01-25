@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any, ClassVar
+
 from pydantic import BaseModel, Field
 from pytz import timezone
 

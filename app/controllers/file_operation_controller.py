@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Path, Query
+from fastapi import APIRouter, Path, Query, status
 from fastapi.responses import JSONResponse
 from flamapy.metamodels.smt_metamodel.operations import (
     FilterConfigs,
@@ -8,14 +8,15 @@ from flamapy.metamodels.smt_metamodel.operations import (
     ValidModel,
 )
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
+from typing_extensions import Annotated
+
+from app.models import Agregator, PackageManager
 from app.services import (
     read_data_for_smt_transform,
     read_graph_for_info_operation,
     read_releases_by_counts,
 )
-from app.models import PackageManager, Agregator
 from app.utils import json_encoder
-from typing_extensions import Annotated
 
 router = APIRouter()
 
