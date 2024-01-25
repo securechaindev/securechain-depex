@@ -11,10 +11,10 @@ from git import GitCommandError, Repo
 from app.services import (
     read_cve_ids_by_version_and_package,
     read_cve_impact_by_id,
-    read_exploits_by_cve_id,
-    read_repository_by_id,
+    read_exploits_by_cve_id
 )
-from app.utils import get_manager, json_encoder
+from app.models import PackageManager
+from app.utils import json_encoder
 
 router = APIRouter()
 
@@ -25,7 +25,7 @@ router = APIRouter()
     response_description="Return a test report",
 )
 async def create_test_report(
-    repository_id: str, configuration: dict[str, str | int | float], file_name: str
+    owner: str, name: str, configuration: dict[str, str | int | float], package_manager: PackageManager
 ) -> JSONResponse:
     """
     Return a test report by a given repository id and a configuration:
@@ -33,12 +33,10 @@ async def create_test_report(
     - **repository_id**: the id of a repository
     - **configuration**: a valid configuration for a file of the repository
     """
-    package_manager = await get_manager(file_name)
-    repository = await read_repository_by_id(repository_id, package_manager)
     carpeta_descarga = await download_repository(
-        repository["owner"], repository["name"]
+        owner, name
     )
-    paths = await get_files_path("repositories/" + repository["name"])
+    paths = await get_files_path("repositories/" + name)
     raw_report = await get_raw_report(configuration, package_manager)
     test_report: dict[str, list[Any]] = {"tests": []}
     number = 0

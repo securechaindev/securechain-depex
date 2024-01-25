@@ -76,7 +76,7 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
         await pip_create_package(package_name)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "initializing"}),
+        content=json_encoder({"message": "Initializing graph"}),
     )
 
 

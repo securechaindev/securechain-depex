@@ -137,25 +137,23 @@ async def read_data_for_smt_transform(
     match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
     call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield relationships
     unwind relationships as relationship
-    with case type(relationship)
-    when 'Requires' then {
-        parent_count: startnode(relationship).count,
-        dependency: endnode(relationship).name,
-        constraints: relationship.constraints,
-        parent_version_name: relationship.parent_version_name
-    }
-    end as requires,
-    case type(relationship)
-    when 'Have' then {
-            dependency: startnode(relationship).name,
-            release: endnode(relationship).name,
-            count: endnode(relationship).count,
-            mean: endnode(relationship).mean,
-            weighted_mean: endnode(relationship).weighted_mean
+        with case type(relationship)
+            when 'Requires' then {
+                parent_count: startnode(relationship).count,
+                dependency: endnode(relationship).name,
+                constraints: relationship.constraints,
+                parent_version_name: relationship.parent_version_name
+            } end as requires,
+        case type(relationship)
+            when 'Have' then {
+                    dependency: startnode(relationship).name,
+                    release: endnode(relationship).name,
+                    count: endnode(relationship).count,
+                    mean: endnode(relationship).mean,
+                    weighted_mean: endnode(relationship).weighted_mean
 
-    }
-    end as have
-    return {requires: apoc.coll.sortMaps(collect(requires), "parent_count"), have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")}
+            } end as have, rf
+    return {name: collect(rf.name)[0], requires: apoc.coll.sortMaps(collect(requires), "parent_count"), have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")}
     """
     session = get_graph_db_session(package_manager)
     result = await session.run(
