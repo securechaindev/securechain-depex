@@ -70,8 +70,7 @@ async def create_tests(
                     f"test{number}": {
                         "dependency": dependency["name"],
                         "version": dependency["version"],
-                        "dep_impact": dependency["impact"],
-                        "file_dir": _path,
+                        "file_path": _path,
                         "dep_artifacts": await get_used_artifacts(
                             _path, dependency["name"]
                         ),
@@ -94,10 +93,6 @@ async def get_raw_report(
     configuration: dict[str, str | int | float], package_manager: str
 ) -> list[dict[str, Any]]:
     raw_report = []
-    aux = {}
-    for dependency in configuration:
-        if "CVSS" in dependency:
-            aux[dependency.replace("CVSS", "")] = configuration[dependency]
     for dependency, version in configuration.items():
         if isinstance(version, str):
             cves = []
@@ -118,7 +113,6 @@ async def get_raw_report(
                 {
                     "name": dependency,
                     "version": version,
-                    "impact": aux[dependency],
                     "cves": cves,
                 }
             )
