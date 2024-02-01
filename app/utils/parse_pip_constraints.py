@@ -1,5 +1,4 @@
-# Need to parse pip constraits because Univers library dont support environment markers like .* version, ~= and === operators
-# TODO: Wait to Univers solves this problem or make a pull request to Univers repository to solve this
+# INFO: Need to parse pip constraits because Univers library dont support environment markers like .* version, ~= and === operatorsç
 async def parse_pip_constraints(raw_constraints: str) -> str:
     if raw_constraints:
         ctcs = []
@@ -28,7 +27,11 @@ async def clean_pip_constraints(raw_constraints: list[str]) -> str:
                         raw_constraint[:index] + " " + raw_constraint[index:]
                     )
                     break
-        operator, version = raw_constraint.strip().split(" ")
+        for index, char in enumerate(raw_constraint):
+            if char.isdigit():
+                pos = index
+        operator = raw_constraint[:pos]
+        version = raw_constraint[pos:]
         if "==" in operator and "*" in version:
             pos = version.find("*")
             version = version[: pos - 1]

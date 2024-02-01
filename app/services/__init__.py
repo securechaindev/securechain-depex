@@ -34,8 +34,10 @@ from .requirement_file_service import (
     delete_requirement_file,
     delete_requirement_file_rel,
     read_requirement_files_by_repository,
+    update_requirement_file_moment,
     update_requirement_rel_constraints,
 )
+from .smt_service import read_smt_text, replace_smt_text
 from .version_service import (
     count_number_of_versions_by_package,
     read_counts_by_releases,
@@ -68,6 +70,7 @@ __all__ = [
     "create_requirement_file",
     "read_requirement_files_by_repository",
     "update_requirement_rel_constraints",
+    "update_requirement_file_moment",
     "delete_requirement_file",
     "delete_requirement_file_rel",
     "read_env_variables",
@@ -77,5 +80,7 @@ __all__ = [
     "read_versions_names_by_package",
     "read_releases_by_counts",
     "read_counts_by_releases",
+    "replace_smt_text",
+    "read_smt_text",
     "count_number_of_versions_by_package",
 ]

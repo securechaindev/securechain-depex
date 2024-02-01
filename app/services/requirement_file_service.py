@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from .dbs.databases import get_graph_db_session
@@ -9,7 +10,7 @@ async def create_requirement_file(
     query = """
     match (r:Repository)
     where elementid(r) = $repository_id
-    create(rf:RequirementFile {name:$name,manager:$manager})
+    create(rf:RequirementFile {name:$name,manager:$manager,moment:$moment})
     create (r)-[rel:USE]->(rf)
     return elementid(rf) as id
     """
@@ -48,6 +49,19 @@ async def update_requirement_rel_constraints(
         requirement_file_id=requirement_file_id,
         package_name=package_name,
         constraints=constraints,
+    )
+
+
+async def update_requirement_file_moment(
+    requirement_file_id: str, package_manager: str
+) -> None:
+    query = """
+    match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
+    set rf.moment = $moment
+    """
+    session = get_graph_db_session(package_manager)
+    await session.run(
+        query, requirement_file_id=requirement_file_id, moment=datetime.now()
     )
 
 

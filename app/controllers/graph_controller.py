@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
-from pytz import UTC, timezone
+from pytz import UTC
 
 from app.apis import get_last_commit_date_github
 from app.services import (
@@ -18,6 +18,7 @@ from app.services import (
     read_requirement_files_by_repository,
     update_repository_is_complete,
     update_repository_moment,
+    update_requirement_file_moment,
     update_requirement_rel_constraints,
 )
 from app.utils import json_encoder, repo_analyzer
@@ -121,7 +122,6 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     )
 
 
-# TODO: Introducir todos los cambios de mejora en los demás extractores de paquetes
 @router.post(
     "/graph/init", summary="Init a graph", response_description="Initialize a graph"
 )
@@ -135,7 +135,7 @@ async def init_graph(owner: str, name: str) -> JSONResponse:
     repository = {
         "owner": owner,
         "name": name,
-        "moment": datetime.now(timezone("Europe/Madrid")),
+        "moment": datetime.now(),
         "add_extras": False,
         "is_complete": False,
     }
@@ -178,7 +178,7 @@ async def init_graph(owner: str, name: str) -> JSONResponse:
             pass
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "initializing"}),
+        content=json_encoder({"message": "Graph initialized"}),
     )
 
 
@@ -205,7 +205,10 @@ async def replace_repository(
             )
             keys = raw_requirement_files[file_name]["dependencies"].keys()
             for group_package, constraints in packages.items():
-                group_id, package = group_package.split(":")
+                if package_manager == "MVN":
+                    group_id, package = group_package.split(":")
+                else:
+                    package = group_package
                 if package in keys:
                     if (
                         constraints
@@ -221,9 +224,11 @@ async def replace_repository(
                     await delete_requirement_file_rel(
                         requirement_file_id, package, package_manager
                     )
-                raw_requirement_files[file_name]["dependencies"].pop(
-                    (group_id, package)
-                )
+                if package_manager == "MVN":
+                    pop_key = (group_id, package)
+                else:
+                    pop_key = package
+                raw_requirement_files[file_name]["dependencies"].pop(pop_key)
             if raw_requirement_files[file_name]["dependencies"]:
                 match package_manager:
                     case "PIP":
@@ -241,6 +246,7 @@ async def replace_repository(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
+            await update_requirement_file_moment(requirement_file_id, package_manager)
         raw_requirement_files.pop(file_name)
     if raw_requirement_files:
         for name, file in raw_requirement_files.items():

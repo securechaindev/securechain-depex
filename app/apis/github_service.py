@@ -11,6 +11,7 @@ headers_github = {
     "Authorization": f"Bearer {settings.GITHUB_GRAPHQL_API_KEY}",
 }
 
+
 async def get_last_commit_date_github(owner: str, name: str) -> datetime:
     query = f"""
     {{

@@ -20,7 +20,7 @@ new_req_file_id = ""
 async def pip_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
     global new_req_file_id
     new_req_file_id = await create_requirement_file(
-        {"name": name, "manager": "PIP"}, repository_id, "PIP"
+        {"name": name, "manager": "PIP", "moment": datetime.now()}, repository_id, "PIP"
     )
     await pip_generate_packages(file["dependencies"], new_req_file_id)
 

@@ -7,18 +7,22 @@ from flamapy.metamodels.smt_metamodel.operations import (
     NumberOfProducts,
     ValidModel,
 )
-from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
+from pytz import UTC
 from typing_extensions import Annotated
 
+from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from app.models import Agregator, PackageManager
 from app.services import (
     read_data_for_smt_transform,
     read_graph_for_info_operation,
     read_releases_by_counts,
+    read_smt_text,
+    replace_smt_text,
 )
 from app.utils import json_encoder
 
 router = APIRouter()
+
 
 @router.post(
     "/operation/file/file_info/{requirement_file_id}",
@@ -26,9 +30,14 @@ router = APIRouter()
     response_description="Return file information",
 )
 async def file_info(
-    requirement_file_id: Annotated[str, Path(pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$")],
+    requirement_file_id: Annotated[
+        str,
+        Path(
+            pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
+        ),
+    ],
     max_level: Annotated[int, Query(ge=-1)],
-    package_manager: PackageManager
+    package_manager: PackageManager,
 ) -> JSONResponse:
     """
     Summarizes file information regarding its dependencies, edges and vulnerabilities:
@@ -51,9 +60,14 @@ async def file_info(
     response_description="Return True if valid, False if not",
 )
 async def valid_file(
-    requirement_file_id: Annotated[str, Path(pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$")],
+    requirement_file_id: Annotated[
+        str,
+        Path(
+            pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
+        ),
+    ],
     max_level: Annotated[int, Query(ge=-1)],
-    package_manager: PackageManager
+    package_manager: PackageManager,
 ) -> JSONResponse:
     """
     Summarizes requirement file graph information regarding its dependencies,
@@ -66,16 +80,31 @@ async def valid_file(
     graph_data = await read_data_for_smt_transform(
         requirement_file_id, package_manager, max_level
     )
+    smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, package_manager, "mean")
-        smt_transform.transform()
-        smt_model = smt_transform.destination_model
+        smt_text = await read_smt_text(smt_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
+            "moment"
+        ].replace(tzinfo=UTC):
+            smt_transform = GraphToSMT(graph_data, package_manager, "mean")
+            smt_transform.convert(smt_text["text"])
+        else:
+            smt_transform = GraphToSMT(graph_data, package_manager, "mean")
+            model_text = smt_transform.transform()
+            await replace_smt_text(smt_id, model_text)
         operation = ValidModel()
-        operation.execute(smt_model)
+        operation.execute(smt_transform.destination_model)
         result = {"is_valid": operation.get_result()}
-        return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+        return JSONResponse(
+            status_code=status.HTTP_200_OK, content=json_encoder(result)
+        )
     else:
-        return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({"message": "The requirement file don't have dependencies"}))
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=json_encoder(
+                {"message": "The requirement file don't have dependencies"}
+            ),
+        )
 
 
 @router.post(
@@ -84,9 +113,14 @@ async def valid_file(
     response_description="Return the number of configurations.",
 )
 async def number_of_configurations(
-    requirement_file_id: Annotated[str, Path(pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$")],
+    requirement_file_id: Annotated[
+        str,
+        Path(
+            pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
+        ),
+    ],
     max_level: Annotated[int, Query(ge=-1)],
-    package_manager: PackageManager
+    package_manager: PackageManager,
 ) -> JSONResponse:
     """
     Count the number of configurations of a file. Recommendatory to not use in massive graphs:
@@ -98,16 +132,31 @@ async def number_of_configurations(
     graph_data = await read_data_for_smt_transform(
         requirement_file_id, package_manager, max_level
     )
+    smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, package_manager, "mean")
-        smt_transform.transform()
-        smt_model = smt_transform.destination_model
+        smt_text = await read_smt_text(smt_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
+            "moment"
+        ].replace(tzinfo=UTC):
+            smt_transform = GraphToSMT(graph_data, package_manager, "mean")
+            smt_transform.convert(smt_text["text"])
+        else:
+            smt_transform = GraphToSMT(graph_data, package_manager, "mean")
+            model_text = smt_transform.transform()
+            await replace_smt_text(smt_id, model_text)
         operation = NumberOfProducts()
-        operation.execute(smt_model)
+        operation.execute(smt_transform.destination_model)
         result = {"number_of_products": operation.get_result()}
-        return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(result))
+        return JSONResponse(
+            status_code=status.HTTP_200_OK, content=json_encoder(result)
+        )
     else:
-        return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({"message": "The requirement file don't have dependencies"}))
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=json_encoder(
+                {"message": "The requirement file don't have dependencies"}
+            ),
+        )
 
 
 @router.post(
@@ -116,11 +165,16 @@ async def number_of_configurations(
     response_description="Return a list of configurations",
 )
 async def minimize_impact(
-    requirement_file_id: Annotated[str, Path(pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$")],
+    requirement_file_id: Annotated[
+        str,
+        Path(
+            pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
+        ),
+    ],
     limit: Annotated[int, Query(ge=1)],
     max_level: Annotated[int, Query(ge=-1)],
     package_manager: PackageManager,
-    agregator: Agregator
+    agregator: Agregator,
 ) -> JSONResponse:
     """
     Return a list of configurations of a file ordered with the minimun posible impact:
@@ -134,9 +188,18 @@ async def minimize_impact(
     graph_data = await read_data_for_smt_transform(
         requirement_file_id, package_manager, max_level
     )
+    smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, package_manager, agregator)
-        smt_transform.transform()
+        smt_text = await read_smt_text(smt_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
+            "moment"
+        ].replace(tzinfo=UTC):
+            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
+            smt_transform.convert(smt_text["text"])
+        else:
+            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
+            model_text = smt_transform.transform()
+            await replace_smt_text(smt_id, model_text)
         operation = MinimizeImpact(limit)
         operation.execute(smt_transform.destination_model)
         result = await read_releases_by_counts(operation.get_result(), package_manager)
@@ -144,7 +207,12 @@ async def minimize_impact(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result})
         )
     else:
-        return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({"message": "The requirement file don't have dependencies"}))
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=json_encoder(
+                {"message": "The requirement file don't have dependencies"}
+            ),
+        )
 
 
 @router.post(
@@ -153,11 +221,16 @@ async def minimize_impact(
     response_description="Return a list of configurations",
 )
 async def maximize_impact(
-    requirement_file_id: Annotated[str, Path(pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$")],
+    requirement_file_id: Annotated[
+        str,
+        Path(
+            pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
+        ),
+    ],
     limit: Annotated[int, Query(ge=1)],
     max_level: Annotated[int, Query(ge=-1)],
     package_manager: PackageManager,
-    agregator: Agregator
+    agregator: Agregator,
 ) -> JSONResponse:
     """
     Return a list of configurations of a file ordered with the maximun posible impact:
@@ -171,18 +244,31 @@ async def maximize_impact(
     graph_data = await read_data_for_smt_transform(
         requirement_file_id, package_manager, max_level
     )
+    smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, package_manager, agregator)
-        smt_transform.transform()
-        smt_model = smt_transform.destination_model
+        smt_text = await read_smt_text(smt_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
+            "moment"
+        ].replace(tzinfo=UTC):
+            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
+            smt_transform.convert(smt_text["text"])
+        else:
+            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
+            model_text = smt_transform.transform()
+            await replace_smt_text(smt_id, model_text)
         operation = MaximizeImpact(limit)
-        operation.execute(smt_model)
+        operation.execute(smt_transform.destination_model)
         result = await read_releases_by_counts(operation.get_result(), package_manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result})
         )
     else:
-        return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({"message": "The requirement file don't have dependencies"}))
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=json_encoder(
+                {"message": "The requirement file don't have dependencies"}
+            ),
+        )
 
 
 @router.post(
@@ -191,13 +277,18 @@ async def maximize_impact(
     response_description="Return a list of configurations",
 )
 async def filter_configs(
-    requirement_file_id: Annotated[str, Path(pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$")],
+    requirement_file_id: Annotated[
+        str,
+        Path(
+            pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
+        ),
+    ],
     max_threshold: Annotated[float, Query(ge=0, le=10)],
     min_threshold: Annotated[float, Query(ge=0, le=10)],
     limit: Annotated[int, Query(ge=1)],
     max_level: Annotated[int, Query(ge=-1)],
     package_manager: PackageManager,
-    agregator: Agregator
+    agregator: Agregator,
 ) -> JSONResponse:
     """
     Return a list of configurations of a file between a max and min impact:
@@ -213,15 +304,28 @@ async def filter_configs(
     graph_data = await read_data_for_smt_transform(
         requirement_file_id, package_manager, max_level
     )
+    smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, package_manager, agregator)
-        smt_transform.transform()
-        smt_model = smt_transform.destination_model
+        smt_text = await read_smt_text(smt_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
+            "moment"
+        ].replace(tzinfo=UTC):
+            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
+            smt_transform.convert(smt_text["text"])
+        else:
+            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
+            model_text = smt_transform.transform()
+            await replace_smt_text(smt_id, model_text)
         operation = FilterConfigs(max_threshold, min_threshold, limit)
-        operation.execute(smt_model)
+        operation.execute(smt_transform.destination_model)
         result = await read_releases_by_counts(operation.get_result(), package_manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result})
         )
     else:
-        return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({"message": "The requirement file don't have dependencies"}))
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=json_encoder(
+                {"message": "The requirement file don't have dependencies"}
+            ),
+        )

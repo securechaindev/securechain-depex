@@ -17,7 +17,7 @@ new_req_file_id = ""
 async def npm_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
     global new_req_file_id
     new_req_file_id = await create_requirement_file(
-        {"name": name, "manager": "NPM"}, repository_id, "NPM"
+        {"name": name, "manager": "NPM", "moment": datetime.now()}, repository_id, "NPM"
     )
     await npm_generate_packages(file["dependencies"], new_req_file_id)
 

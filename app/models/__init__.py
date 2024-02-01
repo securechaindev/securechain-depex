@@ -7,4 +7,11 @@ from .models import (
     VersionModel,
 )
 
-__all__ = ["Agregator", "PackageManager", "RepositoryModel", "RequirementFile", "PackageModel", "VersionModel"]
+__all__ = [
+    "Agregator",
+    "PackageManager",
+    "RepositoryModel",
+    "RequirementFile",
+    "PackageModel",
+    "VersionModel",
+]

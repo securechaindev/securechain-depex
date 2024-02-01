@@ -25,7 +25,10 @@ router = APIRouter()
     response_description="Return a test report",
 )
 async def create_test_report(
-    owner: str, name: str, configuration: dict[str, str | int | float], package_manager: PackageManager
+    owner: str,
+    name: str,
+    configuration: dict[str, str | int | float],
+    package_manager: PackageManager,
 ) -> JSONResponse:
     """
     Return a test report by a given repository id and a configuration:
@@ -33,9 +36,7 @@ async def create_test_report(
     - **repository_id**: the id of a repository
     - **configuration**: a valid configuration for a file of the repository
     """
-    carpeta_descarga = await download_repository(
-        owner, name
-    )
+    carpeta_descarga = await download_repository(owner, name)
     paths = await get_files_path("repositories/" + name)
     raw_report = await get_raw_report(configuration, package_manager)
     test_report: dict[str, list[Any]] = {"tests": []}

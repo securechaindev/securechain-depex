@@ -37,6 +37,8 @@ def get_collection(collection_name: str) -> AsyncIOMotorCollection:
     match collection_name:
         case "env_variables":
             return client.depex.get_collection("env_variables")
+        case "smt_text":
+            return client.depex.get_collection("smt_text")
         case "cves":
             return client.nvd.get_collection("cves")
         case "cpe_matchs":

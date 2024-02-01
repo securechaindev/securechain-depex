@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Any
 
-from pytz import timezone
-
 from .dbs.databases import get_graph_db_session
 
 
@@ -153,7 +151,7 @@ async def read_data_for_smt_transform(
                     weighted_mean: endnode(relationship).weighted_mean
 
             } end as have, rf
-    return {name: collect(rf.name)[0], requires: apoc.coll.sortMaps(collect(requires), "parent_count"), have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")}
+    return {name: collect(rf.name)[0], moment: collect(rf.moment)[0], requires: apoc.coll.sortMaps(collect(requires), "parent_count"), have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")}
     """
     session = get_graph_db_session(package_manager)
     result = await session.run(
@@ -182,5 +180,4 @@ async def update_repository_moment(repository_id: str, package_manager: str) -> 
     set r.moment = $moment
     """
     session = get_graph_db_session(package_manager)
-    moment = datetime.now(timezone("Europe/Madrid"))
-    await session.run(query, repository_id=repository_id, moment=moment)
+    await session.run(query, repository_id=repository_id, moment=datetime.now())

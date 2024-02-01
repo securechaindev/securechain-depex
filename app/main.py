@@ -21,6 +21,7 @@ A backend for dependency graph building, atribution of vulnerabilities and reaso
 over it.
 """
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> None:
     while True:

@@ -20,7 +20,7 @@ new_req_file_id = ""
 async def mvn_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
     global new_req_file_id
     new_req_file_id = await create_requirement_file(
-        {"name": name, "manager": "MVN"}, repository_id, "MVN"
+        {"name": name, "manager": "MVN", "moment": datetime.now()}, repository_id, "MVN"
     )
     await mvn_generate_packages(file["dependencies"], new_req_file_id)
 
