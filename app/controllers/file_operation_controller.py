@@ -7,10 +7,10 @@ from flamapy.metamodels.smt_metamodel.operations import (
     NumberOfProducts,
     ValidModel,
 )
+from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from pytz import UTC
 from typing_extensions import Annotated
 
-from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from app.models import Agregator, PackageManager
 from app.services import (
     read_data_for_smt_transform,
