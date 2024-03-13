@@ -1,7 +1,7 @@
 from app.utils import get_first_position, parse_pip_constraints
 
 
-async def analyze_setup_py(
+async def analyze_requirements_txt(
     requirement_files: dict[str, dict[str, dict | str]],
     repository_path: str,
     requirement_file_name: str,
@@ -10,7 +10,8 @@ async def analyze_setup_py(
         with open(repository_path + requirement_file_name) as file:
             dependencies = []
             for line in file.readlines():
-                dependencies.append(line.strip().replace("\n", ""))
+                if "#" not in line:
+                    dependencies.append(line.strip().replace("\n", ""))
     except Exception as _:
         return requirement_files
     requirement_file_name = requirement_file_name.replace("/master/", "").replace(
@@ -49,6 +50,6 @@ async def analyze_setup_py(
         )
         pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
         requirement_files[requirement_file_name]["dependencies"].update(
-            {dependency[:pos]: await parse_pip_constraints(dependency[pos:])}
+            {dependency[:pos].lower(): await parse_pip_constraints(dependency[pos:])}
         )
     return requirement_files

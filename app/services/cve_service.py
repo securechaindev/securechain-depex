@@ -14,7 +14,7 @@ async def read_cve_impact_by_id(cve_id: str) -> dict[str, list[str]]:
                     "$metrics.cvssMetricV31.impactScore",
                     "$metrics.cvssMetricV30.impactScore",
                     "$metrics.cvssMetricV2.impactScore",
-                    0.0,
+                    .0,
                 ]
             },
         },

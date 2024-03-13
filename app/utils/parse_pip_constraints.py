@@ -30,6 +30,7 @@ async def clean_pip_constraints(raw_constraints: list[str]) -> str:
         for index, char in enumerate(raw_constraint):
             if char.isdigit():
                 pos = index
+                break
         operator = raw_constraint[:pos]
         version = raw_constraint[pos:]
         if "==" in operator and "*" in version:

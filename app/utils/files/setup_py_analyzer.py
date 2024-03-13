@@ -10,13 +10,15 @@ async def analyze_setup_py(
 ) -> dict[str, dict[str, dict | str]]:
     try:
         with open(repository_path + requirement_file_name) as f:
-            matches: list[str] = findall(r"install_requires=\[([^\]]+)\]", f.read())[
-                0
-            ].split("\n")[1:-1]
+            matches: list[str] = findall(r"(?:install_requires|requires)\s*=\s*\[([^\]]+)\]", f.read())
+            dependencies = []
             if matches:
-                dependencies = [
-                    dep.strip().replace('"', "").replace("'", "") for dep in matches
-                ]
+                matches = matches[0].split("\n")[1:-1]
+                for dep in matches:
+                    if "#" not in dep:
+                        dependencies.append(
+                            dep.strip().replace('"', "").replace("'", "")
+                        )
     except Exception as _:
         return requirement_files
     requirement_file_name = requirement_file_name.replace("/master/", "").replace(
@@ -55,6 +57,6 @@ async def analyze_setup_py(
         )
         pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
         requirement_files[requirement_file_name]["dependencies"].update(
-            {dependency[:pos]: await parse_pip_constraints(dependency[pos:])}
+            {dependency[:pos].lower(): await parse_pip_constraints(dependency[pos:])}
         )
     return requirement_files

@@ -21,15 +21,17 @@ async def attribute_cves(
         for cve in cpe_product["cves"]:
             if not any(key in cve for key in version_keys):
                 if "*" in cve["version"] or "-" in cve["version"]:
-                    version["cves"].append(cve["id"])
-                    impacts.append(cve["impact_score"])
+                    if cve["id"] not in version["cves"]:
+                        version["cves"].append(cve["id"])
+                        impacts.append(cve["impact_score"])
                 else:
                     try:
                         if version_type(version["name"]) == version_type(
                             cve["version"]
                         ):
-                            version["cves"].append(cve["id"])
-                            impacts.append(cve["impact_score"])
+                            if cve["id"] not in version["cves"]:
+                                version["cves"].append(cve["id"])
+                                impacts.append(cve["impact_score"])
                     except Exception as _:
                         continue
             else:
@@ -54,8 +56,9 @@ async def attribute_cves(
                 except Exception as _:
                     continue
                 if check:
-                    version["cves"].append(cve["id"])
-                    impacts.append(cve["impact_score"])
+                    if cve["id"] not in version["cves"]:
+                        version["cves"].append(cve["id"])
+                        impacts.append(cve["impact_score"])
     version["mean"] = await mean(impacts)
     version["weighted_mean"] = await weighted_mean(impacts)
     return version

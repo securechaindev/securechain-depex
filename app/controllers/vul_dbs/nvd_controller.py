@@ -171,3 +171,6 @@ async def get_products(cve: dict[str, Any]) -> None:
                         await update_cpe_products(
                             cpe_match["criteria"].split(":")[4], cve_
                         )
+                        await update_cpe_products(
+                            cpe_match["criteria"].split(":")[3], cve_
+                        )

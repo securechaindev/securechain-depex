@@ -3,8 +3,9 @@ from os import makedirs, system
 from os.path import exists, isdir
 from re import findall, search
 from typing import Any
+from typing_extensions import Annotated
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Path
 from fastapi.responses import JSONResponse
 from git import GitCommandError, Repo
 
@@ -18,41 +19,40 @@ from app.utils import json_encoder
 
 router = APIRouter()
 
-
 @router.post(
-    "/test_report/{repository_id}",
+    "/test_report/{owner}/{name}",
     summary="Create a test report by repository id and configuration",
     response_description="Return a test report",
 )
 async def create_test_report(
-    owner: str,
-    name: str,
+    owner: Annotated[str, Path(min_length=1)],
+    name: Annotated[str, Path(min_length=1)],
     configuration: dict[str, str | int | float],
     package_manager: PackageManager,
 ) -> JSONResponse:
     """
-    Return a test report by a given repository id and a configuration:
+    Return a test report by a given owner, name and a configuration of a repository:
 
-    - **repository_id**: the id of a repository
+    - **owner**: the owner of a repository
+    - **name**: the name of a repository
     - **configuration**: a valid configuration for a file of the repository
     """
     carpeta_descarga = await download_repository(owner, name)
-    paths = await get_files_path("repositories/" + name)
+    paths = await get_files_path(carpeta_descarga)
     raw_report = await get_raw_report(configuration, package_manager)
     test_report: dict[str, list[Any]] = {"tests": []}
     number = 0
     for dependency in raw_report:
-        if dependency["impact"] != 0:
-            for cve in dependency["cves"]:
-                if cve["exploits"]:
-                    for exploit in cve["exploits"]:
-                        tests, number = await create_tests(
-                            number, paths, dependency, cve, exploit["id"]
-                        )
-                        test_report["tests"].extend(tests)
-                else:
-                    tests, number = await create_tests(number, paths, dependency, cve)
+        for cve in dependency["cves"]:
+            if cve["exploits"]:
+                for exploit in cve["exploits"]:
+                    tests, number = await create_tests(
+                        number, paths, dependency, cve, exploit
+                    )
                     test_report["tests"].extend(tests)
+            else:
+                tests, number = await create_tests(number, paths, dependency, cve)
+                test_report["tests"].extend(tests)
     system("rm -rf " + carpeta_descarga)
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder(test_report)
@@ -63,6 +63,8 @@ async def create_tests(
     number: int, paths: list[str], dependency, cve, exploit_id: str | None = None
 ) -> tuple[list[Any], int]:
     tests = []
+    if dependency["name"] == "pycrypto":
+        dependency["name"] = "Crypto"
     for _path in paths:
         if await is_imported(_path, dependency["name"]):
             number += 1
@@ -71,7 +73,7 @@ async def create_tests(
                     f"test{number}": {
                         "dependency": dependency["name"],
                         "version": dependency["version"],
-                        "file_path": _path,
+                        "file_path": _path.replace("repositories/", ""),
                         "dep_artifacts": await get_used_artifacts(
                             _path, dependency["name"]
                         ),
@@ -100,28 +102,32 @@ async def get_raw_report(
             cve_ids = await read_cve_ids_by_version_and_package(
                 version, dependency, package_manager
             )
-            for cve_id in cve_ids:
-                impact = await read_cve_impact_by_id(cve_id)
-                exploits = await read_exploits_by_cve_id(cve_id)
-                cves.append(
+            if cve_ids:
+                for cve_id in cve_ids:
+                    impact = await read_cve_impact_by_id(cve_id)
+                    if impact is None:
+                        impact = {"impact_score": [0.]}
+                    exploits = await read_exploits_by_cve_id(cve_id)
+                    cves.append(
+                        {
+                            "id": cve_id,
+                            "vuln_impact": impact["impact_score"][0],
+                            "exploits": exploits,
+                        }
+                    )
+                raw_report.append(
                     {
-                        "id": cve_id,
-                        "vuln_impact": impact["impact_score"][0],
-                        "exploits": exploits,
+                        "name": dependency,
+                        "version": version,
+                        "cves": cves,
                     }
                 )
-            raw_report.append(
-                {
-                    "name": dependency,
-                    "version": version,
-                    "cves": cves,
-                }
-            )
     return raw_report
 
 
 async def download_repository(owner: str, name: str) -> str:
     carpeta_descarga = "repositories/" + name
+    system("rm -rf " + carpeta_descarga)
     branches = ["main", "master"]
     makedirs(carpeta_descarga)
     for branch in branches:
@@ -139,10 +145,13 @@ async def download_repository(owner: str, name: str) -> str:
 
 async def is_imported(file_path: str, dependency: str) -> Any:
     with open(file_path, encoding="utf-8") as file:
-        code = file.read()
-        return search(rf"from\s+{dependency}", code) or search(
-            rf"import\s+{dependency}", code
-        )
+        try:
+            code = file.read()
+            return search(rf"from\s+{dependency}", code) or search(
+                rf"import\s+{dependency}", code
+            )
+        except:
+            return False
 
 
 async def get_files_path(directory_path: str) -> list[str]:
@@ -162,15 +171,15 @@ async def get_used_artifacts(filename: str, dependency: str) -> dict[str, list[i
         code = file.read()
         current_line = 1
         imported_artifacts = []
-        for linea in code.split("\n"):
-            if search(rf"from\s+{dependency}", linea):
+        for line in code.split("\n"):
+            if search(rf"from\s+{dependency}", line):
                 line_imports = findall(
                     rf"from\s+{dependency}\.[^\(\)\s:]+\s+import\s+\w+(?:\s*,\s*\w+)*",
-                    linea,
+                    line,
                 )
                 line_imports.extend(
                     findall(
-                        rf"from\s+{dependency}\s+import\s+\w+(?:\s*,\s*\w+)*", linea
+                        rf"from\s+{dependency}\s+import\s+\w+(?:\s*,\s*\w+)*", line
                     )
                 )
                 for line_import in line_imports:
@@ -180,12 +189,12 @@ async def get_used_artifacts(filename: str, dependency: str) -> dict[str, list[i
                         used_artifacts.setdefault(artifact, []).append(current_line)
                 current_line += 1
                 continue
-            if search(rf"{dependency}\.[^\(\)\s:]+", linea):
-                for artifact in findall(rf"{dependency}\.[^\(\)\s:]+", linea):
+            if search(rf"{dependency}\.[^\(\)\s:]+", line):
+                for artifact in findall(rf"{dependency}\.[^\(\)\s:]+", line):
                     artifact = artifact.replace(f"{dependency}.", "")
                     used_artifacts.setdefault(artifact, []).append(current_line)
             for imported_artifact in imported_artifacts:
-                if search(rf"{imported_artifact}[.(]", linea):
+                if search(rf"{imported_artifact}[.(]", line):
                     used_artifacts[imported_artifact].append(current_line)
             current_line += 1
         return used_artifacts
