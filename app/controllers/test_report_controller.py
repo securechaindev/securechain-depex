@@ -3,11 +3,11 @@ from os import makedirs, system
 from os.path import exists, isdir
 from re import findall, search
 from typing import Any
-from typing_extensions import Annotated
 
-from fastapi import APIRouter, status, Path
+from fastapi import APIRouter, Path, status
 from fastapi.responses import JSONResponse
 from git import GitCommandError, Repo
+from typing_extensions import Annotated
 
 from app.models import PackageManager
 from app.services import (
@@ -18,6 +18,7 @@ from app.services import (
 from app.utils import json_encoder
 
 router = APIRouter()
+
 
 @router.post(
     "/test_report/{owner}/{name}",
@@ -106,7 +107,7 @@ async def get_raw_report(
                 for cve_id in cve_ids:
                     impact = await read_cve_impact_by_id(cve_id)
                     if impact is None:
-                        impact = {"impact_score": [0.]}
+                        impact = {"impact_score": [0.0]}
                     exploits = await read_exploits_by_cve_id(cve_id)
                     cves.append(
                         {
@@ -150,7 +151,7 @@ async def is_imported(file_path: str, dependency: str) -> Any:
             return search(rf"from\s+{dependency}", code) or search(
                 rf"import\s+{dependency}", code
             )
-        except:
+        except Exception as _:
             return False
 
 
@@ -178,9 +179,7 @@ async def get_used_artifacts(filename: str, dependency: str) -> dict[str, list[i
                     line,
                 )
                 line_imports.extend(
-                    findall(
-                        rf"from\s+{dependency}\s+import\s+\w+(?:\s*,\s*\w+)*", line
-                    )
+                    findall(rf"from\s+{dependency}\s+import\s+\w+(?:\s*,\s*\w+)*", line)
                 )
                 for line_import in line_imports:
                     artifacs = line_import.split("import")[1].strip().split(",")

@@ -10,7 +10,9 @@ async def analyze_setup_py(
 ) -> dict[str, dict[str, dict | str]]:
     try:
         with open(repository_path + requirement_file_name) as f:
-            matches: list[str] = findall(r"(?:install_requires|requires)\s*=\s*\[([^\]]+)\]", f.read())
+            matches: list[str] = findall(
+                r"(?:install_requires|requires)\s*=\s*\[([^\]]+)\]", f.read()
+            )
             dependencies = []
             if matches:
                 matches = matches[0].split("\n")[1:-1]

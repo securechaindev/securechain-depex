@@ -49,6 +49,10 @@ async def analyze_setup_cfg(
             )
             pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
             requirement_files[requirement_file_name]["dependencies"].update(
-                {dependency[:pos].lower(): await parse_pip_constraints(dependency[pos:])}
+                {
+                    dependency[:pos].lower(): await parse_pip_constraints(
+                        dependency[pos:]
+                    )
+                }
             )
     return requirement_files

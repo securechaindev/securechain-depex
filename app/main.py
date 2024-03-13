@@ -1,9 +1,7 @@
-from typing import Any
-
 from contextlib import asynccontextmanager
 from time import sleep
+from typing import Any
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import (
     http_exception_handler,
@@ -14,7 +12,6 @@ from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
-from app.controllers import exploit_db_update, nvd_update
 from app.router import api_router
 from app.services import create_indexes
 
