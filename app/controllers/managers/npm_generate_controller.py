@@ -58,8 +58,6 @@ async def npm_create_package(
             await attribute_cves(version, cpe_product, "NPM")
             for version in all_versions
         ]
-        if package_name == "strip-ansi":
-            print(parent_version_name)
         new_versions = await create_package_and_versions(
             {"name": package_name, "moment": datetime.now()},
             versions,

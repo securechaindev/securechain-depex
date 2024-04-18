@@ -11,3 +11,4 @@ univers==30.11.0
 xmltodict==0.13.0
 GitPython==3.1.40
 toml==0.10.2
+regex==2024.4.16

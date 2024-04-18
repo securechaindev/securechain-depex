@@ -1,7 +1,7 @@
 from glob import glob
 from os import makedirs, system
 from os.path import exists, isdir
-from re import findall, search
+from regex import findall, search
 from typing import Any
 
 from fastapi import APIRouter, Path, status
@@ -12,7 +12,7 @@ from typing_extensions import Annotated
 from app.models import PackageManager
 from app.services import (
     read_cve_ids_by_version_and_package,
-    read_cve_impact_by_id,
+    read_cve_by_id,
     read_exploits_by_cve_id,
 )
 from app.utils import json_encoder
@@ -67,7 +67,8 @@ async def create_tests(
     if dependency["name"] == "pycrypto":
         dependency["name"] = "Crypto"
     for _path in paths:
-        if await is_imported(_path, dependency["name"]):
+        dep_artifacts = await get_dep_artifacts(_path, dependency["name"], cve["description"])
+        if await is_imported(_path, dependency["name"]) and dep_artifacts:
             number += 1
             tests.append(
                 {
@@ -75,9 +76,7 @@ async def create_tests(
                         "dependency": dependency["name"],
                         "version": dependency["version"],
                         "file_path": _path.replace("repositories/", ""),
-                        "dep_artifacts": await get_used_artifacts(
-                            _path, dependency["name"]
-                        ),
+                        "dep_artifacts": dep_artifacts,
                         "vulnerability": cve["id"],
                         "vuln_impact": cve["vuln_impact"],
                         "exploit": "https://www.exploit-db.com/exploits/" + exploit_id
@@ -105,14 +104,13 @@ async def get_raw_report(
             )
             if cve_ids:
                 for cve_id in cve_ids:
-                    impact = await read_cve_impact_by_id(cve_id)
-                    if impact is None:
-                        impact = {"impact_score": [0.0]}
+                    cve = await read_cve_by_id(cve_id)
                     exploits = await read_exploits_by_cve_id(cve_id)
                     cves.append(
                         {
                             "id": cve_id,
-                            "vuln_impact": impact["impact_score"][0],
+                            "description": cve["description"],
+                            "vuln_impact": cve["vuln_impact"][0],
                             "exploits": exploits,
                         }
                     )
@@ -148,9 +146,7 @@ async def is_imported(file_path: str, dependency: str) -> Any:
     with open(file_path, encoding="utf-8") as file:
         try:
             code = file.read()
-            return search(rf"from\s+{dependency}", code) or search(
-                rf"import\s+{dependency}", code
-            )
+            return search(rf"(from|import)\s+{dependency}", code)
         except Exception as _:
             return False
 
@@ -166,34 +162,39 @@ async def get_files_path(directory_path: str) -> list[str]:
     return files
 
 
-async def get_used_artifacts(filename: str, dependency: str) -> dict[str, list[int]]:
+async def get_child_artifacts(parent: str, code: str, cve_description: str) -> dict[str, list[int]]:
+    used_artifacts: dict[str, list[int]] = {}
+    for _ in findall(rf"{parent}\.[^\(\)\s:]+", code):
+        for artifact in _.split(".")[1:]:
+            if artifact.lower() in cve_description.lower():
+                used_artifacts.setdefault(artifact.strip(), [])
+    for _ in findall(rf"from\s+{parent}\.[^\(\)\s:]+\s+import\s+\w+(?:\s*,\s*\w+)*", code):
+        for artifact in _.split("import")[1].split(","):
+            if artifact.lower() in cve_description.lower():
+                used_artifacts.setdefault(artifact.strip(), [])
+    for _ in findall(rf"from\s+{parent}\s+import\s+\w+(?:\s*,\s*\w+)*", code):
+        for artifact in _.split("import")[1].split(","):
+            if artifact.lower() in cve_description.lower():
+                used_artifacts.setdefault(artifact.strip(), [])
+    aux = {}
+    for artifact in used_artifacts:
+        aux.update(await get_child_artifacts(artifact, code, cve_description))
+    used_artifacts.update(aux)
+    return used_artifacts
+
+
+async def get_dep_artifacts(filename: str, dependency: str, cve_description: str) -> dict[str, list[int]]:
     with open(filename, encoding="utf-8") as file:
-        used_artifacts: dict[str, list[int]] = {}
         code = file.read()
         current_line = 1
-        imported_artifacts = []
+        used_artifacts = await get_child_artifacts(dependency, code, cve_description)
         for line in code.split("\n"):
-            if search(rf"from\s+{dependency}", line):
-                line_imports = findall(
-                    rf"from\s+{dependency}\.[^\(\)\s:]+\s+import\s+\w+(?:\s*,\s*\w+)*",
-                    line,
-                )
-                line_imports.extend(
-                    findall(rf"from\s+{dependency}\s+import\s+\w+(?:\s*,\s*\w+)*", line)
-                )
-                for line_import in line_imports:
-                    artifacs = line_import.split("import")[1].strip().split(",")
-                    imported_artifacts.extend(artifacs)
-                    for artifact in artifacs:
+            if "import" not in line:
+                for artifact in used_artifacts:
+                    if artifact in line:
                         used_artifacts.setdefault(artifact, []).append(current_line)
-                current_line += 1
-                continue
-            if search(rf"{dependency}\.[^\(\)\s:]+", line):
-                for artifact in findall(rf"{dependency}\.[^\(\)\s:]+", line):
-                    artifact = artifact.replace(f"{dependency}.", "")
-                    used_artifacts.setdefault(artifact, []).append(current_line)
-            for imported_artifact in imported_artifacts:
-                if search(rf"{imported_artifact}[.(]", line):
-                    used_artifacts[imported_artifact].append(current_line)
             current_line += 1
+        for artifact in list(used_artifacts.keys()):
+            if not used_artifacts[artifact]:
+                del used_artifacts[artifact]
         return used_artifacts

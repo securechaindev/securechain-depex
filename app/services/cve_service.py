@@ -3,13 +3,14 @@ from typing import Any
 from .dbs.databases import get_collection
 
 
-async def read_cve_impact_by_id(cve_id: str) -> dict[str, list[str]]:
+async def read_cve_by_id(cve_id: str) -> dict[str, list[str]]:
     cves_collection = get_collection("cves")
-    return await cves_collection.find_one(
+    result = await cves_collection.find_one(
         {"id": cve_id},
         {
             "_id": 0,
-            "impact_score": {
+            "description": {"$first": "$descriptions.value"},
+            "vuln_impact": {
                 "$ifNull": [
                     "$metrics.cvssMetricV31.impactScore",
                     "$metrics.cvssMetricV30.impactScore",
@@ -19,6 +20,7 @@ async def read_cve_impact_by_id(cve_id: str) -> dict[str, list[str]]:
             },
         },
     )
+    return result if result is not None else {"vuln_impact": [0.0], "description": {"value": ""}}
 
 
 async def read_cpe_product_by_package_name(package_name: str) -> dict[str, Any]:

@@ -45,7 +45,6 @@ async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str
             requirement_files = await analyze_requirements_txt(
                 requirement_files, repository_path, requirement_file_name
             )
-            print(requirement_files)
     system("rm -rf " + repository_path)
     return requirement_files
 

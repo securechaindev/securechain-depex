@@ -1,7 +1,7 @@
 from .bulk_write_service import bulk_write_actions
 from .cve_service import (
     read_cpe_product_by_package_name,
-    read_cve_impact_by_id,
+    read_cve_by_id,
     update_cpe_products,
 )
 from .dbs.indexes import create_indexes
@@ -49,7 +49,7 @@ from .version_service import (
 __all__ = [
     "bulk_write_actions",
     "create_indexes",
-    "read_cve_impact_by_id",
+    "read_cve_by_id",
     "update_cpe_products",
     "read_cpe_product_by_package_name",
     "read_exploits_by_cve_id",
