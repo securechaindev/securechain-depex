@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   backend:
     container_name: depex_backend
