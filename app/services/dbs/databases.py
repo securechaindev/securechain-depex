@@ -36,16 +36,16 @@ def get_collection(collection_name: str) -> AsyncIOMotorCollection:
     client: AsyncIOMotorClient = AsyncIOMotorClient(settings.VULN_DB_URI)
     match collection_name:
         case "env_variables":
-            return client.depex.get_collection("env_variables")
+            return client.depex.get_collection(collection_name)
         case "smt_text":
-            return client.depex.get_collection("smt_text")
+            return client.depex.get_collection(collection_name)
         case "cves":
-            return client.nvd.get_collection("cves")
+            return client.nvd.get_collection(collection_name)
         case "cpe_matchs":
-            return client.nvd.get_collection("cpe_matchs")
+            return client.nvd.get_collection(collection_name)
         case "cpes":
-            return client.nvd.get_collection("cpes")
+            return client.nvd.get_collection(collection_name)
         case "cpe_products":
-            return client.nvd.get_collection("cpe_products")
+            return client.nvd.get_collection(collection_name)
         case "exploits":
-            return client.exploit_db.get_collection("exploits")
+            return client.exploit_db.get_collection(collection_name)

@@ -11,9 +11,11 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.router import api_router
 from app.services import create_indexes
+from app.controllers import exploit_db_update, nvd_update
 
 DESCRIPTION = """
 A backend for dependency graph building, atribution of vulnerabilities and reasoning
@@ -26,17 +28,17 @@ async def lifespan(app: FastAPI) -> Any:
     while True:
         try:
             await create_indexes()
-            # await exploit_db_update()
-            # await nvd_update()
-            # scheduler = AsyncIOScheduler()
-            # scheduler.add_job(nvd_update, "interval", seconds=7200)
-            # scheduler.add_job(exploit_db_update, "interval", seconds=86400)
-            # scheduler.start()
+            await exploit_db_update()
+            await nvd_update()
+            scheduler = AsyncIOScheduler()
+            scheduler.add_job(nvd_update, "interval", seconds=7200)
+            scheduler.add_job(exploit_db_update, "interval", seconds=86400)
+            scheduler.start()
             break
         except Exception as _:
             sleep(5)
     yield
-    # scheduler.shutdown()
+    scheduler.shutdown()
 
 
 app = FastAPI(
