@@ -28,11 +28,11 @@ async def read_repositories_moment(owner: str, name: str) -> dict[str, datetime 
     session = get_graph_db_session("PIP")
     result = await session.run(query, owner=owner, name=name)
     record = await result.single()
-    # for session in get_graph_db_session("ALL"):
-    #     result = await session.run(query, owner=owner, name=name)
-    #     record = await result.single()
-    #     if record:
-    #         break
+    for session in get_graph_db_session("ALL"):
+        result = await session.run(query, owner=owner, name=name)
+        record = await result.single()
+        if record:
+            break
     return record[0] if record else {"moment": None, "is_complete": True}
 
 

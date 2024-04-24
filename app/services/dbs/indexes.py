@@ -14,7 +14,7 @@ async def create_indexes() -> None:
     await cpes_collection.create_index("cpeNameId", unique=True)
     await cpe_products_collection.create_index("product", unique=True)
     await exploits_collection.create_index("id", unique=True)
-    await exploits_collection.create_index("cves", unique=False)
+    await exploits_collection.create_index("cvelist", unique=False)
     for session in get_graph_db_session("ALL"):
         await session.run(
             "CREATE CONSTRAINT IF NOT EXISTS FOR (p:Package) REQUIRE p.name IS UNIQUE"

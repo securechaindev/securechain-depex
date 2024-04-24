@@ -14,11 +14,8 @@ from app.services import (
     update_package_moment,
 )
 
-new_req_file_id = ""
-
 
 async def mvn_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
-    global new_req_file_id
     new_req_file_id = await create_requirement_file(
         {"name": name, "manager": "MVN", "moment": datetime.now()}, repository_id, "MVN"
     )

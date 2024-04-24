@@ -1,18 +1,18 @@
 from glob import glob
 from os import makedirs, system
 from os.path import exists, isdir
-from regex import findall, search
 from typing import Any
 
 from fastapi import APIRouter, Path, status
 from fastapi.responses import JSONResponse
 from git import GitCommandError, Repo
+from regex import findall, search
 from typing_extensions import Annotated
 
 from app.models import PackageManager
 from app.services import (
-    read_cve_ids_by_version_and_package,
     read_cve_by_id,
+    read_cve_ids_by_version_and_package,
     read_exploits_by_cve_id,
 )
 from app.utils import json_encoder
