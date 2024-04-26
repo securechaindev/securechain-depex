@@ -1,6 +1,6 @@
 import requests
 
-file = open("all_pypi_packages.txt", "r")
+file = open("all_pypi_packages.txt")
 
 for package in file.read().split("\n"):
     print(package)

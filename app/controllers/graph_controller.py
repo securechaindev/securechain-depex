@@ -27,7 +27,7 @@ from .managers.mvn_generate_controller import (
     mvn_create_package,
     mvn_create_requirement_file,
     mvn_generate_packages,
-    mvn_search_new_versions
+    mvn_search_new_versions,
 )
 from .managers.npm_generate_controller import (
     npm_create_package,
@@ -39,7 +39,7 @@ from .managers.pip_generate_controller import (
     pip_create_package,
     pip_create_requirement_file,
     pip_generate_packages,
-    pip_search_new_versions
+    pip_search_new_versions,
 )
 
 router = APIRouter()

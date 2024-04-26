@@ -1,6 +1,6 @@
+from json import JSONDecodeError
 from time import sleep
 from typing import Any
-from json import JSONDecodeError
 
 from dateutil.parser import parse
 from requests import ConnectionError, ConnectTimeout, get
