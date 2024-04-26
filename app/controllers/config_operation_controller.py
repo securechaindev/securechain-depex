@@ -53,14 +53,13 @@ async def valid_config(
     )
     smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
+        smt_transform = GraphToSMT(graph_data, package_manager, agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
         ].replace(tzinfo=UTC):
-            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
             smt_transform.convert(smt_text["text"])
         else:
-            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
         smt_model = smt_transform.destination_model
@@ -110,14 +109,13 @@ async def complete_config(
     )
     smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
+        smt_transform = GraphToSMT(graph_data, package_manager, agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
         ].replace(tzinfo=UTC):
-            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
             smt_transform.convert(smt_text["text"])
         else:
-            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
         smt_model = smt_transform.destination_model
@@ -169,14 +167,13 @@ async def config_by_impact(
     )
     smt_id = f"{requirement_file_id}-{max_level}"
     if graph_data["name"] is not None:
+        smt_transform = GraphToSMT(graph_data, package_manager, agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
         ].replace(tzinfo=UTC):
-            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
             smt_transform.convert(smt_text["text"])
         else:
-            smt_transform = GraphToSMT(graph_data, package_manager, agregator)
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
         smt_model = smt_transform.destination_model

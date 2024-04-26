@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, status
@@ -27,16 +27,19 @@ from .managers.mvn_generate_controller import (
     mvn_create_package,
     mvn_create_requirement_file,
     mvn_generate_packages,
+    mvn_search_new_versions
 )
 from .managers.npm_generate_controller import (
     npm_create_package,
     npm_create_requirement_file,
     npm_generate_packages,
+    npm_search_new_versions,
 )
 from .managers.pip_generate_controller import (
     pip_create_package,
     pip_create_requirement_file,
     pip_generate_packages,
+    pip_search_new_versions
 )
 
 router = APIRouter()
@@ -75,7 +78,8 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
     package = await read_package_by_name(package_name, "PIP")
     if not package:
         await pip_create_package(package_name)
-    # TODO: Else si el tiempo de creación/actualización ha pasado, search new versions
+    elif package["moment"] < datetime.now() - timedelta(days=10):
+        await pip_search_new_versions(package)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "Initializing graph"}),
@@ -96,6 +100,8 @@ async def init_npm_package(package_name: str) -> JSONResponse:
     package = await read_package_by_name(package_name, "NPM")
     if not package:
         await npm_create_package(package_name)
+    elif package["moment"] < datetime.now() - timedelta(days=10):
+        await npm_search_new_versions(package)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
@@ -117,6 +123,8 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     package = await read_package_by_name(artifact_id, "MVN")
     if not package:
         await mvn_create_package(group_id, artifact_id)
+    elif package["moment"] < datetime.now() - timedelta(days=10):
+        await mvn_search_new_versions(package)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),

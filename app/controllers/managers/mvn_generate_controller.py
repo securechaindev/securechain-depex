@@ -34,7 +34,7 @@ async def mvn_generate_packages(
             package["parent_version_name"] = parent_version_name
             package["constraints"] = constraints
             if package["moment"] < datetime.now() - timedelta(days=10):
-                await search_new_versions(package)
+                await mvn_search_new_versions(package)
             packages.append(package)
         else:
             await mvn_create_package(
@@ -83,7 +83,7 @@ async def mvn_extract_packages(
     await mvn_generate_packages(require_packages, version["id"], parent_artifact_id)
 
 
-async def search_new_versions(package: dict[str, Any]) -> None:
+async def mvn_search_new_versions(package: dict[str, Any]) -> None:
     no_existing_versions: list[dict[str, Any]] = []
     all_versions = await get_all_versions(
         "MVN", package_artifact_id=package["name"], package_group_id=package["group_id"]

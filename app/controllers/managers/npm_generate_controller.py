@@ -1,14 +1,17 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from app.apis import get_all_versions
 from app.controllers.cve_controller import attribute_cves
 from app.services import (
+    count_number_of_versions_by_package,
     create_package_and_versions,
     create_requirement_file,
     read_cpe_product_by_package_name,
     read_package_by_name,
+    read_versions_names_by_package,
     relate_packages,
+    update_package_moment,
 )
 
 
@@ -30,8 +33,8 @@ async def npm_generate_packages(
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
             package["constraints"] = constraints
-            # if package["moment"] < datetime.now() - timedelta(days=10):
-            #     await search_new_versions(package)
+            if package["moment"] < datetime.now() - timedelta(days=10):
+                await npm_search_new_versions(package)
             packages.append(package)
         else:
             await npm_create_package(
@@ -69,22 +72,21 @@ async def npm_create_package(
             )
 
 
-# TODO: Implementar llamada para nuevas versiones
-# async def search_new_versions(package: dict[str, Any]) -> None:
-#     no_existing_versions: list[dict[str, Any]] = []
-#     all_versions = await get_all_versions("NPM", package_name=package["name"])
-#     counter = await count_number_of_versions_by_package(package["name"], "NPM")
-#     if counter < len(all_versions):
-#         cpe_matches = await read_cpe_product_by_package_name(package["name"])
-#         actual_versions = await read_versions_names_by_package(package["name"], "NPM")
-#         for version in all_versions:
-#             if version["release"] not in actual_versions:
-#                 version["count"] = counter
-#                 new_version = await attribute_cves(
-#                     version, cpe_matches, "NPM", package["name"]
-#                 )
-#                 no_existing_versions.append(new_version)
-#                 counter += 1
-#     await update_package_moment(package["name"], "NPM")
-#     for version in no_existing_versions:
-#         await npm_extract_package(package["name"], version)
+async def npm_search_new_versions(package: dict[str, Any]) -> None:
+    no_existing_versions: dict[Any, Any] = {}
+    all_versions, all_require_packages = await get_all_versions("NPM", package_name=package["name"])
+    counter = await count_number_of_versions_by_package(package["name"], "NPM")
+    if counter < len(all_versions):
+        cpe_matches = await read_cpe_product_by_package_name(package["name"])
+        actual_versions = await read_versions_names_by_package(package["name"], "NPM")
+        for version, require_packages in zip(all_versions, all_require_packages):
+            if version["release"] not in actual_versions:
+                version["count"] = counter
+                new_version = await attribute_cves(
+                    version, cpe_matches, "NPM", package["name"]
+                )
+                no_existing_versions.update({new_version: require_packages})
+                counter += 1
+    await update_package_moment(package["name"], "NPM")
+    for version, require_packages in no_existing_versions.items():
+        await npm_generate_packages(require_packages, version["id"], package["name"])

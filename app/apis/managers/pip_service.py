@@ -66,6 +66,7 @@ async def requires_pip_packages(
                     continue
             # INFO: Eliminamos que se puedan requerir extras
             # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta los extras
+            # Ejemplo, selenium:4.1.1 -> urllib3[secure, socks] == 1.26
             if "[" in data[0]:
                 pos_1 = await get_first_position(data[0], ["["])
                 pos_2 = await get_first_position(data[0], ["]"]) + 1

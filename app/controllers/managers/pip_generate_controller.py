@@ -33,7 +33,7 @@ async def pip_generate_packages(
             package["parent_version_name"] = parent_version_name
             package["constraints"] = constraints
             if package["moment"] < datetime.now() - timedelta(days=10):
-                await search_new_versions(package)
+                await pip_search_new_versions(package)
             packages.append(package)
         else:
             await pip_create_package(
@@ -76,7 +76,7 @@ async def pip_extract_packages(
     await pip_generate_packages(require_packages, version["id"], parent_package_name)
 
 
-async def search_new_versions(package: dict[str, Any]) -> None:
+async def pip_search_new_versions(package: dict[str, Any]) -> None:
     no_existing_versions: list[dict[str, Any]] = []
     all_versions = await get_all_versions("PIP", package_name=package["name"])
     counter = await count_number_of_versions_by_package(package["name"], "PIP")
