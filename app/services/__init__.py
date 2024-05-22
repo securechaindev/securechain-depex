@@ -4,6 +4,7 @@ from .cve_service import (
     read_cve_by_id,
     update_cpe_products,
 )
+from .cwe_service import read_cwes_by_cve_id
 from .dbs.indexes import create_indexes
 from .env_variables_service import (
     read_env_variables,
@@ -53,6 +54,7 @@ __all__ = [
     "update_cpe_products",
     "read_cpe_product_by_package_name",
     "read_exploits_by_cve_id",
+    "read_cwes_by_cve_id",
     "create_package_and_versions",
     "read_package_by_name",
     "read_packages_by_requirement_file",

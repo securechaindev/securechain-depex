@@ -1,0 +1,17 @@
+{
+    "affected_component": "",
+    "affected_component_version": "",
+    "vulnerability": {
+        "@id": "",
+        "name": "",
+        "description": "",
+        "cvss": {
+            "vuln_impact": 0.0,
+            "attack_vector": ""
+        },
+        "cwes": []
+    },
+    "reachable_code": [],
+    "exploits": [],
+    "priority": 0.0
+}

@@ -12,7 +12,7 @@ async def read_cve_ids_by_version_and_package(
     session = get_graph_db_session(package_manager)
     result = await session.run(query, version=version, package_name=package_name)
     record = await result.single()
-    return record[0] if record else None
+    return record[0] if record else []
 
 
 async def read_versions_names_by_package(

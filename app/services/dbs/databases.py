@@ -47,5 +47,7 @@ def get_collection(collection_name: str) -> AsyncIOMotorCollection:
             return client.nvd.get_collection(collection_name)
         case "cpe_products":
             return client.nvd.get_collection(collection_name)
+        case "cwes":
+            return client.nvd.get_collection(collection_name)
         case "exploits":
             return client.vulners_db.get_collection(collection_name)

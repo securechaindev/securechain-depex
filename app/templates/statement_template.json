@@ -1,0 +1,15 @@
+{
+    "vulnerability": {
+        "@id": "",
+        "name": "",
+        "description": ""
+    },
+    "timestamp": "",
+    "last_updated": "",
+    "status": "Go to VAN file to find vulnerability",
+    "supplier": "",
+    "justification": "Go to VAN file to find vulnerability",
+    "status_notes": "Go to VAN file to find vulnerability",
+    "impact_statement": "Go to VAN file to find vulnerability",
+    "action_statement": "Go to VAN file to find vulnerability"
+}

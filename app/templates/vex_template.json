@@ -1,0 +1,11 @@
+{
+    "@context": "https://openvex.dev/ns/v0.2.0",
+    "@id": "https://openvex.dev/docs/example/vex-9fb3463de1b57",
+    "author": "",
+    "role": "Generate Automated VEX with Depex",
+    "timestamp": "",
+    "last_updated": "",
+    "version": 1,
+    "tooling": "",
+    "statements": []
+}

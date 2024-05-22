@@ -27,8 +27,6 @@
 
 - How to get a GitHub [API key](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
-- How to get a GitLab [API key](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
-
 - How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
 
 ### Step 2

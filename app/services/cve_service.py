@@ -3,12 +3,13 @@ from typing import Any
 from .dbs.databases import get_collection
 
 
-async def read_cve_by_id(cve_id: str) -> dict[str, list[str]]:
+async def read_cve_by_id(cve_id: str) -> dict[str, Any]:
     cves_collection = get_collection("cves")
     result = await cves_collection.find_one(
         {"id": cve_id},
         {
             "_id": 0,
+            "id": 1,
             "description": {"$first": "$descriptions.value"},
             "vuln_impact": {
                 "$ifNull": [
@@ -16,6 +17,14 @@ async def read_cve_by_id(cve_id: str) -> dict[str, list[str]]:
                     "$metrics.cvssMetricV30.impactScore",
                     "$metrics.cvssMetricV2.impactScore",
                     0.0,
+                ]
+            },
+            "attack_vector": {
+                "$ifNull": [
+                    "$metrics.cvssMetricV31.cvssData.vectorString",
+                    "$metrics.cvssMetricV30.cvssData.vectorString",
+                    "$metrics.cvssMetricV2.cvssData.vectorString",
+                    "",
                 ]
             },
         },
