@@ -19,7 +19,7 @@ services:
   pip_graph_database:
     env_file: .env
     container_name: pip_neo4j
-    image: neo4j:5.19.0
+    image: neo4j:5.20.0
     environment:
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_PIP}
       - NEO4J_PLUGINS=["apoc"]
@@ -45,7 +45,7 @@ services:
   npm_graph_database:
     env_file: .env
     container_name: npm_neo4j
-    image: neo4j:5.19.0
+    image: neo4j:5.20.0
     environment:
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_NPM}
       - NEO4J_PLUGINS=["apoc"]
@@ -71,7 +71,7 @@ services:
   mvn_graph_database:
     env_file: .env
     container_name: mvn_neo4j
-    image: neo4j:5.19.0
+    image: neo4j:5.20.0
     environment:
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_MVN}
       - NEO4J_PLUGINS=["apoc"]
@@ -97,7 +97,7 @@ services:
   vuln_database:
     env_file: .env
     container_name: mongodb
-    image: mongo:7.0.8
+    image: mongo:7.0.11
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${VULN_DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${VULN_DB_PASSWORD}
