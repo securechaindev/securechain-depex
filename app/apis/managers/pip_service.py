@@ -44,6 +44,8 @@ async def requires_pip_packages(
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)
+        except JSONDecodeError:
+            return {}
     if response:
         require_packages: dict[str, Any] = {}
         for dependency in response:

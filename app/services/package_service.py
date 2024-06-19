@@ -87,7 +87,7 @@ async def create_package_and_versions(
         versions=versions,
     )
     record = await result.single()
-    return record[0] if record else None
+    return record[0] if record else []
 
 
 async def read_package_by_name(

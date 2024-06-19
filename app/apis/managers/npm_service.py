@@ -1,3 +1,4 @@
+from json import JSONDecodeError
 from time import sleep
 from typing import Any
 
@@ -11,6 +12,8 @@ async def get_all_npm_versions(pkg_name: str) -> Any:
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)
+        except JSONDecodeError:
+            return {}
     if "versions" in response:
         versions = []
         all_require_packages = []
