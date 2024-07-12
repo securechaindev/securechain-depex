@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field, validator
@@ -20,17 +19,14 @@ class AccountExistsRequest(BaseModel):
     email: str
 
 
+class VerifyAccessTokenRequest(BaseModel):
+    access_token: str | None
+
+
 class ChangePasswordRequest(BaseModel):
     email: str
     old_password: str
     new_password: str
-
-
-class Token(BaseModel):
-    user_id: str
-    access_token: str
-    status: bool
-    moment: datetime
 
 
 class InitGraphRequest(BaseModel):

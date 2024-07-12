@@ -4,13 +4,13 @@ import PropTypes from 'prop-types'
 const AuthContext = createContext()
 
 const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('acess_token'))
+  const [token, setToken] = useState(localStorage.getItem('access_token'))
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('acess_token', token)
+      localStorage.setItem('access_token', token)
     } else {
-      localStorage.removeItem('acess_token')
+      localStorage.removeItem('access_token')
     }
   }, [token])
 

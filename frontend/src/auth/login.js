@@ -46,7 +46,7 @@ const LoginPage = () => {
       .then((r) => r.json())
       .then((r) => {
         if ('success' === r.message) {
-          localStorage.setItem('acess_token', r.access_token)
+          localStorage.setItem('access_token', r.access_token)
           localStorage.setItem('user_id', r.user_id)
           navigate('/')
           window.location.reload()

@@ -8,18 +8,18 @@ from .models import (
     InitGraphRequest,
     LoginRequest,
     MinMaxImpactRequest,
-    Token,
     User,
     ValidConfigRequest,
     ValidFileRequest,
+    VerifyAccessTokenRequest,
 )
 
 __all__ = [
     "User",
     "LoginRequest",
     "AccountExistsRequest",
+    "VerifyAccessTokenRequest",
     "ChangePasswordRequest",
-    "Token",
     "InitGraphRequest",
     "FileInfoRequest",
     "ValidFileRequest",

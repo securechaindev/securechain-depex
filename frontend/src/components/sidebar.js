@@ -6,11 +6,11 @@ import depexLogo from '../assets/depexLogo.png'
 
 const SidebarContext = createContext()
 
-export default function Sidebar({ isLoggedIn, children }) {
+export default function Sidebar({ is_logged, children }) {
   const [expanded, set_expanded] = useState(true)
   const navigate = useNavigate()
   const on_button_logout_click = () => {
-    localStorage.removeItem('acess_token')
+    localStorage.removeItem('access_token')
     localStorage.removeItem('user_id')
     navigate('/')
     window.location.reload()
@@ -30,7 +30,7 @@ export default function Sidebar({ isLoggedIn, children }) {
             <ul className='flex-1 px-3'>{children}</ul>
           </SidebarContext.Provider>
 
-          {isLoggedIn ? (
+          {is_logged ? (
             <input
               className={`bg-blue-500 hover:bg-blue-700 text-white font-bold text-xs rounded ${expanded ? 'w-36' : 'hidden'}`}
               type='button'
@@ -64,8 +64,8 @@ export default function Sidebar({ isLoggedIn, children }) {
 }
 
 Sidebar.propTypes = {
-  isLoggedIn: PropTypes.object,
-  children: PropTypes.object
+  is_logged: PropTypes.object,
+  children: PropTypes.array
 }
 
 export function SidebarItem({ icon, text, active, alert, route }) {

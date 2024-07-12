@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
 
 const HomePage = (props) => {
-  const { isLoggedIn } = props
+  const { is_logged } = props
   const navigate = useNavigate()
 
   const on_button_click = () => {
@@ -27,7 +27,7 @@ const HomePage = (props) => {
           allowFullScreen
         />
       </div>
-      {isLoggedIn ? null : (
+      {is_logged ? null : (
         <input
           className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
           type='button'
@@ -40,7 +40,7 @@ const HomePage = (props) => {
 }
 
 HomePage.propTypes = {
-  isLoggedIn: PropTypes.bool
+  is_logged: PropTypes.bool
 }
 
 export { HomePage }
