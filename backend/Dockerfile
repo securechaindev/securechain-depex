@@ -1,10 +1,10 @@
 FROM python:3.12.3
 
-WORKDIR /depex
+WORKDIR /backend
 
-COPY backend/app/ /depex/app/
-COPY /backend/requirements.txt /depex/
-COPY .env /depex/
+COPY /backend/app/ /backend/app/
+COPY /backend/requirements.txt /backend/
+COPY .env /backend/
 
 RUN pip install --upgrade pip
 

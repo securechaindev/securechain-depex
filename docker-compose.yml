@@ -1,7 +1,9 @@
 services:
   backend:
     container_name: depex_backend
-    build: .
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
     depends_on:
       pip_graph_database:
         condition: service_healthy
@@ -13,6 +15,16 @@ services:
         condition: service_started
     ports:
       - '8000:8000'
+    networks:
+      - depex
+
+  frontend:
+    container_name: depex_frontend
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    ports:
+      - '3000:3000'
     networks:
       - depex
 
