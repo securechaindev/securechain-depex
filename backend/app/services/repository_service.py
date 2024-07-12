@@ -33,27 +33,20 @@ async def read_repositories_update(owner: str, name: str) -> dict[str, datetime 
             record = await result.single()
             if record:
                 break
-    return record[0] if record else {"moment": None, "is_complete": True, "id": ""}
+    return record[0] if record else {"moment": None, "is_complete": True, "id": None}
 
 
 async def read_repositories(owner: str, name: str) -> dict[str, str]:
-    repository_ids: dict[str, str] = {}
     query = """
     match(r: Repository{owner: $owner, name: $name}) return elementid(r)
     """
-    pip_driver, npm_driver, mvn_driver= get_graph_db_driver("ALL")
-    async with pip_driver.session() as session:
-        pip_result = await session.run(query, owner=owner, name=name)
-        pip_record = await pip_result.single()
-        repository_ids.update({"PIP": pip_record[0] if pip_record else None})
-    async with npm_driver.session() as session:
-        npm_result = await session.run(query, owner=owner, name=name)
-        npm_record = await npm_result.single()
-        repository_ids.update({"NPM": npm_record[0] if npm_record else None})
-    async with mvn_driver.session() as session:
-        mvn_result = await session.run(query, owner=owner, name=name)
-        mvn_record = await mvn_result.single()
-        repository_ids.update({"MVN": mvn_record[0] if mvn_record else None})
+    repository_ids: dict[str, str] = {}
+    for package_manager in ("PIP", "MVN", "MVN"):
+        driver = get_graph_db_driver(package_manager)
+        async with driver.session() as session:
+            result = await session.run(query, owner=owner, name=name)
+            record = await result.single()
+            repository_ids.update({package_manager: record[0] if record else None})
     return repository_ids
 
 
