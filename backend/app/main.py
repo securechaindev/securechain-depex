@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from time import sleep
 from typing import Any
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import (
     http_exception_handler,
@@ -12,6 +13,7 @@ from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
+from app.controllers import nvd_update
 from app.router import api_router
 from app.services import create_indexes
 
@@ -26,21 +28,21 @@ async def lifespan(app: FastAPI) -> Any:
     while True:
         try:
             await create_indexes()
-            # await nvd_update()
-            # scheduler = AsyncIOScheduler()
-            # scheduler.add_job(nvd_update, "interval", seconds=7200)
-            # scheduler.start()
+            await nvd_update()
+            scheduler = AsyncIOScheduler()
+            scheduler.add_job(nvd_update, "interval", seconds=7200)
+            scheduler.start()
             break
         except Exception as _:
             sleep(5)
     yield
-    # scheduler.shutdown()
+    scheduler.shutdown()
 
 
 app = FastAPI(
     title="Depex",
     description=DESCRIPTION,
-    version="0.6.2",
+    version="0.7.1",
     contact={
         "name": "Antonio Germán Márquez Trujillo",
         "url": "https://github.com/GermanMT",

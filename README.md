@@ -21,27 +21,27 @@
 ## Deployment with docker
 
 ### Step 1
- Create a .env file from template.env
+ Create a .env from *template.env* file.
 
 #### Get API Keys
 
-- How to get a GitHub [API key](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+- How to get a *GitHub* [API key](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-- How to get a NVD [API key](https://nvd.nist.gov/developers/request-an-api-key)
+- How to get a [API key](https://nvd.nist.gov/developers/request-an-api-key) from the *National Vulnerability Database (NVD)*.
+
+- Modify the **Json Web Token (JWT)** secret key with your own. You can generate your own with the command **node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"**.
 
 ### Step 2
-Run command 'docker compose up --build' and seed the database with vulnerability info
+Run command 'docker compose up --build'. The vulnerability database will be loaded with the data automatically extracted from the NVD up to the date of the release being downloaded. And it will automatically update to the present time before deploying the *backend*. If you want to avoid the update and the time it takes, you can comment out the *lifespan* function in the */backend/app/main.py* file.
 
 #### Seeders
 
-- To use the API is mandatory to load the database with vulnerabilities and exploits, using the command script "seeds/vulndb_seeder.sh" on Linux systems or "seeds/vulndb_seeder.bat" on Windows systems.
-
-- You can create your graphs from scratch or load existing ones used in the experimentation of other articles or simply built and that can help in the creation of new graphs (this task can be time consuming). To do this use the script "seeds/graphdb_seeder.sh" if you are on Linux or "graphdb_seeder.bat" if you are on Windows.
+- You can create your graphs from scratch or load existing ones used in the experimentation of other articles or simply built and that can help in the creation of new graphs (this task can be time consuming). To do this use the script **seeds/graphdb_seeder.sh** if you are on Linux or **graphdb_seeder.bat** if you are on Windows.
 
 ### Step 3 
 Enter [here](http://0.0.0.0:8000/docs)
 
 #### Other tools
-1. It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass) to see what information is being indexed in vulnerability database
+1. It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass) to see what information is being indexed in vulnerability database.
    
 2. You can see the created graph built for [pip](http://0.0.0.0:7474/browser/), [npm](http://localhost:7473/browser/) and [mvn](http://localhost:7472/browser/) clicking in this names. Using the Neo4J browser interfaces.

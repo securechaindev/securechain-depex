@@ -11,8 +11,8 @@ services:
         condition: service_healthy
       mvn_graph_database:
         condition: service_healthy
-      vuln_database:
-        condition: service_started
+      vuln_database_seeder:
+        condition: service_completed_successfully
     ports:
       - '8000:8000'
     networks:
@@ -106,6 +106,20 @@ services:
       retries: 5
       start_period: 3s
 
+  vuln_database_seeder:
+    env_file: .env
+    container_name: mongodb_seeder
+    image: mongo:7.0.11
+    depends_on:
+      vuln_database:
+        condition: service_healthy
+    volumes:
+      - ./seeds:/seeds
+    command:
+      /seeds/vulndb_seeder.sh
+    networks:
+      - depex
+
   vuln_database:
     env_file: .env
     container_name: mongodb
@@ -117,6 +131,12 @@ services:
       - '27017:27017'
     networks:
       - depex
+    healthcheck:
+      test: "echo 'db.stats().ok' | mongosh --username=${VULN_DB_USER} --password=${VULN_DB_PASSWORD} --authenticationDatabase=admin mongodb/testdb"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 3s
 
 networks:
   depex:
