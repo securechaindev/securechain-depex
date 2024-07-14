@@ -64,7 +64,7 @@ export default function Sidebar({ is_logged, children }) {
 }
 
 Sidebar.propTypes = {
-  is_logged: PropTypes.object,
+  is_logged: PropTypes.bool,
   children: PropTypes.array
 }
 
