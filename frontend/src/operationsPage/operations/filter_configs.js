@@ -76,7 +76,6 @@ const FilterConfigsOperation = (props) => {
         onChange={(ev) => set_max_threshold(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
-      <label className='text-red-600'>{max_threshold_error}</label>
       <input
         value={min_threshold}
         type='number'
@@ -90,7 +89,6 @@ const FilterConfigsOperation = (props) => {
         onChange={(ev) => set_min_threshold(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
-      <label className='text-red-600'>{min_threshold_error}</label>
       <input
         value={limit}
         type='number'
@@ -103,7 +101,6 @@ const FilterConfigsOperation = (props) => {
         onChange={(ev) => set_limit(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
-      <label className='text-red-600'>{limit_error}</label>
       <input
         value={_max_level}
         type='number'
@@ -115,6 +112,9 @@ const FilterConfigsOperation = (props) => {
         onChange={(ev) => set_max_level(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
+      <label className='text-red-600'>{max_threshold_error}</label>
+      <label className='text-red-600'>{min_threshold_error}</label>
+      <label className='text-red-600'>{limit_error}</label>
       <label className='text-red-600'>{max_level_error}</label>
       <AgregatorSelect agregator={agregator} set_agregator={set_agregator} />
       <input

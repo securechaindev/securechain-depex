@@ -10,7 +10,7 @@ const ValidConfigOperation = (props) => {
   const [config, set_config] = useState('')
 
   const [max_level_error, set_max_level_error] = useState('')
-  const [configError, set_config_error] = useState('')
+  const [config_error, set_config_error] = useState('')
 
   const have_string_values_only = (obj) => {
     if (typeof obj !== 'object' || obj === null) {
@@ -77,7 +77,6 @@ const ValidConfigOperation = (props) => {
         onChange={(ev) => set_max_level(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
-      <label className='text-red-600'>{max_level_error}</label>
       <textarea
         value={text_config}
         rows='10'
@@ -89,7 +88,8 @@ const ValidConfigOperation = (props) => {
         onChange={(ev) => set_text_config(ev.target.value)}
         className='border-2'
       />
-      <label className='text-red-600'>{configError}</label>
+      <label className='text-red-600'>{max_level_error}</label>
+      <label className='text-red-600'>{config_error}</label>
       <AgregatorSelect agregator={agregator} set_agregator={set_agregator} />
       <input
         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
