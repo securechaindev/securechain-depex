@@ -45,17 +45,21 @@ const RepositoriesPage = () => {
   }
 
   useEffect(() => {
-    fetch('http://localhost:8000/repositories/' + user_id, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then((r) => r.json())
-      .then((r) => {
-        set_repositories(r)
+    const intervalId = setInterval(() => {
+      fetch('http://localhost:8000/repositories/' + user_id, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
-  }, [])
+        .then((r) => r.json())
+        .then((r) => {
+          set_repositories(r)
+        })
+    }, 10000)
+
+    return () => clearInterval(intervalId)
+  })
 
   const handle_change_page = (newPage) => {
     set_page(newPage)
