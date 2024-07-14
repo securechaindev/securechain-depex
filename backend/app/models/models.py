@@ -2,27 +2,30 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, validator
 
-from .validators import validate_max_level
+from .validators import validate_max_level, validate_password
 
-EMAIL_PATTERN = "^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$"
-PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,20}$"
+EMAIL_PATTERN = r"^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$"
 
 class User(BaseModel):
     email: str = Field(
         pattern=EMAIL_PATTERN
     )
-    password: str = Field(
-        pattern=PASSWORD_PATTERN
-    )
+    password: str = Field(...)
+
+    @validator('password')
+    def validate_password(cls, value):
+        return validate_password(value)
 
 
 class LoginRequest(BaseModel):
     email: str = Field(
         pattern=EMAIL_PATTERN
     )
-    password: str = Field(
-        pattern=PASSWORD_PATTERN
-    )
+    password: str = Field(...)
+
+    @validator('password')
+    def validate_password(cls, value):
+        return validate_password(value)
 
 
 class AccountExistsRequest(BaseModel):
@@ -39,12 +42,16 @@ class ChangePasswordRequest(BaseModel):
     email: str = Field(
         pattern=EMAIL_PATTERN
     )
-    old_password: str = Field(
-        pattern=PASSWORD_PATTERN
-    )
-    new_password: str = Field(
-        pattern=PASSWORD_PATTERN
-    )
+    old_password: str = Field(...)
+    new_password: str = Field(...)
+
+    @validator('old_password')
+    def validate_password(cls, value):
+        return validate_password(value)
+    
+    @validator('new_password')
+    def validate_password(cls, value):
+        return validate_password(value)
 
 
 class InitGraphRequest(BaseModel):
