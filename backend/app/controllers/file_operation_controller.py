@@ -29,43 +29,20 @@ from app.utils import json_encoder
 
 router = APIRouter()
 
-@router.post(
-    "/operation/file/file_info",
-    summary="Summarizes file information",
-    response_description="Return file information",
-)
+@router.post("/operation/file/file_info")
 async def file_info(
     FileInfoRequest: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
-    """
-    Summarizes file information regarding its dependencies, edges and vulnerabilities:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **max_level**: the depth of the graph to be analysed
-    - **package_manager**: package manager of the requirement file
-    """
     graph_info = await read_graph_for_info_operation(jsonable_encoder(FileInfoRequest))
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder(graph_info)
     )
 
 
-@router.post(
-    "/operation/file/valid_file",
-    summary="Validates model satisfiability",
-    response_description="Return True if valid, False if not",
-)
+@router.post("/operation/file/valid_file")
 async def valid_file(
     valid_file_request: Annotated[ValidFileRequest, Body()]
 ) -> JSONResponse:
-    """
-    Summarizes requirement file graph information regarding its dependencies,
-    edges and vulnerabilities:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **max_level**: the depth of the graph to be analysed
-    - **package_manager**: package manager of the requirement file
-    """
     print(jsonable_encoder(valid_file_request))
     graph_data = await read_data_for_smt_transform(jsonable_encoder(valid_file_request))
     smt_id = f"{valid_file_request.requirement_file_id}-{valid_file_request.max_level}"
@@ -94,23 +71,10 @@ async def valid_file(
         )
 
 
-@router.post(
-    "/operation/file/minimize_impact",
-    summary="Minimize impact of a graph",
-    response_description="Return a list of configurations",
-)
+@router.post("/operation/file/minimize_impact")
 async def minimize_impact(
     MinMaxImpactRequest: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
-    """
-    Return a list of configurations of a file ordered with the minimun posible impact:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **limit**: the number of configurations to return
-    - **max_level**: the depth of the graph to be analysed
-    - **package_manager**: package manager of the requirement file
-    - **agregator**: agregator function to build the smt model
-    """
     graph_data = await read_data_for_smt_transform(jsonable_encoder(MinMaxImpactRequest))
     smt_id = f"{MinMaxImpactRequest.requirement_file_id}-{MinMaxImpactRequest.max_level}"
     if graph_data["name"] is not None:
@@ -138,23 +102,10 @@ async def minimize_impact(
         )
 
 
-@router.post(
-    "/operation/file/maximize_impact",
-    summary="Maximize impact of a graph",
-    response_description="Return a list of configurations",
-)
+@router.post("/operation/file/maximize_impact")
 async def maximize_impact(
     MinMaxImpactRequest: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
-    """
-    Return a list of configurations of a file ordered with the maximun posible impact:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **limit**: the number of configurations to return
-    - **max_level**: the depth of the graph to be analysed
-    - **package_manager**: package manager of the requirement file
-    - **agregator**: agregator function to build the smt model
-    """
     graph_data = await read_data_for_smt_transform(jsonable_encoder(MinMaxImpactRequest))
     smt_id = f"{MinMaxImpactRequest.requirement_file_id}-{MinMaxImpactRequest.max_level}"
     if graph_data["name"] is not None:
@@ -182,25 +133,10 @@ async def maximize_impact(
         )
 
 
-@router.post(
-    "/operation/file/filter_configs",
-    summary="Filter configurations of a graph",
-    response_description="Return a list of configurations",
-)
+@router.post("/operation/file/filter_configs")
 async def filter_configs(
     FilterConfigsRequest: Annotated[FilterConfigsRequest, Body()]
 ) -> JSONResponse:
-    """
-    Return a list of configurations of a file between a max and min impact:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **max_threshold**: max impact floating threshold between 0.0 and 10.0
-    - **min_threshold**: min impact floating threshold between 0.0 and 10.0
-    - **limit**: the number of configurations to return
-    - **max_level**: the depth of the graph to be analysed
-    - **package_manager**: package manager of the requirement file
-    - **agregator**: agregator function to build the smt model
-    """
     graph_data = await read_data_for_smt_transform(jsonable_encoder(FilterConfigsRequest))
     smt_id = f"{FilterConfigsRequest.requirement_file_id}-{FilterConfigsRequest.max_level}"
     if graph_data["name"] is not None:

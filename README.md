@@ -45,7 +45,7 @@ Run command 'docker compose up --build'. The vulnerability database will be load
 - You can create your graphs from scratch or load existing ones used in the experimentation of other articles or simply built and that can help in the creation of new graphs (this task can be time consuming). To do this use the script **seeds/graphdb_seeder.sh** if you are on Linux or **graphdb_seeder.bat** if you are on Windows.
 
 ### Step 3 
-Enter [here](http://0.0.0.0:8000/docs) for the Swagger API of backend. And [here](http://0.0.0.0:3000) for the frontend Web API.
+Enter [here](http://0.0.0.0:3000) for the frontend Web API.
 
 #### Other tools
 1. It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass) to see what information is being indexed in vulnerability database.

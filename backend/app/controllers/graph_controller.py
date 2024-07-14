@@ -48,33 +48,14 @@ from .managers.pip_generate_controller import (
 router = APIRouter()
 
 
-@router.get(
-    "/repositories/{user_id}",
-    summary="Get all repositories asociated to an user",
-    response_description="Return a graph",
-)
+@router.get("/repositories/{user_id}")
 async def get_repositories(user_id: str) -> JSONResponse:
-    """
-    Get all repositories asociated to an user by the email:
-
-    - **user_email**: the email of an user
-    """
     repositories = await read_repositories_by_user_id(user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
 
 
-@router.get(
-    "/graphs/{owner}/{name}",
-    summary="Get each package manager graph by the owner and name of a repository",
-    response_description="Return a graph",
-)
+@router.get("/graphs/{owner}/{name}")
 async def get_graphs(owner: str, name: str) -> JSONResponse:
-    """
-    Get each package manager graph by the owner and name of a repository:
-
-    - **owner**: the owner of a repository
-    - **name**: the name of a repository
-    """
     # TODO: Hacer un servicio que devuelva todos los grafos por owner y name para mostrarlos en el FrontEnd
     # TODO: Añadir a Neo4J owner y name como un índice
     # TODO: Cambiar en los servicios la palabra relationships por edges
@@ -82,17 +63,8 @@ async def get_graphs(owner: str, name: str) -> JSONResponse:
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graphs))
 
 
-@router.post(
-    "/pypi/package/init",
-    summary="Init a PyPI package",
-    response_description="Initialize a PyPI package",
-)
+@router.post("/pypi/package/init")
 async def init_pypi_package(package_name: str) -> JSONResponse:
-    """
-    Starts graph extraction from a Python Package Index (PyPI) package:
-
-    - **package_name**: the name of the package as it appears in PyPI
-    """
     package = await read_package_by_name(package_name, "PIP")
     if not package:
         await pip_create_package(package_name)
@@ -104,17 +76,8 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
     )
 
 
-@router.post(
-    "/npm/package/init",
-    summary="Init a NPM package",
-    response_description="Initialize a NPM package",
-)
+@router.post("/npm/package/init")
 async def init_npm_package(package_name: str) -> JSONResponse:
-    """
-    Starts graph extraction from a Node Package Manager (NPM) package:
-
-    - **package_name**: the name of the package as it appears in NPM
-    """
     package = await read_package_by_name(package_name, "NPM")
     if not package:
         await npm_create_package(package_name)
@@ -126,18 +89,8 @@ async def init_npm_package(package_name: str) -> JSONResponse:
     )
 
 
-@router.post(
-    "/mvn/package/init",
-    summary="Init a Maven Central package",
-    response_description="Initialize a Maven Central package",
-)
+@router.post("/mvn/package/init")
 async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
-    """
-    Starts graph extraction from a Maven Central package:
-
-    - **group_id**: the group_id of the package as it appears in Maven Central
-    - **artifact_id**: the artifact_id of the package as it appears in Maven Central
-    """
     package = await read_package_by_name(artifact_id, "MVN")
     if not package:
         await mvn_create_package(group_id, artifact_id)
@@ -149,16 +102,8 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     )
 
 
-@router.post(
-    "/graph/init", summary="Init a graph", response_description="Initialize a graph"
-)
+@router.post("/graph/init")
 async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: BackgroundTasks) -> JSONResponse:
-    """
-    Starts graph extraction from a GitHub repository:
-
-    - **owner**: the owner of a repository
-    - **name**: the name of a repository
-    """
     repository = {
         "owner": InitGraphRequest.owner,
         "name": InitGraphRequest.name,

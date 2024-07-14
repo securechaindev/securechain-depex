@@ -22,23 +22,10 @@ from app.utils import json_encoder
 
 router = APIRouter()
 
-@router.post(
-    "/operation/config/valid_config",
-    summary="Validates a configuration",
-    response_description="Return True if valid, False if not",
-)
+@router.post("/operation/config/valid_config")
 async def valid_config(
     ValidConfigRequest: Annotated[ValidConfigRequest, Body()]
 ) -> JSONResponse:
-    """
-    Validates a configuration satisfiability into a graph by the constraints over dependencies:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **max_level**: the depth of the graph to be analysed
-    - **package_manager**: package manager of the requirement file
-    - **agregator**: agregator function to build the smt model
-    - **config**: configuration containing the name of the dependency and the version to be chosen
-    """
     graph_data = await read_data_for_smt_transform(jsonable_encoder(ValidConfigRequest))
     smt_id = f"{ValidConfigRequest.requirement_file_id}-{ValidConfigRequest.max_level}"
     if graph_data["name"] is not None:
@@ -67,23 +54,10 @@ async def valid_config(
         )
 
 
-@router.post(
-    "/operation/config/complete_config",
-    summary="Complete a configuration",
-    response_description="Return a configuration of versions",
-)
+@router.post("/operation/config/complete_config")
 async def complete_config(
     CompleteConfigRequest: Annotated[CompleteConfigRequest, Body()]
 ) -> JSONResponse:
-    """
-    Complete a partial configuration with the minimun posible impact:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **max_level**: the depth of the graph to be analysed
-    - **package_manager**: package manager of the requirement file
-    - **agregator**: agregator function to build the smt model
-    - **config**: partial configuration containing the name and the version of each dependency
-    """
     graph_data = await read_data_for_smt_transform(jsonable_encoder(CompleteConfigRequest))
     smt_id = f"{CompleteConfigRequest.requirement_file_id}-{CompleteConfigRequest.max_level}"
     if graph_data["name"] is not None:
@@ -114,23 +88,10 @@ async def complete_config(
         )
 
 
-@router.post(
-    "/operation/config/config_by_impact",
-    summary="Get a configuration by impact operation",
-    response_description="Return a configuration of versions",
-)
+@router.post("/operation/config/config_by_impact")
 async def config_by_impact(
     ConfigByImpactRequest: Annotated[ConfigByImpactRequest, Body()]
 ) -> JSONResponse:
-    """
-    Return a configuration witn an impact as close as possible to the given impact:
-
-    - **requirement_file_id**: the id of a requirement file
-    - **max_level**: the depth of the graph to be analysed
-    - **impact**: impact floating number between 0.0 and 10.0
-    - **package_manager**: package manager of the requirement file
-    - **agregator**: agregator function to build the smt model
-    """
     graph_data = await read_data_for_smt_transform(jsonable_encoder(ConfigByImpactRequest))
     smt_id = f"{ConfigByImpactRequest.requirement_file_id}-{ConfigByImpactRequest.max_level}"
     if graph_data["name"] is not None:
