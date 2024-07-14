@@ -53,6 +53,9 @@ const MinimiseImpactOperation = (props) => {
         min='0'
         max='10'
         placeholder='Enter the limit here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_minimise_operation()
+        }}
         onChange={(ev) => set_limit(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
@@ -62,6 +65,9 @@ const MinimiseImpactOperation = (props) => {
         type='number'
         min='-1'
         placeholder='Enter the max level here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_minimise_operation()
+        }}
         onChange={(ev) => set_max_level(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />

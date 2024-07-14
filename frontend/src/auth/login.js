@@ -83,6 +83,9 @@ const LoginPage = () => {
           value={email}
           type='text'
           placeholder='Enter your email here'
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') on_button_login_click()
+          }}
           onChange={(ev) => set_email(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
@@ -92,6 +95,9 @@ const LoginPage = () => {
           value={password}
           type={passValue.showPassword ? 'text' : 'password'}
           placeholder='Enter your password here'
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') on_button_login_click()
+          }}
           onChange={(ev) => set_password(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />

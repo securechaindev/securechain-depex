@@ -70,6 +70,9 @@ const FilterConfigsOperation = (props) => {
         max='10'
         step='0.1'
         placeholder='Enter the max threshold here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_filter_configs_operation()
+        }}
         onChange={(ev) => set_max_threshold(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
@@ -81,6 +84,9 @@ const FilterConfigsOperation = (props) => {
         max='10'
         step='0.1'
         placeholder='Enter the min threshold here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_filter_configs_operation()
+        }}
         onChange={(ev) => set_min_threshold(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
@@ -91,6 +97,9 @@ const FilterConfigsOperation = (props) => {
         min='0'
         max='10'
         placeholder='Enter the limit here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_filter_configs_operation()
+        }}
         onChange={(ev) => set_limit(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
@@ -100,6 +109,9 @@ const FilterConfigsOperation = (props) => {
         type='number'
         min='-1'
         placeholder='Enter the max level here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_filter_configs_operation()
+        }}
         onChange={(ev) => set_max_level(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />

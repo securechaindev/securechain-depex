@@ -52,6 +52,9 @@ const ConfigByImpactOperation = (props) => {
         type='number'
         min='-1'
         placeholder='Enter the max level here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_config_by_impact_operation()
+        }}
         onChange={(ev) => set_max_level(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
@@ -62,6 +65,9 @@ const ConfigByImpactOperation = (props) => {
         min='0'
         max='10'
         placeholder='Enter the impact here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_config_by_impact_operation()
+        }}
         onChange={(ev) => set_impact(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />

@@ -90,6 +90,9 @@ const SignUpPage = () => {
           value={email}
           type='text'
           placeholder='Enter your email here'
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') on_button_sign_up_click()
+          }}
           onChange={(ev) => set_email(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
@@ -98,6 +101,9 @@ const SignUpPage = () => {
         <input
           value={password}
           type={passValue.showPassword ? 'text' : 'password'}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') on_button_sign_up_click()
+          }}
           placeholder='Enter your password here'
           onChange={(ev) => set_password(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
@@ -110,6 +116,9 @@ const SignUpPage = () => {
         <input
           value={repeated_password}
           type={repeatedPassValue.showRepeatedPassword ? 'text' : 'password'}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') on_button_sign_up_click()
+          }}
           placeholder='Confirm your password here'
           onChange={(ev) => set_repeated_password(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'

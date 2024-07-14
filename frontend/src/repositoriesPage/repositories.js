@@ -164,6 +164,9 @@ const RepositoriesPage = () => {
           value={owner}
           type='text'
           placeholder='Enter the owner here'
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') on_button_init_click()
+          }}
           onChange={(ev) => set_owner(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
@@ -171,6 +174,9 @@ const RepositoriesPage = () => {
           value={name}
           type='text'
           placeholder='Enter the name here'
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') on_button_init_click()
+          }}
           onChange={(ev) => set_name(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />

@@ -71,17 +71,23 @@ const CompleteConfigOperation = (props) => {
         type='number'
         min='-1'
         placeholder='Enter the max level here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_complete_config_operation()
+        }}
         onChange={(ev) => set_max_level(ev.target.value)}
         className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
       />
       <label className='text-red-600'>{max_level_error}</label>
       <textarea
-        className='border-2'
+        value={text_config}
         rows='10'
         cols='50'
-        value={text_config}
-        onChange={(ev) => set_text_config(ev.target.value)}
         placeholder='Enter a config of versions here'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') on_button_complete_config_operation()
+        }}
+        onChange={(ev) => set_text_config(ev.target.value)}
+        className='border-2'
       />
       <label className='text-red-600'>{config_error}</label>
       <AgregatorSelect agregator={agregator} set_agregator={set_agregator} />
