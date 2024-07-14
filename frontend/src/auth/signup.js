@@ -108,7 +108,7 @@ const SignUpPage = () => {
           onChange={(ev) => set_password(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
-        <div className='absolute right-4 top-2' onClick={handleClickShowPassword}>
+        <div className='absolute end-2 top-2' onClick={handleClickShowPassword}>
           {passValue.showPassword ? <EyeIcon /> : <EyeOffIcon />}
         </div>
       </div>
@@ -123,7 +123,7 @@ const SignUpPage = () => {
           onChange={(ev) => set_repeated_password(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
         />
-        <div className='absolute right-4 top-2' onClick={handleClickShowRepeatedPassword}>
+        <div className='absolute end-2 top-2' onClick={handleClickShowRepeatedPassword}>
           {repeatedPassValue.showRepeatedPassword ? <EyeIcon /> : <EyeOffIcon />}
         </div>
       </div>

@@ -101,7 +101,7 @@ const LoginPage = () => {
           onChange={(ev) => set_password(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
-        <div className='absolute right-4 top-2' onClick={handle_click_show_password}>
+        <div className='absolute end-2 top-2' onClick={handle_click_show_password}>
           {passValue.showPassword ? <EyeIcon /> : <EyeOffIcon />}
         </div>
       </div>
