@@ -12,7 +12,7 @@ class User(BaseModel):
     )
     password: str = Field(...)
 
-    @validator('password')
+    @validator("password")
     def validate_password(cls, value):
         return validate_password(value)
 
@@ -23,7 +23,7 @@ class LoginRequest(BaseModel):
     )
     password: str = Field(...)
 
-    @validator('password')
+    @validator("password")
     def validate_password(cls, value):
         return validate_password(value)
 
@@ -45,11 +45,7 @@ class ChangePasswordRequest(BaseModel):
     old_password: str = Field(...)
     new_password: str = Field(...)
 
-    @validator('old_password')
-    def validate_password(cls, value):
-        return validate_password(value)
-    
-    @validator('new_password')
+    @validator("new_password", "old_password")
     def validate_password(cls, value):
         return validate_password(value)
 
@@ -78,7 +74,7 @@ class FileInfoRequest(BaseModel):
     max_level: int = Field(...)
     package_manager: PackageManager
 
-    @validator('max_level')
+    @validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)
 
@@ -90,7 +86,7 @@ class ValidFileRequest(BaseModel):
     max_level: int = Field(...)
     package_manager: PackageManager
 
-    @validator('max_level')
+    @validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)
 
@@ -106,7 +102,7 @@ class MinMaxImpactRequest(BaseModel):
     package_manager: PackageManager
     agregator: Agregator
 
-    @validator('max_level')
+    @validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)
 
@@ -130,7 +126,7 @@ class FilterConfigsRequest(BaseModel):
     package_manager: PackageManager
     agregator: Agregator
 
-    @validator('max_level')
+    @validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)
 
@@ -144,7 +140,7 @@ class ValidConfigRequest(BaseModel):
     agregator: Agregator
     config: dict[str, str]
 
-    @validator('max_level')
+    @validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)
 
@@ -158,7 +154,7 @@ class CompleteConfigRequest(BaseModel):
     agregator: Agregator
     config: dict[str, str]
 
-    @validator('max_level')
+    @validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)
 
@@ -175,6 +171,6 @@ class ConfigByImpactRequest(BaseModel):
     package_manager: PackageManager
     agregator: Agregator
 
-    @validator('max_level')
+    @validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)
