@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, status
+from fastapi import BackgroundTasks, APIRouter, status
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
@@ -152,7 +152,7 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
 @router.post(
     "/graph/init", summary="Init a graph", response_description="Initialize a graph"
 )
-async def init_graph(InitGraphRequest: InitGraphRequest) -> JSONResponse:
+async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     """
     Starts graph extraction from a GitHub repository:
 
@@ -174,38 +174,47 @@ async def init_graph(InitGraphRequest: InitGraphRequest) -> JSONResponse:
         last_commit_date = await get_last_commit_date_github(
             repository["owner"], repository["name"]
         )
-        if last_commit_date is not None and (
-            not last_repository_update["moment"]
-            or last_repository_update["moment"].replace(tzinfo=UTC)
-            < last_commit_date.replace(tzinfo=UTC)
-        ):
-            repository_ids = await read_repositories(
-                repository["owner"], repository["name"]
+        if not last_commit_date:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content=json_encoder({"message": "no_repo"}),
             )
-            raw_requirement_files = await repo_analyzer(
-                repository["owner"], repository["name"]
-            )
-            for package_manager, repository_id in repository_ids.items():
-                if not repository_id:
-                    repository_id = await create_repository(repository, package_manager)
-                    await extract_repository(
-                        raw_requirement_files, repository_id, package_manager
-                    )
-                else:
-                    await update_repository_is_complete(
-                        repository_id, False, package_manager
-                    )
-                    await replace_repository(
-                        raw_requirement_files, repository_id, package_manager
-                    )
-                await update_repository_is_complete(
-                    repository_id, True, package_manager
-                )
-    await update_repository_users(last_repository_update["id"], InitGraphRequest.user_id)
+        background_tasks.add_task(init_graph_background, repository, last_repository_update, last_commit_date)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "Graph initialized"}),
+        content=json_encoder({"message": "init_graph"}),
     )
+
+
+async def init_graph_background(repository: dict[str, Any], last_repository_update: dict[str, datetime | bool], last_commit_date: datetime):
+    if last_commit_date is not None and (
+        not last_repository_update["moment"]
+        or last_repository_update["moment"].replace(tzinfo=UTC)
+        < last_commit_date.replace(tzinfo=UTC)
+    ):
+        repository_ids = await read_repositories(
+            repository["owner"], repository["name"]
+        )
+        raw_requirement_files = await repo_analyzer(
+            repository["owner"], repository["name"]
+        )
+        for package_manager, repository_id in repository_ids.items():
+            if not repository_id:
+                repository_id = await create_repository(repository, package_manager)
+                await extract_repository(
+                    raw_requirement_files, repository_id, package_manager
+                )
+            else:
+                await update_repository_is_complete(
+                    repository_id, False, package_manager
+                )
+                await replace_repository(
+                    raw_requirement_files, repository_id, package_manager
+                )
+            await update_repository_is_complete(
+                repository_id, True, package_manager
+            )
+    await update_repository_users(last_repository_update["id"], InitGraphRequest.user_id)
 
 
 async def extract_repository(

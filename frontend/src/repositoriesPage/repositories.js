@@ -34,8 +34,14 @@ const RepositoriesPage = () => {
       },
       body: JSON.stringify({ owner, name, user_id })
     })
-    set_owner('')
-    set_name('')
+      .then((r) => r.json())
+      .then((r) => {
+        if ('no_repo' === r.message) {
+          window.alert('There is no repository with that owner and name')
+        }
+        set_owner('')
+        set_name('')
+      })
   }
 
   useEffect(() => {

@@ -12,7 +12,7 @@ headers_github = {
 }
 
 
-async def get_last_commit_date_github(owner: str, name: str) -> datetime:
+async def get_last_commit_date_github(owner: str, name: str) -> datetime | bool:
     query = f"""
     {{
         repository(owner: "{owner}", name: "{name}") {{
@@ -44,9 +44,12 @@ async def get_last_commit_date_github(owner: str, name: str) -> datetime:
             break
         except (ConnectTimeout, ConnectionError):
             sleep(5)
-    if "defaultBranchRef" in response["data"]["repository"]:
-        return parse(
-            response["data"]["repository"]["defaultBranchRef"]["target"]["history"][
-                "edges"
-            ][0]["node"]["author"]["date"]
-        )
+    if response["data"]["repository"]:
+        if "defaultBranchRef" in response["data"]["repository"]:
+            return parse(
+                response["data"]["repository"]["defaultBranchRef"]["target"]["history"][
+                    "edges"
+                ][0]["node"]["author"]["date"]
+            )
+    else:
+        return False
