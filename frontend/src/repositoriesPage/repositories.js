@@ -26,7 +26,23 @@ const RepositoriesPage = () => {
   const [rowsPerPage, set_rows_per_page] = React.useState(10)
   const user_id = localStorage.getItem('user_id')
 
+  const [owner_error, set_owner_error] = useState('')
+  const [name_error, set_name_error] = useState('')
+
   const on_button_init_click = () => {
+    set_owner_error('')
+    set_name_error('')
+
+    if ('' === owner) {
+      set_owner_error('Please enter a owner')
+      return
+    }
+
+    if ('' === name) {
+      set_name_error('Please enter a name')
+      return
+    }
+
     fetch('http://localhost:8000/graph/init', {
       method: 'POST',
       headers: {
@@ -181,6 +197,8 @@ const RepositoriesPage = () => {
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
       </div>
+      <label className='text-red-600'>{owner_error}</label>
+      <label className='text-red-600'>{name_error}</label>
       <input
         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
         type='button'

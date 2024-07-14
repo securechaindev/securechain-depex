@@ -8,8 +8,8 @@ import Modal from '@mui/material/Modal'
 const LoginPage = () => {
   const [email, set_email] = useState('')
   const [password, set_password] = useState('')
-  const [emailError, set_email_error] = useState('')
-  const [passwordError, set_password_error] = useState('')
+  const [email_error, set_email_error] = useState('')
+  const [password_error, set_password_error] = useState('')
 
   const navigate = useNavigate()
 
@@ -105,8 +105,8 @@ const LoginPage = () => {
           {passValue.showPassword ? <EyeIcon /> : <EyeOffIcon />}
         </div>
       </div>
-      <label className='text-red-600'>{emailError}</label>
-      <label className='text-red-600'>{passwordError}</label>
+      <label className='text-red-600'>{email_error}</label>
+      <label className='text-red-600'>{password_error}</label>
       <input
         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
         type='button'
