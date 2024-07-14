@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from jose import jwt
+from jose.exceptions import JWTError
 from jwt.exceptions import InvalidTokenError
 
 from app.config import settings
@@ -20,5 +21,5 @@ def verify_access_token(access_token: str) -> bool:
     try:
         jwt.decode(access_token, settings.JWT_SECRET_KEY, settings.ALGORITHM)
         return True
-    except InvalidTokenError:
+    except (InvalidTokenError, JWTError):
         return False
