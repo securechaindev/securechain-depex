@@ -4,19 +4,31 @@ from pydantic import BaseModel, Field, validator
 
 from .validators import validate_max_level
 
+EMAIL_PATTERN = "^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$"
+PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,20}$"
 
 class User(BaseModel):
-    email: str
-    password: str
+    email: str = Field(
+        pattern=EMAIL_PATTERN
+    )
+    password: str = Field(
+        pattern=PASSWORD_PATTERN
+    )
 
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str
+    email: str = Field(
+        pattern=EMAIL_PATTERN
+    )
+    password: str = Field(
+        pattern=PASSWORD_PATTERN
+    )
 
 
 class AccountExistsRequest(BaseModel):
-    email: str
+    email: str = Field(
+        pattern=EMAIL_PATTERN
+    )
 
 
 class VerifyAccessTokenRequest(BaseModel):
@@ -24,9 +36,15 @@ class VerifyAccessTokenRequest(BaseModel):
 
 
 class ChangePasswordRequest(BaseModel):
-    email: str
-    old_password: str
-    new_password: str
+    email: str = Field(
+        pattern=EMAIL_PATTERN
+    )
+    old_password: str = Field(
+        pattern=PASSWORD_PATTERN
+    )
+    new_password: str = Field(
+        pattern=PASSWORD_PATTERN
+    )
 
 
 class InitGraphRequest(BaseModel):
