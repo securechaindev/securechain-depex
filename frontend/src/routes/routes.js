@@ -43,7 +43,7 @@ function Routes() {
     </>
   )
 
-  const routesForSidebar = [
+  const routes_for_sidebar = [
     {
       path: '/',
       element: <HomePage is_logged={is_logged} />
@@ -72,7 +72,7 @@ function Routes() {
     }
   ]
 
-  const routesForPublic = [
+  const routes_for_public = [
     {
       path: '/',
       element: <HomePage is_logged={is_logged} />
@@ -91,7 +91,7 @@ function Routes() {
     }
   ]
 
-  const routesForAuthenticatedOnly = [
+  const routes_for_authenticated_only = [
     {
       path: '/',
       element: <ProtectedRoute />,
@@ -107,10 +107,10 @@ function Routes() {
   const router = createBrowserRouter([
     {
       element: <SidebarLayout />,
-      children: [...routesForSidebar]
+      children: [...routes_for_sidebar]
     },
-    ...routesForPublic,
-    ...routesForAuthenticatedOnly
+    ...routes_for_public,
+    ...routes_for_authenticated_only
   ])
 
   return <RouterProvider router={router} />

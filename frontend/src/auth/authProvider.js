@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 const AuthContext = createContext()
 
 const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('access_token'))
+  const [token, set_token] = useState(localStorage.getItem('access_token'))
 
   useEffect(() => {
     if (token) {
@@ -17,7 +17,7 @@ const AuthProvider = ({ children }) => {
   const contextValue = useMemo(
     () => ({
       token,
-      setToken
+      set_token
     }),
     [token]
   )

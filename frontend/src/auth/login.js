@@ -6,36 +6,36 @@ import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [emailError, setEmailError] = useState('')
-  const [passwordError, setPasswordError] = useState('')
+  const [email, set_email] = useState('')
+  const [password, set_password] = useState('')
+  const [emailError, set_email_error] = useState('')
+  const [passwordError, set_password_error] = useState('')
 
   const navigate = useNavigate()
 
-  const onButtonLoginClick = () => {
-    setEmailError('')
-    setPasswordError('')
+  const on_button_login_click = () => {
+    set_email_error('')
+    set_password_error('')
 
     if ('' === email) {
-      setEmailError('Please enter your email')
+      set_email_error('Please enter your email')
       return
     }
 
     if (!/^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-      setEmailError('Please enter a valid email')
+      set_email_error('Please enter a valid email')
       return
     }
 
     if ('' === password) {
-      setPasswordError('Please enter a password')
+      set_password_error('Please enter a password')
       return
     }
 
-    logIn()
+    log_in()
   }
 
-  const logIn = () => {
+  const log_in = () => {
     fetch('http://localhost:8000/user/login', {
       method: 'POST',
       headers: {
@@ -51,7 +51,7 @@ const LoginPage = () => {
           navigate('/')
           window.location.reload()
         } else if ('user_no_exist' === r.message) {
-          handleOpen()
+          handle_open()
         } else {
           window.alert('Wrong email or password')
         }
@@ -62,15 +62,15 @@ const LoginPage = () => {
     showPassword: false
   })
 
-  const handleClickShowPassword = () => {
+  const handle_click_show_password = () => {
     setPassValue({ ...passValue, showPassword: !passValue.showPassword })
   }
 
-  const [open, setOpen] = React.useState(false)
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
+  const [open, set_open] = React.useState(false)
+  const handle_open = () => set_open(true)
+  const handle_close = () => set_open(false)
 
-  const onButtonRegisterClick = () => {
+  const on_button_register_click = () => {
     navigate('/signup')
   }
 
@@ -83,7 +83,7 @@ const LoginPage = () => {
           value={email}
           type='text'
           placeholder='Enter your email here'
-          onChange={(ev) => setEmail(ev.target.value)}
+          onChange={(ev) => set_email(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
       </div>
@@ -92,10 +92,10 @@ const LoginPage = () => {
           value={password}
           type={passValue.showPassword ? 'text' : 'password'}
           placeholder='Enter your password here'
-          onChange={(ev) => setPassword(ev.target.value)}
+          onChange={(ev) => set_password(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
-        <div className='absolute right-4 top-2' onClick={handleClickShowPassword}>
+        <div className='absolute right-4 top-2' onClick={handle_click_show_password}>
           {passValue.showPassword ? <EyeIcon /> : <EyeOffIcon />}
         </div>
       </div>
@@ -104,18 +104,18 @@ const LoginPage = () => {
       <input
         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
         type='button'
-        onClick={onButtonLoginClick}
+        onClick={on_button_login_click}
         value={'Log in'}
       />
       <div className='space-x-1 flex'>
         <p className='text-gray-500 text-xs'>If you haven&quot;t an account you can </p>{' '}
-        <p className='underline text-gray-500 text-xs' onClick={onButtonRegisterClick}>
+        <p className='underline text-gray-500 text-xs' onClick={on_button_register_click}>
           register
         </p>
       </div>
       <Modal
         open={open}
-        onClose={handleClose}
+        onClose={handle_close}
         aria-labelledby='modal-modal-title'
         aria-describedby='modal-modal-description'
         className='relative max-w-96 flex flex-col justify-center m-auto'
@@ -130,7 +130,7 @@ const LoginPage = () => {
           <input
             className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
             type='button'
-            onClick={onButtonRegisterClick}
+            onClick={on_button_register_click}
             value={'Sign up'}
           />
         </Box>
