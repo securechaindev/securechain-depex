@@ -19,14 +19,14 @@ import TablePagination from '@mui/material/TablePagination'
 import Modal from '@mui/material/Modal'
 
 const RepositoriesPage = () => {
-  const [owner, setOwner] = useState('')
-  const [name, setName] = useState('')
-  const [repositories, setRepositories] = useState([])
-  const [page, setPage] = React.useState(0)
-  const [rowsPerPage, setRowsPerPage] = React.useState(10)
+  const [owner, set_owner] = useState('')
+  const [name, set_name] = useState('')
+  const [repositories, set_repositories] = useState([])
+  const [page, set_page] = React.useState(0)
+  const [rowsPerPage, set_rows_per_page] = React.useState(10)
   const user_id = localStorage.getItem('user_id')
 
-  const onButtonInitClick = () => {
+  const on_button_init_click = () => {
     fetch('http://localhost:8000/graph/init', {
       method: 'POST',
       headers: {
@@ -34,7 +34,8 @@ const RepositoriesPage = () => {
       },
       body: JSON.stringify({ owner, name, user_id })
     })
-    window.location.reload()
+    set_owner('')
+    set_name('')
   }
 
   useEffect(() => {
@@ -46,33 +47,33 @@ const RepositoriesPage = () => {
     })
       .then((r) => r.json())
       .then((r) => {
-        setRepositories(r)
+        set_repositories(r)
       })
   }, [])
 
-  const handleChangePage = (newPage) => {
-    setPage(newPage)
+  const handle_change_page = (newPage) => {
+    set_page(newPage)
   }
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value)
-    setPage(0)
+  const handle_change_rows_per_page = (event) => {
+    set_rows_per_page(+event.target.value)
+    set_page(0)
   }
 
   function Row(props) {
     const { repository } = props
-    const [openFiles, setOpenFiles] = React.useState(false)
-    const [openModal, setOpenModal] = React.useState(null)
+    const [open_files, set_open_files] = React.useState(false)
+    const [open_modal, set_open_modal] = React.useState(null)
 
-    const handleOpen = (name) => setOpenModal(name)
-    const handleClose = () => setOpenModal(null)
+    const handle_open = (name) => set_open_modal(name)
+    const handle_close = () => set_open_modal(null)
 
     return (
       <React.Fragment>
         <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
           <TableCell>
-            <IconButton aria-label='expand row' size='small' onClick={() => setOpenFiles(!openFiles)}>
-              {openFiles ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            <IconButton aria-label='expand row' size='small' onClick={() => set_open_files(!open_files)}>
+              {open_files ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </TableCell>
           <TableCell align='center'>{repository.owner}</TableCell>
@@ -83,7 +84,7 @@ const RepositoriesPage = () => {
         </TableRow>
         <TableRow>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-            <Collapse in={openFiles} timeout='auto' unmountOnExit>
+            <Collapse in={open_files} timeout='auto' unmountOnExit>
               <Box sx={{ margin: 1 }}>
                 <Typography variant='font-bold text-2xl' gutterBottom component='div'>
                   Requirement Files
@@ -106,7 +107,7 @@ const RepositoriesPage = () => {
                             <input
                               className='w-44 m-auto justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold text-xs rounded'
                               type='button'
-                              onClick={() => handleOpen(requirementFilesRow.name)}
+                              onClick={() => handle_open(requirementFilesRow.name)}
                               value={'Reasoning'}
                             />
                           ) : (
@@ -114,8 +115,8 @@ const RepositoriesPage = () => {
                           )}
                         </TableCell>
                         <Modal
-                          open={openModal === requirementFilesRow.name}
-                          onClose={handleClose}
+                          open={open_modal === requirementFilesRow.name}
+                          onClose={handle_close}
                           aria-labelledby='modal-modal-title'
                           aria-describedby='modal-modal-description'
                           className='relative w-8/12 flex flex-col justify-center m-auto'
@@ -153,21 +154,21 @@ const RepositoriesPage = () => {
           value={owner}
           type='text'
           placeholder='Enter the owner here'
-          onChange={(ev) => setOwner(ev.target.value)}
+          onChange={(ev) => set_owner(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
         <input
           value={name}
           type='text'
           placeholder='Enter the name here'
-          onChange={(ev) => setName(ev.target.value)}
+          onChange={(ev) => set_name(ev.target.value)}
           className='w-64 shadow appearance-none border rounded w-full py-2 px-2 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline'
         />
       </div>
       <input
         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
         type='button'
-        onClick={onButtonInitClick}
+        onClick={on_button_init_click}
         value={'Generate'}
       />
       <TableContainer component={Paper}>
@@ -193,8 +194,8 @@ const RepositoriesPage = () => {
         count={repositories.length}
         rowsPerPage={rowsPerPage}
         page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        onPageChange={handle_change_page}
+        onRowsPerPageChange={handle_change_rows_per_page}
       />
     </div>
   )
