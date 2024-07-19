@@ -48,7 +48,7 @@ const SignUpPage = () => {
   }
 
   const sign_up = () => {
-    fetch('http://localhost:8000/user/signup', {
+    fetch('http://localhost:8000/auth/signup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

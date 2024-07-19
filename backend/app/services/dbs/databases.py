@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection, AsyncIOMotorDatabase
 from neo4j import AsyncDriver, AsyncGraphDatabase
 
 from app.config import settings
@@ -34,20 +34,22 @@ def get_graph_db_driver(package_manager: str) -> AsyncDriver | tuple[AsyncDriver
 @lru_cache
 def get_collection(collection_name: str) -> AsyncIOMotorCollection:
     client: AsyncIOMotorClient = AsyncIOMotorClient(settings.VULN_DB_URI)
+    depex_db: AsyncIOMotorDatabase = client.depex
+    nvd_db: AsyncIOMotorDatabase = client.nvd
     match collection_name:
         case "env_variables":
-            return client.depex.get_collection(collection_name)
+            return depex_db.get_collection(collection_name)
         case "users":
-            return client.depex.get_collection(collection_name)
+            return depex_db.get_collection(collection_name)
         case "jwt_tokens":
-            return client.depex.get_collection(collection_name)
+            return depex_db.get_collection(collection_name)
         case "smt_text":
-            return client.depex.get_collection(collection_name)
+            return depex_db.get_collection(collection_name)
         case "cves":
-            return client.nvd.get_collection(collection_name)
+            return nvd_db.get_collection(collection_name)
         case "cpe_matchs":
-            return client.nvd.get_collection(collection_name)
+            return nvd_db.get_collection(collection_name)
         case "cpes":
-            return client.nvd.get_collection(collection_name)
+            return nvd_db.get_collection(collection_name)
         case "cpe_products":
-            return client.nvd.get_collection(collection_name)
+            return nvd_db.get_collection(collection_name)

@@ -19,6 +19,7 @@ import TablePagination from '@mui/material/TablePagination'
 import Modal from '@mui/material/Modal'
 
 const RepositoriesPage = () => {
+  const access_token = useState(localStorage.getItem('access_token'))[0]
   const [owner, set_owner] = useState('')
   const [name, set_name] = useState('')
   const [repositories, set_repositories] = useState([])
@@ -46,7 +47,8 @@ const RepositoriesPage = () => {
     fetch('http://localhost:8000/graph/init', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`
       },
       body: JSON.stringify({ owner, name, user_id })
     })
@@ -62,10 +64,11 @@ const RepositoriesPage = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      fetch('http://localhost:8000/repositories/' + user_id, {
+      fetch('http://localhost:8000/graph/repositories/' + user_id, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${access_token}`
         }
       })
         .then((r) => r.json())

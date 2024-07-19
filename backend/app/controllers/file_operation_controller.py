@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status
+from fastapi import APIRouter, Body, status, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from flamapy.metamodels.smt_metamodel.operations import (
@@ -25,11 +25,11 @@ from app.services import (
     read_smt_text,
     replace_smt_text,
 )
-from app.utils import json_encoder
+from app.utils import json_encoder, JWTBearer
 
 router = APIRouter()
 
-@router.post("/operation/file/file_info")
+@router.post("/operation/file/file_info", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def file_info(
     FileInfoRequest: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
@@ -39,7 +39,7 @@ async def file_info(
     )
 
 
-@router.post("/operation/file/valid_file")
+@router.post("/operation/file/valid_file", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def valid_file(
     valid_file_request: Annotated[ValidFileRequest, Body()]
 ) -> JSONResponse:
@@ -71,7 +71,7 @@ async def valid_file(
         )
 
 
-@router.post("/operation/file/minimize_impact")
+@router.post("/operation/file/minimize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def minimize_impact(
     MinMaxImpactRequest: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
@@ -102,7 +102,7 @@ async def minimize_impact(
         )
 
 
-@router.post("/operation/file/maximize_impact")
+@router.post("/operation/file/maximize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def maximize_impact(
     MinMaxImpactRequest: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
@@ -133,7 +133,7 @@ async def maximize_impact(
         )
 
 
-@router.post("/operation/file/filter_configs")
+@router.post("/operation/file/filter_configs", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def filter_configs(
     FilterConfigsRequest: Annotated[FilterConfigsRequest, Body()]
 ) -> JSONResponse:

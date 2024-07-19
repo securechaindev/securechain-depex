@@ -36,7 +36,7 @@ const LoginPage = () => {
   }
 
   const log_in = () => {
-    fetch('http://localhost:8000/user/login', {
+    fetch('http://localhost:8000/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

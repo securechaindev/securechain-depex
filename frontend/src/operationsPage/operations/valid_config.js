@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import AgregatorSelect from '../utils/agregator'
 
 const ValidConfigOperation = (props) => {
+  const access_token = useState(localStorage.getItem('access_token'))[0]
   const { requirement_file_id, package_manager, set_operation_result } = props
   const [_max_level, set_max_level] = useState('')
   const [agregator, set_agregator] = useState('mean')
@@ -49,7 +50,8 @@ const ValidConfigOperation = (props) => {
     fetch('http://localhost:8000/operation/config/valid_config', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`
       },
       body: JSON.stringify({ requirement_file_id, max_level, package_manager, agregator, config })
     })

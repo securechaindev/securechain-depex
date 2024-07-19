@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status
+from fastapi import APIRouter, Body, status, Depends
 from fastapi.responses import JSONResponse
 
 from app.models import (
@@ -23,6 +23,7 @@ from app.utils import (
     json_encoder,
     verify_access_token,
     verify_password,
+    JWTBearer,
 )
 
 router = APIRouter()
@@ -110,7 +111,7 @@ async def verify_token(verify_access_token_request: VerifyAccessTokenRequest) ->
     )
 
 
-@router.post("/auth/change_password")
+@router.post("/auth/change_password", dependencies=[Depends(JWTBearer())], tags=["auth"])
 async def change_password(change_password_request: ChangePasswordRequest) -> JSONResponse:
     user = await read_user_by_email(change_password_request.email)
     if user is None:

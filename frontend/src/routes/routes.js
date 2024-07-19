@@ -14,7 +14,7 @@ function Routes() {
   const [is_logged, set_is_logged] = useState(false)
 
   useEffect(() => {
-    fetch('http://localhost:8000/user/verify_token', {
+    fetch('http://localhost:8000/auth/verify_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

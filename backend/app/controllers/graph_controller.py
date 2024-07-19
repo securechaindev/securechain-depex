@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, status
+from fastapi import APIRouter, BackgroundTasks, status, Depends
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
@@ -24,7 +24,7 @@ from app.services import (
     update_requirement_file_moment,
     update_requirement_rel_constraints,
 )
-from app.utils import json_encoder, repo_analyzer
+from app.utils import json_encoder, repo_analyzer, JWTBearer
 
 from .managers.mvn_generate_controller import (
     mvn_create_package,
@@ -48,7 +48,7 @@ from .managers.pip_generate_controller import (
 router = APIRouter()
 
 
-@router.get("/repositories/{user_id}")
+@router.get("/graph/repositories/{user_id}", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def get_repositories(user_id: str) -> JSONResponse:
     repositories = await read_repositories_by_user_id(user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
@@ -63,7 +63,7 @@ async def get_graphs(owner: str, name: str) -> JSONResponse:
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graphs))
 
 
-@router.post("/pypi/package/init")
+@router.post("/graph/pypi/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_pypi_package(package_name: str) -> JSONResponse:
     package = await read_package_by_name(package_name, "PIP")
     if not package:
@@ -76,7 +76,7 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
     )
 
 
-@router.post("/npm/package/init")
+@router.post("/graph/npm/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_npm_package(package_name: str) -> JSONResponse:
     package = await read_package_by_name(package_name, "NPM")
     if not package:
@@ -89,7 +89,7 @@ async def init_npm_package(package_name: str) -> JSONResponse:
     )
 
 
-@router.post("/mvn/package/init")
+@router.post("/graph/mvn/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     package = await read_package_by_name(artifact_id, "MVN")
     if not package:
@@ -102,7 +102,7 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     )
 
 
-@router.post("/graph/init")
+@router.post("/graph/graph/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     repository = {
         "owner": InitGraphRequest.owner,

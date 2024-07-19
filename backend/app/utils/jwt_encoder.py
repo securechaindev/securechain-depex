@@ -6,6 +6,10 @@ from jwt.exceptions import InvalidTokenError
 
 from app.config import settings
 
+from fastapi import Request, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+
 
 async def create_access_token(subject: str, expires_delta: int | None = None) -> str:
     if expires_delta is not None:
@@ -23,3 +27,19 @@ def verify_access_token(access_token: str) -> bool:
         return True
     except (InvalidTokenError, JWTError):
         return False
+
+
+class JWTBearer(HTTPBearer):
+    def __init__(self, auto_error: bool = True):
+        super(JWTBearer, self).__init__(auto_error=auto_error)
+
+    async def __call__(self, request: Request):
+        credentials: HTTPAuthorizationCredentials | None = await super(JWTBearer, self).__call__(request)
+        if credentials:
+            if not credentials.scheme == "Bearer":
+                raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
+            if not verify_access_token(credentials.credentials):
+                raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+            return credentials.credentials
+        else:
+            raise HTTPException(status_code=403, detail="Invalid authorization code.")

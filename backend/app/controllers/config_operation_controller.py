@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, status
+from fastapi import APIRouter, Body, status, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from flamapy.metamodels.smt_metamodel.operations import (
@@ -18,11 +18,11 @@ from app.services import (
     read_smt_text,
     replace_smt_text,
 )
-from app.utils import json_encoder
+from app.utils import json_encoder, JWTBearer
 
 router = APIRouter()
 
-@router.post("/operation/config/valid_config")
+@router.post("/operation/config/valid_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
 async def valid_config(
     ValidConfigRequest: Annotated[ValidConfigRequest, Body()]
 ) -> JSONResponse:
@@ -54,7 +54,7 @@ async def valid_config(
         )
 
 
-@router.post("/operation/config/complete_config")
+@router.post("/operation/config/complete_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
 async def complete_config(
     CompleteConfigRequest: Annotated[CompleteConfigRequest, Body()]
 ) -> JSONResponse:
@@ -88,7 +88,7 @@ async def complete_config(
         )
 
 
-@router.post("/operation/config/config_by_impact")
+@router.post("/operation/config/config_by_impact", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
 async def config_by_impact(
     ConfigByImpactRequest: Annotated[ConfigByImpactRequest, Body()]
 ) -> JSONResponse:
