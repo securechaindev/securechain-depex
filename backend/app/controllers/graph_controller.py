@@ -102,7 +102,7 @@ async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
     )
 
 
-@router.post("/graph/graph/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+@router.post("/graph/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     repository = {
         "owner": InitGraphRequest.owner,

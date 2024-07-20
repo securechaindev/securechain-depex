@@ -26,15 +26,15 @@ over it.
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> Any:
     while True:
-        # try:
+        try:
             await create_indexes()
             await nvd_update()
             scheduler = AsyncIOScheduler()
             scheduler.add_job(nvd_update, "interval", seconds=7200)
             scheduler.start()
             break
-        # except Exception as _:
-        #     sleep(5)
+        except Exception as _:
+            sleep(5)
     yield
     scheduler.shutdown()
 
@@ -42,8 +42,8 @@ async def lifespan(app: FastAPI) -> Any:
 app = FastAPI(
     title="Depex",
     description=DESCRIPTION,
-    # openapi_url=None,
-    version="0.7.1",
+    openapi_url=None,
+    version="0.7.3",
     contact={
         "name": "Antonio Germán Márquez Trujillo",
         "url": "https://github.com/GermanMT",
