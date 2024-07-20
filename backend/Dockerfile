@@ -2,9 +2,7 @@ FROM python:3.12.3
 
 WORKDIR /backend
 
-COPY /backend/app/ ./app/
 COPY /backend/requirements.txt ./
-COPY .env ./
 
 RUN pip install --upgrade pip
 

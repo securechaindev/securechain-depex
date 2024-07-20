@@ -1,4 +1,19 @@
 services:
+  frontend:
+    container_name: depex_frontend
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    volumes:
+      - ./frontend:/frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    networks:
+      - depex
+
   backend:
     container_name: depex_backend
     build:
@@ -6,7 +21,7 @@ services:
       dockerfile: ./backend/Dockerfile
     volumes:
       - ./backend:/backend
-    command: ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+      - .env:/backend/.env
     depends_on:
       pip_graph_database:
         condition: service_healthy
@@ -20,19 +35,12 @@ services:
       - '8000:8000'
     networks:
       - depex
-
-  frontend:
-    container_name: depex_frontend
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
-    volumes:
-      - ./frontend:/frontend
-    command: ["sh", "-c", "npm start"]
-    ports:
-      - '3000:3000'
-    networks:
-      - depex
+    healthcheck:
+      test: curl --fail http://localhost:8000/health || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
 
   pip_graph_database:
     env_file: .env
