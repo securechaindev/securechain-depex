@@ -9,6 +9,7 @@ from app.apis import get_last_commit_date_github
 from app.models import InitGraphRequest
 from app.services import (
     create_repository,
+    create_user_repository_rel,
     delete_requirement_file,
     delete_requirement_file_rel,
     read_graphs_by_owner_name_for_sigma,
@@ -110,7 +111,7 @@ async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: Backg
         "moment": datetime.now(),
         "add_extras": False,
         "is_complete": False,
-        "users": [InitGraphRequest.user_id]
+        "user_id": InitGraphRequest.user_id
     }
     last_repository_update = await read_repositories_update(
         repository["owner"], repository["name"]
@@ -124,14 +125,14 @@ async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: Backg
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=json_encoder({"message": "no_repo"}),
             )
-        background_tasks.add_task(init_graph_background, repository, last_repository_update, last_commit_date)
+        background_tasks.add_task(init_graph_background, repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "init_graph"}),
     )
 
 
-async def init_graph_background(repository: dict[str, Any], last_repository_update: dict[str, datetime | bool], last_commit_date: datetime):
+async def init_graph_background(repository: dict[str, Any], last_repository_update: dict[str, datetime | bool], last_commit_date: datetime, user_id: str):
     if last_commit_date is not None and (
         not last_repository_update["moment"]
         or last_repository_update["moment"].replace(tzinfo=UTC)
@@ -150,6 +151,9 @@ async def init_graph_background(repository: dict[str, Any], last_repository_upda
                     raw_requirement_files, repository_id, package_manager
                 )
             else:
+                await create_user_repository_rel(
+                    repository_id, user_id, package_manager
+                )
                 await update_repository_is_complete(
                     repository_id, False, package_manager
                 )

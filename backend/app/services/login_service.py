@@ -1,16 +1,20 @@
 from typing import Any
 
-from .dbs.databases import get_collection
+from .dbs.databases import get_graph_db_driver, get_collection
 
 
 async def create_user(user: dict[str, str]) -> None:
+    query = """
+    create(u: User{
+        _id: $user_id
+    })
+    """
     users_collection = get_collection("users")
-    await users_collection.insert_one(user)
-
-
-async def create_jwt_token(token: dict[str, Any]) -> None:
-    jwt_tokens_collection = get_collection("jwt_tokens")
-    await jwt_tokens_collection.insert_one(token)
+    result = await users_collection.insert_one(user)
+    user_id = str(result.inserted_id)
+    for driver in get_graph_db_driver("ALL"):
+        async with driver.session() as session:
+            result = await session.run(query, user_id=user_id)
 
 
 async def read_user_by_email(email: str) -> dict[str, str]:

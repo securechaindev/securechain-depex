@@ -6,19 +6,34 @@ from .dbs.databases import get_graph_db_driver
 
 async def create_repository(repository: dict[str, Any], package_manager: str) -> str:
     query = """
+    match(u:User) where u._id = $user_id
     merge(r: Repository{
         owner: $owner,
         name: $name,
         moment: $moment,
         add_extras: $add_extras,
-        is_complete: $is_complete,
-        users: $users
+        is_complete: $is_complete
     })
+    create (u)-[rel:OWN]->(r)
     return elementid(r) as id
     """
     driver = get_graph_db_driver(package_manager)
     async with driver.session() as session:
         result = await session.run(query, repository)
+        record = await result.single()
+    return record[0]
+
+
+async def create_user_repository_rel(repository_id: str, user_id: str, package_manager: str) -> None:
+    query = """
+    match(u:User) where u._id = $user_id
+    match(r:Repository) where elemtid(r) = $repository_id
+    merge (u)-[rel:OWN]->(r)
+    return elementid(r) as id
+    """
+    driver = get_graph_db_driver(package_manager)
+    async with driver.session() as session:
+        result = await session.run(query, repository_id, user_id)
         record = await result.single()
     return record[0]
 
@@ -166,8 +181,8 @@ async def read_data_for_smt_transform(
 
 async def read_repositories_by_user_id(user_id: str) -> dict[str, Any]:
     query = """
-    match (r:Repository)-[rel:USE]->(rf:RequirementFile)
-    where $user_id in r.users
+    match (u:User)-[]->(r:Repository)-[rel:USE]->(rf:RequirementFile)
+    where u._id = $user_id
     with r, collect({name: rf.name, manager: rf.manager, requirement_file_id: elementid(rf)}) as requirement_files
     return collect({
         owner: r.owner,

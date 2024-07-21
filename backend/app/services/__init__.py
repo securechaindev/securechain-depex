@@ -11,7 +11,6 @@ from .env_variables_service import (
     update_env_variables_by_nvd,
 )
 from .login_service import (
-    create_jwt_token,
     create_user,
     read_user_by_email,
     update_user_password,
@@ -25,6 +24,7 @@ from .package_service import (
 )
 from .repository_service import (
     create_repository,
+    create_user_repository_rel,
     read_data_for_smt_transform,
     read_graph_for_info_operation,
     read_graphs_by_owner_name_for_sigma,
@@ -65,6 +65,7 @@ __all__ = [
     "relate_packages",
     "update_package_moment",
     "create_repository",
+    "create_user_repository_rel"
     "read_repositories_update",
     "read_repositories",
     "read_repository_by_id",
@@ -84,7 +85,6 @@ __all__ = [
     "read_env_variables",
     "update_env_variables_by_nvd",
     "create_user",
-    "create_jwt_token",
     "read_user_by_email",
     "update_user_password",
     "update_env_variables_by_exploit_db",

@@ -12,7 +12,6 @@ from app.models import (
     VerifyAccessTokenRequest,
 )
 from app.services import (
-    create_jwt_token,
     create_user,
     read_user_by_email,
     update_user_password,
@@ -70,14 +69,6 @@ async def login(login_request: Annotated[LoginRequest, Body()]) -> JSONResponse:
             ),
         )
     access_token = await create_access_token(user["_id"])
-    await create_jwt_token(
-        token = {
-            "user": user["_id"],
-            "access_token": access_token,
-            "status": True,
-            "moment": datetime.now()
-        }
-    )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder(
