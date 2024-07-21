@@ -1,24 +1,25 @@
 from json import JSONDecodeError
-from time import sleep
 from typing import Any
 
 from dateutil.parser import parse
-from requests import ConnectionError, ConnectTimeout, get
+from aiohttp import ClientSession, ClientConnectorError
+from asyncio import TimeoutError, sleep
 
 from app.utils import get_first_position, parse_pip_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
 async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
-    while True:
-        try:
-            response = get(f"https://pypi.python.org/pypi/{pkg_name}/json").json()
-            break
-        except (ConnectTimeout, ConnectionError):
-            sleep(5)
-        except JSONDecodeError:
-            print("Error en el paquete: ", pkg_name)
-            return []
+    async with ClientSession() as session:
+        while True:
+            try:
+                async with session.get(f"https://pypi.python.org/pypi/{pkg_name}/json") as response:
+                    response = await response.json()
+                    break
+            except (ClientConnectorError, TimeoutError):
+                await sleep(5)
+            except JSONDecodeError:
+                return []
     if "releases" in response:
         versions: list[dict[str, Any]] = []
         raw_versions = response["releases"]
@@ -36,16 +37,16 @@ async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
 async def requires_pip_packages(
     pkg_name: str, version_dist: str
 ) -> dict[str, list[str] | str]:
-    while True:
-        try:
-            response = get(
-                f"https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json"
-            ).json()["info"]["requires_dist"]
-            break
-        except (ConnectTimeout, ConnectionError):
-            sleep(5)
-        except JSONDecodeError:
-            return {}
+    async with ClientSession() as session:
+        while True:
+            try:
+                async with session.get(f"https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json") as response:
+                    response = await response.json()["info"]["requires_dist"]
+                    break
+            except (ClientConnectorError, TimeoutError):
+                await sleep(5)
+            except JSONDecodeError:
+                return {}
     if response:
         require_packages: dict[str, Any] = {}
         for dependency in response:

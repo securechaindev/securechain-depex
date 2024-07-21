@@ -1,8 +1,8 @@
 from datetime import datetime
-from time import sleep
 
 from dateutil.parser import parse
-from requests import ConnectionError, ConnectTimeout, post
+from aiohttp import ClientSession, ClientConnectorError
+from asyncio import TimeoutError, sleep
 
 from app.config import settings
 
@@ -34,16 +34,18 @@ async def get_last_commit_date_github(owner: str, name: str) -> datetime | bool:
         }}
     }}
     """
-    while True:
-        try:
-            response = post(
-                "https://api.github.com/graphql",
-                json={"query": query},
-                headers=headers_github,
-            ).json()
-            break
-        except (ConnectTimeout, ConnectionError):
-            sleep(5)
+    async with ClientSession() as session:
+        while True:
+            try:
+                async with session.post(
+                    "https://api.github.com/graphql",
+                    json={"query": query},
+                    headers=headers_github,
+                ) as response:
+                    response = await response.json()
+                    break
+            except (ClientConnectorError, TimeoutError):
+                await sleep(5)
     if response["data"]["repository"]:
         if "defaultBranchRef" in response["data"]["repository"]:
             return parse(

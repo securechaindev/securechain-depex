@@ -163,7 +163,7 @@ async def init_graph_background(repository: dict[str, Any], last_repository_upda
             await update_repository_is_complete(
                 repository_id, True, package_manager
             )
-    await update_repository_users(last_repository_update["id"], InitGraphRequest.user_id)
+    await update_repository_users(last_repository_update["id"], user_id)
 
 
 async def extract_repository(
