@@ -63,7 +63,7 @@ const RepositoriesPage = () => {
   }
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    const fetchRepositories = () => {
       fetch('http://localhost:8000/graph/repositories/' + user_id, {
         method: 'GET',
         headers: {
@@ -75,10 +75,11 @@ const RepositoriesPage = () => {
         .then((r) => {
           set_repositories(r)
         })
-    }, 10000)
-
+    }
+    fetchRepositories()
+    const intervalId = setInterval(fetchRepositories, 10000)
     return () => clearInterval(intervalId)
-  })
+  }, [])
 
   const handle_change_page = (newPage) => {
     set_page(newPage)
