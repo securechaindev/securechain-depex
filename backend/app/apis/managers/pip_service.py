@@ -41,15 +41,15 @@ async def requires_pip_packages(
         while True:
             try:
                 async with session.get(f"https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json") as response:
-                    response = await response.json()["info"]["requires_dist"]
+                    response = await response.json()
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except JSONDecodeError:
                 return {}
-    if response:
+    if response and "info" in response and "requires_dist" in response["info"]:
         require_packages: dict[str, Any] = {}
-        for dependency in response:
+        for dependency in response["info"]["requires_dist"]:
             data = dependency.split(";")
             # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta la version
             # de python

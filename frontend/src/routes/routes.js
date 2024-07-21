@@ -8,6 +8,7 @@ import { SignUpPage } from '../auth/signup'
 import { ProtectedRoute } from '../auth/protectedRoute'
 import { RepositoriesPage } from '../repositoriesPage/repositories'
 import Sidebar, { SidebarItem } from '../components/sidebar'
+import PageNotFound from '../errorPage/error'
 
 function Routes() {
   const access_token = useState(localStorage.getItem('access_token'))[0]
@@ -107,6 +108,7 @@ function Routes() {
   const router = createBrowserRouter([
     {
       element: <SidebarLayout />,
+      errorElement: <PageNotFound />,
       children: [...routes_for_sidebar]
     },
     ...routes_for_public,
