@@ -15,5 +15,5 @@ jobs:
         run: npm i eslint@9.6.0
       - name: Analysing the code with ESlint
         run: |
-        cd frontend/
-        eslint --fix
+          cd frontend/
+          eslint --fix
