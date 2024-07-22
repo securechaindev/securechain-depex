@@ -13,8 +13,8 @@
     <img src="https://img.shields.io/github/actions/workflow/status/GermanMT/depex/analisys.yml?branch=main&event=push&label=code%20analisys" alt="code analisys">
   </a>
 
-  <a href="https://doi.org/10.5281/zenodo.7692304">
-    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.7692304.svg" alt="DOI">
+  <a href="https://doi.org/10.5281/zenodo.12793934">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.12793934.svg" alt="DOI">
   </a>
 </p>
 
