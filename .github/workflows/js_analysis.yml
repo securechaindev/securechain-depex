@@ -8,9 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up Node 20
-        - uses: actions/setup-node@v3
-          with:
-            node-version: 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
       - name: Install dependencies
         run: npm ci
       - name: Analysing the code with ESlint
