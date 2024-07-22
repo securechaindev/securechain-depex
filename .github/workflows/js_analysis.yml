@@ -12,6 +12,6 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        run: npm ci
+        run: npm i eslint@9.6.0
       - name: Analysing the code with ESlint
         run: eslint --fix
