@@ -1,7 +1,6 @@
-from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status, Depends
+from fastapi import APIRouter, Body, Depends, status
 from fastapi.responses import JSONResponse
 
 from app.models import (
@@ -17,12 +16,12 @@ from app.services import (
     update_user_password,
 )
 from app.utils import (
+    JWTBearer,
     create_access_token,
     get_hashed_password,
     json_encoder,
     verify_access_token,
     verify_password,
-    JWTBearer,
 )
 
 router = APIRouter()

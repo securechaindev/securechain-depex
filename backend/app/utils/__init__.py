@@ -1,9 +1,9 @@
 from .get_first_pos import get_first_position
 from .json_encoder import json_encoder
 from .jwt_encoder import (
+    JWTBearer,
     create_access_token,
     verify_access_token,
-    JWTBearer,
 )
 from .metrics import mean, weighted_mean
 from .parse_pip_constraints import parse_pip_constraints

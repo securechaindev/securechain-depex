@@ -1,8 +1,8 @@
+from asyncio import TimeoutError, sleep
 from json import JSONDecodeError
 from typing import Any
 
-from aiohttp import ClientSession, ClientConnectorError
-from asyncio import TimeoutError, sleep
+from aiohttp import ClientConnectorError, ClientSession
 
 
 async def get_all_npm_versions(pkg_name: str) -> Any:

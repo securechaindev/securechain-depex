@@ -1,6 +1,6 @@
 from typing import Any
 
-from .dbs.databases import get_graph_db_driver, get_collection
+from .dbs.databases import get_collection, get_graph_db_driver
 
 
 async def create_user(user: dict[str, str]) -> None:

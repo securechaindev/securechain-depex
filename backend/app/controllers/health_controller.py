@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
+
 from app.utils import json_encoder
 
 router = APIRouter()

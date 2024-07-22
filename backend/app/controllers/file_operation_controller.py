@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status, Depends
+from fastapi import APIRouter, Body, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from flamapy.metamodels.smt_metamodel.operations import (
@@ -25,7 +25,7 @@ from app.services import (
     read_smt_text,
     replace_smt_text,
 )
-from app.utils import json_encoder, JWTBearer
+from app.utils import JWTBearer, json_encoder
 
 router = APIRouter()
 

@@ -65,7 +65,7 @@ __all__ = [
     "relate_packages",
     "update_package_moment",
     "create_repository",
-    "create_user_repository_rel"
+    "create_user_repository_rel",
     "read_repositories_update",
     "read_repositories",
     "read_repository_by_id",

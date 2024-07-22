@@ -1,9 +1,9 @@
+from asyncio import TimeoutError, sleep
 from json import JSONDecodeError
 from typing import Any
 
+from aiohttp import ClientConnectorError, ClientSession
 from dateutil.parser import parse
-from aiohttp import ClientSession, ClientConnectorError
-from asyncio import TimeoutError, sleep
 
 from app.utils import get_first_position, parse_pip_constraints
 

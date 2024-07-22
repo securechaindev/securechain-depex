@@ -1,8 +1,7 @@
+from asyncio import TimeoutError, sleep
 from typing import Any
 
-from aiohttp import ClientSession, ClientConnectorError
-from asyncio import TimeoutError, sleep
-
+from aiohttp import ClientConnectorError, ClientSession
 from xmltodict import parse
 
 

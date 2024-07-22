@@ -1,8 +1,8 @@
+from asyncio import TimeoutError, sleep
 from datetime import datetime
 
+from aiohttp import ClientConnectorError, ClientSession
 from dateutil.parser import parse
-from aiohttp import ClientSession, ClientConnectorError
-from asyncio import TimeoutError, sleep
 
 from app.config import settings
 

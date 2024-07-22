@@ -1,6 +1,10 @@
 from functools import lru_cache
 
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection, AsyncIOMotorDatabase
+from motor.motor_asyncio import (
+    AsyncIOMotorClient,
+    AsyncIOMotorCollection,
+    AsyncIOMotorDatabase,
+)
 from neo4j import AsyncDriver, AsyncGraphDatabase
 
 from app.config import settings

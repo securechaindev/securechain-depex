@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, status, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
@@ -25,7 +25,7 @@ from app.services import (
     update_requirement_file_moment,
     update_requirement_rel_constraints,
 )
-from app.utils import json_encoder, repo_analyzer, JWTBearer
+from app.utils import JWTBearer, json_encoder, repo_analyzer
 
 from .managers.mvn_generate_controller import (
     mvn_create_package,
