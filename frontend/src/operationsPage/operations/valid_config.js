@@ -40,7 +40,7 @@ const ValidConfigOperation = (props) => {
         set_config_error('JSON should only contain string values')
         return
       }
-    } catch (error) {
+    } catch {
       set_config_error('Invalid JSON')
       return
     }
