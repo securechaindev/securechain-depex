@@ -27,7 +27,10 @@
 ## Deployment with docker
 
 ### Step 1
- Create a .env from *template.env* file.
+Create a .env from *template.env* file.
+
+#### Proxy Enviroment
+In proxy enviroments the .env configuration must be added directly to the Dockerfiles.
 
 #### Get API Keys
 
