@@ -28,6 +28,7 @@ jobs:
         run: |
           echo "{VERSION}={${GITHUB_REF/refs\/tags\//}}"  >> $GITHUB_OUTPUT
           echo "{IS_PRERELEASE}={"${{contains(github.ref, 'dev')}}"}"  >> $GITHUB_OUTPUT
+
       - name: Publish release github
         uses: softprops/action-gh-release@v1
         with:
