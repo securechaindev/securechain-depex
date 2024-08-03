@@ -11,10 +11,10 @@ import Sidebar, { SidebarItem } from '../components/sidebar'
 import PageNotFound from '../errorPage/error'
 
 function Routes() {
-  const access_token = useState(localStorage.getItem('access_token'))[0]
   const [is_logged, set_is_logged] = useState(false)
 
   useEffect(() => {
+    const access_token = localStorage.getItem('access_token')
     fetch('http://localhost:8000/auth/verify_token', {
       method: 'POST',
       headers: {
