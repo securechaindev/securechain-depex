@@ -10,7 +10,7 @@ from .env_variables_service import (
     update_env_variables_by_exploit_db,
     update_env_variables_by_nvd,
 )
-from .login_service import (
+from .auth_service import (
     create_user,
     read_user_by_email,
     update_user_password,
