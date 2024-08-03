@@ -1,3 +1,8 @@
+from .auth_service import (
+    create_user,
+    read_user_by_email,
+    update_user_password,
+)
 from .bulk_write_service import bulk_write_actions
 from .cve_service import (
     read_cpe_product_by_package_name,
@@ -9,11 +14,6 @@ from .env_variables_service import (
     read_env_variables,
     update_env_variables_by_exploit_db,
     update_env_variables_by_nvd,
-)
-from .auth_service import (
-    create_user,
-    read_user_by_email,
-    update_user_password,
 )
 from .package_service import (
     create_package_and_versions,
