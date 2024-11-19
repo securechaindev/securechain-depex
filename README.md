@@ -18,6 +18,10 @@
   </a>
 </p>
 
+## Video tutorial
+
+https://github.com/user-attachments/assets/408975b6-6582-4556-89eb-049d6b4cf0af
+
 ## Deployment requirements
 
 1. [Docker](https://www.docker.com/) to deploy the tool.
