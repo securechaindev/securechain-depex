@@ -16,7 +16,7 @@
 
 ## Video tutorial
 
-https://github.com/user-attachments/assets/408975b6-6582-4556-89eb-049d6b4cf0af
+https://github.com/user-attachments/assets/7a0b2316-cd17-4a98-a228-834222b40162
 
 ## Deployment requirements
 
