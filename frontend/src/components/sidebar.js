@@ -3,24 +3,36 @@ import PropTypes from 'prop-types'
 import { useNavigate, Link } from 'react-router-dom'
 import { ChevronFirst, ChevronLast } from 'lucide-react'
 import depexLogo from '../assets/depexLogo.png'
+import depexCompleteLogo from '../assets/depexCompleteLogo.png'
+import Button from '@mui/material/Button'
 
 const SidebarContext = createContext()
 
 export default function Sidebar({ is_logged, children }) {
   const [expanded, set_expanded] = useState(true)
   const navigate = useNavigate()
+
   const on_button_logout_click = () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('user_id')
     navigate('/')
     window.location.reload()
   }
+
+  const on_click_navigate_home = () => {
+    navigate('/')
+  }
+
   return (
     <>
       <aside>
         <nav className='h-full flex flex-col bg-white border-r shadow-sm'>
           <div className='p-4 pb-2 flex justify-between items-center'>
-            <img src={depexLogo} alt='' className={`overflow-hidden transition-all ${expanded ? 'w-32' : 'w-0'}`} />
+            {
+              expanded ?
+                <img src={depexCompleteLogo} alt='' onClick={() => on_click_navigate_home()} className='overflow-hidden transition-all w-28 cursor-pointer' /> :
+                <img src={depexLogo} alt='' onClick={() => on_click_navigate_home()} className='overflow-hidden transition-all w-12 cursor-pointer' />
+            }
             <button onClick={() => set_expanded((curr) => !curr)} className='p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100'>
               {expanded ? <ChevronFirst /> : <ChevronLast />}
             </button>
@@ -30,17 +42,14 @@ export default function Sidebar({ is_logged, children }) {
             <ul className='flex-1 px-3'>{children}</ul>
           </SidebarContext.Provider>
 
-          {is_logged ? (
-            <input
-              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold text-xs rounded ${expanded ? 'w-36' : 'hidden'}`}
-              type='button'
-              onClick={on_button_logout_click}
-              value='Log out'
-            />
-          ) : null}
+          <div className='pb-2 pl-4 pr-4'>
+            {is_logged ? (
+              <Button variant="contained" size="small" onClick={on_button_logout_click}>Log out</Button>
+            ) : null}
+          </div>
 
-          <div className='border-t flex p-3'>
-            <div className={`flex justify-between items-center overflow-hidden transition-all ${expanded ? 'w-52 ml-3' : 'w-0'} `}>
+          <div className={`transition-all overflow-hidden ${expanded ? 'border-t flex p-3' : 'w-0 h-0'}`}>
+            <div className='flex justify-between items-center w-52 ml-3'>
               <div className='leading-4'>
                 <h4 className='font-semibold text-xs text-gray-600'>
                   {' '}
@@ -58,7 +67,7 @@ export default function Sidebar({ is_logged, children }) {
             </div>
           </div>
         </nav>
-      </aside>
+      </aside >
     </>
   )
 }
@@ -80,7 +89,7 @@ export function SidebarItem({ icon, text, active, alert, route }) {
           to={route}
         >
           {icon}
-          <span className={`overflow-hidden transition-all ${expanded ? 'w-52 ml-3' : 'w-0'}`}>{text}</span>
+          <span className={`overflow-hidden transition-all ${expanded ? 'w-36 ml-3' : 'w-0'}`}>{text}</span>
         </Link>
       }
       {alert && <div className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${expanded ? '' : 'top-2'}`}></div>}
