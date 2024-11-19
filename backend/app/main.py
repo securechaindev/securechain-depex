@@ -1,19 +1,17 @@
 from contextlib import asynccontextmanager
-from time import sleep
 from typing import Any
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI, Request
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import Response
 
-from app.controllers import nvd_update
+from app.exception_handler import (
+    http_exception_handler,
+    request_validation_exception_handler,
+    unhandled_exception_handler,
+)
+from app.middleware import log_request_middleware
 from app.router import api_router
 from app.services import create_indexes
 
@@ -24,19 +22,9 @@ over it.
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> Any:
-    while True:
-        try:
-            await create_indexes()
-            await nvd_update()
-            scheduler = AsyncIOScheduler()
-            scheduler.add_job(nvd_update, "interval", seconds=7200)
-            scheduler.start()
-            break
-        except Exception as _:
-            sleep(5)
+async def lifespan(_: FastAPI) -> Any:
+    await create_indexes()
     yield
-    scheduler.shutdown()
 
 
 app = FastAPI(
@@ -57,20 +45,7 @@ app = FastAPI(
 )
 
 
-@app.exception_handler(HTTPException)
-async def custom_http_exception_handler(
-    request: Request, exc: HTTPException
-) -> Response:
-    return await http_exception_handler(request, exc)
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-) -> Response:
-    return await request_validation_exception_handler(request, exc)
-
-
+app.middleware("http")(log_request_middleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -80,6 +55,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)
 
 
 app.include_router(api_router)
