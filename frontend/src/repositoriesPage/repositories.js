@@ -77,8 +77,8 @@ const RepositoriesPage = () => {
         })
     }
     fetchRepositories()
-    const intervalId = setInterval(fetchRepositories, 10000)
-    return () => clearInterval(intervalId)
+    // const intervalId = setInterval(fetchRepositories, 10000)
+    // return () => clearInterval(intervalId)
   }, [])
 
   const handle_change_page = (newPage) => {
@@ -153,7 +153,7 @@ const RepositoriesPage = () => {
                         >
                           <Box className='text-gray-500 text-center border-blue-500 border-2 bg-white rounded-lg shadow'>
                             <Typography id='modal-modal-title' variant='h6' component='h2'>
-                              Aply reasoning operations for requirement file {requirementFilesRow.name}
+                              Apply reasoning operations for requirement file {requirementFilesRow.name}
                             </Typography>
                             <OperationsPage
                               id='modal-modal-description'

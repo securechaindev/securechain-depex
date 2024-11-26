@@ -4,6 +4,8 @@ from typing import Any
 from aiohttp import ClientConnectorError, ClientSession
 from xmltodict import parse
 
+from app.logger import logger
+
 
 async def get_all_mvn_versions(
     package_artifact_id: str, package_group_id: str
@@ -12,6 +14,7 @@ async def get_all_mvn_versions(
     async with ClientSession() as session:
         while True:
             try:
+                logger.info(f"MAVEN - https://repo1.maven.org/maven2/{package_group_id.replace(".", "/")}/{package_artifact_id}/maven-metadata.xml")
                 async with session.get(f"https://repo1.maven.org/maven2/{package_group_id.replace(".", "/")}/{package_artifact_id}/maven-metadata.xml") as response:
                     xml_string = await response.text()
                     break
@@ -38,16 +41,12 @@ async def requires_mvn_packages(
     async with ClientSession() as session:
         while True:
             try:
+                logger.info(f"MAVEN - https://repo1.maven.org/maven2/{group_id}/{package_artifact_id}/{version_dist}/{package_artifact_id}-{version_dist}.pom")
                 async with session.get(f"https://repo1.maven.org/maven2/{group_id}/{package_artifact_id}/{version_dist}/{package_artifact_id}-{version_dist}.pom") as response:
                     xml_string = await response.text()
                     break
             except (ClientConnectorError, TimeoutError):
-                try:
-                    async with session.get(f"https://search.maven.org/remotecontent?filepath={group_id}/{package_artifact_id}/{version_dist}/{package_artifact_id}-{version_dist}.pom") as response:
-                        xml_string = await response.text()
-                        break
-                except (ClientConnectorError, TimeoutError):
-                    await sleep(5)
+                await sleep(5)
     try:
         pom_dict = parse(xml_string)
     except Exception as _:

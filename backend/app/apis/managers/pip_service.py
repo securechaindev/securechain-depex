@@ -7,12 +7,15 @@ from dateutil.parser import parse
 
 from app.utils import get_first_position, parse_pip_constraints
 
+from app.logger import logger
+
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
 async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
     async with ClientSession() as session:
         while True:
             try:
+                logger.info(f"PyPI - https://pypi.python.org/pypi/{pkg_name}/json")
                 async with session.get(f"https://pypi.python.org/pypi/{pkg_name}/json") as response:
                     response = await response.json()
                     break
@@ -40,6 +43,7 @@ async def requires_pip_packages(
     async with ClientSession() as session:
         while True:
             try:
+                logger.info(f"PyPI - https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json")
                 async with session.get(f"https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json") as response:
                     response = await response.json()
                     break
@@ -47,7 +51,7 @@ async def requires_pip_packages(
                 await sleep(5)
             except JSONDecodeError:
                 return {}
-    if response and "info" in response and "requires_dist" in response["info"]:
+    if response and "info" in response and "requires_dist" in response["info"] and response["info"]["requires_dist"]:
         require_packages: dict[str, Any] = {}
         for dependency in response["info"]["requires_dist"]:
             data = dependency.split(";")

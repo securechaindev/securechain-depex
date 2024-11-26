@@ -4,11 +4,14 @@ from typing import Any
 
 from aiohttp import ClientConnectorError, ClientSession
 
+from app.logger import logger
+
 
 async def get_all_npm_versions(pkg_name: str) -> Any:
     async with ClientSession() as session:
         while True:
             try:
+                logger.info(f"NPM - https://registry.npmjs.org/{pkg_name}")
                 async with session.get(f"https://registry.npmjs.org/{pkg_name}") as response:
                     response = await response.json()
                     break
