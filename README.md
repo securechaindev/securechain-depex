@@ -29,9 +29,6 @@ https://github.com/user-attachments/assets/0dbb63f4-7bc5-4e4d-81d0-94444a61e386
 ### Step 1
 Create a .env from *template.env* file.
 
-#### Proxy Enviroment
-In proxy enviroments the .env configuration must be added directly to the Dockerfiles.
-
 #### Get API Keys
 
 - How to get a *GitHub* [API key](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
@@ -54,3 +51,30 @@ Enter [here](http://0.0.0.0:3000) for the frontend Web API.
 1. It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass) to see what information is being indexed in vulnerability database.
    
 2. You can see the created graph built for [pip](http://0.0.0.0:7474/browser/), [npm](http://localhost:7473/browser/) and [mvn](http://localhost:7472/browser/) clicking in this names. Using the Neo4J browser interfaces.
+
+## Proxy Enviroment
+
+### Create an *.env* file por proxy settings
+
+Define these variables in an *.env* file that can be referenced by *docker-compose.yml*. Example *.env* file:
+
+```
+HTTP_PROXY=http://proxy.example.com:port
+HTTPS_PROXY=https://proxy.example.com:port
+NO_PROXY=localhost,127.0.0.1
+```
+
+### Add an *.env* to the *docker-compose.yml*
+
+Add the proxy configuration defined in the *.env* file, for example to the following *docker-compose.yml* file:
+
+```
+services:
+  app:
+    image: your-app-image
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8080:80"
+```
