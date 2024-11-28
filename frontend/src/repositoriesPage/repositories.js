@@ -59,6 +59,7 @@ const RepositoriesPage = () => {
         }
         set_owner('')
         set_name('')
+        window.location.reload()
       })
   }
 
@@ -77,8 +78,6 @@ const RepositoriesPage = () => {
         })
     }
     fetchRepositories()
-    // const intervalId = setInterval(fetchRepositories, 10000)
-    // return () => clearInterval(intervalId)
   }, [])
 
   const handle_change_page = (newPage) => {
