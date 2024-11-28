@@ -156,7 +156,8 @@ async def read_data_for_smt_transform(
                 parent_count: startnode(relationship).count,
                 dependency: endnode(relationship).name,
                 constraints: relationship.constraints,
-                parent_version_name: relationship.parent_version_name
+                parent_version_name: relationship.parent_version_name,
+                type: CASE WHEN relationship.parent_version_name is null THEN "direct" ELSE "indirect" END
             } end as requires,
         case type(relationship)
             when 'Have' then {
@@ -167,7 +168,12 @@ async def read_data_for_smt_transform(
                     weighted_mean: endnode(relationship).weighted_mean
 
             } end as have, rf
-    return {name: collect(rf.name)[0], moment: collect(rf.moment)[0], requires: apoc.coll.sortMaps(collect(requires), "parent_count"), have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")}
+    return {
+        name: collect(rf.name)[0],
+        moment: collect(rf.moment)[0],
+        requires: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(requires), "parent_count"), "type"),
+        have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")
+    }
     """
     driver = get_graph_db_driver(operation_request["package_manager"])
     async with driver.session() as session:

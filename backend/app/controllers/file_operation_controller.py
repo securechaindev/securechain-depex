@@ -89,7 +89,9 @@ async def minimize_impact(
             await replace_smt_text(smt_id, model_text)
         operation = MinimizeImpact(MinMaxImpactRequest.limit)
         operation.execute(smt_transform.destination_model)
-        result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.package_manager)
+        result = operation.get_result()
+        if not isinstance(result, str):
+            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.package_manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -120,7 +122,9 @@ async def maximize_impact(
             await replace_smt_text(smt_id, model_text)
         operation = MaximizeImpact(MinMaxImpactRequest.limit)
         operation.execute(smt_transform.destination_model)
-        result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.package_manager)
+        result = operation.get_result()
+        if not isinstance(result, str):
+            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.package_manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -151,7 +155,9 @@ async def filter_configs(
             await replace_smt_text(smt_id, model_text)
         operation = FilterConfigs(FilterConfigsRequest.max_threshold, FilterConfigsRequest.min_threshold, FilterConfigsRequest.limit)
         operation.execute(smt_transform.destination_model)
-        result = await read_releases_by_counts(operation.get_result(), FilterConfigsRequest.package_manager)
+        result = operation.get_result()
+        if not isinstance(result, str):
+            result = await read_releases_by_counts(operation.get_result(), FilterConfigsRequest.package_manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )

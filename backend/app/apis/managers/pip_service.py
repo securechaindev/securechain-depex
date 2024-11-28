@@ -5,9 +5,8 @@ from typing import Any
 from aiohttp import ClientConnectorError, ClientSession
 from dateutil.parser import parse
 
-from app.utils import get_first_position, parse_pip_constraints
-
 from app.logger import logger
+from app.utils import get_first_position, parse_pip_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.

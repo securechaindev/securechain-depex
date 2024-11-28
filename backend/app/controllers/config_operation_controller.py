@@ -75,7 +75,9 @@ async def complete_config(
             await read_counts_by_releases(CompleteConfigRequest.config, CompleteConfigRequest.package_manager)
         )
         operation.execute(smt_model)
-        result = await read_releases_by_counts(operation.get_result(), CompleteConfigRequest.package_manager)
+        result = operation.get_result()
+        if not isinstance(result, str):
+            result = await read_releases_by_counts(operation.get_result(), CompleteConfigRequest.package_manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -107,7 +109,9 @@ async def config_by_impact(
         smt_model = smt_transform.destination_model
         operation = ConfigByImpact(ConfigByImpactRequest.impact)
         operation.execute(smt_model)
-        result = await read_releases_by_counts(operation.get_result(), ConfigByImpactRequest.package_manager)
+        result = operation.get_result()
+        if not isinstance(result, str):
+            result = await read_releases_by_counts(operation.get_result(), ConfigByImpactRequest.package_manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
