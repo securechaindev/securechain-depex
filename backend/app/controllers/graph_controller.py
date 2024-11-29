@@ -12,7 +12,6 @@ from app.services import (
     create_user_repository_rel,
     delete_requirement_file,
     delete_requirement_file_rel,
-    read_graphs_by_owner_name_for_sigma,
     read_package_by_name,
     read_packages_by_requirement_file,
     read_repositories,
