@@ -56,7 +56,7 @@ async def read_repositories(owner: str, name: str) -> dict[str, str]:
     match(r: Repository{owner: $owner, name: $name}) return elementid(r)
     """
     repository_ids: dict[str, str] = {}
-    for package_manager in ("PIP", "MVN", "MVN"):
+    for package_manager in ("PIP", "NPM", "MVN"):
         driver = get_graph_db_driver(package_manager)
         async with driver.session() as session:
             result = await session.run(query, owner=owner, name=name)
