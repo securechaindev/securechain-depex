@@ -55,15 +55,6 @@ async def get_repositories(user_id: str) -> JSONResponse:
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
 
 
-@router.get("/graphs/{owner}/{name}")
-async def get_graphs(owner: str, name: str) -> JSONResponse:
-    # TODO: Hacer un servicio que devuelva todos los grafos por owner y name para mostrarlos en el FrontEnd
-    # TODO: Añadir a Neo4J owner y name como un índice
-    # TODO: Cambiar en los servicios la palabra relationships por edges
-    graphs = await read_graphs_by_owner_name_for_sigma(owner, name)
-    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(graphs))
-
-
 @router.post("/graph/pypi/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_pypi_package(package_name: str) -> JSONResponse:
     package = await read_package_by_name(package_name, "PIP")

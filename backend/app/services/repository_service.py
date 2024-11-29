@@ -78,46 +78,6 @@ async def read_repository_by_id(
     return record[0] if record else None
 
 
-async def read_graphs_by_owner_name_for_sigma(owner: str, name: str) -> dict[str, Any]:
-    query = """
-    match (r: Repository{owner: $owner, name: $name})
-    call apoc.path.subgraphAll(r, {relationshipFilter: '>', limit: 20}) yield nodes, relationships
-    unwind nodes as node
-        with case labels(node)[0]
-            when 'Version' then {
-                id: elementid(node),
-                label: node.name + '\n' + apoc.text.join(node.cves, ' ')
-            }
-            else {
-                id: elementid(node),
-                label: node.name
-            }
-        end as sigma_nodes, relationships
-    unwind relationships as relationship
-        with case type(relationship)
-            when 'Requires' then {
-                source: elementid(startnode(relationship)),
-                target: elementid(endnode(relationship)),
-                label: relationship.constraints
-            }
-            else {
-                source: elementid(startnode(relationship)),
-                target: elementid(endnode(relationship)),
-                label: type(relationship)
-            }
-        end as sigma_relationships, sigma_nodes
-    return {nodes: apoc.coll.toSet(collect(sigma_nodes)), relationships: apoc.coll.toSet(collect(sigma_relationships))}
-    """
-    graphs: dict[str, Any] = {}
-    for package_manager in "PIP":
-        driver = get_graph_db_driver(package_manager)
-        async with driver.session() as session:
-            result = await session.run(query, owner=owner, name=name)
-            record = await result.single()
-        graphs[package_manager] = record if record else None
-    return graphs
-
-
 async def read_graph_for_info_operation(
     file_info_request: dict[str, Any]
 ) -> dict[str, Any]:
