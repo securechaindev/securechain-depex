@@ -29,7 +29,11 @@ const ValidFileOperation = (props) => {
       .then((r) => r.json())
       .then((r) => {
         if ('success' === r.message) {
-          set_operation_result({ result: 'The file is Valid' })
+          if (r.is_valid) {
+            set_operation_result({ result: 'The file is Valid' })
+          } else {
+            set_operation_result({ result: 'The file is not Valid' })
+          }
         } else if ('no_dependencies' === r.message) {
           window.alert("The requirement file don't have dependencies")
         }
