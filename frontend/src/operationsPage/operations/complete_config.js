@@ -8,7 +8,6 @@ const CompleteConfigOperation = (props) => {
   const [_max_level, set_max_level] = useState('')
   const [agregator, set_agregator] = useState('mean')
   const [text_config, set_text_config] = useState('')
-  const [config, set_config] = useState('')
 
   const [max_level_error, set_max_level_error] = useState('')
   const [config_error, set_config_error] = useState('')
@@ -35,34 +34,34 @@ const CompleteConfigOperation = (props) => {
     }
 
     try {
-      set_config(JSON.parse(text_config))
+      const config = JSON.parse(text_config)
       if (!have_string_values_only(config)) {
         set_config_error('JSON should only contain string values')
         return
       }
+
+      const max_level = _max_level != -1 ? _max_level * 2 : _max_level
+
+      fetch('http://localhost:8000/operation/config/complete_config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${access_token}`
+        },
+        body: JSON.stringify({ requirement_file_id, max_level, package_manager, agregator, config })
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          if ('success' === r.message) {
+            set_operation_result(r)
+          } else if ('no_dependencies' === r.message) {
+            window.alert("The requirement file don't have dependencies")
+          }
+        })
     } catch {
       set_config_error('Invalid JSON')
       return
     }
-
-    const max_level = _max_level != -1 ? _max_level * 2 : _max_level
-
-    fetch('http://localhost:8000/operation/config/complete_config', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access_token}`
-      },
-      body: JSON.stringify({ requirement_file_id, max_level, package_manager, agregator, config })
-    })
-      .then((r) => r.json())
-      .then((r) => {
-        if ('success' === r.message) {
-          set_operation_result(r)
-        } else if ('no_dependencies' === r.message) {
-          window.alert("The requirement file don't have dependencies")
-        }
-      })
   }
 
   return (
@@ -84,9 +83,6 @@ const CompleteConfigOperation = (props) => {
         rows='10'
         cols='50'
         placeholder='Enter a config of versions here'
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') on_button_complete_config_operation()
-        }}
         onChange={(ev) => set_text_config(ev.target.value)}
         className='border-2'
       />
