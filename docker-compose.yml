@@ -45,6 +45,7 @@ services:
     container_name: pip_neo4j
     image: neo4j:5.20.0
     environment:
+      - EXTENSION_SCRIPT=/seeds/graphdb_seeder.sh
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_PIP}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_server_http_listen__address=:7474
@@ -56,7 +57,8 @@ services:
       - '7474:7474'
       - '7687:7687'
     volumes:
-      - ./seeds/graphs/pip_neo4j.cypher.gz:/backups/pip_neo4j.cypher.gz
+      - ./seeds/graphs/pypi_neo4j.dump:/backups/neo4j.dump
+      - ./seeds/graphdb_seeder.sh:/seeds/graphdb_seeder.sh
     networks:
       - depex
     healthcheck:
@@ -81,8 +83,6 @@ services:
     ports:
       - '7473:7473'
       - '7686:7686'
-    volumes:
-      - ./seeds/graphs/npm_neo4j.cypher.gz:/backups/npm_neo4j.cypher.gz
     networks:
       - depex
     healthcheck:
@@ -107,8 +107,6 @@ services:
     ports:
       - '7472:7472'
       - '7685:7685'
-    volumes:
-      - ./seeds/graphs/mvn_neo4j.cypher.gz:/backups/mvn_neo4j.cypher.gz
     networks:
       - depex
     healthcheck:
@@ -126,9 +124,9 @@ services:
       vuln_database:
         condition: service_healthy
     volumes:
-      - ./seeds:/seeds
-    command:
-      /seeds/vulndb_seeder.sh
+      - ./seeds/vuln/:/seeds/vuln/
+      - ./seeds/vulndb_seeder.sh:/seeds/vulndb_seeder.sh
+    command: /seeds/vulndb_seeder.sh
     networks:
       - depex
 
