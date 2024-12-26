@@ -84,7 +84,7 @@ async def pip_search_new_versions(package: dict[str, Any]) -> None:
         cpe_matches = await read_cpe_product_by_package_name(package["name"])
         actual_versions = await read_versions_names_by_package(package["name"], "PIP")
         for version in all_versions:
-            if version["release"] not in actual_versions:
+            if version["name"] not in actual_versions:
                 version["count"] = counter
                 new_version = await attribute_cves(
                     version, cpe_matches, "PIP", package["name"]
