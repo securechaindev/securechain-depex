@@ -6,6 +6,7 @@ from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
+    create_versions,
     create_requirement_file,
     read_cpe_product_by_package_name,
     read_package_by_name,
@@ -84,22 +85,27 @@ async def mvn_extract_packages(
 
 
 async def mvn_search_new_versions(package: dict[str, Any]) -> None:
-    no_existing_versions: list[dict[str, Any]] = []
     all_versions = await get_all_versions(
         "MVN", package_artifact_id=package["name"], package_group_id=package["group_id"]
     )
     counter = await count_number_of_versions_by_package(package["name"], "MVN")
     if counter < len(all_versions):
-        cpe_matches = await read_cpe_product_by_package_name(package["name"])
+        no_existing_versions: list[dict[str, Any]] = []
+        cpe_product = await read_cpe_product_by_package_name(package["name"])
         actual_versions = await read_versions_names_by_package(package["name"], "MVN")
         for version in all_versions:
             if version["name"] not in actual_versions:
                 version["count"] = counter
                 new_version = await attribute_cves(
-                    version, cpe_matches, "MVN", package["name"]
+                    version, cpe_product, "MVN"
                 )
                 no_existing_versions.append(new_version)
                 counter += 1
+        new_versions = await create_versions(
+            package,
+            no_existing_versions,
+            "MVN",
+        )
+        for new_version in new_versions:
+            await mvn_extract_packages(package["name"], new_version)
     await update_package_moment(package["name"], "MVN")
-    for version in no_existing_versions:
-        await mvn_extract_packages(package["name"], version)

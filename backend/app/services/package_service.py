@@ -20,7 +20,7 @@ async def create_package_and_versions(
         if parent_id
         else ""
     )
-    query_part2 = f"{{{"group_id:$group_id, " if package_manager == "MVN" else ""}name:$name}}"
+    query_part2 = f"{{{"group_id:$group_id, " if package_manager == "MVN" else ""}name:$name, moment:$moment}}"
     query_part3 = (
         f"create (parent)-[rel_p:Requires{{constraints:$constraints{", parent_version_name:$parent_version_name" if parent_version_name else ""}}}]->(p)"
         if parent_id
@@ -57,6 +57,39 @@ async def create_package_and_versions(
     return record[0] if record else []
 
 
+async def create_versions(
+    package: dict[str, Any],
+    versions: list[dict[str, Any]],
+    package_manager: str
+) -> dict[str, Any]:
+    query_part = f"{{{"group_id:$group_id, " if package_manager == "MVN" else ""}name:$name}}"
+    query = f"""
+    match(p:Package{query_part})
+    with p as package
+    unwind $versions as version
+    create(v:Version{{
+        name: version.name,
+        release_date: version.release_date,
+        count: version.count,
+        cves: version.cves,
+        mean: version.mean,
+        weighted_mean: version.weighted_mean
+    }})
+    create (package)-[rel_v:Have]->(v)
+    return collect({{name: v.name, id: elementid(v)}})
+    """
+    driver = get_graph_db_driver(package_manager)
+    async with driver.session() as session:
+        result = await session.run(
+            query,
+            package,
+            versions=versions,
+        )
+        record = await result.single()
+    return record[0] if record else []
+
+
+# TODO: Añadir el group id para busquedas en maven más eficientes con el indice compuesto
 async def read_package_by_name(
     package_name: str, package_manager: str
 ) -> dict[str, Any]:

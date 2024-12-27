@@ -17,6 +17,7 @@ from .env_variables_service import (
 )
 from .package_service import (
     create_package_and_versions,
+    create_versions,
     read_package_by_name,
     read_packages_by_requirement_file,
     relate_packages,
@@ -59,6 +60,7 @@ __all__ = [
     "update_cpe_products",
     "read_cpe_product_by_package_name",
     "create_package_and_versions",
+    "create_versions",
     "read_package_by_name",
     "read_packages_by_requirement_file",
     "relate_packages",

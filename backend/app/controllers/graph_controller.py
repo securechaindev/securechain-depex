@@ -53,8 +53,8 @@ async def get_repositories(user_id: str) -> JSONResponse:
     repositories = await read_repositories_by_user_id(user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
 
-
-@router.post("/graph/pypi/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+# dependencies=[Depends(JWTBearer())], tags=["graph"]
+@router.post("/graph/pypi/package/init")
 async def init_pypi_package(package_name: str) -> JSONResponse:
     package = await read_package_by_name(package_name, "PIP")
     if not package:
@@ -67,7 +67,8 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
     )
 
 
-@router.post("/graph/npm/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+# dependencies=[Depends(JWTBearer())], tags=["graph"]
+@router.post("/graph/npm/package/init")
 async def init_npm_package(package_name: str) -> JSONResponse:
     package = await read_package_by_name(package_name, "NPM")
     if not package:

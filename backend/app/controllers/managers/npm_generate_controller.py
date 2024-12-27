@@ -6,6 +6,7 @@ from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
+    create_versions,
     create_requirement_file,
     read_cpe_product_by_package_name,
     read_package_by_name,
@@ -13,6 +14,8 @@ from app.services import (
     relate_packages,
     update_package_moment,
 )
+
+from app.logger import logger
 
 
 async def npm_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
@@ -73,20 +76,27 @@ async def npm_create_package(
 
 
 async def npm_search_new_versions(package: dict[str, Any]) -> None:
-    no_existing_versions: dict[Any, Any] = {}
     all_versions, all_require_packages = await get_all_versions("NPM", package_name=package["name"])
     counter = await count_number_of_versions_by_package(package["name"], "NPM")
     if counter < len(all_versions):
-        cpe_matches = await read_cpe_product_by_package_name(package["name"])
+        no_existing_versions: list[dict[str, Any]] = []
+        all_require_packages = []
+        cpe_product = await read_cpe_product_by_package_name(package["name"])
         actual_versions = await read_versions_names_by_package(package["name"], "NPM")
         for version, require_packages in zip(all_versions, all_require_packages):
             if version["name"] not in actual_versions:
                 version["count"] = counter
                 new_version = await attribute_cves(
-                    version, cpe_matches, "NPM", package["name"]
+                    version, cpe_product, "NPM"
                 )
-                no_existing_versions.update({new_version: require_packages})
+                no_existing_versions.append(new_version)
+                all_require_packages.append(require_packages)
                 counter += 1
+        new_versions = await create_versions(
+            package,
+            no_existing_versions,
+            "NPM",
+        )
+        for new_version, require_packages in zip(new_versions, all_require_packages):
+            await npm_generate_packages(require_packages, new_version["id"], package["name"])
     await update_package_moment(package["name"], "NPM")
-    for version, require_packages in no_existing_versions.items():
-        await npm_generate_packages(require_packages, version["id"], package["name"])
