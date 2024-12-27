@@ -17,8 +17,16 @@ async def create_indexes() -> None:
     for driver in get_graph_db_driver("ALL"):
         async with driver.session() as session:
             await session.run(
-                "create constraint if not exists for (p:Package) require p.name is unique"
+                "create constraint unique_name if not exists for (u:User) require u._id is unique"
             )
+    for _ in ("PIP", "NPM"):
+        driver = get_graph_db_driver(_)
+        async with driver.session() as session:
             await session.run(
-                "create constraint if not exists for (u:User) require u._id is unique"
+                "create constraint unique_name if not exists for (p:Package) require p.name is unique"
             )
+    driver = get_graph_db_driver("MVN")
+    async with driver.session() as session:
+        await session.run(
+            "create constraint unique_group_name if not exists for (p:Package) require (p.group_id, p.name) is unique"
+        )
