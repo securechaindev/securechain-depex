@@ -54,6 +54,8 @@ async def requires_pip_packages(
         require_packages: dict[str, Any] = {}
         for dependency in response["info"]["requires_dist"]:
             data = dependency.split(";")
+            if "python-version" in data[0]:
+                continue
             # TODO: En el futuro sería interesante construir el grafo teniendo en cuenta la version
             # de python
             if len(data) > 1:

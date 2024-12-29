@@ -6,16 +6,14 @@ from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
-    create_versions,
     create_requirement_file,
+    create_versions,
     read_cpe_product_by_package_name,
     read_package_by_name,
     read_versions_names_by_package,
     relate_packages,
     update_package_moment,
 )
-
-from app.logger import logger
 
 
 async def npm_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
