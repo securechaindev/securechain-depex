@@ -66,9 +66,9 @@ async def attribute_cves(
 
 async def get_version_type(package_manager: str):
     match package_manager:
-        case "PIP":
+        case "pypi":
             return PypiVersion
-        case "NPM":
+        case "npm":
             return SemverVersion
-        case "MVN":
+        case "maven":
             return MavenVersion

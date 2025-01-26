@@ -6,7 +6,7 @@ from .jwt_encoder import (
     verify_access_token,
 )
 from .metrics import mean, weighted_mean
-from .parse_pip_constraints import parse_pip_constraints
+from .parse_pypi_constraints import parse_pypi_constraints
 from .password_encoder import (
     get_hashed_password,
     verify_password,
@@ -22,7 +22,7 @@ __all__ = [
     "get_first_position",
     "mean",
     "weighted_mean",
-    "parse_pip_constraints",
+    "parse_pypi_constraints",
     "repo_analyzer",
     "JWTBearer",
 ]

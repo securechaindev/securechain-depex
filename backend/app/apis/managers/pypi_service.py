@@ -6,11 +6,11 @@ from aiohttp import ClientConnectorError, ClientSession
 from dateutil.parser import parse
 
 from app.logger import logger
-from app.utils import get_first_position, parse_pip_constraints
+from app.utils import get_first_position, parse_pypi_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
-async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
+async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
     async with ClientSession() as session:
         while True:
             try:
@@ -36,7 +36,7 @@ async def get_all_pip_versions(pkg_name: str) -> list[dict[str, Any]]:
     return []
 
 
-async def requires_pip_packages(
+async def requires_pypi_packages(
     pkg_name: str, version_dist: str
 ) -> dict[str, list[str] | str]:
     async with ClientSession() as session:
@@ -87,7 +87,7 @@ async def requires_pip_packages(
                 .replace("'", "")
             )
             pos = await get_first_position(data, ["<", ">", "=", "!", "~"])
-            require_packages[data[:pos].lower()] = await parse_pip_constraints(
+            require_packages[data[:pos].lower()] = await parse_pypi_constraints(
                 data[pos:]
             )
         return require_packages

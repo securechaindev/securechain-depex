@@ -1,4 +1,4 @@
-async def parse_pip_constraints(raw_constraints: str) -> str:
+async def parse_pypi_constraints(raw_constraints: str) -> str:
     if raw_constraints:
         ctcs = []
         for ctc in raw_constraints.split(","):
@@ -8,13 +8,13 @@ async def parse_pip_constraints(raw_constraints: str) -> str:
             else:
                 ctcs.append(ctc.strip())
         if ctcs:
-            clean_ctcs = await clean_pip_constraints(ctcs)
+            clean_ctcs = await clean_pypi_constraints(ctcs)
             if clean_ctcs:
                 return clean_ctcs
     return "any"
 
 
-async def clean_pip_constraints(raw_constraints: list[str]) -> str:
+async def clean_pypi_constraints(raw_constraints: list[str]) -> str:
     constraints = []
     for raw_constraint in raw_constraints:
         try:

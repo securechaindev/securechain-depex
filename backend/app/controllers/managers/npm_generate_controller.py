@@ -18,7 +18,7 @@ from app.services import (
 
 async def npm_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
-        {"name": name, "manager": "NPM", "moment": datetime.now()}, repository_id, "NPM"
+        {"name": name, "manager": "npm", "moment": datetime.now()}, repository_id, "npm"
     )
     await npm_generate_packages(file["dependencies"], new_req_file_id)
 
@@ -29,7 +29,7 @@ async def npm_generate_packages(
     packages: list[dict[str, str]] = []
     for package_name, constraints in dependencies.items():
         package_name = package_name.lower()
-        package = await read_package_by_name(package_name, "NPM")
+        package = await read_package_by_name(package_name, "npm")
         if package:
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
@@ -41,7 +41,7 @@ async def npm_generate_packages(
             await npm_create_package(
                 package_name, constraints, parent_id, parent_version_name
             )
-    await relate_packages(packages, "NPM")
+    await relate_packages(packages, "npm")
 
 
 async def npm_create_package(
@@ -51,18 +51,18 @@ async def npm_create_package(
     parent_version_name: str | None = None,
 ) -> None:
     all_versions, all_require_packages = await get_all_versions(
-        "NPM", package_name=package_name
+        "npm", package_name=package_name
     )
     if all_versions:
         cpe_product = await read_cpe_product_by_package_name(package_name)
         versions = [
-            await attribute_cves(version, cpe_product, "NPM")
+            await attribute_cves(version, cpe_product, "npm")
             for version in all_versions
         ]
         new_versions = await create_package_and_versions(
             {"name": package_name, "moment": datetime.now()},
             versions,
-            "NPM",
+            "npm",
             constraints,
             parent_id,
             parent_version_name,
@@ -74,18 +74,18 @@ async def npm_create_package(
 
 
 async def npm_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions, all_require_packages = await get_all_versions("NPM", package_name=package["name"])
-    counter = await count_number_of_versions_by_package(package["name"], "NPM")
+    all_versions, all_require_packages = await get_all_versions("npm", package_name=package["name"])
+    counter = await count_number_of_versions_by_package(package["name"], "npm")
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []
         all_require_packages = []
         cpe_product = await read_cpe_product_by_package_name(package["name"])
-        actual_versions = await read_versions_names_by_package(package["name"], "NPM")
+        actual_versions = await read_versions_names_by_package(package["name"], "npm")
         for version, require_packages in zip(all_versions, all_require_packages):
             if version["name"] not in actual_versions:
                 version["count"] = counter
                 new_version = await attribute_cves(
-                    version, cpe_product, "NPM"
+                    version, cpe_product, "npm"
                 )
                 no_existing_versions.append(new_version)
                 all_require_packages.append(require_packages)
@@ -93,8 +93,8 @@ async def npm_search_new_versions(package: dict[str, Any]) -> None:
         new_versions = await create_versions(
             package,
             no_existing_versions,
-            "NPM",
+            "npm",
         )
         for new_version, require_packages in zip(new_versions, all_require_packages):
             await npm_generate_packages(require_packages, new_version["id"], package["name"])
-    await update_package_moment(package["name"], "NPM")
+    await update_package_moment(package["name"], "npm")

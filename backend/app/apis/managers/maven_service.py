@@ -7,7 +7,7 @@ from xmltodict import parse
 from app.logger import logger
 
 
-async def get_all_mvn_versions(
+async def get_all_maven_versions(
     package_artifact_id: str, package_group_id: str
 ) -> list[dict[str, Any]]:
     versions: list[dict[str, Any]] = []
@@ -33,7 +33,7 @@ async def get_all_mvn_versions(
     return versions
 
 
-async def requires_mvn_packages(
+async def requires_maven_packages(
     package_artifact_id: str, package_group_id: str, version_dist: str
 ) -> dict[str, list[str] | str]:
     require_packages: dict[str, Any] = {}

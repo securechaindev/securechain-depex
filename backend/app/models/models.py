@@ -57,9 +57,9 @@ class InitGraphRequest(BaseModel):
 
 
 class PackageManager(str, Enum):
-    pip = "PIP"
-    npm = "NPM"
-    mvn = "MVN"
+    pypi = "pypi"
+    npm = "npm"
+    maven = "maven"
 
 
 class Agregator(str, Enum):

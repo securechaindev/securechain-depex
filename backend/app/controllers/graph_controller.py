@@ -26,11 +26,11 @@ from app.services import (
 )
 from app.utils import JWTBearer, json_encoder, repo_analyzer
 
-from .managers.mvn_generate_controller import (
-    mvn_create_package,
-    mvn_create_requirement_file,
-    mvn_generate_packages,
-    mvn_search_new_versions,
+from .managers.maven_generate_controller import (
+    maven_create_package,
+    maven_create_requirement_file,
+    maven_generate_packages,
+    maven_search_new_versions,
 )
 from .managers.npm_generate_controller import (
     npm_create_package,
@@ -38,11 +38,11 @@ from .managers.npm_generate_controller import (
     npm_generate_packages,
     npm_search_new_versions,
 )
-from .managers.pip_generate_controller import (
-    pip_create_package,
-    pip_create_requirement_file,
-    pip_generate_packages,
-    pip_search_new_versions,
+from .managers.pypi_generate_controller import (
+    pypi_create_package,
+    pypi_create_requirement_file,
+    pypi_generate_packages,
+    pypi_search_new_versions,
 )
 
 router = APIRouter()
@@ -56,11 +56,11 @@ async def get_repositories(user_id: str) -> JSONResponse:
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/pypi/package/init")
 async def init_pypi_package(package_name: str) -> JSONResponse:
-    package = await read_package_by_name(package_name, "PIP")
+    package = await read_package_by_name(package_name, "pypi")
     if not package:
-        await pip_create_package(package_name)
+        await pypi_create_package(package_name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
-        await pip_search_new_versions(package)
+        await pypi_search_new_versions(package)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "Initializing graph"}),
@@ -70,7 +70,7 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/npm/package/init")
 async def init_npm_package(package_name: str) -> JSONResponse:
-    package = await read_package_by_name(package_name, "NPM")
+    package = await read_package_by_name(package_name, "npm")
     if not package:
         await npm_create_package(package_name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
@@ -81,13 +81,13 @@ async def init_npm_package(package_name: str) -> JSONResponse:
     )
 
 
-@router.post("/graph/mvn/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
-async def init_mvn_package(group_id: str, artifact_id: str) -> JSONResponse:
-    package = await read_package_by_name(artifact_id, "MVN")
+@router.post("/graph/maven/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+async def init_maven_package(group_id: str, artifact_id: str) -> JSONResponse:
+    package = await read_package_by_name(artifact_id, "maven")
     if not package:
-        await mvn_create_package(group_id, artifact_id)
+        await maven_create_package(group_id, artifact_id)
     elif package["moment"] < datetime.now() - timedelta(days=10):
-        await mvn_search_new_versions(package)
+        await maven_search_new_versions(package)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
@@ -180,7 +180,7 @@ async def replace_repository(
             )
             keys = raw_requirement_files[file_name]["dependencies"].keys()
             for group_package, constraints in packages.items():
-                if package_manager == "MVN":
+                if package_manager == "maven":
                     group_id, package = group_package.split(":")
                 else:
                     package = group_package
@@ -199,25 +199,25 @@ async def replace_repository(
                     await delete_requirement_file_rel(
                         requirement_file_id, package, package_manager
                     )
-                if package_manager == "MVN":
+                if package_manager == "maven":
                     pop_key = (group_id, package)
                 else:
                     pop_key = package
                 raw_requirement_files[file_name]["dependencies"].pop(pop_key)
             if raw_requirement_files[file_name]["dependencies"]:
                 match package_manager:
-                    case "PIP":
-                        await pip_generate_packages(
+                    case "pypi":
+                        await pypi_generate_packages(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
-                    case "NPM":
+                    case "npm":
                         await npm_generate_packages(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
-                    case "MVN":
-                        await mvn_generate_packages(
+                    case "maven":
+                        await maven_generate_packages(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
@@ -234,9 +234,9 @@ async def select_manager(
     package_manager: str, name: str, file: dict[str, Any], repository_id: str
 ) -> None:
     match package_manager:
-        case "PIP":
-            await pip_create_requirement_file(name, file, repository_id)
-        case "NPM":
+        case "pypi":
+            await pypi_create_requirement_file(name, file, repository_id)
+        case "npm":
             await npm_create_requirement_file(name, file, repository_id)
-        case "MVN":
-            await mvn_create_requirement_file(name, file, repository_id)
+        case "maven":
+            await maven_create_requirement_file(name, file, repository_id)

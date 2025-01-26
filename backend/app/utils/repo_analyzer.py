@@ -11,9 +11,9 @@ from .files.requirements_txt_analyzer import analyze_requirements_txt
 from .files.setup_cfg_analyzer import analyze_setup_cfg
 from .files.setup_py_analyzer import analyze_setup_py
 
-pip_files = ["pyproject.toml", "setup.cfg", "setup.py", "requirements.txt"]
+pypi_files = ["pyproject.toml", "setup.cfg", "setup.py", "requirements.txt"]
 npm_files = ["package.json"]
-mvn_files = ["pom.xml"]
+maven_files = ["pom.xml"]
 
 
 async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str]]:
@@ -80,10 +80,10 @@ async def get_req_files_names(directory_path: str) -> list[str]:
 
 
 async def is_req_file(requirement_file_name: str) -> bool:
-    if any(extension in requirement_file_name for extension in pip_files):
+    if any(extension in requirement_file_name for extension in pypi_files):
         return True
     if any(extension in requirement_file_name for extension in npm_files):
         return True
-    if any(extension in requirement_file_name for extension in mvn_files):
+    if any(extension in requirement_file_name for extension in maven_files):
         return True
     return False
