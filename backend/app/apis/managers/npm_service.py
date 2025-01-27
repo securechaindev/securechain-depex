@@ -29,9 +29,6 @@ async def get_all_npm_versions(pkg_name: str) -> Any:
                     "name": version,
                     "release_date": None,
                     "count": count,
-                    "require_packages": raw_versions[version]["dependencies"]
-                    if "dependencies" in raw_versions[version]
-                    else {},
                 }
             )
             all_require_packages.append(
