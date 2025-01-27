@@ -24,8 +24,6 @@ def get_collection(collection_name: str) -> AsyncIOMotorCollection:
     depex_db: AsyncIOMotorDatabase = client.depex
     nvd_db: AsyncIOMotorDatabase = client.nvd
     match collection_name:
-        case "env_variables":
-            return depex_db.get_collection(collection_name)
         case "users":
             return depex_db.get_collection(collection_name)
         case "jwt_tokens":
