@@ -6,7 +6,7 @@ from app.utils import mean, weighted_mean
 
 
 async def attribute_cves(
-    version: Any, cpe_product: dict[str, Any], package_manager: str
+    version: Any, cpe_product: dict[str, Any], manager: str
 ) -> dict[str, Any]:
     impacts: list[float] = []
     version["cves"] = []
@@ -16,7 +16,7 @@ async def attribute_cves(
         "versionStartExcluding",
         "versionEndExcluding",
     )
-    version_type = await get_version_type(package_manager)
+    version_type = await get_version_type(manager)
     if cpe_product:
         for cve in cpe_product["cves"]:
             if not any(key in cve for key in version_keys):
@@ -64,8 +64,8 @@ async def attribute_cves(
     return version
 
 
-async def get_version_type(package_manager: str):
-    match package_manager:
+async def get_version_type(manager: str):
+    match manager:
         case "pypi":
             return PypiVersion
         case "npm":

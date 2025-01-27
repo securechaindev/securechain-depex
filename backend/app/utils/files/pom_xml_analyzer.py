@@ -15,7 +15,7 @@ async def analyze_pom_xml(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "package_manager": "MVN",
+        "manager": "maven",
         "dependencies": {},
     }
     if "project" in pom_dict:

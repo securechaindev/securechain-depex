@@ -1,6 +1,6 @@
 from setuptools.config.setupcfg import read_configuration
 
-from app.utils import get_first_position, parse_pip_constraints
+from app.utils import get_first_position, parse_pypi_constraints
 
 
 async def analyze_setup_cfg(
@@ -16,7 +16,7 @@ async def analyze_setup_cfg(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "package_manager": "PIP",
+        "manager": "pypi",
         "dependencies": {},
     }
     if "install_requires" in file["options"]:
@@ -50,7 +50,7 @@ async def analyze_setup_cfg(
             pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
             requirement_files[requirement_file_name]["dependencies"].update(
                 {
-                    dependency[:pos].lower(): await parse_pip_constraints(
+                    dependency[:pos].lower(): await parse_pypi_constraints(
                         dependency[pos:]
                     )
                 }

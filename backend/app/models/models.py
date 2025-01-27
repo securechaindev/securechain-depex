@@ -56,7 +56,7 @@ class InitGraphRequest(BaseModel):
     user_id: str
 
 
-class PackageManager(str, Enum):
+class Manager(str, Enum):
     pypi = "pypi"
     npm = "npm"
     maven = "maven"
@@ -72,7 +72,7 @@ class FileInfoRequest(BaseModel):
         pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
     )
     max_level: int = Field(...)
-    package_manager: PackageManager
+    manager: Manager
 
     @validator("max_level")
     def validate_max_level(cls, value):
@@ -84,7 +84,7 @@ class ValidFileRequest(BaseModel):
         pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
     )
     max_level: int = Field(...)
-    package_manager: PackageManager
+    manager: Manager
 
     @validator("max_level")
     def validate_max_level(cls, value):
@@ -99,7 +99,7 @@ class MinMaxImpactRequest(BaseModel):
         ge=1
     )
     max_level: int = Field(...)
-    package_manager: PackageManager
+    manager: Manager
     agregator: Agregator
 
     @validator("max_level")
@@ -123,7 +123,7 @@ class FilterConfigsRequest(BaseModel):
         ge=1
     )
     max_level: int = Field(...)
-    package_manager: PackageManager
+    manager: Manager
     agregator: Agregator
 
     @validator("max_level")
@@ -136,7 +136,7 @@ class ValidConfigRequest(BaseModel):
         pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
     )
     max_level: int = Field(...)
-    package_manager: PackageManager
+    manager: Manager
     agregator: Agregator
     config: dict[str, str]
 
@@ -150,7 +150,7 @@ class CompleteConfigRequest(BaseModel):
         pattern="^4:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9]+$"
     )
     max_level: int = Field(...)
-    package_manager: PackageManager
+    manager: Manager
     agregator: Agregator
     config: dict[str, str]
 
@@ -168,7 +168,7 @@ class ConfigByImpactRequest(BaseModel):
         ge=0,
         le=10
     )
-    package_manager: PackageManager
+    manager: Manager
     agregator: Agregator
 
     @validator("max_level")

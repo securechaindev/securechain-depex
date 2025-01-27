@@ -18,7 +18,7 @@ from app.services import (
 
 async def maven_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
-        {"name": name, "manager": "maven", "moment": datetime.now()}, repository_id, "maven"
+        {"name": name, "manager": "maven", "moment": datetime.now()}, repository_id
     )
     await maven_generate_packages(file["dependencies"], new_req_file_id)
 
@@ -29,7 +29,7 @@ async def maven_generate_packages(
     packages: list[dict[str, str]] = []
     for dependency, constraints in dependencies.items():
         group_id, artifact_id = dependency
-        package = await read_package_by_name(artifact_id, "maven")
+        package = await read_package_by_name("maven", group_id, artifact_id)
         if package:
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
@@ -41,7 +41,7 @@ async def maven_generate_packages(
             await maven_create_package(
                 group_id, artifact_id, constraints, parent_id, parent_version_name
             )
-    await relate_packages(packages, "maven")
+    await relate_packages(packages)
 
 
 async def maven_create_package(
@@ -61,9 +61,8 @@ async def maven_create_package(
             for version in all_versions
         ]
         new_versions = await create_package_and_versions(
-            {"name": artifact_id, "group_id": group_id, "moment": datetime.now()},
+            {"manager": "maven", "group_id": group_id, "name": artifact_id, "moment": datetime.now()},
             versions,
-            "maven",
             constraints,
             parent_id,
             parent_version_name,
@@ -88,11 +87,11 @@ async def maven_search_new_versions(package: dict[str, Any]) -> None:
     all_versions = await get_all_versions(
         "maven", package_artifact_id=package["name"], package_group_id=package["group_id"]
     )
-    counter = await count_number_of_versions_by_package(package["name"], "maven")
+    counter = await count_number_of_versions_by_package("maven", package["group_id"], package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []
         cpe_product = await read_cpe_product_by_package_name(package["name"])
-        actual_versions = await read_versions_names_by_package(package["name"], "maven")
+        actual_versions = await read_versions_names_by_package("maven", package["group_id"], package["name"])
         for version in all_versions:
             if version["name"] not in actual_versions:
                 version["count"] = counter
@@ -104,8 +103,7 @@ async def maven_search_new_versions(package: dict[str, Any]) -> None:
         new_versions = await create_versions(
             package,
             no_existing_versions,
-            "maven",
         )
         for new_version in new_versions:
             await maven_extract_packages(package["name"], new_version)
-    await update_package_moment(package["name"], "maven")
+    await update_package_moment("maven", package["group_id"], package["name"])

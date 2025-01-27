@@ -18,7 +18,7 @@ from app.services import (
 
 async def pypi_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
-        {"name": name, "manager": "pypi", "moment": datetime.now()}, repository_id, "pypi"
+        {"name": name, "manager": "pypi", "moment": datetime.now()}, repository_id
     )
     await pypi_generate_packages(file["dependencies"], new_req_file_id)
 
@@ -27,8 +27,8 @@ async def pypi_generate_packages(
     dependencies: dict[str, str], parent_id: str, parent_version_name: str | None = None
 ) -> None:
     packages: list[dict[str, Any]] = []
-    for dependency, constraints in dependencies.items():
-        package = await read_package_by_name(dependency, "pypi")
+    for name, constraints in dependencies.items():
+        package = await read_package_by_name("pypi", "none", name)
         if package:
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
@@ -38,9 +38,9 @@ async def pypi_generate_packages(
             packages.append(package)
         else:
             await pypi_create_package(
-                dependency, constraints, parent_id, parent_version_name
+                name, constraints, parent_id, parent_version_name
             )
-    await relate_packages(packages, "pypi")
+    await relate_packages(packages)
 
 
 async def pypi_create_package(
@@ -57,9 +57,8 @@ async def pypi_create_package(
             for version in all_versions
         ]
         new_versions = await create_package_and_versions(
-            {"name": package_name, "moment": datetime.now()},
+            {"manager": "pypi", "group_id": "none", "name": package_name, "moment": datetime.now()},
             versions,
-            "pypi",
             constraints,
             parent_id,
             parent_version_name,
@@ -79,11 +78,11 @@ async def pypi_extract_packages(
 
 async def pypi_search_new_versions(package: dict[str, Any]) -> None:
     all_versions = await get_all_versions("pypi", package_name=package["name"])
-    counter = await count_number_of_versions_by_package(package["name"], "pypi")
+    counter = await count_number_of_versions_by_package("pypi", "none", package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []
         cpe_product = await read_cpe_product_by_package_name(package["name"])
-        actual_versions = await read_versions_names_by_package(package["name"], "pypi")
+        actual_versions = await read_versions_names_by_package("pypi", "none", package["name"])
         for version in all_versions:
             if version["name"] not in actual_versions:
                 version["count"] = counter
@@ -94,9 +93,8 @@ async def pypi_search_new_versions(package: dict[str, Any]) -> None:
                 counter += 1
         new_versions = await create_versions(
             package,
-            no_existing_versions,
-            "pypi",
+            no_existing_versions
         )
         for new_version in new_versions:
             await pypi_extract_packages(package["name"], new_version)
-    await update_package_moment(package["name"], "pypi")
+    await update_package_moment("pypi", "none", package["name"])

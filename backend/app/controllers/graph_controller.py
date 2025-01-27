@@ -56,7 +56,7 @@ async def get_repositories(user_id: str) -> JSONResponse:
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/pypi/package/init")
 async def init_pypi_package(package_name: str) -> JSONResponse:
-    package = await read_package_by_name(package_name, "pypi")
+    package = await read_package_by_name("pypi", "none", package_name)
     if not package:
         await pypi_create_package(package_name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
@@ -70,7 +70,7 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/npm/package/init")
 async def init_npm_package(package_name: str) -> JSONResponse:
-    package = await read_package_by_name(package_name, "npm")
+    package = await read_package_by_name("npm", "none", package_name)
     if not package:
         await npm_create_package(package_name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
@@ -80,10 +80,10 @@ async def init_npm_package(package_name: str) -> JSONResponse:
         content=json_encoder({"message": "initializing"}),
     )
 
-
-@router.post("/graph/maven/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+# dependencies=[Depends(JWTBearer())], tags=["graph"]
+@router.post("/graph/maven/package/init")
 async def init_maven_package(group_id: str, artifact_id: str) -> JSONResponse:
-    package = await read_package_by_name(artifact_id, "maven")
+    package = await read_package_by_name("maven", group_id, artifact_id)
     if not package:
         await maven_create_package(group_id, artifact_id)
     elif package["moment"] < datetime.now() - timedelta(days=10):
@@ -129,58 +129,56 @@ async def init_graph_background(repository: dict[str, Any], last_repository_upda
         or last_repository_update["moment"].replace(tzinfo=UTC)
         < last_commit_date.replace(tzinfo=UTC)
     ):
-        repository_ids = await read_repositories(
+        repository_id = await read_repositories(
             repository["owner"], repository["name"]
         )
         raw_requirement_files = await repo_analyzer(
             repository["owner"], repository["name"]
         )
-        for package_manager, repository_id in repository_ids.items():
-            if not repository_id:
-                repository_id = await create_repository(repository, package_manager)
-                await extract_repository(
-                    raw_requirement_files, repository_id, package_manager
-                )
-            else:
-                await create_user_repository_rel(
-                    repository_id, user_id, package_manager
-                )
-                await update_repository_is_complete(
-                    repository_id, False, package_manager
-                )
-                await replace_repository(
-                    raw_requirement_files, repository_id, package_manager
-                )
-            await update_repository_is_complete(
-                repository_id, True, package_manager
+        if not repository_id:
+            repository_id = await create_repository(repository)
+            await extract_repository(
+                raw_requirement_files, repository_id
             )
+        else:
+            await create_user_repository_rel(
+                repository_id, user_id
+            )
+            await update_repository_is_complete(
+                repository_id, False
+            )
+            await replace_repository(
+                raw_requirement_files, repository_id
+            )
+        await update_repository_is_complete(
+            repository_id, True
+        )
     await update_repository_users(last_repository_update["id"], user_id)
 
 
 async def extract_repository(
-    raw_requirement_files: dict[str, Any], repository_id: str, package_manager: str
+    raw_requirement_files: dict[str, Any], repository_id: str
 ) -> None:
     for name, file in raw_requirement_files.items():
-        if file["package_manager"] == package_manager:
-            await select_manager(package_manager, name, file, repository_id)
+        await select_manager(name, file, repository_id)
 
 
 async def replace_repository(
-    raw_requirement_files: dict[str, Any], repository_id: str, package_manager: str
+    raw_requirement_files: dict[str, Any], repository_id: str, manager: str
 ) -> None:
     requirement_files = await read_requirement_files_by_repository(
-        repository_id, package_manager
+        repository_id, manager
     )
     for file_name, requirement_file_id in requirement_files.items():
         if file_name not in raw_requirement_files:
-            await delete_requirement_file(repository_id, file_name, package_manager)
+            await delete_requirement_file(repository_id, file_name, manager)
         else:
             packages = await read_packages_by_requirement_file(
-                requirement_file_id, package_manager
+                requirement_file_id, manager
             )
             keys = raw_requirement_files[file_name]["dependencies"].keys()
             for group_package, constraints in packages.items():
-                if package_manager == "maven":
+                if manager == "maven":
                     group_id, package = group_package.split(":")
                 else:
                     package = group_package
@@ -193,19 +191,19 @@ async def replace_repository(
                             requirement_file_id,
                             package,
                             raw_requirement_files[file_name]["dependencies"][package],
-                            package_manager,
+                            manager,
                         )
                 else:
                     await delete_requirement_file_rel(
-                        requirement_file_id, package, package_manager
+                        requirement_file_id, package, manager
                     )
-                if package_manager == "maven":
+                if manager == "maven":
                     pop_key = (group_id, package)
                 else:
                     pop_key = package
                 raw_requirement_files[file_name]["dependencies"].pop(pop_key)
             if raw_requirement_files[file_name]["dependencies"]:
-                match package_manager:
+                match manager:
                     case "pypi":
                         await pypi_generate_packages(
                             raw_requirement_files[file_name]["dependencies"],
@@ -221,19 +219,19 @@ async def replace_repository(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
-            await update_requirement_file_moment(requirement_file_id, package_manager)
+            await update_requirement_file_moment(requirement_file_id, manager)
         raw_requirement_files.pop(file_name)
     if raw_requirement_files:
         for name, file in raw_requirement_files.items():
-            if file["package_manager"] == package_manager:
-                await select_manager(package_manager, name, file, repository_id)
-    await update_repository_moment(repository_id, package_manager)
+            if file["manager"] == manager:
+                await select_manager(manager, name, file, repository_id)
+    await update_repository_moment(repository_id, manager)
 
 
 async def select_manager(
-    package_manager: str, name: str, file: dict[str, Any], repository_id: str
+    name: str, file: dict[str, Any], repository_id: str
 ) -> None:
-    match package_manager:
+    match file["manager"]:
         case "pypi":
             await pypi_create_requirement_file(name, file, repository_id)
         case "npm":

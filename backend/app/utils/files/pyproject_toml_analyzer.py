@@ -1,6 +1,6 @@
 from toml import load
 
-from app.utils import get_first_position, parse_pip_constraints
+from app.utils import get_first_position, parse_pypi_constraints
 
 
 async def analyze_pyproject_toml(
@@ -16,7 +16,7 @@ async def analyze_pyproject_toml(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "package_manager": "PIP",
+        "manager": "pypi",
         "dependencies": {},
     }
     if "project" in file and "dependencies" in file["project"]:
@@ -50,7 +50,7 @@ async def analyze_pyproject_toml(
             pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
             requirement_files[requirement_file_name]["dependencies"].update(
                 {
-                    dependency[:pos].lower(): await parse_pip_constraints(
+                    dependency[:pos].lower(): await parse_pypi_constraints(
                         dependency[pos:]
                     )
                 }

@@ -14,19 +14,13 @@ async def create_indexes() -> None:
     await cpe_matchs_collection.create_index("matchCriteriaId", unique=True)
     await cpes_collection.create_index("cpeNameId", unique=True)
     await cpe_products_collection.create_index("product", unique=True)
-    for driver in get_graph_db_driver("ALL"):
-        async with driver.session() as session:
-            await session.run(
-                "create constraint unique_name if not exists for (u:User) require u._id is unique"
-            )
-    for _ in ("PIP", "NPM"):
-        driver = get_graph_db_driver(_)
-        async with driver.session() as session:
-            await session.run(
-                "create constraint unique_name if not exists for (p:Package) require p.name is unique"
-            )
-    driver = get_graph_db_driver("MVN")
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         await session.run(
-            "create constraint unique_group_name if not exists for (p:Package) require (p.group_id, p.name) is unique"
+            "create constraint unique_user_name if not exists for (u:User) require u._id is unique"
+        )
+        await session.run(
+            "create constraint unique_repository if not exists for (r:Repository) require (r.owner, r.name) is unique"
+        )
+        await session.run(
+            "create constraint unique_package if not exists for (p:Package) require (p.manager, p.group_id, p.name) is unique"
         )

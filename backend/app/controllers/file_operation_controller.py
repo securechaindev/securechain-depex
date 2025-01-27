@@ -47,7 +47,7 @@ async def valid_file(
     graph_data = await read_data_for_smt_transform(jsonable_encoder(valid_file_request))
     smt_id = f"{valid_file_request.requirement_file_id}-{valid_file_request.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, valid_file_request.package_manager, "mean")
+        smt_transform = GraphToSMT(graph_data, valid_file_request.manager, "mean")
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -78,7 +78,7 @@ async def minimize_impact(
     graph_data = await read_data_for_smt_transform(jsonable_encoder(MinMaxImpactRequest))
     smt_id = f"{MinMaxImpactRequest.requirement_file_id}-{MinMaxImpactRequest.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, MinMaxImpactRequest.package_manager, MinMaxImpactRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, MinMaxImpactRequest.manager, MinMaxImpactRequest.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -91,7 +91,7 @@ async def minimize_impact(
         operation.execute(smt_transform.destination_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.package_manager)
+            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -111,7 +111,7 @@ async def maximize_impact(
     graph_data = await read_data_for_smt_transform(jsonable_encoder(MinMaxImpactRequest))
     smt_id = f"{MinMaxImpactRequest.requirement_file_id}-{MinMaxImpactRequest.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, MinMaxImpactRequest.package_manager, MinMaxImpactRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, MinMaxImpactRequest.manager, MinMaxImpactRequest.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -124,7 +124,7 @@ async def maximize_impact(
         operation.execute(smt_transform.destination_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.package_manager)
+            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -144,7 +144,7 @@ async def filter_configs(
     graph_data = await read_data_for_smt_transform(jsonable_encoder(FilterConfigsRequest))
     smt_id = f"{FilterConfigsRequest.requirement_file_id}-{FilterConfigsRequest.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, FilterConfigsRequest.package_manager, FilterConfigsRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, FilterConfigsRequest.manager, FilterConfigsRequest.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -157,7 +157,7 @@ async def filter_configs(
         operation.execute(smt_transform.destination_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), FilterConfigsRequest.package_manager)
+            result = await read_releases_by_counts(operation.get_result(), FilterConfigsRequest.manager)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )

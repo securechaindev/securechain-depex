@@ -11,7 +11,7 @@ async def analyze_package_json(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "package_manager": "NPM",
+        "manager": "npm",
         "dependencies": {},
     }
     try:

@@ -4,7 +4,7 @@ from typing import Any
 from .dbs.databases import get_graph_db_driver
 
 
-async def create_repository(repository: dict[str, Any], package_manager: str) -> str:
+async def create_repository(repository: dict[str, Any]) -> str:
     query = """
     match(u:User) where u._id = $user_id
     merge(r: Repository{
@@ -17,22 +17,20 @@ async def create_repository(repository: dict[str, Any], package_manager: str) ->
     create (u)-[rel:OWN]->(r)
     return elementid(r) as id
     """
-    driver = get_graph_db_driver(package_manager)
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository)
         record = await result.single()
-    return record[0]
+    return record[0] if record else None
 
 
-async def create_user_repository_rel(repository_id: str, user_id: str, package_manager: str) -> None:
+async def create_user_repository_rel(repository_id: str, user_id: str) -> None:
     query = """
     match(u:User) where u._id = $user_id
     match(r:Repository) where elemtid(r) = $repository_id
     merge (u)-[rel:OWN]->(r)
     return elementid(r) as id
     """
-    driver = get_graph_db_driver(package_manager)
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository_id, user_id)
         record = await result.single()
     return record[0]
@@ -42,37 +40,27 @@ async def read_repositories_update(owner: str, name: str) -> dict[str, datetime 
     query = """
     match(r: Repository{owner: $owner, name: $name}) return {moment: r.moment, is_complete: r.is_complete, id: elementid(r)}
     """
-    for driver in get_graph_db_driver("ALL"):
-        async with driver.session() as session:
-            result = await session.run(query, owner=owner, name=name)
-            record = await result.single()
-            if record:
-                break
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(query, owner=owner, name=name)
+        record = await result.single()
     return record[0] if record else {"moment": None, "is_complete": True, "id": None}
 
 
-async def read_repositories(owner: str, name: str) -> dict[str, str]:
+async def read_repositories(owner: str, name: str) -> str:
     query = """
     match(r: Repository{owner: $owner, name: $name}) return elementid(r)
     """
-    repository_ids: dict[str, str] = {}
-    for package_manager in ("PIP", "NPM", "MVN"):
-        driver = get_graph_db_driver(package_manager)
-        async with driver.session() as session:
-            result = await session.run(query, owner=owner, name=name)
-            record = await result.single()
-            repository_ids.update({package_manager: record[0] if record else None})
-    return repository_ids
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(query, owner=owner, name=name)
+        record = await result.single()
+    return record[0] if record else None
 
 
-async def read_repository_by_id(
-    repository_id: str, package_manager: str
-) -> dict[str, str]:
+async def read_repository_by_id(repository_id: str) -> dict[str, str]:
     query = """
     match(r: Repository) where elementid(r)=$repository_id return {name: r.name, owner: r.owner}
     """
-    driver = get_graph_db_driver(package_manager)
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository_id=repository_id)
         record = await result.single()
     return record[0] if record else None
@@ -94,8 +82,7 @@ async def read_graph_for_info_operation(
     with deps, cves, collect(rels) as rels
     return {dependencies: size(deps), edges: size(rels), cves: apoc.coll.toSet(cves)}
     """
-    driver = get_graph_db_driver(file_info_request["package_manager"])
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         result = await session.run(
             query,
             file_info_request
@@ -135,8 +122,7 @@ async def read_data_for_smt_transform(
         have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")
     }
     """
-    driver = get_graph_db_driver(operation_request["package_manager"])
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         result = await session.run(
             query,
             operation_request,
@@ -158,33 +144,28 @@ async def read_repositories_by_user_id(user_id: str) -> dict[str, Any]:
     })
     """
     repositories = []
-    for driver in get_graph_db_driver("ALL"):
-        async with driver.session() as session:
-            result = await session.run(query, user_id=user_id)
-            record = await result.single()
-            repositories.extend(record[0] if record else [])
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(query, user_id=user_id)
+        record = await result.single()
+        repositories.extend(record[0] if record else [])
     return repositories
 
 
-async def update_repository_is_complete(
-    repository_id: str, is_complete: bool, package_manager: str
-) -> None:
+async def update_repository_is_complete(repository_id: str, is_complete: bool) -> None:
     query = """
     match (r:Repository) where elementid(r) = $repository_id
     set r.is_complete = $is_complete
     """
-    driver = get_graph_db_driver(package_manager)
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         await session.run(query, repository_id=repository_id, is_complete=is_complete)
 
 
-async def update_repository_moment(repository_id: str, package_manager: str) -> None:
+async def update_repository_moment(repository_id: str) -> None:
     query = """
     match (r:Repository) where elementid(r) = $repository_id
     set r.moment = $moment
     """
-    driver = get_graph_db_driver(package_manager)
-    async with driver.session() as session:
+    async with get_graph_db_driver().session() as session:
         await session.run(query, repository_id=repository_id, moment=datetime.now())
 
 
@@ -194,6 +175,5 @@ async def update_repository_users(repository_id: str, user_id: str) -> None:
     where elementid(r) = $repository_id and not $user_id in r.users
     set r.users = r.users + [$user_id]
     """
-    for driver in get_graph_db_driver("ALL"):
-        async with driver.session() as session:
-            await session.run(query, repository_id=repository_id, user_id=user_id)
+    async with get_graph_db_driver().session() as session:
+        await session.run(query, repository_id=repository_id, user_id=user_id)

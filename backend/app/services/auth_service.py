@@ -12,9 +12,8 @@ async def create_user(user: dict[str, str]) -> None:
     users_collection = get_collection("users")
     result = await users_collection.insert_one(user)
     user_id = str(result.inserted_id)
-    for driver in get_graph_db_driver("ALL"):
-        async with driver.session() as session:
-            result = await session.run(query, user_id=user_id)
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(query, user_id=user_id)
 
 
 async def read_user_by_email(email: str) -> dict[str, str]:

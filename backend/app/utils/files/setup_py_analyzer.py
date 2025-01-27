@@ -1,6 +1,6 @@
 from re import findall
 
-from app.utils import get_first_position, parse_pip_constraints
+from app.utils import get_first_position, parse_pypi_constraints
 
 
 async def analyze_setup_py(
@@ -27,7 +27,7 @@ async def analyze_setup_py(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "package_manager": "PIP",
+        "manager": "pypi",
         "dependencies": {},
     }
     for dependency in dependencies:
@@ -59,6 +59,6 @@ async def analyze_setup_py(
         )
         pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
         requirement_files[requirement_file_name]["dependencies"].update(
-            {dependency[:pos].lower(): await parse_pip_constraints(dependency[pos:])}
+            {dependency[:pos].lower(): await parse_pypi_constraints(dependency[pos:])}
         )
     return requirement_files

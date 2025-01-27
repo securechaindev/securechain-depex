@@ -23,11 +23,7 @@ services:
       - ./backend:/backend
       - .env:/backend/.env
     depends_on:
-      pip_graph_database:
-        condition: service_healthy
-      npm_graph_database:
-        condition: service_healthy
-      mvn_graph_database:
+      graph_database:
         condition: service_healthy
       vuln_database_seeder:
         condition: service_completed_successfully
@@ -40,13 +36,13 @@ services:
       interval: 10s
       start_period: 20s
 
-  pip_graph_database:
+  graph_database:
     env_file: .env
-    container_name: pip_neo4j
+    container_name: neo4j
     image: neo4j:5.20.0
     environment:
       - EXTENSION_SCRIPT=/seeds/graphdb_seeder.sh
-      - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_PIP}
+      - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_server_http_listen__address=:7474
       - NEO4J_server_http_advertised__address=:7474
@@ -57,60 +53,12 @@ services:
       - '7474:7474'
       - '7687:7687'
     volumes:
-      - ./seeds/graphs/pypi_neo4j.dump:/backups/neo4j.dump
+      - ./seeds/graphs/neo4j.dump:/backups/neo4j.dump
       - ./seeds/graphdb_seeder.sh:/seeds/graphdb_seeder.sh
     networks:
       - depex
     healthcheck:
       test: wget http://localhost:7474 || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 3s
-
-  npm_graph_database:
-    env_file: .env
-    container_name: npm_neo4j
-    image: neo4j:5.20.0
-    environment:
-      - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_NPM}
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_server_http_listen__address=:7473
-      - NEO4J_server_http_advertised__address=:7473
-      - NEO4J_server_bolt_listen__address=:7686
-      - NEO4J_server_bolt_advertised__address=:7686
-      - NEO4J_apoc_export_file_enabled=true
-    ports:
-      - '7473:7473'
-      - '7686:7686'
-    networks:
-      - depex
-    healthcheck:
-      test: wget http://localhost:7473 || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 3s
-
-  mvn_graph_database:
-    env_file: .env
-    container_name: mvn_neo4j
-    image: neo4j:5.20.0
-    environment:
-      - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD_MVN}
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_server_http_listen__address=:7472
-      - NEO4J_server_http_advertised__address=:7472
-      - NEO4J_server_bolt_listen__address=:7685
-      - NEO4J_server_bolt_advertised__address=:7685
-      - NEO4J_apoc_export_file_enabled=true
-    ports:
-      - '7472:7472'
-      - '7685:7685'
-    networks:
-      - depex
-    healthcheck:
-      test: wget http://localhost:7472 || exit 1
       interval: 10s
       timeout: 10s
       retries: 5
