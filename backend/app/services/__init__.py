@@ -10,11 +10,6 @@ from .cve_service import (
     update_cpe_products,
 )
 from .dbs.indexes import create_indexes
-from .env_variables_service import (
-    read_env_variables,
-    update_env_variables_by_exploit_db,
-    update_env_variables_by_nvd,
-)
 from .package_service import (
     create_package_and_versions,
     create_versions,
@@ -82,12 +77,9 @@ __all__ = [
     "update_requirement_file_moment",
     "delete_requirement_file",
     "delete_requirement_file_rel",
-    "read_env_variables",
-    "update_env_variables_by_nvd",
     "create_user",
     "read_user_by_email",
     "update_user_password",
-    "update_env_variables_by_exploit_db",
     "read_cve_ids_by_version_and_package",
     "read_versions_names_by_package",
     "read_releases_by_counts",

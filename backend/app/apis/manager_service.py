@@ -3,6 +3,7 @@ from typing import Any
 from .managers.maven_service import get_all_maven_versions, requires_maven_packages
 from .managers.npm_service import get_all_npm_versions
 from .managers.pypi_service import get_all_pypi_versions, requires_pypi_packages
+from .managers.nuget_service import get_all_nuget_versions
 
 
 async def get_all_versions(
@@ -12,6 +13,8 @@ async def get_all_versions(
     package_group_id: str | None = None,
 ) -> list[dict[str, Any]]:
     match manager:
+        case "nuget":
+            return await get_all_nuget_versions(package_name)
         case "pypi":
             return await get_all_pypi_versions(package_name)
         case "npm":

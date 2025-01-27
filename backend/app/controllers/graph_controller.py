@@ -45,6 +45,13 @@ from .managers.pypi_generate_controller import (
     pypi_search_new_versions,
 )
 
+from .managers.nuget_generate_controller import (
+    nuget_create_package,
+    nuget_create_requirement_file,
+    nuget_generate_packages,
+    nuget_search_new_versions,
+)
+
 router = APIRouter()
 
 
@@ -52,6 +59,21 @@ router = APIRouter()
 async def get_repositories(user_id: str) -> JSONResponse:
     repositories = await read_repositories_by_user_id(user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
+
+
+# dependencies=[Depends(JWTBearer())], tags=["graph"]
+@router.post("/graph/nuget/package/init")
+async def init_nuget_package(package_name: str) -> JSONResponse:
+    package = await read_package_by_name("nuget", "none", package_name)
+    if not package:
+        await nuget_create_package(package_name)
+    elif package["moment"] < datetime.now() - timedelta(days=10):
+        await nuget_search_new_versions(package)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder({"message": "Initializing graph"}),
+    )
+
 
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/pypi/package/init")
