@@ -38,18 +38,15 @@ from .managers.npm_generate_controller import (
     npm_generate_packages,
     npm_search_new_versions,
 )
+from .managers.nuget_generate_controller import (
+    nuget_create_package,
+    nuget_search_new_versions,
+)
 from .managers.pypi_generate_controller import (
     pypi_create_package,
     pypi_create_requirement_file,
     pypi_generate_packages,
     pypi_search_new_versions,
-)
-
-from .managers.nuget_generate_controller import (
-    nuget_create_package,
-    nuget_create_requirement_file,
-    nuget_generate_packages,
-    nuget_search_new_versions,
 )
 
 router = APIRouter()

@@ -2,8 +2,8 @@ from typing import Any
 
 from .managers.maven_service import get_all_maven_versions, requires_maven_packages
 from .managers.npm_service import get_all_npm_versions
-from .managers.pypi_service import get_all_pypi_versions, requires_pypi_packages
 from .managers.nuget_service import get_all_nuget_versions
+from .managers.pypi_service import get_all_pypi_versions, requires_pypi_packages
 
 
 async def get_all_versions(
