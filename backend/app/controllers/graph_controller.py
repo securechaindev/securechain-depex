@@ -64,6 +64,7 @@ async def get_repositories(user_id: str) -> JSONResponse:
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/nuget/package/init")
 async def init_nuget_package(package_name: str) -> JSONResponse:
+    package_name = package_name.lower()
     package = await read_package_by_name("nuget", "none", package_name)
     if not package:
         await nuget_create_package(package_name)
@@ -92,6 +93,7 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/npm/package/init")
 async def init_npm_package(package_name: str) -> JSONResponse:
+    package_name = package_name.lower()
     package = await read_package_by_name("npm", "none", package_name)
     if not package:
         await npm_create_package(package_name)

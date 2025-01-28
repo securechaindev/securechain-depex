@@ -41,7 +41,7 @@ services:
     container_name: neo4j
     image: neo4j:5.20.0
     environment:
-      - EXTENSION_SCRIPT=/seeds/graphdb_seeder.sh
+      # - EXTENSION_SCRIPT=/seeds/graphdb_seeder.sh
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_server_http_listen__address=:7474
