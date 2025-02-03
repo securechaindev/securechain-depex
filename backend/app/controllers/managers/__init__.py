@@ -1,3 +1,4 @@
+from .rubygems_controller import rubygems_create_package, rubygems_search_new_versions
 from .cargo_controller import cargo_create_package, cargo_search_new_versions
 from .maven_controller import (
     maven_create_package,
@@ -23,6 +24,8 @@ from .pypi_controller import (
 )
 
 __all__ = [
+    "rubygems_create_package",
+    "rubygems_search_new_versions",
     "cargo_create_package",
     "cargo_search_new_versions",
     "maven_create_package",

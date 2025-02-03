@@ -9,6 +9,8 @@ from .managers import (
     get_nuget_versions,
     get_pypi_requires,
     get_pypi_versions,
+    get_rubygems_requires,
+    get_rubygems_versions
 )
 
 
@@ -19,6 +21,8 @@ async def get_versions(
     group_id: str | None = None,
 ) -> list[dict[str, Any]]:
     match manager:
+        case "rubygems":
+            return await get_rubygems_versions(name)
         case "cargo":
             return await get_cargo_versions(name)
         case "nuget":
@@ -39,6 +43,8 @@ async def get_requires(
     group_id: str | None = None,
 ) -> dict[str, list[str] | str]:
     match manager:
+        case "rubygems":
+            return await get_rubygems_requires(name, version)
         case "cargo":
             return await get_cargo_requires(name, version)
         case "pypi":

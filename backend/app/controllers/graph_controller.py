@@ -27,6 +27,8 @@ from app.services import (
 from app.utils import JWTBearer, json_encoder, repo_analyzer
 
 from .managers import (
+    rubygems_create_package,
+    rubygems_search_new_versions,
     cargo_create_package,
     cargo_search_new_versions,
     maven_create_package,
@@ -52,6 +54,21 @@ router = APIRouter()
 async def get_repositories(user_id: str) -> JSONResponse:
     repositories = await read_repositories_by_user_id(user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
+
+
+# dependencies=[Depends(JWTBearer())], tags=["graph"]
+@router.post("/graph/rubygems/package/init")
+async def init_rubygems_package(name: str) -> JSONResponse:
+    name = name.lower()
+    package = await read_package_by_name("rubygems", "none", name)
+    if not package:
+        await rubygems_create_package(name)
+    elif package["moment"] < datetime.now() - timedelta(days=10):
+        await rubygems_search_new_versions(package)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder({"message": "Initializing graph"}),
+    )
 
 
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
