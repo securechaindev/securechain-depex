@@ -13,7 +13,7 @@ import CompleteConfigOperation from './operations/complete_config'
 import ConfigByImpactOperation from './operations/config_by_impact'
 
 export default function OperationsPage(props) {
-  const { requirement_file_id, package_manager } = props
+  const { requirement_file_id, manager } = props
   const [operation, set_operation] = useState('')
   const [operation_result, set_operation_result] = useState(null)
 
@@ -26,7 +26,7 @@ export default function OperationsPage(props) {
       return (
         <ValidFileOperation
           requirement_file_id={requirement_file_id}
-          package_manager={package_manager}
+          manager={manager}
           set_operation_result={set_operation_result}
         />
       )
@@ -34,7 +34,7 @@ export default function OperationsPage(props) {
       return (
         <MinimiseImpactOperation
           requirement_file_id={requirement_file_id}
-          package_manager={package_manager}
+          manager={manager}
           set_operation_result={set_operation_result}
         />
       )
@@ -42,7 +42,7 @@ export default function OperationsPage(props) {
       return (
         <MaximiseImpactOperation
           requirement_file_id={requirement_file_id}
-          package_manager={package_manager}
+          manager={manager}
           set_operation_result={set_operation_result}
         />
       )
@@ -50,7 +50,7 @@ export default function OperationsPage(props) {
       return (
         <FilterConfigsOperation
           requirement_file_id={requirement_file_id}
-          package_manager={package_manager}
+          manager={manager}
           set_operation_result={set_operation_result}
         />
       )
@@ -58,7 +58,7 @@ export default function OperationsPage(props) {
       return (
         <ValidConfigOperation
           requirement_file_id={requirement_file_id}
-          package_manager={package_manager}
+          manager={manager}
           set_operation_result={set_operation_result}
         />
       )
@@ -66,7 +66,7 @@ export default function OperationsPage(props) {
       return (
         <CompleteConfigOperation
           requirement_file_id={requirement_file_id}
-          package_manager={package_manager}
+          manager={manager}
           set_operation_result={set_operation_result}
         />
       )
@@ -74,7 +74,7 @@ export default function OperationsPage(props) {
       return (
         <ConfigByImpactOperation
           requirement_file_id={requirement_file_id}
-          package_manager={package_manager}
+          manager={manager}
           set_operation_result={set_operation_result}
         />
       )
@@ -113,5 +113,5 @@ export default function OperationsPage(props) {
 
 OperationsPage.propTypes = {
   requirement_file_id: PropTypes.string,
-  package_manager: PropTypes.string
+  manager: PropTypes.string
 }

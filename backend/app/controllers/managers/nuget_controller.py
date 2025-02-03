@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.apis import get_all_versions
+from app.apis import get_versions
 from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
@@ -45,22 +45,22 @@ async def nuget_generate_packages(
 
 
 async def nuget_create_package(
-    package_name: str,
+    name: str,
     constraints: str | None = None,
     parent_id: str | None = None,
     parent_version_name: str | None = None,
 ) -> None:
-    all_versions, all_require_packages = await get_all_versions(
-        "nuget", package_name=package_name
+    all_versions, all_require_packages = await get_versions(
+        "nuget", name=name
     )
     if all_versions:
-        cpe_product = await read_cpe_product_by_package_name(package_name)
+        cpe_product = await read_cpe_product_by_package_name(name)
         versions = [
             await attribute_cves(version, cpe_product, "nuget")
             for version in all_versions
         ]
         new_versions = await create_package_and_versions(
-            {"manager": "nuget", "group_id": "none", "name": package_name, "moment": datetime.now()},
+            {"manager": "nuget", "group_id": "none", "name": name, "moment": datetime.now()},
             versions,
             constraints,
             parent_id,
@@ -68,12 +68,12 @@ async def nuget_create_package(
         )
         for require_packages, new_version in zip(all_require_packages, new_versions):
             await nuget_generate_packages(
-                require_packages, new_version["id"], package_name
+                require_packages, new_version["id"], name
             )
 
 
 async def nuget_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions, all_require_packages = await get_all_versions("nuget", package_name=package["name"])
+    all_versions, all_require_packages = await get_versions("nuget", name=package["name"])
     counter = await count_number_of_versions_by_package("nuget", "none", package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []

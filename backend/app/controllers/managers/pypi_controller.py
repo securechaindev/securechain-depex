@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.apis import get_all_versions, requires_packages
+from app.apis import get_requires, get_versions
 from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
@@ -44,40 +44,40 @@ async def pypi_generate_packages(
 
 
 async def pypi_create_package(
-    package_name: str,
+    name: str,
     constraints: str | None = None,
     parent_id: str | None = None,
     parent_version_name: str | None = None,
 ) -> None:
-    all_versions = await get_all_versions("pypi", package_name=package_name)
+    all_versions = await get_versions("pypi", name=name)
     if all_versions:
-        cpe_product = await read_cpe_product_by_package_name(package_name)
+        cpe_product = await read_cpe_product_by_package_name(name)
         versions = [
             await attribute_cves(version, cpe_product, "pypi")
             for version in all_versions
         ]
         new_versions = await create_package_and_versions(
-            {"manager": "pypi", "group_id": "none", "name": package_name, "moment": datetime.now()},
+            {"manager": "pypi", "group_id": "none", "name": name, "moment": datetime.now()},
             versions,
             constraints,
             parent_id,
             parent_version_name,
         )
         for new_version in new_versions:
-            await pypi_extract_packages(package_name, new_version)
+            await pypi_extract_packages(name, new_version)
 
 
 async def pypi_extract_packages(
     parent_package_name: str, version: dict[str, Any]
 ) -> None:
-    require_packages = await requires_packages(
-        version["name"], "pypi", package_name=parent_package_name
+    require_packages = await get_requires(
+        version["name"], "pypi", name=parent_package_name
     )
     await pypi_generate_packages(require_packages, version["id"], parent_package_name)
 
 
 async def pypi_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions = await get_all_versions("pypi", package_name=package["name"])
+    all_versions = await get_versions("pypi", name=package["name"])
     counter = await count_number_of_versions_by_package("pypi", "none", package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []

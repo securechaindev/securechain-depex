@@ -157,7 +157,7 @@ const RepositoriesPage = () => {
                             <OperationsPage
                               id='modal-modal-description'
                               requirement_file_id={requirementFilesRow.requirement_file_id}
-                              package_manager={requirementFilesRow.manager}
+                              manager={requirementFilesRow.manager}
                             />
                           </Box>
                         </Modal>

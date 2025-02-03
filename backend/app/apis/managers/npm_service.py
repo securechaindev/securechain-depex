@@ -7,12 +7,13 @@ from aiohttp import ClientConnectorError, ClientSession
 from app.logger import logger
 
 
-async def get_all_npm_versions(pkg_name: str) -> Any:
+async def get_npm_versions(name: str) -> Any:
+    api_url = f"https://registry.npmjs.org/{name}"
     async with ClientSession() as session:
         while True:
             try:
-                logger.info(f"NPM - https://registry.npmjs.org/{pkg_name}")
-                async with session.get(f"https://registry.npmjs.org/{pkg_name}") as response:
+                logger.info(f"NPM - {api_url}")
+                async with session.get(api_url) as response:
                     response = await response.json()
                     break
             except (ClientConnectorError, TimeoutError):

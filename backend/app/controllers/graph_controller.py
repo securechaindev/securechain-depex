@@ -26,23 +26,19 @@ from app.services import (
 )
 from app.utils import JWTBearer, json_encoder, repo_analyzer
 
-from .managers.maven_generate_controller import (
+from .managers import (
+    cargo_create_package,
+    cargo_search_new_versions,
     maven_create_package,
     maven_create_requirement_file,
     maven_generate_packages,
     maven_search_new_versions,
-)
-from .managers.npm_generate_controller import (
     npm_create_package,
     npm_create_requirement_file,
     npm_generate_packages,
     npm_search_new_versions,
-)
-from .managers.nuget_generate_controller import (
     nuget_create_package,
     nuget_search_new_versions,
-)
-from .managers.pypi_generate_controller import (
     pypi_create_package,
     pypi_create_requirement_file,
     pypi_generate_packages,
@@ -59,12 +55,27 @@ async def get_repositories(user_id: str) -> JSONResponse:
 
 
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/nuget/package/init")
-async def init_nuget_package(package_name: str) -> JSONResponse:
-    package_name = package_name.lower()
-    package = await read_package_by_name("nuget", "none", package_name)
+@router.post("/graph/cargo/package/init")
+async def init_cargo_package(name: str) -> JSONResponse:
+    name = name.lower()
+    package = await read_package_by_name("cargo", "none", name)
     if not package:
-        await nuget_create_package(package_name)
+        await cargo_create_package(name)
+    elif package["moment"] < datetime.now() - timedelta(days=10):
+        await cargo_search_new_versions(package)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder({"message": "Initializing graph"}),
+    )
+
+
+# dependencies=[Depends(JWTBearer())], tags=["graph"]
+@router.post("/graph/nuget/package/init")
+async def init_nuget_package(name: str) -> JSONResponse:
+    name = name.lower()
+    package = await read_package_by_name("nuget", "none", name)
+    if not package:
+        await nuget_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await nuget_search_new_versions(package)
     return JSONResponse(
@@ -75,10 +86,11 @@ async def init_nuget_package(package_name: str) -> JSONResponse:
 
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/pypi/package/init")
-async def init_pypi_package(package_name: str) -> JSONResponse:
-    package = await read_package_by_name("pypi", "none", package_name)
+async def init_pypi_package(name: str) -> JSONResponse:
+    name = name.lower()
+    package = await read_package_by_name("pypi", "none", name)
     if not package:
-        await pypi_create_package(package_name)
+        await pypi_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await pypi_search_new_versions(package)
     return JSONResponse(
@@ -89,11 +101,11 @@ async def init_pypi_package(package_name: str) -> JSONResponse:
 
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/npm/package/init")
-async def init_npm_package(package_name: str) -> JSONResponse:
-    package_name = package_name.lower()
-    package = await read_package_by_name("npm", "none", package_name)
+async def init_npm_package(name: str) -> JSONResponse:
+    name = name.lower()
+    package = await read_package_by_name("npm", "none", name)
     if not package:
-        await npm_create_package(package_name)
+        await npm_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await npm_search_new_versions(package)
     return JSONResponse(
@@ -104,6 +116,8 @@ async def init_npm_package(package_name: str) -> JSONResponse:
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
 @router.post("/graph/maven/package/init")
 async def init_maven_package(group_id: str, artifact_id: str) -> JSONResponse:
+    group_id = group_id.lower()
+    artifact_id = artifact_id.lower()
     package = await read_package_by_name("maven", group_id, artifact_id)
     if not package:
         await maven_create_package(group_id, artifact_id)

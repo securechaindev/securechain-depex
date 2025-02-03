@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 const ValidFileOperation = (props) => {
   const access_token = useState(localStorage.getItem('access_token'))[0]
-  const { requirement_file_id, package_manager, set_operation_result } = props
+  const { requirement_file_id, manager, set_operation_result } = props
   const [_max_level, set_max_level] = useState('')
 
   const [max_level_error, set_max_level_error] = useState('')
@@ -24,7 +24,7 @@ const ValidFileOperation = (props) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${access_token}`
       },
-      body: JSON.stringify({ requirement_file_id, max_level, package_manager })
+      body: JSON.stringify({ requirement_file_id, max_level, manager })
     })
       .then((r) => r.json())
       .then((r) => {
@@ -67,7 +67,7 @@ const ValidFileOperation = (props) => {
 
 ValidFileOperation.propTypes = {
   requirement_file_id: PropTypes.string,
-  package_manager: PropTypes.string,
+  manager: PropTypes.string,
   set_operation_result: PropTypes.func
 }
 

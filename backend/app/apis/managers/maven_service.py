@@ -7,15 +7,16 @@ from xmltodict import parse
 from app.logger import logger
 
 
-async def get_all_maven_versions(
-    package_artifact_id: str, package_group_id: str
+async def get_maven_versions(
+    group_id: str, artifact_id: str
 ) -> list[dict[str, Any]]:
     versions: list[dict[str, Any]] = []
+    api_url = f"https://repo1.maven.org/maven2/{group_id.replace(".", "/")}/{artifact_id}/maven-metadata.xml"
     async with ClientSession() as session:
         while True:
             try:
-                logger.info(f"MAVEN - https://repo1.maven.org/maven2/{package_group_id.replace(".", "/")}/{package_artifact_id}/maven-metadata.xml")
-                async with session.get(f"https://repo1.maven.org/maven2/{package_group_id.replace(".", "/")}/{package_artifact_id}/maven-metadata.xml") as response:
+                logger.info(f"MAVEN - {api_url}")
+                async with session.get(api_url) as response:
                     xml_string = await response.text()
                     break
             except (ClientConnectorError, TimeoutError):
@@ -33,16 +34,16 @@ async def get_all_maven_versions(
     return versions
 
 
-async def requires_maven_packages(
-    package_artifact_id: str, package_group_id: str, version_dist: str
+async def get_maven_requires(
+    group_id: str, artifact_id: str, version: str
 ) -> dict[str, list[str] | str]:
     require_packages: dict[str, Any] = {}
-    group_id = package_group_id.replace(".", "/")
+    api_url = f"https://repo1.maven.org/maven2/{group_id.replace(".", "/")}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
     async with ClientSession() as session:
         while True:
             try:
-                logger.info(f"MAVEN - https://repo1.maven.org/maven2/{group_id}/{package_artifact_id}/{version_dist}/{package_artifact_id}-{version_dist}.pom")
-                async with session.get(f"https://repo1.maven.org/maven2/{group_id}/{package_artifact_id}/{version_dist}/{package_artifact_id}-{version_dist}.pom") as response:
+                logger.info(f"MAVEN - {api_url}")
+                async with session.get(api_url) as response:
                     xml_string = await response.text()
                     break
             except (ClientConnectorError, TimeoutError):

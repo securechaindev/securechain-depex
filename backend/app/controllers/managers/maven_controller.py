@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.apis import get_all_versions, requires_packages
+from app.apis import get_requires, get_versions
 from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
@@ -51,8 +51,8 @@ async def maven_create_package(
     parent_id: str | None = None,
     parent_version_name: str | None = None,
 ) -> None:
-    all_versions = await get_all_versions(
-        "maven", package_artifact_id=artifact_id, package_group_id=group_id
+    all_versions = await get_versions(
+        "maven", artifact_id=artifact_id, group_id=group_id
     )
     if all_versions:
         cpe_product = await read_cpe_product_by_package_name(artifact_id)
@@ -74,18 +74,18 @@ async def maven_create_package(
 async def maven_extract_packages(
     parent_group_id: str, parent_artifact_id: str, version: dict[str, Any]
 ) -> None:
-    require_packages = await requires_packages(
+    require_packages = await get_requires(
         version["name"],
         "maven",
-        package_group_id=parent_group_id,
-        package_artifact_id=parent_artifact_id,
+        group_id=parent_group_id,
+        artifact_id=parent_artifact_id,
     )
     await maven_generate_packages(require_packages, version["id"], parent_artifact_id)
 
 
 async def maven_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions = await get_all_versions(
-        "maven", package_artifact_id=package["name"], package_group_id=package["group_id"]
+    all_versions = await get_versions(
+        "maven", artifact_id=package["name"], group_id=package["group_id"]
     )
     counter = await count_number_of_versions_by_package("maven", package["group_id"], package["name"])
     if counter < len(all_versions):

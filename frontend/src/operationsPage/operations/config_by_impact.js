@@ -4,7 +4,7 @@ import AgregatorSelect from '../utils/agregator'
 
 const ConfigByImpactOperation = (props) => {
   const access_token = useState(localStorage.getItem('access_token'))[0]
-  const { requirement_file_id, package_manager, set_operation_result } = props
+  const { requirement_file_id, manager, set_operation_result } = props
   const [_max_level, set_max_level] = useState('')
   const [agregator, set_agregator] = useState('mean')
   const [impact, set_impact] = useState('')
@@ -34,7 +34,7 @@ const ConfigByImpactOperation = (props) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${access_token}`
       },
-      body: JSON.stringify({ requirement_file_id, max_level, impact, package_manager, agregator })
+      body: JSON.stringify({ requirement_file_id, max_level, impact, manager, agregator })
     })
       .then((r) => r.json())
       .then((r) => {
@@ -87,7 +87,7 @@ const ConfigByImpactOperation = (props) => {
 
 ConfigByImpactOperation.propTypes = {
   requirement_file_id: PropTypes.string,
-  package_manager: PropTypes.string,
+  manager: PropTypes.string,
   set_operation_result: PropTypes.func
 }
 

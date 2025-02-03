@@ -1,6 +1,6 @@
 from asyncio import TimeoutError, sleep
 from json import JSONDecodeError
-from typing import Any, List, Dict
+from typing import Any, Dict, List
 
 from aiohttp import ClientConnectorError, ClientSession
 
@@ -20,13 +20,13 @@ async def fetch_page_versions(url: str) -> List[Dict[str, Any]]:
                 return []
 
 
-async def get_all_nuget_versions(pkg_name: str) -> Any:
+async def get_nuget_versions(name: str) -> Any:
+    api_url = f"https://api.nuget.org/v3/registration5-gz-semver2/{name}/index.json"
     async with ClientSession() as session:
         while True:
             try:
-                logger.info(f"NUGET - https://api.nuget.org/v3/registration5-gz-semver2/{pkg_name}/index.json")
-                main_url = f"https://api.nuget.org/v3/registration5-gz-semver2/{pkg_name}/index.json"
-                async with session.get(main_url) as response:
+                logger.info(f"NUGET - {api_url}")
+                async with session.get(api_url) as response:
                     response = await response.json()
                     break
             except (ClientConnectorError, TimeoutError):

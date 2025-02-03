@@ -10,12 +10,13 @@ from app.utils import get_first_position, parse_pypi_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
-async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
+async def get_pypi_versions(name: str) -> list[dict[str, Any]]:
+    api_url = f"https://pypi.python.org/pypi/{name}/json"
     async with ClientSession() as session:
         while True:
             try:
-                logger.info(f"PyPI - https://pypi.python.org/pypi/{pkg_name}/json")
-                async with session.get(f"https://pypi.python.org/pypi/{pkg_name}/json") as response:
+                logger.info(f"PyPI - {api_url}")
+                async with session.get(api_url) as response:
                     response = await response.json()
                     break
             except (ClientConnectorError, TimeoutError):
@@ -36,14 +37,15 @@ async def get_all_pypi_versions(pkg_name: str) -> list[dict[str, Any]]:
     return []
 
 
-async def requires_pypi_packages(
-    pkg_name: str, version_dist: str
+async def get_pypi_requires(
+    name: str, version: str
 ) -> dict[str, list[str] | str]:
+    api_url = f"https://pypi.python.org/pypi/{name}/{version}/json"
     async with ClientSession() as session:
         while True:
             try:
-                logger.info(f"PyPI - https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json")
-                async with session.get(f"https://pypi.python.org/pypi/{pkg_name}/{version_dist}/json") as response:
+                logger.info(f"PyPI - {api_url}")
+                async with session.get(api_url) as response:
                     response = await response.json()
                     break
             except (ClientConnectorError, TimeoutError):

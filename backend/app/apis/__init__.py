@@ -1,8 +1,8 @@
 from .github_service import get_last_commit_date_github
-from .manager_service import get_all_versions, requires_packages
+from .manager_service import get_requires, get_versions
 
 __all__ = [
-    "get_all_versions",
-    "requires_packages",
+    "get_versions",
+    "get_requires",
     "get_last_commit_date_github"
 ]
