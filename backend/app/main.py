@@ -1,6 +1,3 @@
-from contextlib import asynccontextmanager
-from typing import Any
-
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
@@ -13,24 +10,15 @@ from app.exception_handler import (
 )
 from app.middleware import log_request_middleware
 from app.router import api_router
-from app.services import create_indexes
 
 DESCRIPTION = """
 A backend for dependency graph building, atribution of vulnerabilities and reasoning
 over it.
 """
 
-
-@asynccontextmanager
-async def lifespan(_: FastAPI) -> Any:
-    await create_indexes()
-    yield
-
-
 app = FastAPI(
     title="Depex",
     description=DESCRIPTION,
-    # openapi_url=None,
     version="0.7.3",
     contact={
         "name": "Antonio Germán Márquez Trujillo",
@@ -41,9 +29,7 @@ app = FastAPI(
         "name": "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "url": "https://www.gnu.org/licenses/gpl-3.0.html",
     },
-    lifespan=lifespan,
 )
-
 
 app.middleware("http")(log_request_middleware)
 app.add_middleware(
@@ -56,10 +42,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
-
 
 app.include_router(api_router)

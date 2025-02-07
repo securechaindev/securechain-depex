@@ -34,14 +34,14 @@ services:
     healthcheck:
       test: curl --fail http://localhost:8000/health || exit 1
       interval: 10s
-      start_period: 20s
+      start_period: 30s
 
   graph_database:
     env_file: .env
     container_name: neo4j
     image: neo4j:5.20.0
     environment:
-      # - EXTENSION_SCRIPT=/seeds/graphdb_seeder.sh
+      - EXTENSION_SCRIPT=/seeds/graphdb_seeder.sh
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_server_http_listen__address=:7474
@@ -61,8 +61,8 @@ services:
       test: wget http://localhost:7474 || exit 1
       interval: 10s
       timeout: 10s
-      retries: 5
-      start_period: 3s
+      retries: 10
+      start_period: 30s
 
   vuln_database_seeder:
     env_file: .env
@@ -93,8 +93,8 @@ services:
       test: "echo 'db.stats().ok' | mongosh --username=${VULN_DB_USER} --password=${VULN_DB_PASSWORD} --authenticationDatabase=admin mongodb/testdb"
       interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 3s
+      retries: 10
+      start_period: 30s
 
 networks:
   depex:

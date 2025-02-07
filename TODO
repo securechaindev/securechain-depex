@@ -1,0 +1,12 @@
+- No hacer el load de la base de datos de Neo4j si ya tiene datos dentro.
+
+---
+
+- Quitar el env que hay en el docker file de VexGen.
+- Cambiar url de NuGet en VexGen por esta: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/index.json
+- Ponerle versión a la imagen lts-alpine de node en VexGen.
+- Quitar que los logs se guarden en un fichero en el backend en ambas herramientas.
+
+---
+
+- Investigar replicación automática de bases de datos mongo en kubernetes.

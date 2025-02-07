@@ -10,7 +10,7 @@ from .managers import (
     get_pypi_requires,
     get_pypi_versions,
     get_rubygems_requires,
-    get_rubygems_versions
+    get_rubygems_versions,
 )
 
 

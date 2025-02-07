@@ -27,8 +27,6 @@ from app.services import (
 from app.utils import JWTBearer, json_encoder, repo_analyzer
 
 from .managers import (
-    rubygems_create_package,
-    rubygems_search_new_versions,
     cargo_create_package,
     cargo_search_new_versions,
     maven_create_package,
@@ -45,6 +43,8 @@ from .managers import (
     pypi_create_requirement_file,
     pypi_generate_packages,
     pypi_search_new_versions,
+    rubygems_create_package,
+    rubygems_search_new_versions,
 )
 
 router = APIRouter()
