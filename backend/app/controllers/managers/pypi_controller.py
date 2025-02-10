@@ -49,7 +49,7 @@ async def pypi_create_package(
     parent_id: str | None = None,
     parent_version_name: str | None = None,
 ) -> None:
-    all_versions = await get_versions("pypi", name=name)
+    all_versions = await get_versions("pypi", name)
     if all_versions:
         cpe_product = await read_cpe_product_by_package_name(name)
         versions = [
@@ -77,7 +77,7 @@ async def pypi_extract_packages(
 
 
 async def pypi_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions = await get_versions("pypi", name=package["name"])
+    all_versions = await get_versions("pypi", package["name"])
     counter = await count_number_of_versions_by_package("pypi", "none", package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []

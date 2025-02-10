@@ -51,7 +51,7 @@ async def npm_create_package(
     parent_version_name: str | None = None,
 ) -> None:
     all_versions, all_require_packages = await get_versions(
-        "npm", name=name
+        "npm", name
     )
     if all_versions:
         cpe_product = await read_cpe_product_by_package_name(name)
@@ -73,7 +73,7 @@ async def npm_create_package(
 
 
 async def npm_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions, all_require_packages = await get_versions("npm", name=package["name"])
+    all_versions, all_require_packages = await get_versions("npm", package["name"])
     counter = await count_number_of_versions_by_package("npm", "none", package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []

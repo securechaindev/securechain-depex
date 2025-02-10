@@ -49,7 +49,7 @@ async def cargo_create_package(
     parent_id: str | None = None,
     parent_version_name: str | None = None,
 ) -> None:
-    all_versions = await get_versions("cargo", name=name)
+    all_versions = await get_versions("cargo", name)
     if all_versions:
         cpe_product = await read_cpe_product_by_package_name(name)
         versions = [
@@ -77,7 +77,7 @@ async def cargo_extract_packages(
 
 
 async def cargo_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions = await get_versions("cargo", name=package["name"])
+    all_versions = await get_versions("cargo", package["name"])
     counter = await count_number_of_versions_by_package("cargo", "none", package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []
