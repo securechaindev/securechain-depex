@@ -3,7 +3,6 @@ from json import JSONDecodeError
 from typing import Any
 
 from aiohttp import ClientConnectorError, ClientSession
-from dateutil.parser import parse
 
 from app.logger import logger
 from app.utils import get_first_position, parse_pypi_constraints

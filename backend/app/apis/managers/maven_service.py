@@ -1,8 +1,8 @@
 from asyncio import TimeoutError, sleep
 from typing import Any
+from xml.etree.ElementTree import ParseError, fromstring
 
 from aiohttp import ClientConnectorError, ClientSession
-from xml.etree.ElementTree import fromstring, ParseError
 
 from app.logger import logger
 
