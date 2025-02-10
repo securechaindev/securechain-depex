@@ -16,8 +16,7 @@ from .managers import (
 
 async def get_versions(
     manager: str,
-    name: str | None = None,
-    artifact_id: str | None = None,
+    name: str,
     group_id: str | None = None,
 ) -> list[dict[str, Any]]:
     match manager:
@@ -32,7 +31,7 @@ async def get_versions(
         case "npm":
             return await get_npm_versions(name)
         case "maven":
-            return await get_maven_versions(group_id, artifact_id)
+            return await get_maven_versions(group_id, name)
 
 
 async def get_requires(

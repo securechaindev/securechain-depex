@@ -32,7 +32,6 @@ async def create_package_and_versions(
     unwind $versions as version
     create(v:Version{{
         name: version.name,
-        release_date: version.release_date,
         count: version.count,
         cves: version.cves,
         mean: version.mean,
@@ -64,7 +63,6 @@ async def create_versions(
     unwind $versions as version
     create(v:Version{
         name: version.name,
-        release_date: version.release_date,
         count: version.count,
         cves: version.cves,
         mean: version.mean,

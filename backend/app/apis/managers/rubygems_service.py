@@ -18,14 +18,12 @@ async def get_rubygems_versions(name: str) -> list[dict[str, Any]]:
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
-    if response:
-        versions: list[dict[str, Any]] = []
-        for count, version in enumerate(response):
-            versions.append(
-                {"name": version["number"], "count": count}
-            )
-        return versions
-    return []
+    versions: list[dict[str, Any]] = []
+    for count, version in enumerate(response):
+        versions.append(
+            {"name": version.get("number"), "count": count}
+        )
+    return versions
 
 
 async def get_rubygems_requires(
@@ -43,9 +41,7 @@ async def get_rubygems_requires(
                 await sleep(5)
             except JSONDecodeError:
                 return {}
-    if response and "dependencies" in response and "runtime" in response["dependencies"]:
-        require_packages: dict[str, Any] = {}
-        for dependency in response["dependencies"]["runtime"]:
-            require_packages[dependency["name"]] = dependency["requirements"]
-        return require_packages
-    return {}
+    require_packages: dict[str, Any] = {}
+    for dependency in response.get("dependencies", {}).get("runtime", {}):
+        require_packages[dependency.get("name")] = dependency.get("requirements")
+    return require_packages

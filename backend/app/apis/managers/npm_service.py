@@ -20,22 +20,9 @@ async def get_npm_versions(name: str) -> Any:
                 await sleep(5)
             except JSONDecodeError:
                 return {}
-    if "versions" in response:
-        versions = []
-        all_require_packages = []
-        raw_versions = response["versions"]
-        for count, version in enumerate(raw_versions):
-            versions.append(
-                {
-                    "name": version,
-                    "release_date": None,
-                    "count": count,
-                }
-            )
-            all_require_packages.append(
-                raw_versions[version]["dependencies"]
-                if "dependencies" in raw_versions[version]
-                else {}
-            )
-        return (versions, all_require_packages)
-    return ([], [])
+    versions = []
+    all_require_packages = []
+    for count, (version, data) in enumerate(response.get("versions", {}).items()):
+        versions.append({"name": version, "count": count})
+        all_require_packages.append(data.get("dependencies"))
+    return (versions, all_require_packages)

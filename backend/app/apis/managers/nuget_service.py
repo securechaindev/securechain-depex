@@ -33,50 +33,42 @@ async def get_nuget_versions(name: str) -> Any:
                 await sleep(5)
             except JSONDecodeError:
                 return {}
-    items = response.get("items", [])
     versions = []
     all_require_packages = []
-    for item in items:
+    count = 0
+    for item in response.get("items", []):
         if "items" in item:
-            for version_item in item["items"]:
+            for version_item in item.get("items", []):
                 catalog_entry = version_item.get("catalogEntry", {})
                 versions.append(
                     {
                         "name": catalog_entry.get("version"),
-                        "release_date": catalog_entry.get("published"),
-                        "authors": catalog_entry.get("authors"),
-                        "description": catalog_entry.get("description"),
-                        "vulnerabilities": catalog_entry.get("vulnerabilities", []),
+                        "count": count,
                     }
                 )
-                dependency_groups = catalog_entry.get("dependencyGroups", [])
+                count += 1
                 dependencies = {
-                    dependency["id"]: dependency["range"]
-                    for group in dependency_groups
-                    if "dependencies" in group and "targetFramework" not in group
-                    for dependency in group["dependencies"]
+                    dependency.get("id"): dependency.get("range")
+                    for group in catalog_entry.get("dependencyGroups", [])
+                    if "targetFramework" not in group
+                    for dependency in group.get("dependencies", [])
                 }
                 all_require_packages.append(dependencies)
         elif "@id" in item:
-            page_url = item["@id"]
-            page_versions = await fetch_page_versions(page_url)
-            for version_item in page_versions:
+            for version_item in await fetch_page_versions(item.get("@id")):
                 catalog_entry = version_item.get("catalogEntry", {})
                 versions.append(
                     {
                         "name": catalog_entry.get("version"),
-                        "release_date": catalog_entry.get("published"),
-                        "authors": catalog_entry.get("authors"),
-                        "description": catalog_entry.get("description"),
-                        "vulnerabilities": catalog_entry.get("vulnerabilities", []),
+                        "count": count,
                     }
                 )
-                dependency_groups = catalog_entry.get("dependencyGroups", [])
+                count += 1
                 dependencies = {
-                    dependency["id"]: dependency["range"]
-                    for group in dependency_groups
-                    if "dependencies" in group and "targetFramework" not in group
-                    for dependency in group["dependencies"]
+                    dependency.get("id"): dependency.get("range")
+                    for group in catalog_entry.get("dependencyGroups", [])
+                    if  "targetFramework" not in group
+                    for dependency in group.get("dependencies", [])
                 }
                 all_require_packages.append(dependencies)
     return (versions, all_require_packages)

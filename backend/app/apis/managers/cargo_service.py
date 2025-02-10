@@ -18,14 +18,12 @@ async def get_cargo_versions(name: str) -> list[dict[str, Any]]:
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
-    if "versions" in response:
-        versions: list[dict[str, Any]] = []
-        for count, version in enumerate(response["versions"]):
-            versions.append(
-                {"name": version["num"], "count": count}
-            )
-        return versions
-    return []
+    versions: list[dict[str, Any]] = []
+    for count, version in enumerate(response.get("versions", [])):
+        versions.append(
+            {"name": version.get("num"), "count": count}
+        )
+    return versions
 
 
 async def get_cargo_requires(
@@ -43,9 +41,7 @@ async def get_cargo_requires(
                 await sleep(5)
             except JSONDecodeError:
                 return {}
-    if response and "dependencies" in response:
-        require_packages: dict[str, Any] = {}
-        for dependency in response["dependencies"]:
-            require_packages[dependency["crate_id"]] = dependency["req"]
-        return require_packages
-    return {}
+    require_packages: dict[str, Any] = {}
+    for dependency in response.get("dependencies", []):
+        require_packages[dependency.get("crate_id")] = dependency.get("req")
+    return require_packages

@@ -1,0 +1,219 @@
+from asyncio import TimeoutError, sleep
+from typing import Any
+
+from aiohttp import ClientConnectorError, ClientSession
+from xmltodict import parse
+
+from asyncio import run
+
+
+async def get_maven_requires_old(
+    group_id: str, artifact_id: str, version: str
+) -> dict[str, list[str] | str]:
+    require_packages: dict[str, Any] = {}
+    api_url = f"https://repo1.maven.org/maven2/{group_id.replace(".", "/")}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
+    async with ClientSession() as session:
+        while True:
+            try:
+                async with session.get(api_url) as response:
+                    xml_string = await response.text()
+                    break
+            except (ClientConnectorError, TimeoutError):
+                await sleep(5)
+    try:
+        pom_dict = parse(xml_string)
+    except Exception as _:
+        return require_packages
+    if "project" in pom_dict:
+        if "dependencyManagement" in pom_dict["project"]:
+            if (
+                "dependencies" in pom_dict["project"]
+                and "dependencies" in pom_dict["project"]["dependencyManagement"]
+                and pom_dict["project"]["dependencyManagement"]["dependencies"]
+            ):
+                if "dependency" in pom_dict["project"]["dependencies"]:
+                    if isinstance(
+                        pom_dict["project"]["dependencies"]["dependency"], list
+                    ) and isinstance(
+                        pom_dict["project"]["dependencyManagement"]["dependencies"][
+                            "dependency"
+                        ],
+                        list,
+                    ):
+                        pom_dict["project"]["dependencies"]["dependency"].extend(
+                            pom_dict["project"]["dependencyManagement"]["dependencies"][
+                                "dependency"
+                            ]
+                        )
+                    elif isinstance(
+                        pom_dict["project"]["dependencies"]["dependency"], list
+                    ) and isinstance(
+                        pom_dict["project"]["dependencyManagement"]["dependencies"][
+                            "dependency"
+                        ],
+                        dict,
+                    ):
+                        pom_dict["project"]["dependencies"]["dependency"].append(
+                            pom_dict["project"]["dependencyManagement"]["dependencies"][
+                                "dependency"
+                            ]
+                        )
+                    elif isinstance(
+                        pom_dict["project"]["dependencies"]["dependency"], dict
+                    ) and isinstance(
+                        pom_dict["project"]["dependencyManagement"]["dependencies"][
+                            "dependency"
+                        ],
+                        list,
+                    ):
+                        pom_dict["project"]["dependencyManagement"]["dependencies"][
+                            "dependency"
+                        ].append(pom_dict["project"]["dependencies"]["dependency"])
+                        pom_dict["project"]["dependencies"]["dependency"] = pom_dict[
+                            "project"
+                        ]["dependencyManagement"]["dependencies"]["dependency"]
+                    else:
+                        pom_dict["project"]["dependencies"]["dependency"] = [
+                            pom_dict["project"]["dependencies"]["dependency"],
+                            pom_dict["project"]["dependencyManagement"]["dependencies"][
+                                "dependency"
+                            ],
+                        ]
+            else:
+                pom_dict["project"]["dependencies"] = pom_dict["project"][
+                    "dependencyManagement"
+                ]["dependencies"]
+        if (
+            "dependencies" in pom_dict["project"]
+            and pom_dict["project"]["dependencies"] is not None
+            and "dependency" in pom_dict["project"]["dependencies"]
+        ):
+            properties = {}
+            if (
+                "properties" in pom_dict["project"]
+                and pom_dict["project"]["properties"]
+            ):
+                properties.update(pom_dict["project"]["properties"])
+            if "parent" in pom_dict["project"] and pom_dict["project"]["parent"]:
+                properties.update(pom_dict["project"]["parent"])
+            if isinstance(pom_dict["project"]["dependencies"]["dependency"], list):
+                dependencies = pom_dict["project"]["dependencies"]["dependency"]
+            else:
+                dependencies = [pom_dict["project"]["dependencies"]["dependency"]]
+            for dependency in dependencies:
+                if "scope" not in dependency or dependency["scope"] in (
+                    "compile",
+                    "runtime",
+                    "provided",
+                ):
+                    version = ""
+                    if "version" in dependency and dependency["version"] is not None:
+                        version = (
+                            pom_dict["project"]["version"]
+                            if "$" in dependency["version"]
+                            and "project.version" in dependency["version"]
+                            and "version" in pom_dict["project"]
+                            else dependency["version"]
+                        )
+                        if "properties" in pom_dict["project"] or not any(
+                            "$" in att
+                            for att in (
+                                dependency["groupId"],
+                                dependency["artifactId"],
+                                version,
+                            )
+                        ):
+                            if "$" in dependency["groupId"]:
+                                property_ = (
+                                    dependency["groupId"]
+                                    .replace("$", "")
+                                    .replace("{", "")
+                                    .replace("}", "")
+                                )
+                                if property_ and property_ in properties:
+                                    if isinstance(properties[property_], list):
+                                        dependency["groupId"] = properties[property_][0]
+                                    else:
+                                        dependency["groupId"] = properties[property_]
+                                else:
+                                    continue
+                            if "$" in dependency["artifactId"]:
+                                property_ = (
+                                    dependency["artifactId"]
+                                    .replace("$", "")
+                                    .replace("{", "")
+                                    .replace("}", "")
+                                )
+                                if property_ and property_ in properties:
+                                    if isinstance(properties[property_], list):
+                                        dependency["artifactId"] = properties[
+                                            property_
+                                        ][0]
+                                    else:
+                                        dependency["artifactId"] = properties[property_]
+                                else:
+                                    continue
+                            if "$" in version:
+                                property_ = (
+                                    version.replace("$", "")
+                                    .replace("{", "")
+                                    .replace("}", "")
+                                )
+                                if property_ and property_ in properties:
+                                    if isinstance(properties[property_], list):
+                                        version = properties[property_][0]
+                                    else:
+                                        version = properties[property_]
+                                else:
+                                    version = ""
+                            if not any(
+                                char in version for char in ["[", "]", "(", ")"]
+                            ):
+                                version = "[" + version + "]"
+                    version = version if version else "any"
+                    require_packages[
+                        (dependency["groupId"], dependency["artifactId"])
+                    ] = version
+    return require_packages
+
+import xml.etree.ElementTree as ET
+
+async def get_maven_requires_new(group_id, artifact_id, version):
+    require_packages: dict[str, Any] = {}
+    api_url = f"https://repo1.maven.org/maven2/{group_id.replace(".", "/")}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
+    async with ClientSession() as session:
+        while True:
+            try:
+                async with session.get(api_url) as response:
+                    response = await response.text()
+                    break
+            except (ClientConnectorError, TimeoutError):
+                await sleep(5)
+    try:
+        root = ET.fromstring(response)
+        namespace = {"mvn": "http://maven.apache.org/POM/4.0.0"}
+        for dep in root.findall(".//mvn:dependency", namespace):
+            dep_group_id = dep.find("mvn:groupId", namespace).text
+            dep_artifact_id = dep.find("mvn:artifactId", namespace).text
+            dep_version = dep.find("mvn:version", namespace)
+            dep_version_text = dep_version.text if dep_version is not None else "latest"
+            if not any(
+                char in dep_version_text for char in ["[", "]", "(", ")"]
+            ):
+                dep_version_text = "[" + dep_version_text + "]"
+            require_packages[
+                (dep_group_id, dep_artifact_id)
+            ] = dep_version_text
+    except ET.ParseError:
+        pass
+    return require_packages
+
+require_packages = run(get_maven_requires_old("org.springframework", "spring-core", "6.2.2"))
+
+print(require_packages)
+
+print("-----------------------------------------------")
+
+require_packages = run(get_maven_requires_new("org.springframework", "spring-core", "6.2.2"))
+
+print(require_packages)
