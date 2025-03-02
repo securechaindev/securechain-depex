@@ -1,6 +1,6 @@
 from typing import Any
 
-from univers.versions import MavenVersion, PypiVersion, SemverVersion
+from univers.versions import MavenVersion, PypiVersion, SemverVersion, RubygemsVersion, NugetVersion
 
 from app.utils import mean, weighted_mean
 
@@ -68,7 +68,11 @@ async def get_version_type(manager: str):
     match manager:
         case "pypi":
             return PypiVersion
-        case "npm":
+        case "npm" | "cargo":
             return SemverVersion
         case "maven":
             return MavenVersion
+        case "rubygems":
+            return RubygemsVersion
+        case "nuget":
+            return NugetVersion
