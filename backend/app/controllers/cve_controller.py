@@ -1,6 +1,12 @@
 from typing import Any
 
-from univers.versions import MavenVersion, PypiVersion, SemverVersion, RubygemsVersion, NugetVersion
+from univers.versions import (
+    MavenVersion,
+    NugetVersion,
+    PypiVersion,
+    RubygemsVersion,
+    SemverVersion,
+)
 
 from app.utils import mean, weighted_mean
 
