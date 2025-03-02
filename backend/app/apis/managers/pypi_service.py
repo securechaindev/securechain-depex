@@ -46,7 +46,7 @@ async def get_pypi_requires(
             except JSONDecodeError:
                 return {}
     require_packages: dict[str, Any] = {}
-    for dependency in response.get("info", {}).get("requires_dist", []):
+    for dependency in response.get("info", {}).get("requires_dist", []) or []:
         data = dependency.split(";")
         if "python-version" in data[0]:
             continue

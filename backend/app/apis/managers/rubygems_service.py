@@ -42,6 +42,6 @@ async def get_rubygems_requires(
             except JSONDecodeError:
                 return {}
     require_packages: dict[str, Any] = {}
-    for dependency in response.get("dependencies", {}).get("runtime", {}):
+    for dependency in response.get("dependencies", {}).get("runtime", {}) or []:
         require_packages[dependency.get("name")] = dependency.get("requirements")
     return require_packages

@@ -36,7 +36,7 @@ async def get_nuget_versions(name: str) -> Any:
     versions = []
     all_require_packages = []
     count = 0
-    for item in response.get("items", []):
+    for item in response.get("items", []) or []:
         if "items" in item:
             for version_item in item.get("items", []):
                 catalog_entry = version_item.get("catalogEntry", {})

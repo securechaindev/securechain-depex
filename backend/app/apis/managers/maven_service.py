@@ -31,7 +31,7 @@ async def get_maven_versions(
     return versions
 
 
-async def get_maven_requires_new(group_id, artifact_id, version):
+async def get_maven_requires(group_id, artifact_id, version):
     require_packages: dict[str, Any] = {}
     api_url = f"https://repo1.maven.org/maven2/{group_id.replace(".", "/")}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
     async with ClientSession() as session:

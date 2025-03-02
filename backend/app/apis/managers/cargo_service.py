@@ -42,6 +42,6 @@ async def get_cargo_requires(
             except JSONDecodeError:
                 return {}
     require_packages: dict[str, Any] = {}
-    for dependency in response.get("dependencies", []):
+    for dependency in response.get("dependencies", []) or []:
         require_packages[dependency.get("crate_id")] = dependency.get("req")
     return require_packages
