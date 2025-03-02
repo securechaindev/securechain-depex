@@ -2,7 +2,7 @@ from asyncio import TimeoutError, sleep
 from typing import Any
 from xml.etree.ElementTree import ParseError, fromstring
 
-from aiohttp import ClientConnectorError, ClientSession
+from aiohttp import ClientConnectorError, ClientSession, ContentTypeError
 
 from app.logger import logger
 
@@ -24,6 +24,8 @@ async def get_maven_versions(
                         break
                 except (ClientConnectorError, TimeoutError):
                     await sleep(5)
+                except ContentTypeError:
+                    return []
         start += 200
         docs = response.get("response").get("docs", [])
         for count, version in enumerate(response.get("response", {}).get("docs", [])):
