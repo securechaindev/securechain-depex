@@ -2,46 +2,65 @@ from asyncio import TimeoutError, sleep
 from typing import Any
 from xml.etree.ElementTree import ParseError, fromstring
 
-from aiohttp import ClientConnectorError, ClientSession, ContentTypeError
+from aiohttp import ClientConnectorError, ContentTypeError
 
+from app.cache import get_cache, set_cache
+from app.http_session import get_session
 from app.logger import logger
 
 
 async def get_maven_versions(
-    group_id: str, artifact_id: str
-) -> list[dict[str, Any]]:
+    group_id: str,
+    artifact_id: str,
+    constraints: str | None = None,
+    parent_id: str | None = None,
+    parent_version_name: str | None = None
+) -> tuple[list[dict[str, Any]], str, str, str | None, str | None, str | None]:
     versions: list[dict[str, Any]] = []
+    session = await get_session()
     start = 0
-    docs = True
-    while docs:
-        api_url = f"https://search.maven.org/solrsearch/select?q=g:{group_id}+AND+a:{artifact_id}&core=gav&rows=200&start={start}"
-        async with ClientSession() as session:
-            while True:
+    while True:
+        url = f"https://search.maven.org/solrsearch/select?q=g:{group_id}+AND+a:{artifact_id}&core=gav&rows=200&start={start}"
+        while True:
+            response = await get_cache(url)
+            logger.info(response)
+            if not response:
                 try:
-                    logger.info(f"MAVEN - {api_url}")
-                    async with session.get(api_url) as response:
+                    logger.info(f"Maven - {url}")
+                    async with session.get(url) as response:
                         response = await response.json()
+                        await set_cache(url, response)
                         break
                 except (ClientConnectorError, TimeoutError):
                     await sleep(5)
                 except ContentTypeError:
-                    return []
+                    return versions, group_id, artifact_id, constraints, parent_id, parent_version_name
+        logger.info(response)
         start += 200
-        docs = response.get("response").get("docs", [])
+        if not response.get("response").get("docs", []):
+            break
         for count, version in enumerate(response.get("response", {}).get("docs", [])):
             versions.append({"name": version.get("v"), "count": count})
-    return versions
+    return versions, group_id, artifact_id, constraints, parent_id, parent_version_name
 
 
-async def get_maven_requires(group_id, artifact_id, version):
+async def get_maven_requires(
+    version_id: str,
+    version: str,
+    group_id: str,
+    artifact_id: str
+) -> tuple[dict[str, list[str] | str], str]:
     require_packages: dict[str, Any] = {}
-    api_url = f"https://repo1.maven.org/maven2/{group_id.replace(".", "/")}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
-    async with ClientSession() as session:
-        while True:
+    session = await get_session()
+    url = f"https://repo1.maven.org/maven2/{group_id.replace('.', '/')}/{artifact_id}/{version}/{artifact_id}-{version}.pom"
+    while True:
+        response = await get_cache(url)
+        if not response:
             try:
-                logger.info(f"MAVEN - {api_url}")
-                async with session.get(api_url) as response:
+                logger.info(f"Maven - {url}")
+                async with session.get(url) as response:
                     response = await response.text()
+                    await set_cache(url, response)
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
@@ -62,4 +81,4 @@ async def get_maven_requires(group_id, artifact_id, version):
             ] = dep_version_text
     except ParseError:
         pass
-    return require_packages
+    return require_packages, version_id, artifact_id
