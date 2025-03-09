@@ -1,7 +1,8 @@
+from asyncio import gather
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.apis import get_requires, get_versions
+from app.apis import get_cargo_requires, get_cargo_versions
 from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
@@ -26,7 +27,8 @@ async def cargo_create_requirement_file(name: str, file: Any, repository_id: str
 async def cargo_generate_packages(
     dependencies: dict[str, str], parent_id: str, parent_version_name: str | None = None
 ) -> None:
-    packages: list[dict[str, Any]] = []
+    known_packages = []
+    tasks = []
     for name, constraints in dependencies.items():
         package = await read_package_by_name("cargo", "none", name)
         if package:
@@ -35,66 +37,91 @@ async def cargo_generate_packages(
             package["constraints"] = constraints
             if package["moment"] < datetime.now() - timedelta(days=10):
                 await cargo_search_new_versions(package)
-            packages.append(package)
+            known_packages.append(package)
         else:
-            await cargo_create_package(
-                name, constraints, parent_id, parent_version_name
+            tasks.append(
+                get_cargo_versions(
+                    name,
+                    constraints,
+                    parent_id,
+                    parent_version_name
+                )
             )
-    await relate_packages(packages)
+    api_versions_results = await gather(*tasks)
+    if api_versions_results:
+        await cargo_create_package(api_versions_results)
+    await relate_packages(known_packages)
 
 
 async def cargo_create_package(
-    name: str,
-    constraints: str | None = None,
-    parent_id: str | None = None,
-    parent_version_name: str | None = None,
+    api_versions_results: list[tuple[list[dict[str, Any]], str]]
 ) -> None:
-    all_versions = await get_versions("cargo", name)
-    if all_versions:
-        cpe_product = await read_cpe_product_by_package_name(name)
-        versions = [
-            await attribute_cves(version, cpe_product, "cargo")
-            for version in all_versions
-        ]
-        new_versions = await create_package_and_versions(
-            {"manager": "cargo", "group_id": "none", "name": name, "moment": datetime.now()},
-            versions,
-            constraints,
-            parent_id,
-            parent_version_name,
-        )
-        for new_version in new_versions:
-            await cargo_extract_packages(name, new_version)
+    for all_versions, name, constraints, parent_id, parent_version_name in api_versions_results:
+        if all_versions:
+            cpe_product = await read_cpe_product_by_package_name(name)
+            tasks = [
+                attribute_cves(
+                    version,
+                    cpe_product,
+                    "cargo"
+                )
+                for version in all_versions
+            ]
+            results = await gather(*tasks)
+            new_versions = await create_package_and_versions(
+                {"manager": "cargo", "group_id": "none", "name": name, "moment": datetime.now()},
+                results,
+                constraints,
+                parent_id,
+                parent_version_name,
+            )
+            tasks = [
+                get_cargo_requires(
+                    version["id"],
+                    version["name"],
+                    name
+                )
+                for version in new_versions
+            ]
+            api_requires_results = await gather(*tasks)
+            await cargo_extract_packages(api_requires_results)
 
 
 async def cargo_extract_packages(
-    parent_package_name: str, version: dict[str, Any]
+    api_requires_results: list[tuple[dict[str, list[str] | str], str]]
 ) -> None:
-    require_packages = await get_requires(
-        version["name"], "cargo", name=parent_package_name
-    )
-    await cargo_generate_packages(require_packages, version["id"], parent_package_name)
+    for require_packages, version_id, name in api_requires_results:
+        await cargo_generate_packages(require_packages, version_id, name)
 
 
 async def cargo_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions = await get_versions("cargo", package["name"])
-    counter = await count_number_of_versions_by_package("cargo", "none", package["name"])
-    if counter < len(all_versions):
-        no_existing_versions: list[dict[str, Any]] = []
-        cpe_product = await read_cpe_product_by_package_name(package["name"])
-        actual_versions = await read_versions_names_by_package("cargo", "none", package["name"])
-        for version in all_versions:
-            if version["name"] not in actual_versions:
-                version["count"] = counter
-                new_version = await attribute_cves(
-                    version, cpe_product, "cargo"
+    api_versions_results = await get_cargo_versions(package["name"])
+    for all_versions in api_versions_results[0]:
+        counter = await count_number_of_versions_by_package("cargo", "none", package["name"])
+        if counter < len(all_versions):
+            no_existing_versions: list[dict[str, Any]] = []
+            cpe_product = await read_cpe_product_by_package_name(package["name"])
+            actual_versions = await read_versions_names_by_package("cargo", "none", package["name"])
+            for version in all_versions:
+                if version["name"] not in actual_versions:
+                    version["count"] = counter
+                    new_version = await attribute_cves(
+                        version, cpe_product, "cargo"
+                    )
+                    no_existing_versions.append(new_version)
+                    counter += 1
+            new_versions = await create_versions(
+                package,
+                no_existing_versions,
+            )
+            tasks = [
+                get_cargo_requires(
+                    version["id"],
+                    version["name"],
+                    package["name"]
                 )
-                no_existing_versions.append(new_version)
-                counter += 1
-        new_versions = await create_versions(
-            package,
-            no_existing_versions
-        )
-        for new_version in new_versions:
-            await cargo_extract_packages(package["name"], new_version)
+                for version in new_versions
+            ]
+            api_requires_results = await gather(*tasks)
+            await cargo_extract_packages(api_requires_results)
     await update_package_moment("cargo", "none", package["name"])

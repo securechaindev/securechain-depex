@@ -1,7 +1,8 @@
+from asyncio import gather
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.apis import get_requires, get_versions
+from app.apis import get_maven_requires, get_maven_versions
 from app.controllers.cve_controller import attribute_cves
 from app.services import (
     count_number_of_versions_by_package,
@@ -26,7 +27,8 @@ async def maven_create_requirement_file(name: str, file: Any, repository_id: str
 async def maven_generate_packages(
     dependencies: dict[str, str], parent_id: str, parent_version_name: str | None = None
 ) -> None:
-    packages: list[dict[str, str]] = []
+    known_packages = []
+    tasks = []
     for dependency, constraints in dependencies.items():
         group_id, artifact_id = dependency
         package = await read_package_by_name("maven", group_id, artifact_id)
@@ -36,74 +38,96 @@ async def maven_generate_packages(
             package["constraints"] = constraints
             if package["moment"] < datetime.now() - timedelta(days=10):
                 await maven_search_new_versions(package)
-            packages.append(package)
+            known_packages.append(package)
         else:
-            await maven_create_package(
-                group_id, artifact_id, constraints, parent_id, parent_version_name
+            tasks.append(
+                get_maven_versions(
+                    group_id,
+                    artifact_id,
+                    constraints,
+                    parent_id,
+                    parent_version_name
+                )
             )
-    await relate_packages(packages)
+    api_versions_results = await gather(*tasks)
+    if api_versions_results:
+        await maven_create_package(api_versions_results)
+    await relate_packages(known_packages)
 
 
 async def maven_create_package(
-    group_id: str,
-    artifact_id: str,
-    constraints: str | None = None,
-    parent_id: str | None = None,
-    parent_version_name: str | None = None,
+    api_versions_results: list[tuple[list[dict[str, Any]], str, str, str]]
 ) -> None:
-    all_versions = await get_versions(
-        "maven", artifact_id, group_id=group_id
-    )
-    if all_versions:
-        cpe_product = await read_cpe_product_by_package_name(artifact_id)
-        versions = [
-            await attribute_cves(version, cpe_product, "maven")
-            for version in all_versions
-        ]
-        new_versions = await create_package_and_versions(
-            {"manager": "maven", "group_id": group_id, "name": artifact_id, "moment": datetime.now()},
-            versions,
-            constraints,
-            parent_id,
-            parent_version_name,
-        )
-        for new_version in new_versions:
-            await maven_extract_packages(group_id, artifact_id, new_version)
+    for all_versions, group_id, artifact_id, constraints, parent_id, parent_version_name in api_versions_results:
+        if all_versions:
+            cpe_product = await read_cpe_product_by_package_name(artifact_id)
+            tasks = [
+                attribute_cves(
+                    version,
+                    cpe_product,
+                    "maven"
+                )
+                for version in all_versions
+            ]
+            results = await gather(*tasks)
+            new_versions = await create_package_and_versions(
+                {"manager": "maven", "group_id": group_id, "name": artifact_id, "moment": datetime.now()},
+                results,
+                constraints,
+                parent_id,
+                parent_version_name,
+            )
+            tasks = [
+                get_maven_requires(
+                    version["id"],
+                    version["name"],
+                    group_id,
+                    artifact_id
+                )
+                for version in new_versions
+            ]
+            api_requires_results = await gather(*tasks)
+            await maven_extract_packages(api_requires_results)
 
 
 async def maven_extract_packages(
-    parent_group_id: str, parent_artifact_id: str, version: dict[str, Any]
+    api_requires_results: list[tuple[dict[str, list[str] | str], str]]
 ) -> None:
-    require_packages = await get_requires(
-        version["name"],
-        "maven",
-        group_id=parent_group_id,
-        artifact_id=parent_artifact_id,
-    )
-    await maven_generate_packages(require_packages, version["id"], parent_artifact_id)
+    for require_packages, version_id, artifact_id in api_requires_results:
+        await maven_generate_packages(require_packages, version_id, artifact_id)
 
 
 async def maven_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions = await get_versions(
-        "maven", package["name"], group_id=package["group_id"]
+    api_versions_results = await get_maven_versions(
+        package["group_id"], package["name"]
     )
-    counter = await count_number_of_versions_by_package("maven", package["group_id"], package["name"])
-    if counter < len(all_versions):
-        no_existing_versions: list[dict[str, Any]] = []
-        cpe_product = await read_cpe_product_by_package_name(package["name"])
-        actual_versions = await read_versions_names_by_package("maven", package["group_id"], package["name"])
-        for version in all_versions:
-            if version["name"] not in actual_versions:
-                version["count"] = counter
-                new_version = await attribute_cves(
-                    version, cpe_product, "maven"
+    for all_versions in api_versions_results[0]:
+        counter = await count_number_of_versions_by_package("maven", package["group_id"], package["name"])
+        if counter < len(all_versions):
+            no_existing_versions: list[dict[str, Any]] = []
+            cpe_product = await read_cpe_product_by_package_name(package["name"])
+            actual_versions = await read_versions_names_by_package("maven", package["group_id"], package["name"])
+            for version in all_versions:
+                if version["name"] not in actual_versions:
+                    version["count"] = counter
+                    new_version = await attribute_cves(
+                        version, cpe_product, "maven"
+                    )
+                    no_existing_versions.append(new_version)
+                    counter += 1
+            new_versions = await create_versions(
+                package,
+                no_existing_versions,
+            )
+            tasks = [
+                get_maven_requires(
+                    new_version["id"],
+                    version["name"],
+                    package["group_id"],
+                    package["name"]
                 )
-                no_existing_versions.append(new_version)
-                counter += 1
-        new_versions = await create_versions(
-            package,
-            no_existing_versions,
-        )
-        for new_version in new_versions:
-            await maven_extract_packages(package["name"], new_version)
+                for new_version in new_versions
+            ]
+            api_requires_results = await gather(*tasks)
+            await maven_extract_packages(api_requires_results)
     await update_package_moment("maven", package["group_id"], package["name"])

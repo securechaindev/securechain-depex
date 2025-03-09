@@ -168,7 +168,8 @@ async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: Backg
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=json_encoder({"message": "no_repo"}),
             )
-        background_tasks.add_task(init_graph_background, repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
+        await init_graph_background(repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
+        # background_tasks.add_task(init_graph_background, repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "init_graph"}),
