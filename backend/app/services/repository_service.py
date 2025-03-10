@@ -74,7 +74,7 @@ async def read_graph_for_info_operation(
     call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield nodes, relationships
     with nodes, relationships
     unwind nodes as node
-    with case when labels(node)[0] = 'Package' then node end as deps,
+    with case when labels(node)[0] ENDS WITH 'Package' then node end as deps,
     case when labels(node)[0] = 'Version' then node.cves end as cves, relationships
     with collect(deps) as deps, apoc.coll.flatten(collect(cves)) as cves, relationships
     unwind relationships as relationship

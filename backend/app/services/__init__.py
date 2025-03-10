@@ -4,9 +4,7 @@ from .auth_service import (
     update_user_password,
 )
 from .cve_service import (
-    read_cpe_product_by_package_name,
-    read_cve_by_id,
-    update_cpe_products,
+    read_cpe_product_by_package_name
 )
 from .package_service import (
     create_package_and_versions,
@@ -41,14 +39,11 @@ from .smt_service import read_smt_text, replace_smt_text
 from .version_service import (
     count_number_of_versions_by_package,
     read_counts_by_releases,
-    read_cve_ids_by_version_and_package,
     read_releases_by_counts,
     read_versions_names_by_package,
 )
 
 __all__ = [
-    "read_cve_by_id",
-    "update_cpe_products",
     "read_cpe_product_by_package_name",
     "create_package_and_versions",
     "create_versions",
@@ -76,7 +71,6 @@ __all__ = [
     "create_user",
     "read_user_by_email",
     "update_user_password",
-    "read_cve_ids_by_version_and_package",
     "read_versions_names_by_package",
     "read_releases_by_counts",
     "read_counts_by_releases",

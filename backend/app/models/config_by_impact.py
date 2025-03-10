@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, validator
 
 from .agregator import Agregator
-from .manager import Manager
+from .node_type import NodeType
 from .patterns import NEO4J_ID_PATTERN
 from .validators import validate_max_level
 
@@ -15,7 +15,7 @@ class ConfigByImpactRequest(BaseModel):
         ge=0,
         le=10
     )
-    manager: Manager
+    node_type: NodeType
     agregator: Agregator
 
     @validator("max_level")

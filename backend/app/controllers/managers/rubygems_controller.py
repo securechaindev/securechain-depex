@@ -30,7 +30,7 @@ async def rubygems_generate_packages(
     known_packages = []
     tasks = []
     for name, constraints in dependencies.items():
-        package = await read_package_by_name("rubygems", "none", name)
+        package = await read_package_by_name("RubyGemsPackage", name)
         if package:
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
@@ -50,7 +50,7 @@ async def rubygems_generate_packages(
     api_versions_results = await gather(*tasks)
     if api_versions_results:
         await rubygems_create_package(api_versions_results)
-    await relate_packages(known_packages)
+    await relate_packages("RubyGemsPackage", known_packages)
 
 
 async def rubygems_create_package(
@@ -67,10 +67,11 @@ async def rubygems_create_package(
                 )
                 for version in all_versions
             ]
-            results = await gather(*tasks)
+            versions = await gather(*tasks)
             new_versions = await create_package_and_versions(
                 {"manager": "rubygems", "group_id": "none", "name": name, "moment": datetime.now()},
-                results,
+                versions,
+                "RubyGemsPackage",
                 constraints,
                 parent_id,
                 parent_version_namein,
@@ -97,11 +98,11 @@ async def rubygems_extract_packages(
 async def rubygems_search_new_versions(package: dict[str, Any]) -> None:
     api_versions_results = await get_rubygems_versions(package["name"])
     for all_versions in api_versions_results[0]:
-        counter = await count_number_of_versions_by_package("rubygems", "none", package["name"])
+        counter = await count_number_of_versions_by_package("RubyGemsPackage", package["name"])
         if counter < len(all_versions):
             no_existing_versions: list[dict[str, Any]] = []
             cpe_product = await read_cpe_product_by_package_name(package["name"])
-            actual_versions = await read_versions_names_by_package("rubygems", "none", package["name"])
+            actual_versions = await read_versions_names_by_package("RubyGemsPackage", package["name"])
             for version in all_versions:
                 if version["name"] not in actual_versions:
                     version["count"] = counter
@@ -112,6 +113,7 @@ async def rubygems_search_new_versions(package: dict[str, Any]) -> None:
                     counter += 1
             new_versions = await create_versions(
                 package,
+                "RubyGemsPackage",
                 no_existing_versions,
             )
             tasks = [
@@ -124,4 +126,4 @@ async def rubygems_search_new_versions(package: dict[str, Any]) -> None:
             ]
             api_requires_results = await gather(*tasks)
             await rubygems_extract_packages(api_requires_results)
-    await update_package_moment("rubygems", "none", package["name"])
+    await update_package_moment("RubyGemsPackage", package["name"])

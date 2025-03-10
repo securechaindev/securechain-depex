@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, validator
 
 from .agregator import Agregator
-from .manager import Manager
+from .node_type import NodeType
 from .patterns import NEO4J_ID_PATTERN
 from .validators import validate_max_level
 
@@ -11,7 +11,7 @@ class CompleteConfigRequest(BaseModel):
         pattern=NEO4J_ID_PATTERN
     )
     max_level: int = Field(...)
-    manager: Manager
+    node_type: NodeType
     agregator: Agregator
     config: dict[str, str]
 
