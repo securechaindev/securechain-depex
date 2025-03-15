@@ -17,6 +17,7 @@ const ValidFileOperation = (props) => {
     }
 
     const max_level = _max_level != -1 ? _max_level * 2 : _max_level
+    const node_type = manager + "Package"
 
     fetch('http://localhost:8000/operation/file/valid_file', {
       method: 'POST',
@@ -24,7 +25,7 @@ const ValidFileOperation = (props) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${access_token}`
       },
-      body: JSON.stringify({ requirement_file_id, max_level, manager })
+      body: JSON.stringify({ requirement_file_id, max_level, node_type })
     })
       .then((r) => r.json())
       .then((r) => {

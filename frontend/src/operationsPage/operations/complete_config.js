@@ -41,6 +41,7 @@ const CompleteConfigOperation = (props) => {
       }
 
       const max_level = _max_level != -1 ? _max_level * 2 : _max_level
+      const node_type = manager + "Package"
 
       fetch('http://localhost:8000/operation/config/complete_config', {
         method: 'POST',
@@ -48,7 +49,7 @@ const CompleteConfigOperation = (props) => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${access_token}`
         },
-        body: JSON.stringify({ requirement_file_id, max_level, manager, agregator, config })
+        body: JSON.stringify({ requirement_file_id, max_level, node_type, agregator, config })
       })
         .then((r) => r.json())
         .then((r) => {

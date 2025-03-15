@@ -43,6 +43,7 @@ const FilterConfigsOperation = (props) => {
     }
 
     const max_level = _max_level != -1 ? _max_level * 2 : _max_level
+    const node_type = manager + "Package"
 
     fetch('http://localhost:8000/operation/file/filter_configs', {
       method: 'POST',
@@ -50,7 +51,7 @@ const FilterConfigsOperation = (props) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${access_token}`
       },
-      body: JSON.stringify({ requirement_file_id, max_threshold, min_threshold, limit, max_level, manager, agregator })
+      body: JSON.stringify({ requirement_file_id, max_threshold, min_threshold, limit, max_level, node_type, agregator })
     })
       .then((r) => r.json())
       .then((r) => {

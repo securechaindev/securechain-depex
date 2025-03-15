@@ -27,6 +27,7 @@ const ConfigByImpactOperation = (props) => {
     }
 
     const max_level = _max_level != -1 ? _max_level * 2 : _max_level
+    const node_type = manager + "Package"
 
     fetch('http://localhost:8000/operation/config/config_by_impact', {
       method: 'POST',
@@ -34,7 +35,7 @@ const ConfigByImpactOperation = (props) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${access_token}`
       },
-      body: JSON.stringify({ requirement_file_id, max_level, impact, manager, agregator })
+      body: JSON.stringify({ requirement_file_id, max_level, impact, node_type, agregator })
     })
       .then((r) => r.json())
       .then((r) => {

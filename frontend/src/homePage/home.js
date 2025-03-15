@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { useNavigate } from 'react-router-dom'
+import Button from '@mui/material/Button'
 
 const HomePage = (props) => {
   const { is_logged } = props
@@ -28,12 +29,9 @@ const HomePage = (props) => {
         />
       </div>
       {is_logged ? null : (
-        <input
-          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-          type='button'
-          onClick={on_button_click}
-          value='Log in'
-        />
+        <div className='py-2'>
+          <Button variant="contained" onClick={on_button_click}>Log In</Button>
+        </div>
       )}
     </div>
   )

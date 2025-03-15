@@ -121,19 +121,14 @@ const LoginPage = () => {
         aria-describedby='modal-modal-description'
         className='relative max-w-96 flex flex-col justify-center m-auto'
       >
-        <Box className='text-gray-500 text-center border-blue-500 border-2 bg-white rounded-lg shadow'>
+        <Box className='text-gray-500 text-center border-blue-500 border-2 bg-white py-2 rounded-lg shadow'>
           <Typography id='modal-modal-title' variant='h6' component='h2'>
             Email not registered
           </Typography>
           <Typography id='modal-modal-description' sx={{ mt: 2 }}>
             An account does not exist with this email address: {email}. Do you want to create a new account?
           </Typography>
-          <input
-            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-            type='button'
-            onClick={on_button_register_click}
-            value={'Sign up'}
-          />
+          <Button variant="contained" onClick={on_button_register_click}>Sign up</Button>
         </Box>
       </Modal>
     </div>
