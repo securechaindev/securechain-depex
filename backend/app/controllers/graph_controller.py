@@ -1,3 +1,4 @@
+from asyncio import gather
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -5,7 +6,15 @@ from fastapi import APIRouter, BackgroundTasks, Depends, status
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
-from app.apis import get_last_commit_date_github
+from app.apis import (
+    get_last_commit_date_github,
+    get_rubygems_versions,
+    get_cargo_versions,
+    get_nuget_versions,
+    get_pypi_versions,
+    get_npm_versions,
+    get_maven_versions
+)
 from app.models import InitGraphRequest
 from app.services import (
     create_repository,
@@ -60,9 +69,12 @@ async def get_repositories(user_id: str) -> JSONResponse:
 @router.post("/graph/rubygems/package/init")
 async def init_rubygems_package(name: str) -> JSONResponse:
     name = name.lower()
-    package = await read_package_by_name("rubygems", "none", name)
+    package = await read_package_by_name("RubyGemsPackage", name)
     if not package:
-        await rubygems_create_package(name)
+        tasks = [get_rubygems_versions(name)]
+        api_versions_results = await gather(*tasks)
+        if api_versions_results:
+            await rubygems_create_package(api_versions_results)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await rubygems_search_new_versions(package)
     return JSONResponse(
@@ -75,9 +87,12 @@ async def init_rubygems_package(name: str) -> JSONResponse:
 @router.post("/graph/cargo/package/init")
 async def init_cargo_package(name: str) -> JSONResponse:
     name = name.lower()
-    package = await read_package_by_name("cargo", "none", name)
+    package = await read_package_by_name("CargoPackage", name)
     if not package:
-        await cargo_create_package(name)
+        tasks = [get_cargo_versions(name)]
+        api_versions_results = await gather(*tasks)
+        if api_versions_results:
+            await cargo_create_package(api_versions_results)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await cargo_search_new_versions(package)
     return JSONResponse(
@@ -90,9 +105,12 @@ async def init_cargo_package(name: str) -> JSONResponse:
 @router.post("/graph/nuget/package/init")
 async def init_nuget_package(name: str) -> JSONResponse:
     name = name.lower()
-    package = await read_package_by_name("nuget", "none", name)
+    package = await read_package_by_name("NuGetPackage", name)
     if not package:
-        await nuget_create_package(name)
+        tasks = [get_nuget_versions(name)]
+        api_versions_results = await gather(*tasks)
+        if api_versions_results:
+            await nuget_create_package(api_versions_results)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await nuget_search_new_versions(package)
     return JSONResponse(
@@ -105,9 +123,12 @@ async def init_nuget_package(name: str) -> JSONResponse:
 @router.post("/graph/pypi/package/init")
 async def init_pypi_package(name: str) -> JSONResponse:
     name = name.lower()
-    package = await read_package_by_name("pypi", "none", name)
+    package = await read_package_by_name("PyPIPackage", name)
     if not package:
-        await pypi_create_package(name)
+        tasks = [get_pypi_versions(name)]
+        api_versions_results = await gather(*tasks)
+        if api_versions_results:
+            await pypi_create_package(api_versions_results)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await pypi_search_new_versions(package)
     return JSONResponse(
@@ -120,9 +141,12 @@ async def init_pypi_package(name: str) -> JSONResponse:
 @router.post("/graph/npm/package/init")
 async def init_npm_package(name: str) -> JSONResponse:
     name = name.lower()
-    package = await read_package_by_name("npm", "none", name)
+    package = await read_package_by_name("NPMPackage", name)
     if not package:
-        await npm_create_package(name)
+        tasks = [get_npm_versions(name)]
+        api_versions_results = await gather(*tasks)
+        if api_versions_results:
+            await npm_create_package(api_versions_results)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await npm_search_new_versions(package)
     return JSONResponse(
@@ -135,9 +159,12 @@ async def init_npm_package(name: str) -> JSONResponse:
 async def init_maven_package(group_id: str, artifact_id: str) -> JSONResponse:
     group_id = group_id.lower()
     artifact_id = artifact_id.lower()
-    package = await read_package_by_name("maven", group_id, artifact_id)
+    package = await read_package_by_name("MavenPackage", f"{group_id}:{artifact_id}")
     if not package:
-        await maven_create_package(group_id, artifact_id)
+        tasks = [get_maven_versions(group_id, artifact_id)]
+        api_versions_results = await gather(*tasks)
+        if api_versions_results:
+            await maven_create_package(api_versions_results)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await maven_search_new_versions(package)
     return JSONResponse(
@@ -146,7 +173,8 @@ async def init_maven_package(group_id: str, artifact_id: str) -> JSONResponse:
     )
 
 
-@router.post("/graph/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+# dependencies=[Depends(JWTBearer())], tags=["graph"]
+@router.post("/graph/init")
 async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     repository = {
         "owner": InitGraphRequest.owner,

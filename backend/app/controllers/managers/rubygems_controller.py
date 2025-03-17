@@ -3,13 +3,12 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from app.apis import get_rubygems_requires, get_rubygems_versions
-from app.controllers.cve_controller import attribute_cves
+from app.controllers.vulnerability_controller import attribute_vulnerabilities
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
     create_requirement_file,
     create_versions,
-    read_cpe_product_by_package_name,
     read_package_by_name,
     read_versions_names_by_package,
     relate_packages,
@@ -58,13 +57,8 @@ async def rubygems_create_package(
 ) -> None:
     for all_versions, name, constraints, parent_id, parent_version_namein in api_versions_results:
         if all_versions:
-            cpe_product = await read_cpe_product_by_package_name(name)
             tasks = [
-                attribute_cves(
-                    version,
-                    cpe_product,
-                    "rubygems"
-                )
+                attribute_vulnerabilities(name, version)
                 for version in all_versions
             ]
             versions = await gather(*tasks)
@@ -101,20 +95,21 @@ async def rubygems_search_new_versions(package: dict[str, Any]) -> None:
         counter = await count_number_of_versions_by_package("RubyGemsPackage", package["name"])
         if counter < len(all_versions):
             no_existing_versions: list[dict[str, Any]] = []
-            cpe_product = await read_cpe_product_by_package_name(package["name"])
             actual_versions = await read_versions_names_by_package("RubyGemsPackage", package["name"])
             for version in all_versions:
                 if version["name"] not in actual_versions:
                     version["count"] = counter
-                    new_version = await attribute_cves(
-                        version, cpe_product, "rubygems"
-                    )
-                    no_existing_versions.append(new_version)
+                    no_existing_versions.append(version)
                     counter += 1
+            tasks = [
+                attribute_vulnerabilities(package["name"], version)
+                for version in no_existing_versions
+            ]
+            no_existing_attributed_versions = await gather(*tasks)
             new_versions = await create_versions(
                 package,
                 "RubyGemsPackage",
-                no_existing_versions,
+                no_existing_attributed_versions,
             )
             tasks = [
                 get_rubygems_requires(

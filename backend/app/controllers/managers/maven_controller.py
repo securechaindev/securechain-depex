@@ -3,13 +3,12 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from app.apis import get_maven_requires, get_maven_versions
-from app.controllers.cve_controller import attribute_cves
+from app.controllers.vulnerability_controller import attribute_vulnerabilities
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
     create_requirement_file,
     create_versions,
-    read_cpe_product_by_package_name,
     read_package_by_name,
     read_versions_names_by_package,
     relate_packages,
@@ -60,20 +59,15 @@ async def maven_create_package(
 ) -> None:
     for all_versions, group_id, artifact_id, constraints, parent_id, parent_version_name in api_versions_results:
         if all_versions:
-            cpe_product = await read_cpe_product_by_package_name(artifact_id)
             tasks = [
-                attribute_cves(
-                    version,
-                    cpe_product,
-                    "maven"
-                )
+                attribute_vulnerabilities(f"{group_id}:{artifact_id}", version)
                 for version in all_versions
             ]
             versions = await gather(*tasks)
             new_versions = await create_package_and_versions(
                 {"group_id": group_id, "artifact_id": artifact_id, "name": f"{group_id}:{artifact_id}", "moment": datetime.now()},
                 versions,
-                "MavenPackge",
+                "MavenPackage",
                 constraints,
                 parent_id,
                 parent_version_name,
@@ -106,20 +100,21 @@ async def maven_search_new_versions(package: dict[str, Any]) -> None:
         counter = await count_number_of_versions_by_package("MavenPackage", package["name"])
         if counter < len(all_versions):
             no_existing_versions: list[dict[str, Any]] = []
-            cpe_product = await read_cpe_product_by_package_name(package["artifact_id"])
             actual_versions = await read_versions_names_by_package("MavenPackage", package["name"])
             for version in all_versions:
                 if version["name"] not in actual_versions:
                     version["count"] = counter
-                    new_version = await attribute_cves(
-                        version, cpe_product, "maven"
-                    )
-                    no_existing_versions.append(new_version)
+                    no_existing_versions.append(version)
                     counter += 1
+            tasks = [
+                attribute_vulnerabilities(package["name"], version)
+                for version in no_existing_versions
+            ]
+            no_existing_attributed_versions = await gather(*tasks)
             new_versions = await create_versions(
                 package,
                 "MavenPackage",
-                no_existing_versions,
+                no_existing_attributed_versions,
             )
             tasks = [
                 get_maven_requires(
