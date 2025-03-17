@@ -1,4 +1,4 @@
-FROM python:3.12.3
+FROM python:3.13.2
 
 WORKDIR /backend
 
@@ -7,6 +7,8 @@ COPY /backend/requirements.txt ./
 RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
+
+ENV GIT_PYTHON_REFRESH=quiet
 
 EXPOSE 8000
 

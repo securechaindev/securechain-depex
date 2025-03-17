@@ -39,7 +39,7 @@ services:
   graph_database:
     env_file: .env
     container_name: neo4j
-    image: neo4j:5.20.0
+    image: neo4j:5.26.4
     environment:
       - EXTENSION_SCRIPT=/seeds/graphdb_seeder.sh
       - NEO4J_AUTH=${GRAPH_DB_USER}/${GRAPH_DB_PASSWORD}
@@ -67,7 +67,7 @@ services:
   vuln_database_seeder:
     env_file: .env
     container_name: mongodb_seeder
-    image: mongo:7.0.11
+    image: mongo:8.0.5
     depends_on:
       vuln_database:
         condition: service_healthy
@@ -81,7 +81,7 @@ services:
   vuln_database:
     env_file: .env
     container_name: mongodb
-    image: mongo:7.0.11
+    image: mongo:8.0.5
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${VULN_DB_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${VULN_DB_PASSWORD}
