@@ -3,8 +3,8 @@ from .auth_service import (
     read_user_by_email,
     update_user_password,
 )
-from .cve_service import (
-    read_cpe_product_by_package_name
+from .vulnerability_service import (
+    read_vulnerabilities_by_package_and_version
 )
 from .package_service import (
     create_package_and_versions,
@@ -44,7 +44,7 @@ from .version_service import (
 )
 
 __all__ = [
-    "read_cpe_product_by_package_name",
+    "read_vulnerabilities_by_package_and_version",
     "create_package_and_versions",
     "create_versions",
     "read_package_by_name",
