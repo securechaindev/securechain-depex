@@ -14,22 +14,24 @@ async def get_cargo_versions(
     parent_id: str | None = None,
     parent_version_name: str | None = None
 ) -> tuple[list[dict[str, Any]], str, str | None, str | None, str | None]:
-    url = f"https://crates.io/api/v1/crates/{name}"
-    session = await get_session()
-    while True:
-        response = await get_cache(url)
-        if not response:
+    response = await get_cache(name)
+    if response:
+        versions = response
+    else:
+        url = f"https://crates.io/api/v1/crates/{name}"
+        session = await get_session()
+        while True:
             try:
                 logger.info(f"Cargo - {url}")
                 async with session.get(url) as resp:
                     response = await resp.json()
-                    await set_cache(url, response)
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
                 return [], name, constraints, parent_id, parent_version_name
-    versions = [{"name": version.get("num"), "count": count} for count, version in enumerate(response.get("versions", []))]
+        versions = [{"name": version.get("num"), "count": count} for count, version in enumerate(response.get("versions", []))]
+        await set_cache(name, versions)
     return versions, name, constraints, parent_id, parent_version_name
 
 
@@ -38,20 +40,23 @@ async def get_cargo_requires(
     version: str,
     name: str
 ) -> tuple[dict[str, list[str] | str], str, str]:
-    url = f"https://crates.io/api/v1/crates/{name}/{version}/dependencies"
-    session = await get_session()
-    while True:
-        response = await get_cache(url)
-        if not response:
+    key = f"{name}:{version}"
+    response = await get_cache(key)
+    if response:
+        require_packages = response
+    else:
+        url = f"https://crates.io/api/v1/crates/{name}/{version}/dependencies"
+        session = await get_session()
+        while True:
             try:
                 logger.info(f"Cargo - {url}")
                 async with session.get(url) as resp:
                     response = await resp.json()
-                    await set_cache(url, response)
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
                 return {}, version_id, name
-    require_packages: dict[str, Any] = {dep.get("crate_id"): dep.get("req") for dep in response.get("dependencies", []) or []}
+        require_packages: dict[str, Any] = {dep.get("crate_id"): dep.get("req") for dep in response.get("dependencies", []) or []}
+        await set_cache(key, require_packages)
     return require_packages, version_id, name
