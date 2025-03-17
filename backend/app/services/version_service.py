@@ -58,7 +58,7 @@ async def read_counts_by_releases(
 
 async def count_number_of_versions_by_package(node_type: str, name: str) -> int:
     query = f"""
-    mmatch(p:{node_type}{{name:$name}})
+    match(p:{node_type}{{name:$name}})
     match (p)-[r:Have]->(v: Version)
     return count(v)
     """
