@@ -3,6 +3,7 @@ from json import JSONDecodeError
 from typing import Any
 
 from aiohttp import ClientConnectorError, ContentTypeError
+
 from app.cache import get_cache, set_cache
 from app.http_session import get_session
 from app.logger import logger

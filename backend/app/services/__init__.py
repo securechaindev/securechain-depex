@@ -3,9 +3,6 @@ from .auth_service import (
     read_user_by_email,
     update_user_password,
 )
-from .vulnerability_service import (
-    read_vulnerabilities_by_package_and_version
-)
 from .package_service import (
     create_package_and_versions,
     create_versions,
@@ -42,6 +39,7 @@ from .version_service import (
     read_releases_by_counts,
     read_versions_names_by_package,
 )
+from .vulnerability_service import read_vulnerabilities_by_package_and_version
 
 __all__ = [
     "read_vulnerabilities_by_package_and_version",

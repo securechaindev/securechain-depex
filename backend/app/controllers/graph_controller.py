@@ -7,13 +7,13 @@ from fastapi.responses import JSONResponse
 from pytz import UTC
 
 from app.apis import (
-    get_last_commit_date_github,
-    get_rubygems_versions,
     get_cargo_versions,
+    get_last_commit_date_github,
+    get_maven_versions,
+    get_npm_versions,
     get_nuget_versions,
     get_pypi_versions,
-    get_npm_versions,
-    get_maven_versions
+    get_rubygems_versions,
 )
 from app.models import InitGraphRequest
 from app.services import (
