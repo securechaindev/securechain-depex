@@ -17,4 +17,4 @@ passlib==1.7.4
 pyjwt==2.10.1
 aiohttp==3.11.8
 aiocache==0.12.3
-bcrypt==4.3.0
+bcrypt==3.2.0
