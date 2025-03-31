@@ -9,12 +9,7 @@ from app.http_session import get_session
 from app.logger import logger
 
 
-async def get_cargo_versions(
-    name: str,
-    constraints: str | None = None,
-    parent_id: str | None = None,
-    parent_version_name: str | None = None
-) -> tuple[list[dict[str, Any]], str, str | None, str | None, str | None]:
+async def get_cargo_versions(name: str) -> list[dict[str, Any]]:
     response = await get_cache(name)
     if response:
         versions = response
@@ -30,17 +25,16 @@ async def get_cargo_versions(
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
-                return [], name, constraints, parent_id, parent_version_name
+                return []
         versions = [{"name": version.get("num"), "count": count} for count, version in enumerate(response.get("versions", []))]
         await set_cache(name, versions)
-    return versions, name, constraints, parent_id, parent_version_name
+    return versions
 
 
 async def get_cargo_requires(
-    version_id: str,
     version: str,
     name: str
-) -> tuple[dict[str, list[str] | str], str, str]:
+) -> dict[str, list[str] | str]:
     key = f"{name}:{version}"
     response = await get_cache(key)
     if response:
@@ -57,7 +51,7 @@ async def get_cargo_requires(
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
-                return {}, version_id, name
+                return {}
         require_packages: dict[str, Any] = {dep.get("crate_id"): dep.get("req") for dep in response.get("dependencies", []) or []}
         await set_cache(key, require_packages)
-    return require_packages, version_id, name
+    return require_packages

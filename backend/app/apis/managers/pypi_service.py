@@ -11,12 +11,7 @@ from app.utils import get_first_position, parse_pypi_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
-async def get_pypi_versions(
-    name: str,
-    constraints: str | None = None,
-    parent_id: str | None = None,
-    parent_version_name: str | None = None
-) -> tuple[list[dict[str, Any]], str | None, str | None, str | None]:
+async def get_pypi_versions(name: str) -> list[dict[str, Any]]:
     response = await get_cache(name)
     if response:
         versions = response
@@ -32,17 +27,16 @@ async def get_pypi_versions(
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
-                return [], name, constraints, parent_id, parent_version_name
+                return []
         versions = [{"name": version, "count": count} for count, version in enumerate(response.get("releases", {}))]
         await set_cache(name, versions)
-    return versions, name, constraints, parent_id, parent_version_name
+    return versions
 
 
 async def get_pypi_requires(
-    version_id: str,
     version: str,
     name: str
-) -> tuple[dict[str, list[str] | str], str, str]:
+) -> dict[str, list[str] | str]:
     key = f"{name}:{version}"
     response = await get_cache(key)
     if response:
@@ -61,7 +55,7 @@ async def get_pypi_requires(
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
                 await set_cache(url, "error")
-                return {}, version_id, name
+                return {}
         require_packages: dict[str, Any] = {}
         for dependency in response.get("info", {}).get("requires_dist", []) or []:
             data = dependency.split(";")
@@ -86,4 +80,4 @@ async def get_pypi_requires(
             pos = await get_first_position(data, ["<", ">", "=", "!", "~"])
             require_packages[data[:pos].lower()] = await parse_pypi_constraints(data[pos:])
         await set_cache(key, require_packages)
-    return require_packages, version_id, name
+    return require_packages

@@ -19,7 +19,7 @@ async def analyze_setup_py(
                 for dep in matches:
                     if "#" not in dep:
                         dependencies.append(
-                            dep.strip().replace('"', "").replace("'", "")
+                            dep.strip().replace('"', "").replace("'", "").replace(",", "")
                         )
     except Exception as _:
         return requirement_files

@@ -25,11 +25,8 @@ async def fetch_page_versions(url: str) -> List[Dict[str, Any]]:
                 return []
 
 async def get_nuget_versions(
-    name: str,
-    constraints: str | None = None,
-    parent_id: str | None = None,
-    parent_version_name: str | None = None
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], str | None, str | None, str | None]:
+    name: str
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     response = await get_cache(name)
     if response:
         versions, all_require_packages = response
@@ -45,7 +42,7 @@ async def get_nuget_versions(
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
-                return [], [], name, constraints, parent_id, parent_version_name
+                return [], []
         versions = []
         all_require_packages = []
         count = 0
@@ -75,4 +72,4 @@ async def get_nuget_versions(
                     }
                     all_require_packages.append(dependencies)
         await set_cache(name, (versions, all_require_packages))
-    return versions, all_require_packages, name, constraints, parent_id, parent_version_name
+    return versions, all_require_packages

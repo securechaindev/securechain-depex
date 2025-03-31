@@ -10,11 +10,8 @@ from app.logger import logger
 
 
 async def get_npm_versions(
-    name: str,
-    constraints: str | None = None,
-    parent_id: str | None = None,
-    parent_version_name: str | None = None
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str | None, str | None, str | None]:
+    name: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     response = await get_cache(name)
     if response:
         versions, all_require_packages = response
@@ -30,8 +27,8 @@ async def get_npm_versions(
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
-                return [], [], name, constraints, parent_id, parent_version_name
+                return [], []
         versions = [{"name": version, "count": count} for count, version in enumerate(response.get("versions", {}).keys())]
         all_require_packages = [data.get("dependencies", {}) for data in response.get("versions", {}).values()]
         await set_cache(name, (versions, all_require_packages))
-    return versions, all_require_packages, name, constraints, parent_id, parent_version_name
+    return versions, all_require_packages

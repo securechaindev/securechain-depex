@@ -1,4 +1,3 @@
-from asyncio import gather
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -7,13 +6,7 @@ from fastapi.responses import JSONResponse
 from pytz import UTC
 
 from app.apis import (
-    get_cargo_versions,
     get_last_commit_date_github,
-    get_maven_versions,
-    get_npm_versions,
-    get_nuget_versions,
-    get_pypi_versions,
-    get_rubygems_versions,
 )
 from app.models import InitGraphRequest
 from app.services import (
@@ -71,10 +64,7 @@ async def init_rubygems_package(name: str) -> JSONResponse:
     name = name.lower()
     package = await read_package_by_name("RubyGemsPackage", name)
     if not package:
-        tasks = [get_rubygems_versions(name)]
-        api_versions_results = await gather(*tasks)
-        if api_versions_results:
-            await rubygems_create_package(api_versions_results)
+        await rubygems_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await rubygems_search_new_versions(package)
     return JSONResponse(
@@ -89,10 +79,7 @@ async def init_cargo_package(name: str) -> JSONResponse:
     name = name.lower()
     package = await read_package_by_name("CargoPackage", name)
     if not package:
-        tasks = [get_cargo_versions(name)]
-        api_versions_results = await gather(*tasks)
-        if api_versions_results:
-            await cargo_create_package(api_versions_results)
+        await cargo_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await cargo_search_new_versions(package)
     return JSONResponse(
@@ -107,10 +94,7 @@ async def init_nuget_package(name: str) -> JSONResponse:
     name = name.lower()
     package = await read_package_by_name("NuGetPackage", name)
     if not package:
-        tasks = [get_nuget_versions(name)]
-        api_versions_results = await gather(*tasks)
-        if api_versions_results:
-            await nuget_create_package(api_versions_results)
+        await nuget_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await nuget_search_new_versions(package)
     return JSONResponse(
@@ -125,10 +109,7 @@ async def init_pypi_package(name: str) -> JSONResponse:
     name = name.lower()
     package = await read_package_by_name("PyPIPackage", name)
     if not package:
-        tasks = [get_pypi_versions(name)]
-        api_versions_results = await gather(*tasks)
-        if api_versions_results:
-            await pypi_create_package(api_versions_results)
+        await pypi_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await pypi_search_new_versions(package)
     return JSONResponse(
@@ -143,10 +124,7 @@ async def init_npm_package(name: str) -> JSONResponse:
     name = name.lower()
     package = await read_package_by_name("NPMPackage", name)
     if not package:
-        tasks = [get_npm_versions(name)]
-        api_versions_results = await gather(*tasks)
-        if api_versions_results:
-            await npm_create_package(api_versions_results)
+        await npm_create_package(name)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await npm_search_new_versions(package)
     return JSONResponse(
@@ -161,10 +139,7 @@ async def init_maven_package(group_id: str, artifact_id: str) -> JSONResponse:
     artifact_id = artifact_id.lower()
     package = await read_package_by_name("MavenPackage", f"{group_id}:{artifact_id}")
     if not package:
-        tasks = [get_maven_versions(group_id, artifact_id)]
-        api_versions_results = await gather(*tasks)
-        if api_versions_results:
-            await maven_create_package(api_versions_results)
+        await maven_create_package(group_id, artifact_id)
     elif package["moment"] < datetime.now() - timedelta(days=10):
         await maven_search_new_versions(package)
     return JSONResponse(

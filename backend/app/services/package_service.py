@@ -26,7 +26,9 @@ async def create_package_and_versions(
         )
     query = f"""
     {query_part1}
-    create(p:{node_type}{{{"group_id:$group_id, artifact_id:$artifact_id," if node_type == "MavenPackage" else ""}name:$name, moment:$moment}})
+    MERGE(p:{node_type}{{{"group_id:$group_id, artifact_id:$artifact_id," if node_type == "MavenPackage" else ""}name:$name}})
+    ON CREATE SET p.vendor = $vendor, p.moment = $moment
+    ON MATCH SET p.vendor = $vendor, p.moment = $moment
     {query_part3}
     with p as package
     unwind $versions as version

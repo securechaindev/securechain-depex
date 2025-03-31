@@ -75,12 +75,12 @@ async def read_graph_for_info_operation(
     with nodes, relationships
     unwind nodes as node
     with case when labels(node)[0] ENDS WITH 'Package' then node end as deps,
-    case when labels(node)[0] = 'Version' then node.cves end as cves, relationships
-    with collect(deps) as deps, apoc.coll.flatten(collect(cves)) as cves, relationships
+    case when labels(node)[0] = 'Version' then node.vulnerabilities end as vulnerabilities, relationships
+    with collect(deps) as deps, apoc.coll.flatten(collect(vulnerabilities)) as vulnerabilities, relationships
     unwind relationships as relationship
-    with case when type(relationship) = 'Requires' then relationship end as rels, deps, cves
-    with deps, cves, collect(rels) as rels
-    return {dependencies: size(deps), edges: size(rels), cves: apoc.coll.toSet(cves)}
+    with case when type(relationship) = 'Requires' then relationship end as rels, deps, vulnerabilities
+    with deps, vulnerabilities, collect(rels) as rels
+    return {dependencies: size(deps), edges: size(rels), vulnerabilities: apoc.coll.toSet(vulnerabilities)}
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(

@@ -1,4 +1,3 @@
-from asyncio import gather
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -24,10 +23,11 @@ async def npm_create_requirement_file(name: str, file: Any, repository_id: str) 
 
 
 async def npm_generate_packages(
-    dependencies: dict[str, str], parent_id: str, parent_version_name: str | None = None
+    dependencies: dict[str, str],
+    parent_id: str,
+    parent_version_name: str | None = None
 ) -> None:
     known_packages = []
-    tasks = []
     for name, constraints in dependencies.items():
         name = name.lower()
         package = await read_package_by_name("NPMPackage", name)
@@ -39,49 +39,39 @@ async def npm_generate_packages(
                 await npm_search_new_versions(package)
             known_packages.append(package)
         else:
-            tasks.append(
-                get_npm_versions(
-                    name,
-                    constraints,
-                    parent_id,
-                    parent_version_name
-                )
+            await npm_create_package(
+                name, constraints, parent_id, parent_version_name
             )
-    api_versions_results = await gather(*tasks)
-    if api_versions_results:
-        await npm_create_package(api_versions_results)
     await relate_packages("NPMPackage", known_packages)
 
 
 async def npm_create_package(
-    api_versions_results: list[tuple[list[dict[str, Any]], list[dict[str, Any]], str]]
+    name: str,
+    constraints: str | None = None,
+    parent_id: str | None = None,
+    parent_version_name: str | None = None
 ) -> None:
-    for all_versions, all_require_packages, name, constraints, parent_id, parent_version_name in api_versions_results:
-        if all_versions:
-            tasks = [
-                attribute_vulnerabilities(name, version)
-                for version in all_versions
-            ]
-            versions = await gather(*tasks)
-            new_versions = await create_package_and_versions(
-                {"manager": "npm", "group_id": "none", "name": name, "moment": datetime.now()},
-                versions,
-                "NPMPackage",
-                constraints,
-                parent_id,
-                parent_version_name,
-            )
-            tasks = [
-                npm_generate_packages(
-                    require_packages, new_version["id"], name
-                )
-                for require_packages, new_version in zip(all_require_packages, new_versions)
-            ]
-            await gather(*tasks)
+    all_versions, all_require_packages = await get_npm_versions(name)
+    if all_versions:
+        versions = [
+            await attribute_vulnerabilities(name, version)
+            for version in all_versions
+        ]
+        vendor = name.split("/")[0] if "@" in name else "n/a"
+        new_versions = await create_package_and_versions(
+            {"name": name, "vendor": vendor, "moment": datetime.now()},
+            versions,
+            "NPMPackage",
+            constraints,
+            parent_id,
+            parent_version_name,
+        )
+        for require_packages, new_version in zip(all_require_packages, new_versions):
+            await npm_generate_packages(require_packages, new_version["id"], name)
 
 
 async def npm_search_new_versions(package: dict[str, Any]) -> None:
-    all_versions, all_require_packages = await get_npm_versions(package["name"])[:2]
+    all_versions, all_require_packages = await get_npm_versions(package["name"])
     counter = await count_number_of_versions_by_package("NPMPackage", package["name"])
     if counter < len(all_versions):
         no_existing_versions: list[dict[str, Any]] = []
@@ -93,15 +83,11 @@ async def npm_search_new_versions(package: dict[str, Any]) -> None:
                 no_existing_versions.append(version)
                 filtered_require_packages.append(require_packages)
                 counter += 1
-        tasks = [
-            attribute_vulnerabilities(package["name"], version)
+        no_existing_attributed_versions = [
+            await attribute_vulnerabilities(package["name"], version)
             for version in no_existing_versions
         ]
-        no_existing_attributed_versions = await gather(*tasks)
-        created_versions = await create_versions(package, "NPMPackage", no_existing_attributed_versions)
-        tasks = [
-            npm_generate_packages(require_packages, new_version["id"], package["name"])
-            for require_packages, new_version in zip(filtered_require_packages, created_versions)
-        ]
-        await gather(*tasks)
+        new_versions = await create_versions(package, "NPMPackage", no_existing_attributed_versions)
+        for new_version, require_packages in zip(new_versions, all_require_packages):
+            await npm_generate_packages(require_packages, new_version["id"], package["name"])
     await update_package_moment("NPMPackage", package["name"])

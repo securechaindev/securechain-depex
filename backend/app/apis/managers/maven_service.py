@@ -12,10 +12,7 @@ from app.logger import logger
 async def get_maven_versions(
     group_id: str,
     artifact_id: str,
-    constraints: str | None = None,
-    parent_id: str | None = None,
-    parent_version_name: str | None = None
-) -> tuple[list[dict[str, Any]], str, str, str | None, str | None, str | None]:
+) -> list[dict[str, Any]]:
     key = f"{group_id}:{artifact_id}"
     response = await get_cache(key)
     if response:
@@ -36,22 +33,21 @@ async def get_maven_versions(
                 except (ClientConnectorError, TimeoutError):
                     await sleep(5)
                 except ContentTypeError:
-                    return versions, group_id, artifact_id, constraints, parent_id, parent_version_name
+                    return versions
             start += 200
             if not response.get("response").get("docs", []):
                 break
             for count, version in enumerate(response.get("response", {}).get("docs", [])):
                 versions.append({"name": version.get("v"), "count": count})
         await set_cache(key, versions)
-    return versions, group_id, artifact_id, constraints, parent_id, parent_version_name
+    return versions
 
 
 async def get_maven_requires(
-    version_id: str,
     version: str,
     group_id: str,
     artifact_id: str
-) -> tuple[dict[str, list[str] | str], str]:
+) -> dict[str, list[str] | str]:
     key = f"{group_id}:{artifact_id}:{version}"
     response = await get_cache(key)
     if response:
@@ -86,4 +82,4 @@ async def get_maven_requires(
         except ParseError:
             pass
         await set_cache(key, require_packages)
-    return require_packages, version_id, artifact_id
+    return require_packages
