@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Body, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -8,7 +10,6 @@ from flamapy.metamodels.smt_metamodel.operations import (
 )
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from pytz import UTC
-from typing_extensions import Annotated
 
 from app.models import CompleteConfigRequest, ConfigByImpactRequest, ValidConfigRequest
 from app.services import (

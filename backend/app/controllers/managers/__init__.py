@@ -24,8 +24,6 @@ from .pypi_controller import (
 from .rubygems_controller import rubygems_create_package, rubygems_search_new_versions
 
 __all__ = [
-    "rubygems_create_package",
-    "rubygems_search_new_versions",
     "cargo_create_package",
     "cargo_search_new_versions",
     "maven_create_package",
@@ -41,5 +39,7 @@ __all__ = [
     "pypi_create_package",
     "pypi_create_requirement_file",
     "pypi_generate_packages",
-    "pypi_search_new_versions"
+    "pypi_search_new_versions",
+    "rubygems_create_package",
+    "rubygems_search_new_versions"
 ]
