@@ -12,6 +12,7 @@ from flamapy.metamodels.smt_metamodel.operations import (
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from pytz import UTC
 
+from app.logger import logger
 from app.models import (
     FileInfoRequest,
     FilterConfigsRequest,
@@ -26,8 +27,6 @@ from app.services import (
     replace_smt_text,
 )
 from app.utils import JWTBearer, json_encoder
-
-from app.logger import logger
 
 router = APIRouter()
 
