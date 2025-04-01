@@ -33,8 +33,6 @@ Create a .env from *template.env* file.
 
 - How to get a *GitHub* [API key](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-- How to get a [API key](https://nvd.nist.gov/developers/request-an-api-key) from the *National Vulnerability Database (NVD)*.
-
 - Modify the **Json Web Token (JWT)** secret key with your own. You can generate your own with the command **node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"**.
 
 ### Step 2

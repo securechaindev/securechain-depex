@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 0
     JWT_SECRET_KEY: str = ""
     GITHUB_GRAPHQL_API_KEY: str = ""
-    NVD_API_KEY: str = ""
 
     class Config:
         env_file = ".env"
