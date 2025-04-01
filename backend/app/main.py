@@ -22,7 +22,7 @@ over it.
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-    close_session()
+    await close_session()
 
 app = FastAPI(
     title="Depex",
