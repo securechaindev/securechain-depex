@@ -17,7 +17,7 @@ from app.services import (
 
 async def npm_create_requirement_file(name: str, file: Any, repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
-        {"name": name, "manager": "npm", "moment": datetime.now()}, repository_id
+        {"name": name, "manager": file["manager"], "moment": datetime.now()}, repository_id
     )
     await npm_generate_packages(file["dependencies"], new_req_file_id)
 

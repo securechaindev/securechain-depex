@@ -11,7 +11,7 @@ async def analyze_pom_xml(
             pom_xml = file.read()
         root = fromstring(pom_xml)
         requirement_file_name = requirement_file_name.replace("/master/", "").replace("/main/", "")
-        requirement_files[requirement_file_name] = {"manager": "maven", "dependencies": {}}
+        requirement_files[requirement_file_name] = {"manager": "Maven", "dependencies": {}}
         namespace = "{http://maven.apache.org/POM/4.0.0}"
         dependencies = root.findall(f".//{namespace}dependency")
         properties = {

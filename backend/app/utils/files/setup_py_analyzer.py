@@ -27,7 +27,7 @@ async def analyze_setup_py(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "manager": "pypi",
+        "manager": "PyPI",
         "dependencies": {},
     }
     for dependency in dependencies:

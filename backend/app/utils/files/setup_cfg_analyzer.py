@@ -16,7 +16,7 @@ async def analyze_setup_cfg(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "manager": "pypi",
+        "manager": "PyPI",
         "dependencies": {},
     }
     if "install_requires" in file["options"]:

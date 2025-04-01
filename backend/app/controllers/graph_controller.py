@@ -288,9 +288,9 @@ async def select_manager(
     name: str, file: dict[str, Any], repository_id: str
 ) -> None:
     match file["manager"]:
-        case "pypi":
+        case "PyPI":
             await pypi_create_requirement_file(name, file, repository_id)
-        case "npm":
+        case "NPM":
             await npm_create_requirement_file(name, file, repository_id)
-        case "maven":
+        case "Maven":
             await maven_create_requirement_file(name, file, repository_id)

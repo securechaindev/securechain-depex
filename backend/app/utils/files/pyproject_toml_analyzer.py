@@ -16,7 +16,7 @@ async def analyze_pyproject_toml(
         "/main/", ""
     )
     requirement_files[requirement_file_name] = {
-        "manager": "pypi",
+        "manager": "PyPI",
         "dependencies": {},
     }
     if "project" in file and "dependencies" in file["project"]:
