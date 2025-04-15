@@ -96,6 +96,6 @@ async def cargo_search_new_versions(package: dict[str, Any]) -> None:
             "CargoPackage",
             no_existing_attributed_versions,
         )
-        for new_version, in new_versions:
+        for new_version in new_versions:
             await cargo_extract_packages(package["name"], new_version)
     await update_package_moment("CargoPackage", package["name"])

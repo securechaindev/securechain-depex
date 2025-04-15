@@ -103,6 +103,6 @@ async def maven_search_new_versions(package: dict[str, Any]) -> None:
             "MavenPackage",
             no_existing_attributed_versions,
         )
-        for new_version, in new_versions:
+        for new_version in new_versions:
             await maven_extract_packages(package["group_id"], package["artifact_id"], new_version)
     await update_package_moment("MavenPackage", package["name"])

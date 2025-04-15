@@ -96,6 +96,6 @@ async def rubygems_search_new_versions(package: dict[str, Any]) -> None:
             "RubyGemsPackage",
             no_existing_attributed_versions,
         )
-        for new_version, in new_versions:
+        for new_version in new_versions:
             await rubygems_extract_packages(package["name"], new_version)
     await update_package_moment("RubyGemsPackage", package["name"])

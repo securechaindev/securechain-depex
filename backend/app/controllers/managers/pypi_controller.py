@@ -96,6 +96,6 @@ async def pypi_search_new_versions(package: dict[str, Any]) -> None:
             "PyPIPackage",
             no_existing_attributed_versions,
         )
-        for new_version, in new_versions:
+        for new_version in new_versions:
             await pypi_extract_packages(package["name"], new_version)
     await update_package_moment("PyPIPackage", package["name"])
