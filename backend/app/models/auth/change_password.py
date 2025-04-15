@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, validator
 
-from .patterns import EMAIL_PATTERN
-from .validators import validate_password
+from app.models.patterns import EMAIL_PATTERN
+from app.models.validators import validate_password
 
 
 class ChangePasswordRequest(BaseModel):

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from .patterns import EMAIL_PATTERN
+from app.models.patterns import EMAIL_PATTERN
 
 
 class AccountExistsRequest(BaseModel):

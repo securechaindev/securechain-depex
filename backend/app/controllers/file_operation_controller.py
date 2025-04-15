@@ -13,7 +13,7 @@ from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from pytz import UTC
 
 from app.logger import logger
-from app.models import (
+from app.models.operations import (
     FileInfoRequest,
     FilterConfigsRequest,
     MinMaxImpactRequest,
