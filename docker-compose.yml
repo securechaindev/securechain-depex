@@ -34,8 +34,10 @@ services:
       - depex
     healthcheck:
       test: curl --fail http://localhost:8000/health || exit 1
-      interval: 10s
-      start_period: 30s
+      interval: 100s
+      timeout: 100s
+      retries: 10
+      start_period: 300s
 
   graph_database:
     env_file: .env
@@ -60,10 +62,10 @@ services:
       - depex
     healthcheck:
       test: wget http://localhost:7474 || exit 1
-      interval: 10s
-      timeout: 10s
+      interval: 100s
+      timeout: 100s
       retries: 10
-      start_period: 30s
+      start_period: 300s
 
   vuln_database_seeder:
     env_file: .env
@@ -92,10 +94,10 @@ services:
       - depex
     healthcheck:
       test: "echo 'db.stats().ok' | mongosh --username=${VULN_DB_USER} --password=${VULN_DB_PASSWORD} --authenticationDatabase=admin mongodb/testdb"
-      interval: 30s
-      timeout: 10s
+      interval: 100s
+      timeout: 100s
       retries: 10
-      start_period: 30s
+      start_period: 300s
 
 networks:
   depex:
