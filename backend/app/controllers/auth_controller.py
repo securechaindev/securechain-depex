@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, status
 from fastapi.responses import JSONResponse
 
-from app.models import (
+from app.models.auth import (
     AccountExistsRequest,
     ChangePasswordRequest,
     LoginRequest,
@@ -38,8 +38,7 @@ async def signup(user: User) -> JSONResponse:
         )
     await create_user({
         "email": user.email,
-        "password": await get_hashed_password(user.password),
-        "repositories": []
+        "password": await get_hashed_password(user.password)
     })
     return JSONResponse(
         status_code=status.HTTP_200_OK,
