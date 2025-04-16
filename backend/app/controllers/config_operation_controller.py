@@ -11,7 +11,11 @@ from flamapy.metamodels.smt_metamodel.operations import (
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from pytz import UTC
 
-from app.models.operations import CompleteConfigRequest, ConfigByImpactRequest, ValidConfigRequest
+from app.models.operations import (
+    CompleteConfigRequest,
+    ConfigByImpactRequest,
+    ValidConfigRequest,
+)
 from app.services import (
     read_counts_by_releases,
     read_data_for_smt_transform,

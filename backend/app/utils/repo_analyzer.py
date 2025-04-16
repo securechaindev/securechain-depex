@@ -2,7 +2,10 @@ from glob import glob
 from os import makedirs, system
 from os.path import exists, isdir, join
 from shutil import rmtree
+
 from aiofiles import open
+
+from app.http_session import get_session
 
 from .files.package_json_analyzer import analyze_package_json
 from .files.pom_xml_analyzer import analyze_pom_xml
@@ -10,8 +13,6 @@ from .files.pyproject_toml_analyzer import analyze_pyproject_toml
 from .files.requirements_txt_analyzer import analyze_requirements_txt
 from .files.setup_cfg_analyzer import analyze_setup_cfg
 from .files.setup_py_analyzer import analyze_setup_py
-
-from app.http_session import get_session
 
 pypi_files = ["pyproject.toml", "setup.cfg", "setup.py", "requirements.txt"]
 npm_files = ["package.json"]
