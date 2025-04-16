@@ -12,7 +12,6 @@ from flamapy.metamodels.smt_metamodel.operations import (
 from flamapy.metamodels.smt_metamodel.transformations import GraphToSMT
 from pytz import UTC
 
-from app.logger import logger
 from app.models.operations import (
     FileInfoRequest,
     FilterConfigsRequest,
@@ -54,7 +53,6 @@ async def valid_file(
         ].replace(tzinfo=UTC):
             smt_transform.convert(smt_text["text"])
         else:
-            logger.info(smt_transform.source_data["requires"])
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
         operation = ValidModel()

@@ -1,8 +1,8 @@
 from glob import glob
 from os import makedirs, system
-from os.path import exists, isdir
-
-from git import GitCommandError, Repo
+from os.path import exists, isdir, join
+from shutil import rmtree
+from aiofiles import open
 
 from .files.package_json_analyzer import analyze_package_json
 from .files.pom_xml_analyzer import analyze_pom_xml
@@ -11,9 +11,12 @@ from .files.requirements_txt_analyzer import analyze_requirements_txt
 from .files.setup_cfg_analyzer import analyze_setup_cfg
 from .files.setup_py_analyzer import analyze_setup_py
 
+from app.http_session import get_session
+
 pypi_files = ["pyproject.toml", "setup.cfg", "setup.py", "requirements.txt"]
 npm_files = ["package.json"]
 maven_files = ["pom.xml"]
+all_files = set(pypi_files + npm_files + maven_files)
 
 
 async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str]]:
@@ -50,32 +53,37 @@ async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str
 
 
 async def download_repository(owner: str, name: str) -> str:
-    repository_path = "repositories/" + name
-    branches = ["main", "master"]
+    repository_path = f"repositories/{name}"
+    if exists(repository_path):
+        rmtree(repository_path)
     makedirs(repository_path)
-    for branch in branches:
-        branch_dir = repository_path + "/" + branch
-        if not exists(branch_dir):
-            makedirs(branch_dir)
-        try:
-            Repo.clone_from(
-                f"https://github.com/{owner}/{name}.git", branch_dir, branch=branch
-            )
-        except GitCommandError:
-            continue
+    session = await get_session()
+    url = f"https://api.github.com/repos/{owner}/{name}/contents"
+    async with session.get(url) as resp:
+        if resp.status != 200:
+            print(f"Error fetching contents of {owner}/{name}")
+            return repository_path
+        contents = await resp.json()
+    for item in contents:
+        if item["type"] == "file" and item["name"] in all_files:
+            raw_url = item["download_url"]
+            async with session.get(raw_url) as file_resp:
+                if file_resp.status == 200:
+                    file_content = await file_resp.text()
+                    filepath = join(repository_path, item["name"])
+                    async with open(filepath, "w") as f:
+                            await f.write(file_content)
     return repository_path
 
 
 async def get_req_files_names(directory_path: str) -> list[str]:
-    branches = ["/main", "/master"]
     requirement_files = []
-    for branch in branches:
-        paths = glob(directory_path + branch + "/**", recursive=True)
-        for _path in paths:
-            if not isdir(_path) and await is_req_file(_path):
-                requirement_files.append(
-                    _path.replace(directory_path, "").replace(directory_path, "")
-                )
+    paths = glob(directory_path + "/**", recursive=True)
+    for _path in paths:
+        if not isdir(_path) and await is_req_file(_path):
+            requirement_files.append(
+                _path.replace(directory_path, "").replace(directory_path, "")
+            )
     return requirement_files
 
 
