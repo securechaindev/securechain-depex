@@ -8,7 +8,7 @@ from pytz import UTC
 from app.apis import (
     get_last_commit_date_github,
 )
-from app.models.graphs import InitRepositoryRequest, InitPackageRequest
+from app.models.graphs import InitPackageRequest, InitRepositoryRequest
 from app.services import (
     create_repository,
     create_user_repository_rel,
