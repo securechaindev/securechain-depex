@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class InitGraphRequest(BaseModel):
+class InitRepositoryRequest(BaseModel):
     owner: str  = Field(...)
     name: str = Field(...)
     user_id: str = Field(...)

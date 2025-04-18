@@ -23,7 +23,7 @@ async def get_last_commit_date_github(owner: str, name: str) -> datetime | bool:
                             edges {{
                                 node {{
                                     author {{
-                                    date
+                                        date
                                     }}
                                 }}
                             }}

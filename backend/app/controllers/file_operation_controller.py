@@ -31,9 +31,9 @@ router = APIRouter()
 
 @router.post("/operation/file/file_info", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def file_info(
-    FileInfoRequest: Annotated[FileInfoRequest, Body()]
+    file_info_request: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
-    graph_info = await read_graph_for_info_operation(jsonable_encoder(FileInfoRequest))
+    graph_info = await read_graph_for_info_operation(jsonable_encoder(file_info_request))
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder(graph_info)
     )
@@ -72,12 +72,12 @@ async def valid_file(
 
 @router.post("/operation/file/minimize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def minimize_impact(
-    MinMaxImpactRequest: Annotated[MinMaxImpactRequest, Body()]
+    min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(MinMaxImpactRequest))
-    smt_id = f"{MinMaxImpactRequest.requirement_file_id}-{MinMaxImpactRequest.max_level}"
+    graph_data = await read_data_for_smt_transform(jsonable_encoder(min_max_impact_request))
+    smt_id = f"{min_max_impact_request.requirement_file_id}-{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, MinMaxImpactRequest.node_type.value, MinMaxImpactRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -86,11 +86,11 @@ async def minimize_impact(
         else:
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
-        operation = MinimizeImpact(MinMaxImpactRequest.limit)
+        operation = MinimizeImpact(min_max_impact_request.limit)
         operation.execute(smt_transform.destination_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.node_type.value)
+            result = await read_releases_by_counts(operation.get_result(), min_max_impact_request.node_type.value)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -105,12 +105,12 @@ async def minimize_impact(
 
 @router.post("/operation/file/maximize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def maximize_impact(
-    MinMaxImpactRequest: Annotated[MinMaxImpactRequest, Body()]
+    min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(MinMaxImpactRequest))
-    smt_id = f"{MinMaxImpactRequest.requirement_file_id}-{MinMaxImpactRequest.max_level}"
+    graph_data = await read_data_for_smt_transform(jsonable_encoder(min_max_impact_request))
+    smt_id = f"{min_max_impact_request.requirement_file_id}-{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, MinMaxImpactRequest.node_type.value, MinMaxImpactRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -119,11 +119,11 @@ async def maximize_impact(
         else:
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
-        operation = MaximizeImpact(MinMaxImpactRequest.limit)
+        operation = MaximizeImpact(min_max_impact_request.limit)
         operation.execute(smt_transform.destination_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), MinMaxImpactRequest.node_type.value)
+            result = await read_releases_by_counts(operation.get_result(), min_max_impact_request.node_type.value)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -138,12 +138,12 @@ async def maximize_impact(
 
 @router.post("/operation/file/filter_configs", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
 async def filter_configs(
-    FilterConfigsRequest: Annotated[FilterConfigsRequest, Body()]
+    filter_configs_request: Annotated[FilterConfigsRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(FilterConfigsRequest))
-    smt_id = f"{FilterConfigsRequest.requirement_file_id}-{FilterConfigsRequest.max_level}"
+    graph_data = await read_data_for_smt_transform(jsonable_encoder(filter_configs_request))
+    smt_id = f"{filter_configs_request.requirement_file_id}-{filter_configs_request.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, FilterConfigsRequest.node_type.value, FilterConfigsRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, filter_configs_request.node_type.value, filter_configs_request.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -152,11 +152,11 @@ async def filter_configs(
         else:
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
-        operation = FilterConfigs(FilterConfigsRequest.max_threshold, FilterConfigsRequest.min_threshold, FilterConfigsRequest.limit)
+        operation = FilterConfigs(filter_configs_request.max_threshold, filter_configs_request.min_threshold, filter_configs_request.limit)
         operation.execute(smt_transform.destination_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), FilterConfigsRequest.node_type.value)
+            result = await read_releases_by_counts(operation.get_result(), filter_configs_request.node_type.value)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )

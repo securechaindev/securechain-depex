@@ -1,6 +1,6 @@
 from asyncio import TimeoutError, sleep
 from json import JSONDecodeError
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from aiohttp import ClientConnectorError, ContentTypeError
 
@@ -9,7 +9,7 @@ from app.http_session import get_session
 from app.logger import logger
 
 
-async def fetch_page_versions(url: str) -> List[Dict[str, Any]]:
+async def fetch_page_versions(url: str) -> list[dict[str, Any]]:
     session = await get_session()
     while True:
         response = await get_cache(url)
@@ -26,7 +26,7 @@ async def fetch_page_versions(url: str) -> List[Dict[str, Any]]:
 
 async def get_nuget_versions(
     name: str
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     response = await get_cache(name)
     if response:
         versions, all_require_packages = response

@@ -8,7 +8,7 @@ from pytz import UTC
 from app.apis import (
     get_last_commit_date_github,
 )
-from app.models.graphs import InitGraphRequest
+from app.models.graphs import InitRepositoryRequest, InitPackageRequest
 from app.services import (
     create_repository,
     create_user_repository_rel,
@@ -59,105 +59,63 @@ async def get_repositories(user_id: str) -> JSONResponse:
 
 
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/rubygems/package/init")
-async def init_rubygems_package(name: str) -> JSONResponse:
-    name = name.lower()
-    package = await read_package_by_name("RubyGemsPackage", name)
+@router.post("/graph/package/init")
+async def init_package(init_package_request: InitPackageRequest) -> JSONResponse:
+    init_package_request.name = init_package_request.name.lower()
+    package = await read_package_by_name(init_package_request.node_type.value, init_package_request.name)
     if not package:
-        await rubygems_create_package(name)
+        await create_package(init_package_request)
     elif package["moment"] < datetime.now() - timedelta(days=10):
-        await rubygems_search_new_versions(package)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "Initializing graph"}),
-    )
-
-
-# dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/cargo/package/init")
-async def init_cargo_package(name: str) -> JSONResponse:
-    name = name.lower()
-    package = await read_package_by_name("CargoPackage", name)
-    if not package:
-        await cargo_create_package(name)
-    elif package["moment"] < datetime.now() - timedelta(days=10):
-        await cargo_search_new_versions(package)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "Initializing graph"}),
-    )
-
-
-# dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/nuget/package/init")
-async def init_nuget_package(name: str) -> JSONResponse:
-    name = name.lower()
-    package = await read_package_by_name("NuGetPackage", name)
-    if not package:
-        await nuget_create_package(name)
-    elif package["moment"] < datetime.now() - timedelta(days=10):
-        await nuget_search_new_versions(package)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "Initializing graph"}),
-    )
-
-
-# dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/pypi/package/init")
-async def init_pypi_package(name: str) -> JSONResponse:
-    name = name.lower()
-    package = await read_package_by_name("PyPIPackage", name)
-    if not package:
-        await pypi_create_package(name)
-    elif package["moment"] < datetime.now() - timedelta(days=10):
-        await pypi_search_new_versions(package)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "Initializing graph"}),
-    )
-
-
-# dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/npm/package/init")
-async def init_npm_package(name: str) -> JSONResponse:
-    name = name.lower()
-    package = await read_package_by_name("NPMPackage", name)
-    if not package:
-        await npm_create_package(name)
-    elif package["moment"] < datetime.now() - timedelta(days=10):
-        await npm_search_new_versions(package)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=json_encoder({"message": "initializing"}),
-    )
-
-# dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/maven/package/init")
-async def init_maven_package(group_id: str, artifact_id: str) -> JSONResponse:
-    group_id = group_id.lower()
-    artifact_id = artifact_id.lower()
-    package = await read_package_by_name("MavenPackage", f"{group_id}:{artifact_id}")
-    if not package:
-        await maven_create_package(group_id, artifact_id)
-    elif package["moment"] < datetime.now() - timedelta(days=10):
-        await maven_search_new_versions(package)
+        await search_new_versions(package, init_package_request.node_type.value)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "initializing"}),
     )
 
 
+async def create_package(init_package_request: InitPackageRequest) -> None:
+    match init_package_request.node_type.value:
+        case "CargoPackage":
+            await cargo_create_package(init_package_request.name)
+        case "MavenPackage":
+            group_id, artifact_id = init_package_request.name.split(":")
+            await maven_create_package(group_id, artifact_id)
+        case "NPMPackage":
+            await npm_create_package(init_package_request.name)
+        case "NuGetPackage":
+            await nuget_create_package(init_package_request.name)
+        case "PyPIPackage":
+            await pypi_create_package(init_package_request.name)
+        case "RubyGemsPackage":
+            await rubygems_create_package(init_package_request.name)
+
+
+async def search_new_versions(package: dict[str, Any], node_type: str) -> None:
+    match node_type:
+        case "CargoPackage":
+            await cargo_search_new_versions(package)
+        case "MavenPackage":
+            await maven_search_new_versions(package)
+        case "NPMPackage":
+            await npm_search_new_versions(package)
+        case "NuGetPackage":
+            await nuget_search_new_versions(package)
+        case "PyPIPackage":
+            await pypi_search_new_versions(package)
+        case "RubyGemsPackage":
+            await rubygems_search_new_versions(package)
+
+
 # dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/init")
-async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: BackgroundTasks) -> JSONResponse:
+@router.post("/graph/repository/init")
+async def init_repository(init_graph_request: InitRepositoryRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     repository = {
-        "owner": InitGraphRequest.owner,
-        "name": InitGraphRequest.name,
+        "owner": init_graph_request.owner,
+        "name": init_graph_request.name,
         "moment": datetime.now(),
         "add_extras": False,
         "is_complete": False,
-        "user_id": InitGraphRequest.user_id
+        "user_id": init_graph_request.user_id
     }
     last_repository_update = await read_repositories_update(
         repository["owner"], repository["name"]
@@ -171,15 +129,15 @@ async def init_graph(InitGraphRequest: InitGraphRequest, background_tasks: Backg
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=json_encoder({"message": "no_repo"}),
             )
-        await init_graph_background(repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
-        # background_tasks.add_task(init_graph_background, repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
+        await init_repository_graph(repository, last_repository_update, last_commit_date, init_graph_request.user_id)
+        # background_tasks.add_task(init_repository_graph, repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "init_graph"}),
     )
 
 
-async def init_graph_background(repository: dict[str, Any], last_repository_update: dict[str, datetime | bool], last_commit_date: datetime, user_id: str):
+async def init_repository_graph(repository: dict[str, Any], last_repository_update: dict[str, datetime | bool], last_commit_date: datetime, user_id: str) -> None:
     if last_commit_date is not None and (
         not last_repository_update["moment"]
         or last_repository_update["moment"].replace(tzinfo=UTC)

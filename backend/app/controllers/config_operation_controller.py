@@ -29,12 +29,12 @@ router = APIRouter()
 
 @router.post("/operation/config/valid_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
 async def valid_config(
-    ValidConfigRequest: Annotated[ValidConfigRequest, Body()]
+    valid_config_request: Annotated[ValidConfigRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(ValidConfigRequest))
-    smt_id = f"{ValidConfigRequest.requirement_file_id}-{ValidConfigRequest.max_level}"
+    graph_data = await read_data_for_smt_transform(jsonable_encoder(valid_config_request))
+    smt_id = f"{valid_config_request.requirement_file_id}-{valid_config_request.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, ValidConfigRequest.node_type.value, ValidConfigRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, valid_config_request.node_type.value, valid_config_request.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -44,7 +44,7 @@ async def valid_config(
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
         smt_model = smt_transform.destination_model
-        operation = ValidConfig(await read_counts_by_releases(ValidConfigRequest.config, ValidConfigRequest.node_type.value))
+        operation = ValidConfig(await read_counts_by_releases(valid_config_request.config, valid_config_request.node_type.value))
         operation.execute(smt_model)
         result = {"is_valid": operation.get_result(), "message": "success"}
         return JSONResponse(
@@ -61,12 +61,12 @@ async def valid_config(
 
 @router.post("/operation/config/complete_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
 async def complete_config(
-    CompleteConfigRequest: Annotated[CompleteConfigRequest, Body()]
+    complete_config_request: Annotated[CompleteConfigRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(CompleteConfigRequest))
-    smt_id = f"{CompleteConfigRequest.requirement_file_id}-{CompleteConfigRequest.max_level}"
+    graph_data = await read_data_for_smt_transform(jsonable_encoder(complete_config_request))
+    smt_id = f"{complete_config_request.requirement_file_id}-{complete_config_request.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, CompleteConfigRequest.node_type.value, CompleteConfigRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, complete_config_request.node_type.value, complete_config_request.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -77,12 +77,12 @@ async def complete_config(
             await replace_smt_text(smt_id, model_text)
         smt_model = smt_transform.destination_model
         operation = CompleteConfig(
-            await read_counts_by_releases(CompleteConfigRequest.config, CompleteConfigRequest.node_type.value)
+            await read_counts_by_releases(complete_config_request.config, complete_config_request.node_type.value)
         )
         operation.execute(smt_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), CompleteConfigRequest.node_type.value)
+            result = await read_releases_by_counts(operation.get_result(), complete_config_request.node_type.value)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -97,12 +97,12 @@ async def complete_config(
 
 @router.post("/operation/config/config_by_impact", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
 async def config_by_impact(
-    ConfigByImpactRequest: Annotated[ConfigByImpactRequest, Body()]
+    config_by_impact_request: Annotated[ConfigByImpactRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(ConfigByImpactRequest))
-    smt_id = f"{ConfigByImpactRequest.requirement_file_id}-{ConfigByImpactRequest.max_level}"
+    graph_data = await read_data_for_smt_transform(jsonable_encoder(config_by_impact_request))
+    smt_id = f"{config_by_impact_request.requirement_file_id}-{config_by_impact_request.max_level}"
     if graph_data["name"] is not None:
-        smt_transform = GraphToSMT(graph_data, ConfigByImpactRequest.node_type.value, ConfigByImpactRequest.agregator)
+        smt_transform = GraphToSMT(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.agregator)
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -112,11 +112,11 @@ async def config_by_impact(
             model_text = smt_transform.transform()
             await replace_smt_text(smt_id, model_text)
         smt_model = smt_transform.destination_model
-        operation = ConfigByImpact(ConfigByImpactRequest.impact)
+        operation = ConfigByImpact(config_by_impact_request.impact)
         operation.execute(smt_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), ConfigByImpactRequest.node_type.value)
+            result = await read_releases_by_counts(operation.get_result(), config_by_impact_request.node_type.value)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
