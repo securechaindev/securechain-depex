@@ -3,9 +3,9 @@ from .dbs.databases import get_graph_db_driver
 
 async def read_versions_names_by_package(node_type: str, name: str) -> list[str]:
     query = f"""
-    match(p:{node_type}{{name:$name}})
-    match (p)-[r:Have]->(v: Version)
-    return collect(v.name)
+    MATCH (p:{node_type}{{name:$name}})
+    MATCH (p)-[r:Have]->(v: Version)
+    RETURN collect(v.name)
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, name=name)
@@ -20,7 +20,7 @@ async def read_releases_by_counts(
     sanitized_configs: list[dict[str, str | float | int]] = []
     query = f"""
     MATCH (v:Version)<-[:Have]-(parent:{node_type})
-    WHERE v.count = $count and parent.name = $package
+    WHERE v.count = $count AND parent.name = $package
     RETURN v.name
     """
     for config in configs:
@@ -44,7 +44,7 @@ async def read_counts_by_releases(
     sanitized_config: dict[str, int] = {}
     query = f"""
     MATCH (v:Version)<-[:Have]-(parent:{node_type})
-    WHERE v.name = $release and parent.name = $package
+    WHERE v.name = $release AND parent.name = $package
     RETURN v.count
     """
     for package, release in config.items():
@@ -58,9 +58,9 @@ async def read_counts_by_releases(
 
 async def count_number_of_versions_by_package(node_type: str, name: str) -> int:
     query = f"""
-    match(p:{node_type}{{name:$name}})
-    match (p)-[r:Have]->(v: Version)
-    return count(v)
+    MATCH (p:{node_type}{{name:$name}})
+    MATCH (p)-[r:Have]->(v: Version)
+    RETURN count(v)
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, name=name)

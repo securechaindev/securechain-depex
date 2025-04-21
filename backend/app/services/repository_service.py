@@ -6,16 +6,16 @@ from .dbs.databases import get_graph_db_driver
 
 async def create_repository(repository: dict[str, Any]) -> str:
     query = """
-    match(u:User) where u._id = $user_id
-    merge(r: Repository{
+    MATCH(u:User) WHERE u._id = $user_id
+    MERGE(r: Repository{
         owner: $owner,
         name: $name,
         moment: $moment,
         add_extras: $add_extras,
         is_complete: $is_complete
     })
-    create (u)-[rel:OWN]->(r)
-    return elementid(r) as id
+    CREATE (u)-[rel:OWN]->(r)
+    RETURN elementid(r) AS id
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository)
@@ -25,10 +25,10 @@ async def create_repository(repository: dict[str, Any]) -> str:
 
 async def create_user_repository_rel(repository_id: str, user_id: str) -> None:
     query = """
-    match(u:User) where u._id = $user_id
-    match(r:Repository) where elemtid(r) = $repository_id
-    merge (u)-[rel:OWN]->(r)
-    return elementid(r) as id
+    MATCH(u:User) WHERE u._id = $user_id
+    MATCH(r:Repository) WHERE elementid(r) = $repository_id
+    MERGE (u)-[rel:OWN]->(r)
+    RETURN elementid(r) AS id
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository_id, user_id)
@@ -38,7 +38,8 @@ async def create_user_repository_rel(repository_id: str, user_id: str) -> None:
 
 async def read_repositories_update(owner: str, name: str) -> dict[str, datetime | bool]:
     query = """
-    match(r: Repository{owner: $owner, name: $name}) return {moment: r.moment, is_complete: r.is_complete, id: elementid(r)}
+    MATCH(r: Repository{owner: $owner, name: $name})
+    RETURN {moment: r.moment, is_complete: r.is_complete, id: elementid(r)}
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, owner=owner, name=name)
@@ -48,7 +49,8 @@ async def read_repositories_update(owner: str, name: str) -> dict[str, datetime 
 
 async def read_repositories(owner: str, name: str) -> str:
     query = """
-    match(r: Repository{owner: $owner, name: $name}) return elementid(r)
+    MATCH(r: Repository{owner: $owner, name: $name})
+    RETURN elementid(r)
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, owner=owner, name=name)
@@ -58,7 +60,8 @@ async def read_repositories(owner: str, name: str) -> str:
 
 async def read_repository_by_id(repository_id: str) -> dict[str, str]:
     query = """
-    match(r: Repository) where elementid(r)=$repository_id return {name: r.name, owner: r.owner}
+    MATCH(r: Repository) WHERE elementid(r)=$repository_id
+    RETURN {name: r.name, owner: r.owner}
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository_id=repository_id)
@@ -70,17 +73,17 @@ async def read_graph_for_info_operation(
     file_info_request: dict[str, Any]
 ) -> dict[str, Any]:
     query = """
-    match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
-    call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield nodes, relationships
-    with nodes, relationships
-    unwind nodes as node
-    with case when labels(node)[0] ENDS WITH 'Package' then node end as deps,
-    case when labels(node)[0] = 'Version' then node.vulnerabilities end as vulnerabilities, relationships
-    with collect(deps) as deps, apoc.coll.flatten(collect(vulnerabilities)) as vulnerabilities, relationships
-    unwind relationships as relationship
-    with case when type(relationship) = 'Requires' then relationship end as rels, deps, vulnerabilities
-    with deps, vulnerabilities, collect(rels) as rels
-    return {dependencies: size(deps), edges: size(rels), vulnerabilities: apoc.coll.toSet(vulnerabilities)}
+    MATCH(rf: RequirementFile) WHERE elementid(rf) = $requirement_file_id
+    CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) YIELD nodes, relationships
+    WITH nodes, relationships
+    UNWIND nodes AS node
+    WITH CASE WHEN labels(node)[0] ENDS WITH 'Package' THEN node END AS deps,
+    CASE WHEN labels(node)[0] = 'Version' THEN node.vulnerabilities END AS vulnerabilities, relationships
+    WITH collect(deps) AS deps, apoc.coll.flatten(collect(vulnerabilities)) AS vulnerabilities, relationships
+    UNWIND relationships AS relationship
+    WITH CASE WHEN type(relationship) = 'Requires' THEN relationship END AS rels, deps, vulnerabilities
+    WITH deps, vulnerabilities, collect(rels) AS rels
+    RETURN {dependencies: size(deps), edges: size(rels), vulnerabilities: apoc.coll.toSet(vulnerabilities)}
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(
@@ -95,27 +98,27 @@ async def read_data_for_smt_transform(
     operation_request: dict[str, Any]
 ) -> dict[str, Any]:
     query = """
-    match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
-    call apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) yield relationships
-    unwind relationships as relationship
-        with case type(relationship)
-            when 'Requires' then {
+    MATCH (rf: RequirementFile) WHERE elementid(rf) = $requirement_file_id
+    CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) YIELD relationships
+    UNWIND relationships AS relationship
+        WITH CASE type(relationship)
+            WHEN 'Requires' THEN {
                 parent_count: startnode(relationship).count,
                 dependency: endnode(relationship).name,
                 constraints: relationship.constraints,
                 parent_version_name: relationship.parent_version_name,
                 type: CASE WHEN relationship.parent_version_name is null THEN "direct" ELSE "indirect" END
-            } end as requires,
-        case type(relationship)
-            when 'Have' then {
+            } END AS requires,
+        CASE type(relationship)
+            WHEN 'Have' THEN {
                     dependency: startnode(relationship).name,
                     release: endnode(relationship).name,
                     count: endnode(relationship).count,
                     mean: endnode(relationship).mean,
                     weighted_mean: endnode(relationship).weighted_mean
 
-            } end as have, rf
-    return {
+            } END AS have, rf
+    RETURN {
         name: collect(rf.name)[0],
         moment: collect(rf.moment)[0],
         requires: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(requires), "parent_count"), "type"),
@@ -133,10 +136,10 @@ async def read_data_for_smt_transform(
 
 async def read_repositories_by_user_id(user_id: str) -> dict[str, Any]:
     query = """
-    match (u:User)-[]->(r:Repository)-[rel:USE]->(rf:RequirementFile)
-    where u._id = $user_id
-    with r, collect({name: rf.name, manager: rf.manager, requirement_file_id: elementid(rf)}) as requirement_files
-    return collect({
+    MATCH (u:User)-[]->(r:Repository)-[rel:USE]->(rf:RequirementFile)
+    WHERE u._id = $user_id
+    WITH r, collect({name: rf.name, manager: rf.manager, requirement_file_id: elementid(rf)}) as requirement_files
+    RETURN collect({
         owner: r.owner,
         name: r.name,
         is_complete: r.is_complete,
@@ -153,8 +156,8 @@ async def read_repositories_by_user_id(user_id: str) -> dict[str, Any]:
 
 async def update_repository_is_complete(repository_id: str, is_complete: bool) -> None:
     query = """
-    match (r:Repository) where elementid(r) = $repository_id
-    set r.is_complete = $is_complete
+    MATCH (r:Repository) WHERE elementid(r) = $repository_id
+    SET r.is_complete = $is_complete
     """
     async with get_graph_db_driver().session() as session:
         await session.run(query, repository_id=repository_id, is_complete=is_complete)
@@ -162,8 +165,8 @@ async def update_repository_is_complete(repository_id: str, is_complete: bool) -
 
 async def update_repository_moment(repository_id: str) -> None:
     query = """
-    match (r:Repository) where elementid(r) = $repository_id
-    set r.moment = $moment
+    MATCH (r:Repository) WHERE elementid(r) = $repository_id
+    SET r.moment = $moment
     """
     async with get_graph_db_driver().session() as session:
         await session.run(query, repository_id=repository_id, moment=datetime.now())
@@ -171,9 +174,9 @@ async def update_repository_moment(repository_id: str) -> None:
 
 async def update_repository_users(repository_id: str, user_id: str) -> None:
     query = """
-    match (r:Repository)
-    where elementid(r) = $repository_id and not $user_id in r.users
-    set r.users = r.users + [$user_id]
+    MATCH (r:Repository)
+    WHERE elementid(r) = $repository_id AND NOT $user_id IN r.users
+    SET r.users = r.users + [$user_id]
     """
     async with get_graph_db_driver().session() as session:
         await session.run(query, repository_id=repository_id, user_id=user_id)

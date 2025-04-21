@@ -6,11 +6,11 @@ from .dbs.databases import get_graph_db_driver
 
 async def create_requirement_file(requirement_file: dict[str, Any], repository_id: str) -> str:
     query = """
-    match (r:Repository)
-    where elementid(r) = $repository_id
-    create(rf:RequirementFile {name:$name,manager:$manager,moment:$moment})
-    create (r)-[rel:USE]->(rf)
-    return elementid(rf) as id
+    MATCH (r:Repository)
+    WHERE elementid(r) = $repository_id
+    CREATE (rf:RequirementFile {name:$name,manager:$manager,moment:$moment})
+    CREATE (r)-[rel:USE]->(rf)
+    RETURN elementid(rf) AS id
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, requirement_file, repository_id=repository_id)
@@ -20,9 +20,10 @@ async def create_requirement_file(requirement_file: dict[str, Any], repository_i
 
 async def read_requirement_files_by_repository(repository_id: str) -> dict[str, str]:
     query = """
-    match (r:Repository) where elementid(r) = $repository_id
-    match (r)-[use_rel]->(requirement_file)
-    return apoc.map.fromPairs(collect([requirement_file.name, elementid(requirement_file)]))
+    MATCH (r:Repository)
+    WHERE elementid(r) = $repository_id
+    MATCH (r)-[use_rel]->(requirement_file)
+    RETURN apoc.map.fromPairs(collect([requirement_file.name, elementid(requirement_file)]))
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository_id=repository_id)
@@ -32,10 +33,11 @@ async def read_requirement_files_by_repository(repository_id: str) -> dict[str, 
 
 async def update_requirement_rel_constraints(requirement_file_id: str, package_name: str, constraints: str) -> None:
     query = """
-    match (rf:RequirementFile) where elementid(rf) = $requirement_file_id
-    match (rf)-[requirement_rel]->(package)
-    where package.name = $package_name
-    set requirement_rel.constraints = $constraints
+    MATCH (rf:RequirementFile)
+    WHERE elementid(rf) = $requirement_file_id
+    MATCH (rf)-[requirement_rel]->(package)
+    WHERE package.name = $package_name
+    SET requirement_rel.constraints = $constraints
     """
     async with get_graph_db_driver().session() as session:
         await session.run(
@@ -48,8 +50,9 @@ async def update_requirement_rel_constraints(requirement_file_id: str, package_n
 
 async def update_requirement_file_moment(requirement_file_id: str) -> None:
     query = """
-    match (rf: RequirementFile) where elementid(rf) = $requirement_file_id
-    set rf.moment = $moment
+    MATCH (rf: RequirementFile)
+    WHERE elementid(rf) = $requirement_file_id
+    SET rf.moment = $moment
     """
     async with get_graph_db_driver().session() as session:
         await session.run(
@@ -59,10 +62,11 @@ async def update_requirement_file_moment(requirement_file_id: str) -> None:
 
 async def delete_requirement_file(repository_id: str, requirement_file_name: str) -> None:
     query = """
-    match (r:Repository) where elementid(r) = $repository_id
-    match (r)-[use_rel]->(requirement_file)-[requirement_rel]->(p)
-    where requirement_file.name = $requirement_file_name
-    delete requirement_rel, use_rel, requirement_file
+    MATCH (r:Repository)
+    WHERE elementid(r) = $repository_id
+    MATCH (r)-[use_rel]->(requirement_file)-[requirement_rel]->(p)
+    WHERE requirement_file.name = $requirement_file_name
+    DELETE requirement_rel, use_rel, requirement_file
     """
     async with get_graph_db_driver().session() as session:
         await session.run(
@@ -72,10 +76,11 @@ async def delete_requirement_file(repository_id: str, requirement_file_name: str
 
 async def delete_requirement_file_rel(requirement_file_id: str, package_name: str) -> None:
     query = """
-    match (rf:RequirementFile) where elementid(rf) = $requirement_file_id
-    match (rf)-[requirement_rel]->(package)
-    where package.name = $package_name
-    delete requirement_rel
+    MATCH (rf:RequirementFile)
+    WHERE elementid(rf) = $requirement_file_id
+    MATCH (rf)-[requirement_rel]->(package)
+    WHERE package.name = $package_name
+    DELETE requirement_rel
     """
     async with get_graph_db_driver().session() as session:
         await session.run(
