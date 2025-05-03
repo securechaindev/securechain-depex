@@ -73,20 +73,21 @@ async def nuget_search_new_versions(package: dict[str, Any]) -> None:
     all_versions, all_require_packages = await get_nuget_versions(package["name"])
     counter = await count_number_of_versions_by_package("NuGetPackage", package["name"])
     if counter < len(all_versions):
-        no_existing_versions: list[dict[str, Any]] = []
+        new_versions: list[dict[str, Any]] = []
         filtered_require_packages = []
         actual_versions = await read_versions_names_by_package("NuGetPackage", package["name"])
         for version, require_packages in zip(all_versions, all_require_packages):
             if version["name"] not in actual_versions:
                 version["count"] = counter
-                no_existing_versions.append(version)
+                new_version = await attribute_vulnerabilities(package["name"], version)
+                new_versions.append(new_version) 
                 filtered_require_packages.append(require_packages)
                 counter += 1
-        no_existing_attributed_versions = [
-            await attribute_vulnerabilities(package["name"], version)
-            for version in no_existing_versions
-        ]
-        new_versions = await create_versions(package, "NuGetPackage", no_existing_attributed_versions)
-        for new_version, require_packages in zip(new_versions, all_require_packages):
-            await nuget_generate_packages(require_packages, new_version["id"], package["name"])
+        created_versions = await create_versions(
+            package,
+            "NuGetPackage",
+            new_versions
+        )
+        for version, require_packages in zip(created_versions, all_require_packages):
+            await nuget_generate_packages(require_packages, version["id"], package["name"])
     await update_package_moment("NuGetPackage", package["name"])

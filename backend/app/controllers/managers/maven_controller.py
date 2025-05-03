@@ -87,22 +87,19 @@ async def maven_search_new_versions(package: dict[str, Any]) -> None:
     all_versions = await get_maven_versions(package["group_id"], package["artifact_id"])
     counter = await count_number_of_versions_by_package("MavenPackage", package["name"])
     if counter < len(all_versions):
-        no_existing_versions: list[dict[str, Any]] = []
+        new_versions: list[dict[str, Any]] = []
         actual_versions = await read_versions_names_by_package("MavenPackage", package["name"])
         for version in all_versions:
             if version["name"] not in actual_versions:
                 version["count"] = counter
-                no_existing_versions.append(version)
+                new_version = await attribute_vulnerabilities(package["name"], version)
+                new_versions.append(new_version)
                 counter += 1
-        no_existing_attributed_versions = [
-            await attribute_vulnerabilities(package["name"], version)
-            for version in no_existing_versions
-        ]
-        new_versions = await create_versions(
+        created_versions = await create_versions(
             package,
             "MavenPackage",
-            no_existing_attributed_versions,
+            new_versions,
         )
-        for new_version in new_versions:
-            await maven_extract_packages(package["group_id"], package["artifact_id"], new_version)
+        for version in created_versions:
+            await maven_extract_packages(package["group_id"], package["artifact_id"], version)
     await update_package_moment("MavenPackage", package["name"])
