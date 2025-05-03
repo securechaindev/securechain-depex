@@ -80,7 +80,7 @@ async def nuget_search_new_versions(package: dict[str, Any]) -> None:
             if version["name"] not in actual_versions:
                 version["count"] = counter
                 new_version = await attribute_vulnerabilities(package["name"], version)
-                new_versions.append(new_version) 
+                new_versions.append(new_version)
                 filtered_require_packages.append(require_packages)
                 counter += 1
         created_versions = await create_versions(
