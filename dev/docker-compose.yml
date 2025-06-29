@@ -1,0 +1,28 @@
+services:
+  depex_backend:
+    container_name: depex_backend
+    build:
+      context: ../
+      dockerfile: ./dev/Dockerfile
+    volumes:
+      - ../app:/app
+      - ../.env:/.env
+    depends_on:
+      graph_database:
+        condition: service_healthy
+      vuln_database_seeder:
+        condition: service_completed_successfully
+    ports:
+      - '8000:8000'
+    networks:
+      - depex
+    healthcheck:
+      test: curl --fail http://localhost:8000/health || exit 1
+      interval: 100s
+      timeout: 100s
+      retries: 10
+      start_period: 300s
+
+networks:
+  depex:
+    driver: bridge
