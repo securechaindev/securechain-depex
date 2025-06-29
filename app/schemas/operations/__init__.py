@@ -1,10 +1,10 @@
-from .complete_config import CompleteConfigRequest
-from .config_by_impact import ConfigByImpactRequest
-from .file_info import FileInfoRequest
-from .filter_configs import FilterConfigsRequest
-from .min_max_impact import MinMaxImpactRequest
-from .valid_config import ValidConfigRequest
-from .valid_file import ValidFileRequest
+from .complete_config_request import CompleteConfigRequest
+from .config_by_impact_request import ConfigByImpactRequest
+from .file_info_request import FileInfoRequest
+from .filter_configs_request import FilterConfigsRequest
+from .min_max_impact_request import MinMaxImpactRequest
+from .valid_config_request import ValidConfigRequest
+from .valid_file_request import ValidFileRequest
 
 __all__ = [
     "CompleteConfigRequest",
