@@ -15,8 +15,7 @@ from app.middleware import log_request_middleware
 from app.router import api_router
 
 DESCRIPTION = """
-A backend for dependency graph building, atribution of vulnerabilities and reasoning
-over it.
+Depex is a tool that allows you to reason over the entire configuration space of the Software Supply Chain of an open-source software repository.
 """
 
 @asynccontextmanager
@@ -25,12 +24,13 @@ async def lifespan(app: FastAPI):
     await close_session()
 
 app = FastAPI(
-    title="Depex",
+    title="Secure Chain Depex Tool",
+    version="1.0.0",
     description=DESCRIPTION,
     contact={
-        "name": "Antonio Germán Márquez Trujillo",
-        "url": "https://github.com/GermanMT",
-        "email": "amtrujillo@us.es",
+        "name": "Secure Chain Team",
+        "url": "https://github.com/securechaindev",
+        "email": "hi@securechain.dev",
     },
     license_info={
         "name": "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
@@ -42,9 +42,7 @@ app = FastAPI(
 app.middleware("http")(log_request_middleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        'http://localhost:3000'
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

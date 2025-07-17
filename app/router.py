@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
 from app.controllers import (
-    auth_controller,
     config_operation_controller,
     file_operation_controller,
     graph_controller,
