@@ -1,4 +1,9 @@
-from .cargo_controller import cargo_create_package, cargo_search_new_versions
+from .cargo_controller import (
+    cargo_create_package,
+    cargo_create_requirement_file,
+    cargo_generate_packages,
+    cargo_search_new_versions,
+)
 from .maven_controller import (
     maven_create_package,
     maven_create_requirement_file,
@@ -13,6 +18,8 @@ from .npm_controller import (
 )
 from .nuget_controller import (
     nuget_create_package,
+    nuget_create_requirement_file,
+    nuget_generate_packages,
     nuget_search_new_versions,
 )
 from .pypi_controller import (
@@ -21,10 +28,17 @@ from .pypi_controller import (
     pypi_generate_packages,
     pypi_search_new_versions,
 )
-from .rubygems_controller import rubygems_create_package, rubygems_search_new_versions
+from .rubygems_controller import (
+    rubygems_create_package,
+    rubygems_create_requirement_file,
+    rubygems_generate_packages,
+    rubygems_search_new_versions,
+)
 
 __all__ = [
     "cargo_create_package",
+    "cargo_create_requirement_file",
+    "cargo_generate_packages",
     "cargo_search_new_versions",
     "maven_create_package",
     "maven_create_requirement_file",
@@ -35,11 +49,15 @@ __all__ = [
     "npm_generate_packages",
     "npm_search_new_versions",
     "nuget_create_package",
+    "nuget_create_requirement_file",
+    "nuget_generate_packages",
     "nuget_search_new_versions",
     "pypi_create_package",
     "pypi_create_requirement_file",
     "pypi_generate_packages",
     "pypi_search_new_versions",
     "rubygems_create_package",
+    "rubygems_create_requirement_file",
+    "rubygems_generate_packages",
     "rubygems_search_new_versions"
 ]

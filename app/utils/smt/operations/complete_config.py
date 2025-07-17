@@ -1,10 +1,10 @@
-from z3 import Int, sat, Optimize, unknown
+from z3 import Int, Optimize, sat, unknown
 
-from .config_sanitizer import config_sanitizer
+from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
 
 
-class CompleteConfig():
+class CompleteConfig:
     def __init__(self, config: dict[str, int]) -> None:
         self.config: dict[str, int] = config
         self.result: list[dict[str, float | int]] | str = []
@@ -29,7 +29,5 @@ class CompleteConfig():
             break
         if solver.check() == unknown:
             self.result = (
-                "Execution timed out after 3 seconds. "
-                "The complexity of the model is too high, "
-                "try lowering the maximum level of the graph."
+                "Execution timed out after 3 seconds. The complexity of the model is too high, try lowering the maximum level of the graph."
             )

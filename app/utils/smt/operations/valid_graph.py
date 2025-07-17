@@ -1,8 +1,9 @@
 from z3 import Solver, sat, unknown
+
 from app.utils.smt.model import SMTModel
 
 
-class ValidFile():
+class ValidGraph:
     def __init__(self) -> None:
         self.result: bool | str = True
 
@@ -16,7 +17,5 @@ class ValidFile():
         self.result = solver.check() == sat
         if solver.check() == unknown:
             self.result = (
-                "Execution timed out after 3 seconds. "
-                "The complexity of the model is too high, "
-                "try lowering the maximum level of the graph."
+                "Execution timed out after 3 seconds. The complexity of the model is too high, try lowering the maximum level of the graph."
             )

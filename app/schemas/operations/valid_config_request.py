@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
-from app.models.patterns import NEO4J_ID_PATTERN
-from app.models.utils import Agregator, NodeType
-from app.models.validators import validate_max_level
+from app.schemas.patterns import NEO4J_ID_PATTERN
+from app.schemas.utils import Agregator, NodeType
+from app.schemas.validators import validate_max_level
 
 
 class ValidConfigRequest(BaseModel):
@@ -14,6 +14,6 @@ class ValidConfigRequest(BaseModel):
     agregator: Agregator
     config: dict[str, str]
 
-    @validator("max_level")
+    @field_validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)

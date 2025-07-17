@@ -1,8 +1,9 @@
 from z3 import Int, Solver, sat, unknown
+
 from app.utils.smt.model import SMTModel
 
 
-class ValidConfig():
+class ValidConfig:
     def __init__(self, config: dict[str, int]) -> None:
         self.config: dict[str, int] = config
         self.result: bool | str = True
@@ -19,7 +20,5 @@ class ValidConfig():
         self.result = solver.check() == sat
         if solver.check() == unknown:
             self.result = (
-                "Execution timed out after 3 seconds. "
-                "The complexity of the model is too high, "
-                "try lowering the maximum level of the graph."
+                "Execution timed out after 3 seconds. The complexity of the model is too high, try lowering the maximum level of the graph."
             )

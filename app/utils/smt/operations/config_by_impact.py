@@ -1,10 +1,10 @@
-from z3 import sat, Optimize, Abs, unknown
+from z3 import Abs, Optimize, sat, unknown
 
-from .config_sanitizer import config_sanitizer
+from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
 
 
-class ConfigByImpact():
+class ConfigByImpact:
     def __init__(self, impact: float) -> None:
         self.impact: float = impact
         self.result: list[dict[str, float | int]] | str = []
@@ -28,7 +28,5 @@ class ConfigByImpact():
             break
         if solver.check() == unknown:
             self.result = (
-                "Execution timed out after 3 seconds. "
-                "The complexity of the model is too high, "
-                "try lowering the maximum level of the graph."
+                "Execution timed out after 3 seconds. The complexity of the model is too high, try lowering the maximum level of the graph."
             )

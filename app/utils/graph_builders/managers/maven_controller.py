@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from app.apis import get_maven_requires, get_maven_versions
-from app.controllers.vulnerability_controller import attribute_vulnerabilities
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
@@ -13,6 +12,8 @@ from app.services import (
     relate_packages,
     update_package_moment,
 )
+
+from .vulnerabilities import attribute_vulnerabilities
 
 
 async def maven_create_requirement_file(name: str, file: Any, repository_id: str) -> None:

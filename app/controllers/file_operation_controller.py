@@ -3,20 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from app.utils.smt.operations import (
-    FilterConfigs,
-    MaximizeImpact,
-    MinimizeImpact,
-    ValidFile,
-)
-from app.utils.smt.model import SMTModel
 from pytz import UTC
 
-from app.schemas.operations import (
+from app.schemas import (
     FileInfoRequest,
     FilterConfigsRequest,
     MinMaxImpactRequest,
-    ValidFileRequest,
+    ValidGraphRequest,
 )
 from app.services import (
     read_data_for_smt_transform,
@@ -25,7 +18,15 @@ from app.services import (
     read_smt_text,
     replace_smt_text,
 )
-from app.utils import JWTBearer, json_encoder
+from app.utils import (
+    FilterConfigs,
+    JWTBearer,
+    MaximizeImpact,
+    MinimizeImpact,
+    SMTModel,
+    ValidGraph,
+    json_encoder,
+)
 
 router = APIRouter()
 
@@ -39,14 +40,14 @@ async def file_info(
     )
 
 
-@router.post("/operation/file/valid_file", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
-async def valid_file(
-    valid_file_request: Annotated[ValidFileRequest, Body()]
+@router.post("/operation/file/valid_graph", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+async def valid_graph(
+    valid_graph_request: Annotated[ValidGraphRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(valid_file_request))
-    smt_id = f"{valid_file_request.requirement_file_id}-{valid_file_request.max_level}"
+    graph_data = await read_data_for_smt_transform(jsonable_encoder(valid_graph_request))
+    smt_id = f"{valid_graph_request.requirement_file_id}-{valid_graph_request.max_level}"
     if graph_data["name"] is not None:
-        smt_model = SMTModel(graph_data, valid_file_request.node_type.value, "mean")
+        smt_model = SMTModel(graph_data, valid_graph_request.node_type.value, "mean")
         smt_text = await read_smt_text(smt_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
             "moment"
@@ -55,7 +56,7 @@ async def valid_file(
         else:
             model_text = smt_model.transform()
             await replace_smt_text(smt_id, model_text)
-        operation = ValidFile()
+        operation = ValidGraph()
         operation.execute(smt_model)
         result = {"is_valid": operation.get_result(), "message": "success"}
         return JSONResponse(

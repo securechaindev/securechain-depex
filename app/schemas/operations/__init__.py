@@ -4,7 +4,7 @@ from .file_info_request import FileInfoRequest
 from .filter_configs_request import FilterConfigsRequest
 from .min_max_impact_request import MinMaxImpactRequest
 from .valid_config_request import ValidConfigRequest
-from .valid_file_request import ValidFileRequest
+from .valid_graph_request import ValidGraphRequest
 
 __all__ = [
     "CompleteConfigRequest",
@@ -13,5 +13,5 @@ __all__ = [
     "FilterConfigsRequest",
     "MinMaxImpactRequest",
     "ValidConfigRequest",
-    "ValidFileRequest"
+    "ValidGraphRequest"
 ]

@@ -5,22 +5,22 @@ from univers.version_range import (
     GemVersionRange,
     MavenVersionRange,
     NpmVersionRange,
+    NugetVersionRange,
     PypiVersionRange,
     VersionRange,
-    NugetVersionRange
 )
 from univers.versions import (
     MavenVersion,
+    NugetVersion,
     PypiVersion,
     RubygemsVersion,
-    NugetVersion,
     SemverVersion,
     Version,
 )
-from z3 import Real, parse_smt2_string, BoolRef, ArithRef
+from z3 import ArithRef, BoolRef, Real, parse_smt2_string
 
 
-class SMTModel():
+class SMTModel:
     def __init__(
         self,
         source_data: dict[str, Any],

@@ -1,10 +1,10 @@
-from z3 import Or, Optimize, sat, unknown
+from z3 import Optimize, Or, sat, unknown
 
-from flamapy.metamodels.smt_metamodel.utils import config_sanitizer
+from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
 
 
-class MaximizeImpact():
+class MaximizeImpact:
     def __init__(self, limit: int) -> None:
         self.limit: int = limit
         self.result: list[dict[str, float | int]] | str = []
@@ -33,7 +33,5 @@ class MaximizeImpact():
             solver.add(Or(block))
         if solver.check() == unknown:
             self.result = (
-                "Execution timed out after 3 seconds. "
-                "The complexity of the model is too high, "
-                "try lowering the maximum level of the graph."
+                "Execution timed out after 3 seconds. The complexity of the model is too high, try lowering the maximum level of the graph."
             )

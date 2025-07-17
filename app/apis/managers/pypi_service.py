@@ -7,7 +7,7 @@ from aiohttp import ClientConnectorError, ContentTypeError
 from app.cache import get_cache, set_cache
 from app.http_session import get_session
 from app.logger import logger
-from app.utils import get_first_position, parse_pypi_constraints
+from app.utils.others import get_first_position, parse_pypi_constraints
 
 
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.

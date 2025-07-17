@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.models.utils import NodeType
+from app.schemas.utils import NodeType
 
 
 class InitPackageRequest(BaseModel):

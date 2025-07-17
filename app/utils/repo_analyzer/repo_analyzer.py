@@ -7,12 +7,14 @@ from aiofiles import open
 
 from app.http_session import get_session
 
-from .files.package_json_analyzer import analyze_package_json
-from .files.pom_xml_analyzer import analyze_pom_xml
-from .files.pyproject_toml_analyzer import analyze_pyproject_toml
-from .files.requirements_txt_analyzer import analyze_requirements_txt
-from .files.setup_cfg_analyzer import analyze_setup_cfg
-from .files.setup_py_analyzer import analyze_setup_py
+from .requirement_files import (
+    analyze_package_json,
+    analyze_pom_xml,
+    analyze_pyproject_toml,
+    analyze_requirements_txt,
+    analyze_setup_cfg,
+    analyze_setup_py,
+)
 
 pypi_files = ["pyproject.toml", "setup.cfg", "setup.py", "requirements.txt"]
 npm_files = ["package.json"]
@@ -62,7 +64,6 @@ async def download_repository(owner: str, name: str) -> str:
     url = f"https://api.github.com/repos/{owner}/{name}/contents"
     async with session.get(url) as resp:
         if resp.status != 200:
-            print(f"Error fetching contents of {owner}/{name}")
             return repository_path
         contents = await resp.json()
     for item in contents:

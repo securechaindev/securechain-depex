@@ -1,10 +1,10 @@
 from z3 import And, Or, Solver, sat, unknown
 
-from flamapy.metamodels.smt_metamodel.utils import config_sanitizer
+from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
 
 
-class FilterConfigs():
+class FilterConfigs:
     def __init__(self, max_threshold: float, min_threshold: float, limit: int) -> None:
         self.max_threshold: float = max_threshold
         self.min_threshold: float = min_threshold
@@ -36,7 +36,5 @@ class FilterConfigs():
             solver.add(Or(block))
         if solver.check() == unknown:
             self.result = (
-                "Execution timed out after 3 seconds. "
-                "The complexity of the model is too high, "
-                "try lowering the maximum level of the graph."
+                "Execution timed out after 3 seconds. The complexity of the model is too high, try lowering the maximum level of the graph."
             )

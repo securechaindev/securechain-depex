@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
-from app.models.patterns import NEO4J_ID_PATTERN
-from app.models.validators import validate_max_level
+from app.schemas.patterns import NEO4J_ID_PATTERN
+from app.schemas.validators import validate_max_level
 
 
 class FileInfoRequest(BaseModel):
@@ -10,6 +10,6 @@ class FileInfoRequest(BaseModel):
     )
     max_level: int = Field(...)
 
-    @validator("max_level")
+    @field_validator("max_level")
     def validate_max_level(cls, value):
         return validate_max_level(value)

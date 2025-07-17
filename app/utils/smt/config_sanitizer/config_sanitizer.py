@@ -1,4 +1,4 @@
-from z3 import ModelRef, RatNumRef, IntNumRef
+from z3 import IntNumRef, ModelRef, RatNumRef
 
 
 def config_sanitizer(config: ModelRef) -> dict[str, float | int]:

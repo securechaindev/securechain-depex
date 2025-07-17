@@ -1,17 +1,26 @@
-from app.utils import get_first_position, parse_pypi_constraints
+from re import findall
+
+from app.utils.others import get_first_position, parse_pypi_constraints
 
 
-async def analyze_requirements_txt(
+async def analyze_setup_py(
     requirement_files: dict[str, dict[str, dict | str]],
     repository_path: str,
     requirement_file_name: str,
 ) -> dict[str, dict[str, dict | str]]:
     try:
-        with open(repository_path + requirement_file_name) as file:
+        with open(repository_path + requirement_file_name) as f:
+            matches: list[str] = findall(
+                r"(?:install_requires|requires)\s*=\s*\[([^\]]+)\]", f.read()
+            )
             dependencies = []
-            for line in file.readlines():
-                if "#" not in line:
-                    dependencies.append(line.strip().replace("\n", ""))
+            if matches:
+                matches = matches[0].split("\n")[1:-1]
+                for dep in matches:
+                    if "#" not in dep:
+                        dependencies.append(
+                            dep.strip().replace('"', "").replace("'", "").replace(",", "")
+                        )
     except Exception as _:
         return requirement_files
     requirement_file_name = requirement_file_name.replace("/master/", "").replace(

@@ -1,7 +1,8 @@
 from typing import Any
 
 from app.services import read_vulnerabilities_by_package_and_version
-from app.utils import mean, weighted_mean
+
+from .metrics import mean, weighted_mean
 
 
 async def attribute_vulnerabilities(

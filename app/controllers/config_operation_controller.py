@@ -3,15 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from app.utils.smt.operations import (
-    CompleteConfig,
-    ConfigByImpact,
-    ValidConfig,
-)
-from app.utils.smt.model import SMTModel
 from pytz import UTC
 
-from app.schemas.operations import (
+from app.schemas import (
     CompleteConfigRequest,
     ConfigByImpactRequest,
     ValidConfigRequest,
@@ -23,7 +17,14 @@ from app.services import (
     read_smt_text,
     replace_smt_text,
 )
-from app.utils import JWTBearer, json_encoder
+from app.utils import (
+    CompleteConfig,
+    ConfigByImpact,
+    JWTBearer,
+    SMTModel,
+    ValidConfig,
+    json_encoder,
+)
 
 router = APIRouter()
 
