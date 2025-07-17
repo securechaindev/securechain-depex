@@ -18,21 +18,38 @@ jobs:
         id: changelog
         uses: Requarks/changelog-action@v1
         with:
-          token: ${{secrets.GIT_TOKEN}}
-          tag: ${{github.ref_name}}
+          token: ${{ secrets.GIT_TOKEN }}
+          tag: ${{ github.ref_name }}
           writeToFile: false
           excludeTypes: other
 
       - name: Get variables
         id: get_variables
         run: |
-          echo "{VERSION}={${GITHUB_REF/refs\/tags\//}}"  >> $GITHUB_OUTPUT
-          echo "{IS_PRERELEASE}={"${{contains(github.ref, 'dev')}}"}"  >> $GITHUB_OUTPUT
+          VERSION=${GITHUB_REF/refs\/tags\//}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "IS_PRERELEASE=${{ contains(github.ref, 'dev') }}" >> $GITHUB_OUTPUT
 
       - name: Publish release github
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{secrets.GIT_TOKEN}}
-          prerelease: ${{steps.get_variables.outputs.IS_PRERELEASE}}
-          tag_name: ${{steps.get_variables.outputs.VERSION}}
-          body: ${{steps.changelog.outputs.changes}}
+          token: ${{ secrets.GIT_TOKEN }}
+          prerelease: ${{ steps.get_variables.outputs.IS_PRERELEASE }}
+          tag_name: ${{ steps.get_variables.outputs.VERSION }}
+          body: ${{ steps.changelog.outputs.changes }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GIT_TOKEN }}
+
+      - name: Build and push Docker image to GHCR
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/securechain-depex:latest
+            ghcr.io/${{ github.repository_owner }}/securechain-depex:${{ steps.get_variables.outputs.VERSION }}
