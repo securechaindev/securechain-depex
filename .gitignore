@@ -108,6 +108,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+depex-env/
 env/
 venv/
 ENV/
