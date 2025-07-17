@@ -1,21 +1,17 @@
 services:
-  depex_backend:
-    container_name: depex_backend
+  securechain-depex:
+    container_name: securechain-depex
     build:
-      context: ../
-      dockerfile: ./dev/Dockerfile
+      context: ..
+      dockerfile: dev/Dockerfile
     volumes:
       - ../app:/app
-      - ../.env:/.env
-    depends_on:
-      graph_database:
-        condition: service_healthy
-      vuln_database_seeder:
-        condition: service_completed_successfully
+    env_file:
+      - ../app/.env
     ports:
-      - '8000:8000'
+      - '8002:8000'
     networks:
-      - depex
+      - securechain
     healthcheck:
       test: curl --fail http://localhost:8000/health || exit 1
       interval: 100s
@@ -24,5 +20,7 @@ services:
       start_period: 300s
 
 networks:
-  depex:
+  securechain:
+    name: securechain
+    external: true
     driver: bridge
