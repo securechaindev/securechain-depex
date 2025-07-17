@@ -1,35 +1,43 @@
-import sys
+from sys import exc_info
 
 from fastapi import Request
-from fastapi.exception_handlers import http_exception_handler as _http_exception_handler
-from fastapi.exception_handlers import (
-    request_validation_exception_handler as _request_validation_exception_handler,
-)
 from fastapi.exceptions import HTTPException, RequestValidationError
-from fastapi.responses import JSONResponse, PlainTextResponse, Response
+from fastapi.responses import JSONResponse, Response
 
 from app.logger import logger
 
 
 async def request_validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-    body = await request.body()
-    query_params = request.query_params._dict
-    detail = {"errors": exc.errors(), "body": body.decode(), "query_params": query_params}
+    for error in exc.errors():
+        msg = error["msg"]
+        if isinstance(msg, Exception):
+            msg = str(msg)
+    detail = {
+        "code": "validation_error",
+        "message": msg,
+        "path": request.url.path
+    }
     logger.info(detail)
-    return await _request_validation_exception_handler(request, exc)
+    return JSONResponse(status_code=422, content=detail)
 
 
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse | Response:
-    return await _http_exception_handler(request, exc)
+    detail = {
+        "code": "http_error",
+        "message": exc.detail,
+        "path": request.url.path
+    }
+    logger.warning(detail)
+    return JSONResponse(status_code=exc.status_code, content=detail)
 
 
-async def unhandled_exception_handler(request: Request, exc: Exception) -> PlainTextResponse:
-    host = getattr(getattr(request, "client", None), "host", None)
-    port = getattr(getattr(request, "client", None), "port", None)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     url = f"{request.url.path}?{request.query_params}" if request.query_params else request.url.path
-    exception_type, exception_value, _ = sys.exc_info()
-    exception_name = getattr(exception_type, "__name__", None)
-    logger.error(
-        f'{host}:{port} - "{request.method} {url}" 500 Internal Server Error <{exception_name}: {exception_value}>'
-    )
-    return PlainTextResponse(str(exc), status_code=500)
+    _, exception_value, _ = exc_info()
+    detail = {
+        "code": "internal_error",
+        "message": str(exception_value),
+        "path": url
+    }
+    logger.error(detail)
+    return JSONResponse(status_code=500, content=detail)
