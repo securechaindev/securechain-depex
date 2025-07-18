@@ -9,7 +9,7 @@ async def analyze_pyproject_toml(
     requirement_file_name: str,
 ) -> dict[str, dict[str, dict | str]]:
     try:
-        file = load(repository_path + requirement_file_name)
+        file = load(f"{repository_path}/{requirement_file_name}")
     except Exception as _:
         return requirement_files
     requirement_file_name = requirement_file_name.replace("/master/", "").replace(

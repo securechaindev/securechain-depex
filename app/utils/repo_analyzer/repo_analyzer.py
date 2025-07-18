@@ -9,17 +9,26 @@ from app.http_session import get_session
 
 from .requirement_files import (
     analyze_package_json,
+    analyze_package_lock_json,
     analyze_pom_xml,
     analyze_pyproject_toml,
     analyze_requirements_txt,
     analyze_setup_cfg,
     analyze_setup_py,
+    analyze_packages_config,
+    analyze_gemfile,
+    analyze_gemfile_lock,
+    analyze_cargo_toml,
+    analyze_cargo_lock,
 )
 
 pypi_files = ["pyproject.toml", "setup.cfg", "setup.py", "requirements.txt"]
-npm_files = ["package.json"]
+npm_files = ["package.json", "package-lock.json"]
 maven_files = ["pom.xml"]
-all_files = set(pypi_files + npm_files + maven_files)
+nuget_files = ["packages.config"]
+ruby_files = ["Gemfile", "Gemfile.lock"]
+cargo_files = ["Cargo.toml", "Cargo.lock"]
+all_files = set(pypi_files + npm_files + maven_files + nuget_files + ruby_files + cargo_files)
 
 
 async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str]]:
@@ -27,28 +36,52 @@ async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str
     repository_path = await download_repository(owner, name)
     requirement_file_names = await get_req_files_names(repository_path)
     for requirement_file_name in requirement_file_names:
-        if "pom.xml" in requirement_file_name:
+        if "pom.xml" == requirement_file_name:
             requirement_files = await analyze_pom_xml(
                 requirement_files, repository_path, requirement_file_name
             )
-        elif "package.json" in requirement_file_name:
+        elif "package.json" == requirement_file_name:
             requirement_files = await analyze_package_json(
                 requirement_files, repository_path, requirement_file_name
             )
-        elif "pyproject.toml" in requirement_file_name:
+        elif "package-lock.json" == requirement_file_name:
+            requirement_files = await analyze_package_lock_json(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "pyproject.toml" == requirement_file_name:
             requirement_files = await analyze_pyproject_toml(
                 requirement_files, repository_path, requirement_file_name
             )
-        elif "setup.cfg" in requirement_file_name:
+        elif "setup.cfg" == requirement_file_name:
             requirement_files = await analyze_setup_cfg(
                 requirement_files, repository_path, requirement_file_name
             )
-        elif "setup.py" in requirement_file_name:
+        elif "setup.py" == requirement_file_name:
             requirement_files = await analyze_setup_py(
                 requirement_files, repository_path, requirement_file_name
             )
-        elif "requirements.txt" in requirement_file_name:
+        elif "requirements.txt" == requirement_file_name:
             requirement_files = await analyze_requirements_txt(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "packages.config" == requirement_file_name:
+            requirement_files = await analyze_packages_config(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "Gemfile" == requirement_file_name:
+            requirement_files = await analyze_gemfile(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "Gemfile.lock" == requirement_file_name:
+            requirement_files = await analyze_gemfile_lock(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "Cargo.toml" == requirement_file_name:
+            requirement_files = await analyze_cargo_toml(
+                requirement_files, repository_path, requirement_file_name
+            )
+        elif "Cargo.lock" == requirement_file_name:
+            requirement_files = await analyze_cargo_lock(
                 requirement_files, repository_path, requirement_file_name
             )
     system("rm -rf " + repository_path)

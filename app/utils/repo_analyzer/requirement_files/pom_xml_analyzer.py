@@ -7,7 +7,7 @@ async def analyze_pom_xml(
     requirement_file_name: str,
 ) -> dict[str, dict[str, dict | str]]:
     try:
-        with open(repository_path + requirement_file_name, encoding="utf-8") as file:
+        with open(f"{repository_path}/{requirement_file_name}", encoding="utf-8") as file:
             pom_xml = file.read()
         root = fromstring(pom_xml)
         requirement_file_name = requirement_file_name.replace("/master/", "").replace("/main/", "")

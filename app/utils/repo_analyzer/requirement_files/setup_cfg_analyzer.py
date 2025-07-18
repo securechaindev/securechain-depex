@@ -9,7 +9,7 @@ async def analyze_setup_cfg(
     requirement_file_name: str,
 ) -> dict[str, dict[str, dict | str]]:
     try:
-        file = read_configuration(repository_path + requirement_file_name)
+        file = read_configuration(f"{repository_path}/{requirement_file_name}")
     except Exception as _:
         return requirement_files
     requirement_file_name = requirement_file_name.replace("/master/", "").replace(

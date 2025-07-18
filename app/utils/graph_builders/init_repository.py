@@ -76,68 +76,73 @@ async def extract_repository(
 
 
 async def replace_repository(
-    raw_requirement_files: dict[str, Any], repository_id: str, manager: str
+    raw_requirement_files: dict[str, Any], repository_id: str
 ) -> None:
-    requirement_files = await read_requirement_files_by_repository(
-        repository_id, manager
-    )
+    requirement_files = await read_requirement_files_by_repository(repository_id)
     for file_name, requirement_file_id in requirement_files.items():
         if file_name not in raw_requirement_files:
-            await delete_requirement_file(repository_id, file_name, manager)
+            await delete_requirement_file(repository_id, file_name)
         else:
-            packages = await read_packages_by_requirement_file(
-                requirement_file_id, manager
-            )
+            packages = await read_packages_by_requirement_file(requirement_file_id)
             keys = raw_requirement_files[file_name]["dependencies"].keys()
-            for group_package, constraints in packages.items():
-                if manager == "maven":
-                    group_id, package = group_package.split(":")
-                else:
-                    package = group_package
-                if package in keys:
+            for package_name, constraints in packages.items():
+                if package_name in keys:
                     if (
                         constraints
-                        != raw_requirement_files[file_name]["dependencies"][package]
+                        != raw_requirement_files[file_name]["dependencies"][package_name]
                     ):
                         await update_requirement_rel_constraints(
                             requirement_file_id,
-                            package,
-                            raw_requirement_files[file_name]["dependencies"][package],
-                            manager,
+                            package_name,
+                            raw_requirement_files[file_name]["dependencies"][package_name]
                         )
                 else:
                     await delete_requirement_file_rel(
-                        requirement_file_id, package, manager
+                        requirement_file_id, package_name
                     )
-                if manager == "maven":
-                    pop_key = (group_id, package)
-                else:
-                    pop_key = package
-                raw_requirement_files[file_name]["dependencies"].pop(pop_key)
+                raw_requirement_files[file_name]["dependencies"].pop(package_name)
             if raw_requirement_files[file_name]["dependencies"]:
-                match manager:
-                    case "pypi":
+                match raw_requirement_files[file_name]["manager"]:
+                    case "PyPI":
                         await pypi_generate_packages(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
-                    case "npm":
+                    case "NPM":
                         await npm_generate_packages(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
-                    case "maven":
+                    case "Maven":
                         await maven_generate_packages(
                             raw_requirement_files[file_name]["dependencies"],
                             requirement_file_id,
                         )
-            await update_requirement_file_moment(requirement_file_id, manager)
+                    case "Cargo":
+                        await cargo_generate_packages(
+                            raw_requirement_files[file_name]["dependencies"],
+                            requirement_file_id,
+                        )
+                    case "NuGet":
+                        await nuget_generate_packages(
+                            raw_requirement_files[file_name]["dependencies"],
+                            requirement_file_id,
+                        )
+                    case "RubyGems":
+                        await rubygems_generate_packages(
+                            raw_requirement_files[file_name]["dependencies"],
+                            requirement_file_id,
+                        )
+                    case _:
+                        raise ValueError(
+                            f"Unsupported manager: {raw_requirement_files[file_name]['manager']}"
+                        )
+            await update_requirement_file_moment(requirement_file_id)
         raw_requirement_files.pop(file_name)
     if raw_requirement_files:
         for name, file in raw_requirement_files.items():
-            if file["manager"] == manager:
-                await select_manager(manager, name, file, repository_id)
-    await update_repository_moment(repository_id, manager)
+            await select_manager(name, file, repository_id)
+    await update_repository_moment(repository_id)
 
 
 async def select_manager(
@@ -148,5 +153,13 @@ async def select_manager(
             await pypi_create_requirement_file(name, file, repository_id)
         case "NPM":
             await npm_create_requirement_file(name, file, repository_id)
-        case "Maven":
+        case "Maven":   
             await maven_create_requirement_file(name, file, repository_id)
+        case "Cargo":
+            await cargo_create_requirement_file(name, file, repository_id)
+        case "NuGet":
+            await nuget_create_requirement_file(name, file, repository_id)
+        case "RubyGems":
+            await rubygems_create_requirement_file(name, file, repository_id)
+        case _:
+            raise ValueError(f"Unsupported manager: {file['manager']}")

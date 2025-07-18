@@ -7,7 +7,7 @@ async def analyze_requirements_txt(
     requirement_file_name: str,
 ) -> dict[str, dict[str, dict | str]]:
     try:
-        with open(repository_path + requirement_file_name) as file:
+        with open(f"{repository_path}/{requirement_file_name}") as file:
             dependencies = []
             for line in file.readlines():
                 if "#" not in line:

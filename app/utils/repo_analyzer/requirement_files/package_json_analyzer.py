@@ -6,7 +6,7 @@ async def analyze_package_json(
     repository_path: str,
     requirement_file_name: str,
 ) -> dict[str, dict[str, dict | str]]:
-    file = open(repository_path + requirement_file_name)
+    file = open(f"{repository_path}/{requirement_file_name}")
     requirement_file_name = requirement_file_name.replace("/master/", "").replace(
         "/main/", ""
     )
