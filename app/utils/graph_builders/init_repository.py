@@ -18,6 +18,7 @@ from app.services import (
     update_requirement_rel_constraints,
 )
 from app.utils.repo_analyzer import repo_analyzer
+from app.schemas import InitRepositoryRequest
 from .managers import (
     maven_create_requirement_file,
     maven_generate_packages,
@@ -34,26 +35,26 @@ from .managers import (
 )
 
 
-async def init_repository_graph(repository: dict[str, Any], last_repository_update: dict[str, datetime | bool], last_commit_date: datetime, user_id: str) -> None:
+async def init_repository_graph(init_graph_request: InitRepositoryRequest, last_repository_update: dict[str, datetime | bool], last_commit_date: datetime) -> None:
     if last_commit_date is not None and (
         not last_repository_update["moment"]
         or last_repository_update["moment"].replace(tzinfo=UTC)
         < last_commit_date.replace(tzinfo=UTC)
     ):
         repository_id = await read_repositories(
-            repository["owner"], repository["name"]
+            init_graph_request.owner, init_graph_request.name
         )
         raw_requirement_files = await repo_analyzer(
-            repository["owner"], repository["name"]
+            init_graph_request.owner, init_graph_request.name
         )
         if not repository_id:
-            repository_id = await create_repository(repository)
+            repository_id = await create_repository(init_graph_request.model_dump())
             await extract_repository(
                 raw_requirement_files, repository_id
             )
         else:
             await create_user_repository_rel(
-                repository_id, user_id
+                repository_id, init_graph_request.user_id
             )
             await update_repository_is_complete(
                 repository_id, False
@@ -64,7 +65,7 @@ async def init_repository_graph(repository: dict[str, Any], last_repository_upda
         await update_repository_is_complete(
             repository_id, True
         )
-    await update_repository_users(last_repository_update["id"], user_id)
+    await update_repository_users(last_repository_update["id"], init_graph_request.user_id)
 
 
 async def extract_repository(

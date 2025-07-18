@@ -44,31 +44,22 @@ async def init_package(init_package_request: InitPackageRequest) -> JSONResponse
     )
 
 
-# dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/repository/init")
+@router.post("/graph/repository/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_repository(init_graph_request: InitRepositoryRequest, background_tasks: BackgroundTasks) -> JSONResponse:
-    repository = {
-        "owner": init_graph_request.owner,
-        "name": init_graph_request.name,
-        "moment": datetime.now(),
-        "add_extras": False,
-        "is_complete": False,
-        "user_id": init_graph_request.user_id
-    }
     last_repository_update = await read_repositories_update(
-        repository["owner"], repository["name"]
+        init_graph_request.owner, init_graph_request.name
     )
     if last_repository_update["is_complete"]:
         last_commit_date = await get_last_commit_date_github(
-            repository["owner"], repository["name"]
+            init_graph_request.owner, init_graph_request.name
         )
         if not last_commit_date:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=json_encoder({"message": "no_repo"}),
             )
-        await init_repository_graph(repository, last_repository_update, last_commit_date, init_graph_request.user_id)
-        # background_tasks.add_task(init_repository_graph, repository, last_repository_update, last_commit_date, InitGraphRequest.user_id)
+        await init_repository_graph(init_graph_request, last_repository_update, last_commit_date)
+        # background_tasks.add_task(init_repository_graph, repository, last_repository_update, last_commit_date)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "init_graph"}),
