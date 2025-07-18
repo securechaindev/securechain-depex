@@ -117,7 +117,7 @@ async def get_req_files_names(directory_path: str) -> list[str]:
     for _path in paths:
         if not isdir(_path) and await is_req_file(_path):
             requirement_files.append(
-                _path.replace(directory_path, "").replace(directory_path, "")
+                _path.replace(directory_path, "").replace(directory_path, "").replace("/", "")
             )
     return requirement_files
 
