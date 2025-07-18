@@ -29,10 +29,8 @@ async def get_repositories(user_id: str) -> JSONResponse:
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
 
 
-# dependencies=[Depends(JWTBearer())], tags=["graph"]
-@router.post("/graph/package/init")
+@router.post("/graph/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_package(init_package_request: InitPackageRequest) -> JSONResponse:
-    init_package_request.name = init_package_request.name.lower()
     package = await read_package_by_name(init_package_request.node_type.value, init_package_request.name)
     if not package:
         await create_package(init_package_request)
