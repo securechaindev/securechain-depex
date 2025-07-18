@@ -27,6 +27,6 @@ async def analyze_packages_config(
                     dependencies[name] = version
         if dependencies:
             requirement_files[requirement_file_name]["dependencies"] = dependencies
-    except Exception as e:
+    except Exception:
         pass
     return requirement_files

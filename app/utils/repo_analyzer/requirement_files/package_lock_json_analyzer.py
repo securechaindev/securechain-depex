@@ -26,6 +26,6 @@ async def analyze_package_lock_json(
                     dependencies[package] = version
         if dependencies:
             requirement_files[requirement_file_name]["dependencies"] = dependencies
-    except Exception as e:
+    except Exception:
         pass
     return requirement_files

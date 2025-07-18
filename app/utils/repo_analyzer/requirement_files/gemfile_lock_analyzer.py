@@ -14,7 +14,7 @@ async def analyze_gemfile_lock(
         "dependencies": {},
     }
     try:
-        with open(f"{repository_path}/{requirement_file_name}", "r") as file:
+        with open(f"{repository_path}/{requirement_file_name}") as file:
             gemfile_content = file.read()
             dependencies = {}
             gem_pattern = re.compile(r"\s+(\S+)\s+\(([^)]+)\)")
@@ -26,6 +26,6 @@ async def analyze_gemfile_lock(
                     dependencies[gem] = version
             if dependencies:
                 requirement_files[requirement_file_name]["dependencies"] = dependencies
-    except Exception as e:
+    except Exception:
         pass
     return requirement_files

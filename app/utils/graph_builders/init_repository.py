@@ -3,6 +3,7 @@ from typing import Any
 
 from pytz import UTC
 
+from app.schemas import InitRepositoryRequest
 from app.services import (
     create_repository,
     create_user_repository_rel,
@@ -18,12 +19,12 @@ from app.services import (
     update_requirement_rel_constraints,
 )
 from app.utils.repo_analyzer import repo_analyzer
-from app.schemas import InitRepositoryRequest
+
 from .managers import (
-    maven_create_requirement_file,
-    maven_generate_packages,
     cargo_create_requirement_file,
     cargo_generate_packages,
+    maven_create_requirement_file,
+    maven_generate_packages,
     npm_create_requirement_file,
     npm_generate_packages,
     nuget_create_requirement_file,
@@ -153,7 +154,7 @@ async def select_manager(
             await pypi_create_requirement_file(name, file, repository_id)
         case "NPM":
             await npm_create_requirement_file(name, file, repository_id)
-        case "Maven":   
+        case "Maven":
             await maven_create_requirement_file(name, file, repository_id)
         case "Cargo":
             await cargo_create_requirement_file(name, file, repository_id)

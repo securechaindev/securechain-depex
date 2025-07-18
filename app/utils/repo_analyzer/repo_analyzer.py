@@ -8,18 +8,18 @@ from aiofiles import open
 from app.http_session import get_session
 
 from .requirement_files import (
+    analyze_cargo_lock,
+    analyze_cargo_toml,
+    analyze_gemfile,
+    analyze_gemfile_lock,
     analyze_package_json,
     analyze_package_lock_json,
+    analyze_packages_config,
     analyze_pom_xml,
     analyze_pyproject_toml,
     analyze_requirements_txt,
     analyze_setup_cfg,
     analyze_setup_py,
-    analyze_packages_config,
-    analyze_gemfile,
-    analyze_gemfile_lock,
-    analyze_cargo_toml,
-    analyze_cargo_lock,
 )
 
 pypi_files = ["pyproject.toml", "setup.cfg", "setup.py", "requirements.txt"]
