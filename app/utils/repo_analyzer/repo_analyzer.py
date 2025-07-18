@@ -123,10 +123,6 @@ async def get_req_files_names(directory_path: str) -> list[str]:
 
 
 async def is_req_file(requirement_file_name: str) -> bool:
-    if any(extension in requirement_file_name for extension in pypi_files):
-        return True
-    if any(extension in requirement_file_name for extension in npm_files):
-        return True
-    if any(extension in requirement_file_name for extension in maven_files):
+    if any(extension in requirement_file_name for extension in all_files):
         return True
     return False
