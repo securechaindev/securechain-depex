@@ -37,7 +37,8 @@ async def create_package_and_versions(
         count: version.count,
         cves: version.cves,
         mean: version.mean,
-        weighted_mean: version.weighted_mean
+        weighted_mean: version.weighted_mean,
+        vulnerabilities: version.vulnerabilities
     }})
     CREATE (package)-[rel_v:Have]->(v)
     RETURN collect({{name: v.name, id: elementid(v)}})
@@ -69,7 +70,8 @@ async def create_versions(
         count: version.count,
         cves: version.cves,
         mean: version.mean,
-        weighted_mean: version.weighted_mean
+        weighted_mean: version.weighted_mean,
+        vulnerabilities: version.vulnerabilities
     }})
     CREATE (package)-[rel_v:Have]->(v)
     RETURN collect({{name: v.name, id: elementid(v)}})

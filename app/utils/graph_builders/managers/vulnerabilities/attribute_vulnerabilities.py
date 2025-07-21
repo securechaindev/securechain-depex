@@ -8,7 +8,7 @@ from .metrics import mean, weighted_mean
 async def attribute_vulnerabilities(
     name: str, version: Any
 ) -> dict[str, Any]:
-    vulnerabilities = await read_vulnerabilities_by_package_and_version(name, version)
+    vulnerabilities = await read_vulnerabilities_by_package_and_version(name, version["name"])
     impacts: list[float] = []
     version["vulnerabilities"] = []
     for vuln in vulnerabilities:
