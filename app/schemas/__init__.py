@@ -1,4 +1,11 @@
-from .graphs import InitPackageRequest, InitRepositoryRequest
+from .graphs import (
+    GetPackageStatusRequest,
+    GetRepositoriesRequest,
+    GetVersionStatusRequest,
+    InitPackageRequest,
+    InitRepositoryRequest,
+    InitVersionRequest
+)
 from .operations import (
     CompleteConfigRequest,
     ConfigByImpactRequest,
@@ -10,12 +17,16 @@ from .operations import (
 )
 
 __all__ = [
+    "GetPackageStatusRequest",
+    "GetRepositoriesRequest",
+    "GetVersionStatusRequest",
     "CompleteConfigRequest",
     "ConfigByImpactRequest",
     "FileInfoRequest",
     "FilterConfigsRequest",
     "InitPackageRequest",
     "InitRepositoryRequest",
+    "InitVersionRequest",
     "MinMaxImpactRequest",
     "ValidConfigRequest",
     "ValidGraphRequest",

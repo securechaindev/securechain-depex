@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.patterns import NEO4J_ID_PATTERN
-from app.schemas.utils import NodeType
+from app.schemas.enums import NodeType
 from app.schemas.validators import validate_max_level
 
 

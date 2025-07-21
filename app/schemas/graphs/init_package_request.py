@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, model_validator
 
-from app.schemas.utils import NodeType
+from app.schemas.enums import NodeType
 
 
 class InitPackageRequest(BaseModel):

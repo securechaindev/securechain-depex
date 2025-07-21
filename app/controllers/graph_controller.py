@@ -6,9 +6,18 @@ from fastapi.responses import JSONResponse
 from app.apis import (
     get_last_commit_date_github,
 )
-from app.schemas import InitPackageRequest, InitRepositoryRequest
+from app.schemas import (
+    GetPackageStatusRequest,
+    GetRepositoriesRequest,
+    GetVersionStatusRequest,
+    InitPackageRequest,
+    InitRepositoryRequest,
+    InitVersionRequest
+)
 from app.services import (
     read_package_by_name,
+    read_package_status_by_name,
+    read_version_status_by_package_and_name,
     read_repositories_by_user_id,
     read_repositories_update,
 )
@@ -22,10 +31,9 @@ from app.utils import (
 
 router = APIRouter()
 
-
 @router.get("/graph/repositories/{user_id}", dependencies=[Depends(JWTBearer())], tags=["graph"])
-async def get_repositories(user_id: str) -> JSONResponse:
-    repositories = await read_repositories_by_user_id(user_id)
+async def get_repositories(get_repositories_request: GetRepositoriesRequest = Depends()) -> JSONResponse:
+    repositories = await read_repositories_by_user_id(get_repositories_request.user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
 
 
