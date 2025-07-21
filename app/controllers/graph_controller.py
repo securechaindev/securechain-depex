@@ -52,6 +52,31 @@ async def get_package_status(get_package_status_request: GetPackageStatusRequest
     )
 
 
+# TODO: Hacer una llamada para ver el estado de una versión de un paquete
+@router.get("/graph/version/status", tags=["graph"])
+async def get_version_status(get_version_status_request: GetVersionStatusRequest = Depends()) -> JSONResponse:
+    package = await read_version_status_by_package_and_name(
+        get_version_status_request.node_type.value,
+        get_version_status_request.package_name,
+        get_version_status_request.name
+    )
+    if not package:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=json_encoder({"message": "version_not_found"}),
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder(package),
+    )
+
+
+# TODO: Hacer una llamada para que se inicialice una versión de un paquete
+@router.post("/graph/version/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+async def init_version(init_version_request: InitVersionRequest) -> JSONResponse:
+    pass
+
+
 @router.post("/graph/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_package(init_package_request: InitPackageRequest) -> JSONResponse:
     package = await read_package_by_name(init_package_request.node_type.value, init_package_request.name)
