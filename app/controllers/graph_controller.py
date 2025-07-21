@@ -37,6 +37,21 @@ async def get_repositories(get_repositories_request: GetRepositoriesRequest = De
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder(repositories))
 
 
+# TODO: Hacer una llamada para devolver la información de un paquete
+@router.get("/graph/package/status", tags=["graph"])
+async def get_package_status(get_package_status_request: GetPackageStatusRequest = Depends()) -> JSONResponse:
+    package = await read_package_status_by_name(get_package_status_request.node_type.value, get_package_status_request.name)
+    if not package:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=json_encoder({"message": "package_not_found"}),
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder(package),
+    )
+
+
 @router.post("/graph/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
 async def init_package(init_package_request: InitPackageRequest) -> JSONResponse:
     package = await read_package_by_name(init_package_request.node_type.value, init_package_request.name)
@@ -65,7 +80,7 @@ async def init_repository(init_graph_request: InitRepositoryRequest, background_
                 content=json_encoder({"message": "no_repo"}),
             )
         await init_repository_graph(init_graph_request, last_repository_update, last_commit_date)
-        # background_tasks.add_task(init_repository_graph, repository, last_repository_update, last_commit_date)
+        # background_tasks.add_task(init_repository_graph, init_graph_request, last_repository_update, last_commit_date)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder({"message": "init_graph"}),

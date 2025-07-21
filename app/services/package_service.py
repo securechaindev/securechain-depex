@@ -100,6 +100,21 @@ async def read_package_by_name(node_type: str, name: str) -> dict[str, Any]:
     return record[0] if record else None
 
 
+async def read_package_status_by_name(node_type: str, name: str) -> dict[str, Any]:
+    query = f"""
+    MATCH(p:{node_type}{{name:$name}})-[:Have]->(v:Version)
+    WITH p, collect(v{{.*}}) AS versions
+    RETURN p{{.*, versions: versions}}
+    """
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(
+            query,
+            name=name
+        )
+        record = await result.single()
+    return record[0] if record else None
+
+
 async def read_packages_by_requirement_file(requirement_file_id: str) -> dict[str, str]:
     query = """
     MATCH (rf:RequirementFile) WHERE elementid(rf) = $requirement_file_id
