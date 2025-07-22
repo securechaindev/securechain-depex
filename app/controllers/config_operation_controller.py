@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
+from app.limiter import limiter
 from app.schemas import (
     CompleteConfigRequest,
     ConfigByImpactRequest,
@@ -29,6 +30,7 @@ from app.utils import (
 router = APIRouter()
 
 @router.post("/operation/config/valid_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
+@limiter.limit("25/minute")
 async def valid_config(
     valid_config_request: Annotated[ValidConfigRequest, Body()]
 ) -> JSONResponse:
@@ -61,6 +63,7 @@ async def valid_config(
 
 
 @router.post("/operation/config/complete_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
+@limiter.limit("25/minute")
 async def complete_config(
     complete_config_request: Annotated[CompleteConfigRequest, Body()]
 ) -> JSONResponse:
@@ -97,6 +100,7 @@ async def complete_config(
 
 
 @router.post("/operation/config/config_by_impact", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
+@limiter.limit("25/minute")
 async def config_by_impact(
     config_by_impact_request: Annotated[ConfigByImpactRequest, Body()]
 ) -> JSONResponse:

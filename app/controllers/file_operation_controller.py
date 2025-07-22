@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
+from app.limiter import limiter
 from app.schemas import (
     FileInfoRequest,
     FilterConfigsRequest,
@@ -31,6 +32,7 @@ from app.utils import (
 router = APIRouter()
 
 @router.post("/operation/file/file_info", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@limiter.limit("25/minute")
 async def file_info(
     file_info_request: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
@@ -41,6 +43,7 @@ async def file_info(
 
 
 @router.post("/operation/file/valid_graph", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@limiter.limit("25/minute")
 async def valid_graph(
     valid_graph_request: Annotated[ValidGraphRequest, Body()]
 ) -> JSONResponse:
@@ -72,6 +75,7 @@ async def valid_graph(
 
 
 @router.post("/operation/file/minimize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@limiter.limit("25/minute")
 async def minimize_impact(
     min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
@@ -105,6 +109,7 @@ async def minimize_impact(
 
 
 @router.post("/operation/file/maximize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@limiter.limit("25/minute")
 async def maximize_impact(
     min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
@@ -138,6 +143,7 @@ async def maximize_impact(
 
 
 @router.post("/operation/file/filter_configs", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@limiter.limit("25/minute")
 async def filter_configs(
     filter_configs_request: Annotated[FilterConfigsRequest, Body()]
 ) -> JSONResponse:

@@ -10,6 +10,7 @@ from app.exception_handler import (
     request_validation_exception_handler,
     unhandled_exception_handler,
 )
+from app.limiter import limiter
 from app.http_session import close_session
 from app.middleware import log_request_middleware
 from app.router import api_router
@@ -39,6 +40,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.state.limiter = limiter
 app.middleware("http")(log_request_middleware)
 app.add_middleware(
     CORSMiddleware,
