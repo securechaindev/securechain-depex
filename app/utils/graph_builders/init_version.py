@@ -19,7 +19,6 @@ from .managers import (
     pypi_extract_packages,
     rubygems_extract_packages,
 )
-
 from .managers.vulnerabilities import attribute_vulnerabilities
 
 

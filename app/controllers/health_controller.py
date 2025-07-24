@@ -10,5 +10,10 @@ router = APIRouter()
 @limiter.limit("25/minute")
 def health_check(request: Request):
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder({"status": "healthy"})
+        status_code=status.HTTP_200_OK, content=json_encoder(
+            {
+                "code": "healthy",
+                "message": "Service is running",
+            }
+        )
     )

@@ -48,15 +48,23 @@ async def valid_config(
             await replace_smt_text(smt_id, model_text)
         operation = ValidConfig(await read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config))
         operation.execute(smt_model)
-        result = {"is_valid": operation.get_result(), "message": "success"}
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(result)
+            status_code=status.HTTP_200_OK, content=json_encoder(
+                {
+                    "result": operation.get_result(),
+                    "code": "success",
+                    "message": "Operation Valid Configuration executed successfully"
+                }
+            )
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=json_encoder(
-                {"message": "no_dependencies"}
+                {
+                    "code": "no_dependencies",
+                    "message": "No dependencies found for the provided requirement file ID and max level"
+                }
             ),
         )
 
@@ -102,7 +110,7 @@ async def complete_config(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level."
+                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )
@@ -133,12 +141,21 @@ async def config_by_impact(
         if not isinstance(result, str):
             result = await read_releases_by_serial_numbers(config_by_impact_request.node_type.value, operation.get_result())
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
+            status_code=status.HTTP_200_OK, content=json_encoder(
+                {
+                    "result": result,
+                    "code": "success",
+                    "message": "Operation Config by Impact executed successfully"
+                }
+            )
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=json_encoder(
-                {"message": "no_dependencies"}
+                {
+                    "code": "no_dependencies",
+                    "message": "No dependencies found for the provided requirement file ID and max level"
+                }
             ),
         )

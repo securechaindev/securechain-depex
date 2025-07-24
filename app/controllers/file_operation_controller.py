@@ -37,9 +37,13 @@ async def file_info(
     request: Request,
     file_info_request: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
-    graph_info = await read_graph_for_info_operation(jsonable_encoder(file_info_request))
+    result = await read_graph_for_info_operation(jsonable_encoder(file_info_request))
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(graph_info)
+        status_code=status.HTTP_200_OK, content=json_encoder({
+            "result": result,
+            "code": "success",
+            "message": "File information retrieved successfully"
+        })
     )
 
 
@@ -63,15 +67,21 @@ async def valid_graph(
             await replace_smt_text(smt_id, model_text)
         operation = ValidGraph()
         operation.execute(smt_model)
-        result = {"is_valid": operation.get_result(), "message": "success"}
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(result)
+            status_code=status.HTTP_200_OK, content=json_encoder({
+                "result": operation.get_result(),
+                "code": "success",
+                "message": "Operation Valid Graph executed successfully"
+            })
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=json_encoder(
-                {"message": "no_dependencies"}
+                {
+                    "code": "no_dependencies",
+                    "message": "No dependencies found for the provided requirement file ID and max level"
+                }
             ),
         )
 
@@ -100,13 +110,22 @@ async def minimize_impact(
         if not isinstance(result, str):
             result = await read_releases_by_serial_numbers(min_max_impact_request.node_type.value, operation.get_result())
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
+            status_code=status.HTTP_200_OK, content=json_encoder(
+                {
+                    "result": result,
+                    "code": "success",
+                    "message": "Operation Minimize Impact executed successfully"
+                }
+            )
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=json_encoder(
-                {"message": "no_dependencies"}
+                {
+                    "code": "no_dependencies",
+                    "message": "No dependencies found for the provided requirement file ID and max level"
+                }
             ),
         )
 
@@ -135,13 +154,22 @@ async def maximize_impact(
         if not isinstance(result, str):
             result = await read_releases_by_serial_numbers(min_max_impact_request.node_type.value, operation.get_result())
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
+            status_code=status.HTTP_200_OK, content=json_encoder(
+                {
+                    "result": result,
+                    "code": "success",
+                    "message": "Operation Maximize Impact executed successfully"
+                }
+            )
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=json_encoder(
-                {"message": "no_dependencies"}
+                {
+                    "code": "no_dependencies",
+                    "message": "No dependencies found for the provided requirement file ID and max level"
+                }
             ),
         )
 
@@ -170,12 +198,21 @@ async def filter_configs(
         if not isinstance(result, str):
             result = await read_releases_by_serial_numbers(filter_configs_request.node_type.value, operation.get_result())
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
+            status_code=status.HTTP_200_OK, content=json_encoder(
+                {
+                    "result": result,
+                    "code": "success",
+                    "message": "Operation Filter Configs executed successfully"
+                }
+            )
         )
     else:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=json_encoder(
-                {"message": "no_dependencies"}
+                {
+                    "code": "no_dependencies",
+                    "message": "No dependencies found for the provided requirement file ID and max level"
+                }
             ),
         )

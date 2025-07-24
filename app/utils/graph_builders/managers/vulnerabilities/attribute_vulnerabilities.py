@@ -4,6 +4,7 @@ from app.services import read_vulnerabilities_by_package_and_version
 
 from .metrics import mean, weighted_mean
 
+
 async def attribute_vulnerabilities(
     package_name: str, version: Any
 ) -> dict[str, Any]:
