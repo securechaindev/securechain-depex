@@ -1,4 +1,4 @@
-from re import compile, VERBOSE
+from re import VERBOSE, compile
 
 _STAGE_MAP = {
     "dev": "dev",
@@ -38,15 +38,9 @@ _VERSION_RE = compile(
 )
 
 async def version_to_serial_number(version_str: str) -> int | None:
-    """
-    Convierte una versión a un número ordenable.
-    Soporta epoch y prefijos como 'v1.2.3'.
-    Devuelve None si la versión no es válida o es ambigua.
-    """
     m = _VERSION_RE.match(version_str)
     if not m:
         return None
-
     try:
         epoch = int(m.group("epoch")) if m.group("epoch") else 0
         release = m.group("release")
@@ -56,13 +50,10 @@ async def version_to_serial_number(version_str: str) -> int | None:
         while len(parts) < 3:
             parts.append("0")
         major, minor, patch = map(int, parts)
-
         major = epoch * 1000 + major
-
         suffix = m.group("suffix")
         suffix_num = m.group("suffix_num")
         post_num = m.group("post_num")
-
         if suffix:
             norm = _STAGE_MAP.get(suffix.lower())
             if not norm:
@@ -78,12 +69,9 @@ async def version_to_serial_number(version_str: str) -> int | None:
             else:
                 stage = "release"
                 stage_num = 0
-
-        if not (0 <= major < 10**3_3 and 0 <= minor < 1000 and 0 <= patch < 1000 and 0 <= stage_num < 1000):
+        if not (0 <= major < 10000 and 0 <= minor < 1000 and 0 <= patch < 1000 and 0 <= stage_num < 1000):
             return None
-
         stage_code = _STAGE_ORDER[stage]
-
         return (
             major * 10**12 +
             minor * 10**9 +

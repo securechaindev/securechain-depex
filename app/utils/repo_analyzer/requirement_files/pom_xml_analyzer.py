@@ -11,7 +11,7 @@ async def analyze_pom_xml(
             pom_xml = file.read()
         root = fromstring(pom_xml)
         requirement_file_name = requirement_file_name.replace("/master/", "").replace("/main/", "")
-        requirement_files[requirement_file_name] = {"manager": "Maven", "dependencies": {}}
+        requirement_files[requirement_file_name] = {"manager": "Maven", "requirement": {}}
         namespace = "{http://maven.apache.org/POM/4.0.0}"
         dependencies = root.findall(f".//{namespace}dependency")
         properties = {
@@ -31,7 +31,7 @@ async def analyze_pom_xml(
                 version_text = properties.get(property_key, "any")
             if not any(char in version_text for char in ["[", "]", "(", ")"]):
                 version_text = f"[{version_text}]"
-            requirement_files[requirement_file_name]["dependencies"][(group_id_text, artifact_id_text)] = version_text
+            requirement_files[requirement_file_name]["requirement"][(group_id_text, artifact_id_text)] = version_text
     except Exception:
         pass
     return requirement_files

@@ -15,10 +15,10 @@ class FilterConfigs:
         return self.result
 
     def execute(self, model: SMTModel) -> None:
-        if model.func_obj_var is not None:
-            cvss_f = model.func_obj_var
-            max_ctc = cvss_f <= self.max_threshold
-            min_ctc = cvss_f >= self.min_threshold
+        if model.func_obj is not None:
+            impact = model.func_obj
+            max_ctc = impact <= self.max_threshold
+            min_ctc = impact >= self.min_threshold
         solver = Solver()
         solver.set("timeout", 3000)
         solver.add(And([model.domain, max_ctc, min_ctc]))

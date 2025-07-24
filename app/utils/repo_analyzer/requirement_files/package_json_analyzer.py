@@ -12,11 +12,11 @@ async def analyze_package_json(
     )
     requirement_files[requirement_file_name] = {
         "manager": "NPM",
-        "dependencies": {},
+        "requirement": {},
     }
     try:
         data = load(file)
-        requirement_files[requirement_file_name]["dependencies"] = (
+        requirement_files[requirement_file_name]["requirement"] = (
             data["dependencies"] if "dependencies" in data else {}
         )
     except Exception:

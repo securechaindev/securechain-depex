@@ -10,8 +10,8 @@ from app.exception_handler import (
     request_validation_exception_handler,
     unhandled_exception_handler,
 )
-from app.limiter import limiter
 from app.http_session import close_session
+from app.limiter import limiter
 from app.middleware import log_request_middleware
 from app.router import api_router
 

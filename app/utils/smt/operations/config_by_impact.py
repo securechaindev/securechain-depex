@@ -15,9 +15,9 @@ class ConfigByImpact:
     def execute(self, model: SMTModel) -> None:
         solver = Optimize()
         solver.set("timeout", 3000)
-        if model.func_obj_var is not None:
-            cvss_f = model.func_obj_var
-            obj = Abs(cvss_f - self.impact)
+        if model.func_obj is not None:
+            impact = model.func_obj
+            obj = Abs(impact - self.impact)
             solver.minimize(obj)
         solver.add(model.domain)
         while solver.check() == sat:

@@ -15,9 +15,9 @@ class MaximizeImpact:
     def execute(self, model: SMTModel) -> None:
         solver = Optimize()
         solver.set("timeout", 3000)
-        if model.func_obj_var is not None:
-            cvss_f = model.func_obj_var
-            solver.maximize(cvss_f)
+        if model.func_obj is not None:
+            impact = model.func_obj
+            solver.maximize(impact)
         solver.add(model.domain)
         while len(self.result) < self.limit and solver.check() == sat:
             config = solver.model()

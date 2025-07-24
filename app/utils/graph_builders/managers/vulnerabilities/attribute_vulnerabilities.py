@@ -4,11 +4,10 @@ from app.services import read_vulnerabilities_by_package_and_version
 
 from .metrics import mean, weighted_mean
 
-
 async def attribute_vulnerabilities(
-    name: str, version: Any
+    package_name: str, version: Any
 ) -> dict[str, Any]:
-    vulnerabilities = await read_vulnerabilities_by_package_and_version(name, version["name"])
+    vulnerabilities = await read_vulnerabilities_by_package_and_version(package_name, version["name"])
     impacts: list[float] = []
     version["vulnerabilities"] = []
     for vuln in vulnerabilities:

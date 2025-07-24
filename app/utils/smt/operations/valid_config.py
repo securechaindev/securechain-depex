@@ -15,8 +15,8 @@ class ValidConfig:
         solver = Solver()
         solver.set("timeout", 3000)
         solver.add(model.domain)
-        for package, count in self.config.items():
-            solver.add(Int(package) == count)
+        for package, serial_number in self.config.items():
+            solver.add(Int(package) == serial_number)
         self.result = solver.check() == sat
         if solver.check() == unknown:
             self.result = (

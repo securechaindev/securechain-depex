@@ -21,18 +21,22 @@ from .managers import (
 async def create_package(init_package_request: InitPackageRequest) -> None:
     match init_package_request.node_type.value:
         case "CargoPackage":
-            await cargo_create_package(init_package_request.name)
+            await cargo_create_package(init_package_request.package_name)
         case "MavenPackage":
-            group_id, artifact_id = init_package_request.name.split(":")
+            if ":" not in init_package_request.package_name:
+                raise ValueError("Maven package name must be in the format 'group_id:artifact_id'")
+            group_id, artifact_id = init_package_request.package_name.split(":")
             await maven_create_package(group_id, artifact_id)
         case "NPMPackage":
-            await npm_create_package(init_package_request.name)
+            await npm_create_package(init_package_request.package_name)
         case "NuGetPackage":
-            await nuget_create_package(init_package_request.name)
+            await nuget_create_package(init_package_request.package_name)
         case "PyPIPackage":
-            await pypi_create_package(init_package_request.name)
+            await pypi_create_package(init_package_request.package_name)
         case "RubyGemsPackage":
-            await rubygems_create_package(init_package_request.name)
+            await rubygems_create_package(init_package_request.package_name)
+        case _:
+            raise ValueError(f"Unsupported node type: {init_package_request.node_type.value}")
 
 
 async def search_new_versions(package: dict[str, Any], node_type: str) -> None:
@@ -49,3 +53,5 @@ async def search_new_versions(package: dict[str, Any], node_type: str) -> None:
             await pypi_search_new_versions(package)
         case "RubyGemsPackage":
             await rubygems_search_new_versions(package)
+        case _:
+            raise ValueError(f"Unsupported node type: {node_type}")

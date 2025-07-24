@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 
 from app.limiter import limiter
@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get("/health")
 @limiter.limit("25/minute")
-def health_check():
+def health_check(request: Request):
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({"status": "healthy"})
     )

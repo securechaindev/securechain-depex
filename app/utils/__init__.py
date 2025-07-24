@@ -1,5 +1,6 @@
 from .graph_builders import (
     create_package,
+    create_version,
     init_repository_graph,
     search_new_versions,
 )
@@ -29,6 +30,7 @@ __all__ = [
     "ValidConfig",
     "ValidGraph",
     "create_package",
+    "create_version",
     "init_repository_graph",
     "json_encoder",
     "search_new_versions",

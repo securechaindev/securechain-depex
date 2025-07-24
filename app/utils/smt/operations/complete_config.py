@@ -15,12 +15,12 @@ class CompleteConfig:
     def execute(self, model: SMTModel) -> None:
         solver = Optimize()
         solver.set("timeout", 3000)
-        if model.func_obj_var is not None:
-            cvss_f = model.func_obj_var
-            solver.minimize(cvss_f)
+        if model.func_obj is not None:
+            impact = model.func_obj
+            solver.minimize(impact)
         solver.add(model.domain)
-        for package, count in self.config.items():
-            solver.add(Int(package) == count)
+        for package, serial_number in self.config.items():
+            solver.add(Int(package) == serial_number)
         while solver.check() == sat:
             config = solver.model()
             sanitized_config = config_sanitizer(config)

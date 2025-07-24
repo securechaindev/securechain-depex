@@ -17,7 +17,7 @@ async def analyze_pyproject_toml(
     )
     requirement_files[requirement_file_name] = {
         "manager": "PyPI",
-        "dependencies": {},
+        "requirement": {},
     }
     if "project" in file and "dependencies" in file["project"]:
         for dependency in file["project"]["dependencies"]:
@@ -48,7 +48,7 @@ async def analyze_pyproject_toml(
                 .replace("'", "")
             )
             pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
-            requirement_files[requirement_file_name]["dependencies"].update(
+            requirement_files[requirement_file_name]["requirement"].update(
                 {
                     dependency[:pos].lower(): await parse_pypi_constraints(
                         dependency[pos:]

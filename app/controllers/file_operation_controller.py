@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, status
+from fastapi import APIRouter, Body, Depends, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pytz import UTC
@@ -15,7 +15,7 @@ from app.schemas import (
 from app.services import (
     read_data_for_smt_transform,
     read_graph_for_info_operation,
-    read_releases_by_counts,
+    read_releases_by_serial_numbers,
     read_smt_text,
     replace_smt_text,
 )
@@ -32,8 +32,9 @@ from app.utils import (
 router = APIRouter()
 
 @router.post("/operation/file/file_info", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
-@limiter.limit("25/minute")
+@limiter.limit("5/minute")
 async def file_info(
+    request: Request,
     file_info_request: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
     graph_info = await read_graph_for_info_operation(jsonable_encoder(file_info_request))
@@ -43,11 +44,12 @@ async def file_info(
 
 
 @router.post("/operation/file/valid_graph", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
-@limiter.limit("25/minute")
+@limiter.limit("5/minute")
 async def valid_graph(
+    request: Request,
     valid_graph_request: Annotated[ValidGraphRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(valid_graph_request))
+    graph_data = await read_data_for_smt_transform(valid_graph_request.requirement_file_id, valid_graph_request.max_level)
     smt_id = f"{valid_graph_request.requirement_file_id}-{valid_graph_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, valid_graph_request.node_type.value, "mean")
@@ -75,11 +77,12 @@ async def valid_graph(
 
 
 @router.post("/operation/file/minimize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
-@limiter.limit("25/minute")
+@limiter.limit("5/minute")
 async def minimize_impact(
+    request: Request,
     min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(min_max_impact_request))
+    graph_data = await read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_level)
     smt_id = f"{min_max_impact_request.requirement_file_id}-{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
@@ -95,7 +98,7 @@ async def minimize_impact(
         operation.execute(smt_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), min_max_impact_request.node_type.value)
+            result = await read_releases_by_serial_numbers(min_max_impact_request.node_type.value, operation.get_result())
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -109,11 +112,12 @@ async def minimize_impact(
 
 
 @router.post("/operation/file/maximize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
-@limiter.limit("25/minute")
+@limiter.limit("5/minute")
 async def maximize_impact(
+    request: Request,
     min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(min_max_impact_request))
+    graph_data = await read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_level)
     smt_id = f"{min_max_impact_request.requirement_file_id}-{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
@@ -129,7 +133,7 @@ async def maximize_impact(
         operation.execute(smt_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), min_max_impact_request.node_type.value)
+            result = await read_releases_by_serial_numbers(min_max_impact_request.node_type.value, operation.get_result())
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )
@@ -143,11 +147,12 @@ async def maximize_impact(
 
 
 @router.post("/operation/file/filter_configs", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
-@limiter.limit("25/minute")
+@limiter.limit("5/minute")
 async def filter_configs(
+    request: Request,
     filter_configs_request: Annotated[FilterConfigsRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(jsonable_encoder(filter_configs_request))
+    graph_data = await read_data_for_smt_transform(filter_configs_request.requirement_file_id, filter_configs_request.max_level)
     smt_id = f"{filter_configs_request.requirement_file_id}-{filter_configs_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, filter_configs_request.node_type.value, filter_configs_request.agregator)
@@ -163,7 +168,7 @@ async def filter_configs(
         operation.execute(smt_model)
         result = operation.get_result()
         if not isinstance(result, str):
-            result = await read_releases_by_counts(operation.get_result(), filter_configs_request.node_type.value)
+            result = await read_releases_by_serial_numbers(filter_configs_request.node_type.value, operation.get_result())
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({"result": result, "message": "success"})
         )

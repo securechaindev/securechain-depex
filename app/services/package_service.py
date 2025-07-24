@@ -5,9 +5,9 @@ from .dbs.databases import get_graph_db_driver
 
 
 async def create_package_and_versions(
+    node_type: str,
     package: dict[str, Any],
     versions: list[dict[str, Any]],
-    node_type: str,
     constraints: str | None = None,
     parent_id: str | None = None,
     parent_version_name: str | None = None,
@@ -34,8 +34,7 @@ async def create_package_and_versions(
     UNWIND $versions AS version
     CREATE(v:Version{{
         name: version.name,
-        count: version.count,
-        cves: version.cves,
+        serial_number: version.serial_number,
         mean: version.mean,
         weighted_mean: version.weighted_mean,
         vulnerabilities: version.vulnerabilities
@@ -57,18 +56,17 @@ async def create_package_and_versions(
 
 
 async def create_versions(
-    package: dict[str, Any],
     node_type: str,
+    package_name: str,
     versions: list[dict[str, Any]]
 ) -> dict[str, Any]:
     query = f"""
-    MATCH(p:{node_type}{{name:$name}})
+    MATCH(p:{node_type}{{name:$package_name}})
     WITH p AS package
     UNWIND $versions AS version
     CREATE(v:Version{{
         name: version.name,
-        count: version.count,
-        cves: version.cves,
+        serial_number: version.serial_number,
         mean: version.mean,
         weighted_mean: version.weighted_mean,
         vulnerabilities: version.vulnerabilities
@@ -79,37 +77,37 @@ async def create_versions(
     async with get_graph_db_driver().session() as session:
         result = await session.run(
             query,
-            package,
+            package_name=package_name,
             versions=versions,
         )
         record = await result.single()
     return record[0] if record else []
 
 
-async def read_package_by_name(node_type: str, name: str) -> dict[str, Any]:
+async def read_package_by_name(node_type: str, package_name: str) -> dict[str, Any]:
     query = f"""
-    MATCH(p:{node_type}{{name:$name}})
+    MATCH(p:{node_type}{{name:$package_name}})
     RETURN p{{id: elementid(p), .*}}
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(
             query,
-            name=name
+            package_name=package_name
         )
         record = await result.single()
     return record[0] if record else None
 
 
-async def read_package_status_by_name(node_type: str, name: str) -> dict[str, Any]:
+async def read_package_status_by_name(node_type: str, package_name: str) -> dict[str, Any]:
     query = f"""
-    MATCH(p:{node_type}{{name:$name}})-[:Have]->(v:Version)
+    MATCH(p:{node_type}{{name:$package_name}})-[:Have]->(v:Version)
     WITH p, collect(v{{.*}}) AS versions
     RETURN p{{.*, versions: versions}}
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(
             query,
-            name=name
+            package_name=package_name
         )
         record = await result.single()
     return record[0] if record else None
@@ -155,10 +153,32 @@ async def relate_packages(node_type: str, packages: list[dict[str, Any]]) -> Non
         await session.run(query, packages=packages)
 
 
-async def update_package_moment(node_type: str, name: str) -> None:
+async def update_package_moment(node_type: str, package_name: str) -> None:
     query = f"""
-    MATCH(p:{node_type}{{name:$name}})
+    MATCH(p:{node_type}{{name:$package_name}})
     SET p.moment = $moment
     """
     async with get_graph_db_driver().session() as session:
-        await session.run(query, name=name, moment=datetime.now())
+        await session.run(query, package_name=package_name, moment=datetime.now())
+
+
+async def exists_package(node_type: str, package_name: str) -> bool:
+    query = f"""
+    MATCH(p:{node_type}{{name:$package_name}})
+    RETURN count(p) > 0
+    """
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(query, package_name=package_name)
+        record = await result.single()
+    return record[0] if record else False
+
+
+async def exists_version(node_type: str, package_name: str, version_name: str) -> bool:
+    query = f"""
+    MATCH(p:{node_type}{{name:$package_name}})-[:Have]->(v:Version{{name:$version_name}})
+    RETURN count(v) > 0
+    """
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(query, package_name=package_name, version_name=version_name)
+        record = await result.single()
+    return record[0] if record else False

@@ -12,20 +12,19 @@ async def analyze_package_lock_json(
     )
     requirement_files[requirement_file_name] = {
         "manager": "NPM",
-        "dependencies": {},
+        "requirement": {},
     }
     try:
         data = load(file)
-        dependencies = {}
+        requirement = {}
         if "dependencies" in data:
             for package, details in data["dependencies"].items():
                 version = details.get("version")
                 if version and version.count(".") == 2 and not any(op in version for op in ['<', '>', '=']):
-                    dependencies[package] = f"== {version}"
+                    requirement[package] = f"== {version}"
                 else:
-                    dependencies[package] = version
-        if dependencies:
-            requirement_files[requirement_file_name]["dependencies"] = dependencies
+                    requirement[package] = version
+        requirement_files[requirement_file_name]["requirement"] = requirement
     except Exception:
         pass
     return requirement_files

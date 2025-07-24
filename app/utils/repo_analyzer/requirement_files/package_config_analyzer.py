@@ -11,22 +11,21 @@ async def analyze_packages_config(
     )
     requirement_files[requirement_file_name] = {
         "manager": "NuGet",
-        "dependencies": {},
+        "requirement": {},
     }
     try:
         tree = ElementTree.parse(f"{repository_path}/{requirement_file_name}")
         root = tree.getroot()
-        dependencies = {}
+        requirement = {}
         for package in root.findall("package"):
             name = package.get("id")
             version = package.get("version")
             if name and version:
                 if version.count(".") == 2 and not any(op in version for op in ['<', '>', '=']):
-                    dependencies[name] = f"== {version}"
+                    requirement[name] = f"== {version}"
                 else:
-                    dependencies[name] = version
-        if dependencies:
-            requirement_files[requirement_file_name]["dependencies"] = dependencies
+                    requirement[name] = version
+        requirement_files[requirement_file_name]["requirement"] = requirement
     except Exception:
         pass
     return requirement_files

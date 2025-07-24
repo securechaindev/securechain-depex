@@ -15,5 +15,6 @@ select = [
 ignore = [
     "E501", # Supress line-too-long warnings: trust black's judgement on this one
     "C901",
-    "A004"
+    "A004",
+    "B008"
 ]

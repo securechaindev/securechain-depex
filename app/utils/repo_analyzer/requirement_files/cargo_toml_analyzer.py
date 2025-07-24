@@ -11,20 +11,19 @@ async def analyze_cargo_toml(
     )
     requirement_files[requirement_file_name] = {
         "manager": "Cargo",
-        "dependencies": {},
+        "requirement": {},
     }
     try:
         with open(f"{repository_path}/{requirement_file_name}") as file:
             data = load(file)
-            dependencies = {}
+            requirement = {}
             if "dependencies" in data:
                 for package, version in data["dependencies"].items():
                     if version.count(".") == 2 and not ("<" in version or ">" in version or "=" in version):
-                        dependencies[package] = f"== {version}"
+                        requirement[package] = f"== {version}"
                     else:
-                        dependencies[package] = version
-            if dependencies:
-                requirement_files[requirement_file_name]["dependencies"] = dependencies
+                        requirement[package] = version
+            requirement_files[requirement_file_name]["requirement"] = requirement
     except Exception:
         pass
     return requirement_files

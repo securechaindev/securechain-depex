@@ -28,7 +28,7 @@ async def analyze_setup_py(
     )
     requirement_files[requirement_file_name] = {
         "manager": "PyPI",
-        "dependencies": {},
+        "requirement": {},
     }
     for dependency in dependencies:
         dependency = dependency.split(";")
@@ -58,7 +58,7 @@ async def analyze_setup_py(
             .replace("'", "")
         )
         pos = await get_first_position(dependency, ["<", ">", "=", "!", "~"])
-        requirement_files[requirement_file_name]["dependencies"].update(
+        requirement_files[requirement_file_name]["requirement"].update(
             {dependency[:pos].lower(): await parse_pypi_constraints(dependency[pos:])}
         )
     return requirement_files

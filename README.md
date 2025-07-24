@@ -1,4 +1,4 @@
-# Depex Project
+# Depex
 
 <p>
   <a href="https://github.com/GermanMT/depex/releases" target="_blank">
@@ -13,6 +13,10 @@
     <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.12793934.svg" alt="DOI">
   </a>
 </p>
+
+## What is Depex?
+
+Depex is a tool that allows you to reason over the entire configuration space of the Software Supply Chain of an open-source software repository.
 
 ## Video tutorial
 

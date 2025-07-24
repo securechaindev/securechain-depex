@@ -11,21 +11,20 @@ async def analyze_gemfile(
     )
     requirement_files[requirement_file_name] = {
         "manager": "RubyGems",
-        "dependencies": {},
+        "requirement": {},
     }
     try:
         with open(f"{repository_path}/{requirement_file_name}") as file:
             gemfile_content = file.read()
-            dependencies = {}
+            requirement = {}
             gem_pattern = re.compile(r"gem\s+'([^']+)'\s*,?\s*'([^']+)'")
             matches = gem_pattern.findall(gemfile_content)
             for gem, version in matches:
                 if version.count(".") == 2 and not any(op in version for op in ['<', '>', '=']):
-                    dependencies[gem] = f"== {version}"
+                    requirement[gem] = f"== {version}"
                 else:
-                    dependencies[gem] = version
-            if dependencies:
-                requirement_files[requirement_file_name]["dependencies"] = dependencies
+                    requirement[gem] = version
+            requirement_files[requirement_file_name]["requirement"] = requirement
     except Exception:
         pass
     return requirement_files

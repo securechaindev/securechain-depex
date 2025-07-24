@@ -3,9 +3,10 @@ from pydantic import BaseModel, Field, model_validator
 from app.schemas.enums import NodeType
 
 
-class InitPackageRequest(BaseModel):
+class InitVersionRequest(BaseModel):
     node_type: NodeType = Field(...)
-    package_name: str  = Field(...)
+    package_name: str = Field(...)
+    version_name: str  = Field(...)
 
     @model_validator(mode='before')
     def set_package_name_to_lowercase(cls, values):

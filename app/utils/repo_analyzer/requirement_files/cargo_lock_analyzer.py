@@ -11,18 +11,17 @@ async def analyze_cargo_lock(
     )
     requirement_files[requirement_file_name] = {
         "manager": "Cargo",
-        "dependencies": {},
+        "requirement": {},
     }
     try:
         with open(f"{repository_path}/{requirement_file_name}") as file:
             data = load(file)
-            dependencies = {}
+            requirement = {}
             if "package" in data:
                 for package in data["package"]:
                     version = package["version"]
-                    dependencies[package["name"]] = f"== {version}"
-            if dependencies:
-                requirement_files[requirement_file_name]["dependencies"] = dependencies
+                    requirement[package["name"]] = f"== {version}"
+            requirement_files[requirement_file_name]["requirement"] = requirement
     except Exception:
         pass
     return requirement_files

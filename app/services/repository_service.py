@@ -95,40 +95,54 @@ async def read_graph_for_info_operation(
 
 
 async def read_data_for_smt_transform(
-    operation_request: dict[str, Any]
+    requirement_file_id: str,
+    max_level: int
 ) -> dict[str, Any]:
     query = """
-    MATCH (rf: RequirementFile) WHERE elementid(rf) = $requirement_file_id
-    CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) YIELD relationships
+    MATCH (rf: RequirementFile)
+    WHERE elementid(rf) = $requirement_file_id
+    CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level})
+    YIELD relationships
     UNWIND relationships AS relationship
-        WITH CASE type(relationship)
+    WITH
+        CASE type(relationship)
             WHEN 'Requires' THEN {
-                parent_count: startnode(relationship).count,
+                parent_serial_number: startnode(relationship).serial_number,
                 dependency: endnode(relationship).name,
                 constraints: relationship.constraints,
                 parent_version_name: relationship.parent_version_name,
-                type: CASE WHEN relationship.parent_version_name is null THEN "direct" ELSE "indirect" END
-            } END AS requires,
+                type: CASE
+                        WHEN relationship.parent_version_name IS NULL
+                        THEN "direct"
+                        ELSE "indirect"
+                    END
+            }
+        END AS requires_raw,
         CASE type(relationship)
             WHEN 'Have' THEN {
-                    dependency: startnode(relationship).name,
-                    release: endnode(relationship).name,
-                    count: endnode(relationship).count,
-                    mean: endnode(relationship).mean,
-                    weighted_mean: endnode(relationship).weighted_mean
-
-            } END AS have, rf
+                dependency: startnode(relationship).name,
+                release: endnode(relationship).name,
+                serial_number: endnode(relationship).serial_number,
+                mean: endnode(relationship).mean,
+                weighted_mean: endnode(relationship).weighted_mean
+            }
+        END AS have_raw,
+        rf
+    WITH rf,
+        [r IN collect(requires_raw) WHERE r.type = "direct" OR r.parent_serial_number IS NOT NULL] AS requires,
+        [h IN collect(have_raw) WHERE  h.serial_number IS NOT NULL] AS have
     RETURN {
-        name: collect(rf.name)[0],
-        moment: collect(rf.moment)[0],
-        requires: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(requires), "parent_count"), "type"),
-        have: apoc.map.groupByMulti(apoc.coll.sortMaps(collect(have), "count"), "dependency")
+        name: rf.name,
+        moment: rf.moment,
+        requires: apoc.map.groupByMulti(apoc.coll.sortMaps(requires, "parent_serial_number"), "type"),
+        have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, "serial_number"), "dependency")
     }
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(
             query,
-            operation_request,
+            requirement_file_id=requirement_file_id,
+            max_level=max_level
         )
         record = await result.single()
     return record[0] if record else None
@@ -172,6 +186,7 @@ async def update_repository_moment(repository_id: str) -> None:
         await session.run(query, repository_id=repository_id, moment=datetime.now())
 
 
+# TODO: Esto sigue haciendo falta?
 async def update_repository_users(repository_id: str, user_id: str) -> None:
     query = """
     MATCH (r:Repository)
