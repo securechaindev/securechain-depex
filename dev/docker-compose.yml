@@ -19,6 +19,22 @@ services:
       retries: 10
       start_period: 300s
 
+  securechain-user-login:
+    container_name: securechain-user-login
+    image: ghcr.io/securechaindev/securechain-user-login:latest
+    env_file:
+      - ../app/.env
+    ports:
+      - '8001:8000'
+    networks:
+      - securechain
+    healthcheck:
+      test: curl --fail http://localhost:8000/health || exit 1
+      interval: 100s
+      timeout: 100s
+      retries: 10
+      start_period: 300s
+
 networks:
   securechain:
     name: securechain
