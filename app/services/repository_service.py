@@ -184,14 +184,3 @@ async def update_repository_moment(repository_id: str) -> None:
     """
     async with get_graph_db_driver().session() as session:
         await session.run(query, repository_id=repository_id, moment=datetime.now())
-
-
-# TODO: Esto sigue haciendo falta?
-async def update_repository_users(repository_id: str, user_id: str) -> None:
-    query = """
-    MATCH (r:Repository)
-    WHERE elementid(r) = $repository_id AND NOT $user_id IN r.users
-    SET r.users = r.users + [$user_id]
-    """
-    async with get_graph_db_driver().session() as session:
-        await session.run(query, repository_id=repository_id, user_id=user_id)

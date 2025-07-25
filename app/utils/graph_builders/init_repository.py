@@ -14,7 +14,6 @@ from app.services import (
     read_requirement_files_by_repository,
     update_repository_is_complete,
     update_repository_moment,
-    update_repository_users,
     update_requirement_file_moment,
     update_requirement_rel_constraints,
 )
@@ -66,7 +65,6 @@ async def init_repository_graph(init_graph_request: InitRepositoryRequest, last_
         await update_repository_is_complete(
             repository_id, True
         )
-    await update_repository_users(last_repository_update["id"], init_graph_request.user_id)
 
 
 async def extract_repository(

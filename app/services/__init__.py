@@ -21,7 +21,6 @@ from .repository_service import (
     read_repository_by_id,
     update_repository_is_complete,
     update_repository_moment,
-    update_repository_users,
 )
 from .requirement_file_service import (
     create_requirement_file,
@@ -72,7 +71,6 @@ __all__ = [
     "update_package_moment",
     "update_repository_is_complete",
     "update_repository_moment",
-    "update_repository_users",
     "update_requirement_file_moment",
     "update_requirement_rel_constraints",
 ]
