@@ -70,25 +70,69 @@ async def read_repository_by_id(repository_id: str) -> dict[str, str]:
 
 
 async def read_graph_for_info_operation(
-    file_info_request: dict[str, Any]
+    node_type: str,
+    requirement_file_id: str,
+    max_level: int
 ) -> dict[str, Any]:
-    query = """
-    MATCH(rf: RequirementFile) WHERE elementid(rf) = $requirement_file_id
-    CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level}) YIELD nodes, relationships
-    WITH nodes, relationships
-    UNWIND nodes AS node
-    WITH CASE WHEN labels(node)[0] ENDS WITH 'Package' THEN node END AS deps,
-    CASE WHEN labels(node)[0] = 'Version' THEN node.vulnerabilities END AS vulnerabilities, relationships
-    WITH collect(deps) AS deps, apoc.coll.flatten(collect(vulnerabilities)) AS vulnerabilities, relationships
-    UNWIND relationships AS relationship
-    WITH CASE WHEN type(relationship) = 'Requires' THEN relationship END AS rels, deps, vulnerabilities
-    WITH deps, vulnerabilities, collect(rels) AS rels
-    RETURN {dependencies: size(deps), edges: size(rels), vulnerabilities: apoc.coll.toSet(vulnerabilities)}
+    query = f"""
+    MATCH (rf:RequirementFile)
+    WHERE elementid(rf) = $requirement_file_id
+    CALL apoc.path.expandConfig(
+        rf,
+        {{
+            relationshipFilter: 'Requires>|Have>',
+            labelFilter: 'Version|{node_type}',
+            maxLevel: -1,
+            bfs: true,
+            uniqueness: 'NODE_GLOBAL'
+        }}
+    ) YIELD path
+    WITH last(nodes(path)) AS pkg, length(path) - 1 AS depth
+    WHERE '{node_type}' IN labels(pkg)
+    OPTIONAL MATCH (pkg)-[:Have]->(v:Version)
+    WITH
+        pkg,
+        depth,
+        collect({{
+            name: v.name,
+            mean: v.mean,
+            weighted_mean: v.weighted_mean,
+            vulnerability_count: v.vulnerabilities
+        }}) AS versions
+    WITH
+        {{
+            package_name: pkg.name,
+            package_vendor: pkg.vendor,
+            versions: versions
+        }} AS enriched_pkg,
+        depth
+    WITH
+        collect(CASE WHEN depth = 0 THEN enriched_pkg END) AS direct_deps,
+        collect(CASE WHEN depth > 1 THEN {{node: enriched_pkg, depth: depth}} END) AS indirect_info
+    WITH
+        direct_deps,
+        indirect_info,
+        reduce(
+            map = {{}},
+            entry IN indirect_info |
+            apoc.map.setKey(
+            map,
+            toString(entry.depth),
+            coalesce(map[toString(entry.depth)], []) + entry.node
+            )
+        ) AS indirect_by_depth
+    RETURN {{
+        directDependencies: direct_deps,
+        totalDirectDependencies: size(direct_deps),
+        indirectDependenciesByDepth: apoc.map.removeKey(indirect_by_depth, null),
+        totalIndirectDependencies: size(indirect_info)
+    }}
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(
             query,
-            file_info_request
+            requirement_file_id=requirement_file_id,
+            max_level=max_level
         )
         record = await result.single()
     return record[0] if record else None

@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Request, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
@@ -37,7 +36,11 @@ async def file_info(
     request: Request,
     file_info_request: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
-    result = await read_graph_for_info_operation(jsonable_encoder(file_info_request))
+    result = await read_graph_for_info_operation(
+        file_info_request.node_type.value,
+        file_info_request.requirement_file_id,
+        file_info_request.max_level
+    )
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({
             "result": result,
