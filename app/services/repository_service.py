@@ -80,7 +80,7 @@ async def read_graph_for_info_operation(
     CALL apoc.path.expandConfig(
         rf,
         {{
-            relationshipFilter: 'Requires>|Have>',
+            relationshipFilter: 'REQUIRE>|HAVE>',
             labelFilter: 'Version|{node_type}',
             maxLevel: -1,
             bfs: true,
@@ -89,7 +89,7 @@ async def read_graph_for_info_operation(
     ) YIELD path
     WITH last(nodes(path)) AS pkg, length(path) - 1 AS depth
     WHERE '{node_type}' IN labels(pkg)
-    OPTIONAL MATCH (pkg)-[:Have]->(v:Version)
+    OPTIONAL MATCH (pkg)-[:HAVE]->(v:Version)
     WITH
         pkg,
         depth,
@@ -150,7 +150,7 @@ async def read_data_for_smt_transform(
     UNWIND relationships AS relationship
     WITH
         CASE type(relationship)
-            WHEN 'Requires' THEN {
+            WHEN 'REQUIRE' THEN {
                 parent_serial_number: startnode(relationship).serial_number,
                 dependency: endnode(relationship).name,
                 constraints: relationship.constraints,
@@ -163,7 +163,7 @@ async def read_data_for_smt_transform(
             }
         END AS requires_raw,
         CASE type(relationship)
-            WHEN 'Have' THEN {
+            WHEN 'HAVE' THEN {
                 dependency: startnode(relationship).name,
                 release: endnode(relationship).name,
                 serial_number: endnode(relationship).serial_number,

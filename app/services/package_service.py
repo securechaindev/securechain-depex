@@ -22,7 +22,7 @@ async def create_package_and_versions(
             """
         )
         query_part3 = (
-            f"CREATE (parent)-[rel_p:Requires{{constraints:$constraints{", parent_version_name:$parent_version_name" if parent_version_name else ""}}}]->(p)"
+            f"CREATE (parent)-[rel_p:REQUIRE{{constraints:$constraints{", parent_version_name:$parent_version_name" if parent_version_name else ""}}}]->(p)"
         )
     query = f"""
     {query_part1}
@@ -39,7 +39,7 @@ async def create_package_and_versions(
         weighted_mean: version.weighted_mean,
         vulnerabilities: version.vulnerabilities
     }})
-    CREATE (package)-[rel_v:Have]->(v)
+    CREATE (package)-[rel_v:HAVE]->(v)
     RETURN collect({{name: v.name, id: elementid(v)}})
     """
     async with get_graph_db_driver().session() as session:
@@ -71,7 +71,7 @@ async def create_versions(
         weighted_mean: version.weighted_mean,
         vulnerabilities: version.vulnerabilities
     }})
-    CREATE (package)-[rel_v:Have]->(v)
+    CREATE (package)-[rel_v:HAVE]->(v)
     RETURN collect({{name: v.name, id: elementid(v)}})
     """
     async with get_graph_db_driver().session() as session:
@@ -100,7 +100,7 @@ async def read_package_by_name(node_type: str, package_name: str) -> dict[str, A
 
 async def read_package_status_by_name(node_type: str, package_name: str) -> dict[str, Any]:
     query = f"""
-    MATCH(p:{node_type}{{name:$package_name}})-[:Have]->(v:Version)
+    MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version)
     WITH p, collect(v{{.*}}) AS versions
     RETURN p{{.*, versions: versions}}
     """
@@ -115,7 +115,7 @@ async def read_package_status_by_name(node_type: str, package_name: str) -> dict
 
 async def read_version_status_by_package_and_name(node_type: str, package_name: str, version_name: str) -> dict[str, Any]:
     query = f"""
-    MATCH(p:{node_type}{{name:$package_name}})-[:Have]->(v:Version{{name:$version_name}})
+    MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
     RETURN v{{id: elementid(v), .*}}
     """
     async with get_graph_db_driver().session() as session:
@@ -147,7 +147,7 @@ async def relate_packages(node_type: str, packages: list[dict[str, Any]]) -> Non
     WHERE elementid(parent) = package.parent_id
     MATCH (p: {node_type})
     WHERE elementid(p) = package.id
-    CREATE (parent)-[:Requires{{constraints: package.constraints, parent_version_name: package.parent_version_name}}]->(p)
+    CREATE (parent)-[:REQUIRE{{constraints: package.constraints, parent_version_name: package.parent_version_name}}]->(p)
     """
     async with get_graph_db_driver().session() as session:
         await session.run(query, packages=packages)
@@ -175,7 +175,7 @@ async def exists_package(node_type: str, package_name: str) -> bool:
 
 async def exists_version(node_type: str, package_name: str, version_name: str) -> bool:
     query = f"""
-    MATCH(p:{node_type}{{name:$package_name}})-[:Have]->(v:Version{{name:$version_name}})
+    MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
     RETURN count(v) > 0
     """
     async with get_graph_db_driver().session() as session:

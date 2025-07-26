@@ -4,7 +4,7 @@ from .dbs.databases import get_graph_db_driver
 async def read_versions_names_by_package(node_type: str, package_name: str) -> list[str]:
     query = f"""
     MATCH (p:{node_type}{{name:$package_name}})
-    MATCH (p)-[r:Have]->(v: Version)
+    MATCH (p)-[r:HAVE]->(v: Version)
     RETURN collect(v.name)
     """
     async with get_graph_db_driver().session() as session:
@@ -19,7 +19,7 @@ async def read_releases_by_serial_numbers(
 ) -> list[dict[str, str | float | int]]:
     sanitized_configs: list[dict[str, str | float | int]] = []
     query = f"""
-    MATCH (v:Version)<-[:Have]-(parent:{node_type})
+    MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
     WHERE v.serial_number = $serial_number AND parent.name = $package
     RETURN v.name
     """
@@ -43,7 +43,7 @@ async def read_serial_numbers_by_releases(
 ) -> dict[str, int]:
     sanitized_config: dict[str, int] = {}
     query = f"""
-    MATCH (v:Version)<-[:Have]-(parent:{node_type})
+    MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
     WHERE v.name = $release AND parent.name = $package
     RETURN v.serial_number
     """
@@ -59,7 +59,7 @@ async def read_serial_numbers_by_releases(
 async def count_number_of_versions_by_package(node_type: str, package_name: str) -> int:
     query = f"""
     MATCH (p:{node_type}{{name:$package_name}})
-    MATCH (p)-[r:Have]->(v: Version)
+    MATCH (p)-[r:HAVE]->(v: Version)
     RETURN count(v)
     """
     async with get_graph_db_driver().session() as session:
