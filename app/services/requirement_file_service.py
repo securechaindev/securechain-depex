@@ -31,6 +31,18 @@ async def read_requirement_files_by_repository(repository_id: str) -> dict[str, 
     return record[0] if record else None
 
 
+async def read_requirement_file_moment(requirement_file_id: str) -> datetime:
+    query = """
+    MATCH (rf:RequirementFile)
+    WHERE elementid(rf) = $requirement_file_id
+    RETURN rf.moment AS moment
+    """
+    async with get_graph_db_driver().session() as session:
+        result = await session.run(query, requirement_file_id=requirement_file_id)
+        record = await result.single()
+    return record[0] if record else None
+
+
 async def update_requirement_rel_constraints(requirement_file_id: str, package_name: str, constraints: str) -> None:
     query = """
     MATCH (rf:RequirementFile)

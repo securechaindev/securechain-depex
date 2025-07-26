@@ -35,17 +35,15 @@ async def valid_config(
     valid_config_request: Annotated[ValidConfigRequest, Body()]
 ) -> JSONResponse:
     graph_data = await read_data_for_smt_transform(valid_config_request.requirement_file_id, valid_config_request.max_level)
-    smt_id = f"{valid_config_request.requirement_file_id}-{valid_config_request.max_level}"
+    smt_text_id = f"{valid_config_request.requirement_file_id}-{valid_config_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, valid_config_request.node_type.value, valid_config_request.agregator)
-        smt_text = await read_smt_text(smt_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
-            "moment"
-        ].replace(tzinfo=UTC):
+        smt_text = await read_smt_text(smt_text_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             smt_model.convert(smt_text["text"])
         else:
             model_text = smt_model.transform()
-            await replace_smt_text(smt_id, model_text)
+            await replace_smt_text(smt_text_id, model_text)
         operation = ValidConfig(await read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config))
         operation.execute(smt_model)
         return JSONResponse(
@@ -76,17 +74,15 @@ async def complete_config(
     complete_config_request: Annotated[CompleteConfigRequest, Body()]
 ) -> JSONResponse:
     graph_data = await read_data_for_smt_transform(complete_config_request.requirement_file_id, complete_config_request.max_level)
-    smt_id = f"{complete_config_request.requirement_file_id}-{complete_config_request.max_level}"
+    smt_text_id = f"{complete_config_request.requirement_file_id}-{complete_config_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, complete_config_request.node_type.value, complete_config_request.agregator)
-        smt_text = await read_smt_text(smt_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
-            "moment"
-        ].replace(tzinfo=UTC):
+        smt_text = await read_smt_text(smt_text_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             smt_model.convert(smt_text["text"])
         else:
             model_text = smt_model.transform()
-            await replace_smt_text(smt_id, model_text)
+            await replace_smt_text(smt_text_id, model_text)
         smt_model = smt_model
         operation = CompleteConfig(
             await read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
@@ -123,17 +119,15 @@ async def config_by_impact(
     config_by_impact_request: Annotated[ConfigByImpactRequest, Body()]
 ) -> JSONResponse:
     graph_data = await read_data_for_smt_transform(config_by_impact_request.requirement_file_id, config_by_impact_request.max_level)
-    smt_id = f"{config_by_impact_request.requirement_file_id}-{config_by_impact_request.max_level}"
+    smt_text_id = f"{config_by_impact_request.requirement_file_id}-{config_by_impact_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.agregator)
-        smt_text = await read_smt_text(smt_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data[
-            "moment"
-        ].replace(tzinfo=UTC):
+        smt_text = await read_smt_text(smt_text_id)
+        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             smt_model.convert(smt_text["text"])
         else:
             model_text = smt_model.transform()
-            await replace_smt_text(smt_id, model_text)
+            await replace_smt_text(smt_text_id, model_text)
         smt_model = smt_model
         operation = ConfigByImpact(config_by_impact_request.impact)
         operation.execute(smt_model)
