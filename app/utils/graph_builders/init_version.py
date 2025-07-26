@@ -23,32 +23,31 @@ from .managers.vulnerabilities import attribute_vulnerabilities
 
 
 async def create_version(init_version_request: InitVersionRequest) -> None:
-    version, requirements = await get_version(init_version_request)
-    attributed_version = await attribute_vulnerabilities(
+    versions, requirement = await get_version(init_version_request)
+    versions[0] = await attribute_vulnerabilities(
         init_version_request.node_type.value,
-        version
+        versions[0]
     )
     created_versions = await create_versions(
         init_version_request.node_type.value,
         init_version_request.package_name,
-        [attributed_version]
+        versions
     )
-    for version in created_versions:
-        match init_version_request.node_type.value:
-            case "CargoPackage":
-                await cargo_extract_packages(init_version_request.package_name, version)
-            case "MavenPackage":
-                await maven_extract_packages(init_version_request.package_name, version)
-            case "NPMPackage":
-                await npm_generate_packages(requirements, version["id"], init_version_request.version_name)
-            case "NuGetPackage":
-                await nuget_generate_packages(requirements, version["id"], init_version_request.version_name)
-            case "PyPIPackage":
-                await pypi_extract_packages(init_version_request.package_name, version)
-            case "RubyGemsPackage":
-                await rubygems_extract_packages(init_version_request.package_name, version)
-            case _:
-                raise ValueError(f"Unsupported node type: {init_version_request.node_type.value}")
+    match init_version_request.node_type.value:
+        case "CargoPackage":
+            await cargo_extract_packages(init_version_request.package_name, created_versions[0])
+        case "MavenPackage":
+            await maven_extract_packages(init_version_request.package_name, created_versions[0])
+        case "NPMPackage":
+            await npm_generate_packages(requirement, created_versions[0].get("id"), created_versions[0].get("name"))
+        case "NuGetPackage":
+            await nuget_generate_packages(requirement, created_versions[0].get("id"), created_versions[0].get("name"))
+        case "PyPIPackage":
+            await pypi_extract_packages(init_version_request.package_name, created_versions[0])
+        case "RubyGemsPackage":
+            await rubygems_extract_packages(init_version_request.package_name, created_versions[0])
+        case _:
+            raise ValueError(f"Unsupported node type: {init_version_request.node_type.value}")
 
 
 async def get_version(

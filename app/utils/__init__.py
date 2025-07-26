@@ -7,6 +7,7 @@ from .graph_builders import (
 from .others import (
     JWTBearer,
     json_encoder,
+    order_versions,
 )
 from .smt import (
     CompleteConfig,
@@ -33,5 +34,6 @@ __all__ = [
     "create_version",
     "init_repository_graph",
     "json_encoder",
+    "order_versions",
     "search_new_versions",
 ]

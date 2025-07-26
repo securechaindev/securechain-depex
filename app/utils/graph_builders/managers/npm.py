@@ -79,12 +79,12 @@ async def npm_search_new_versions(package: dict[str, Any]) -> None:
         attributed_versions: list[dict[str, Any]] = []
         new_requirements = []
         actual_versions = await read_versions_names_by_package("NPMPackage", package["name"])
-        for version, requirement in zip(versions, requirements):
+        for index, (version, requirement) in enumerate(zip(versions, requirements)):
             if version["name"] not in actual_versions:
-                version["serial_number"] = await version_to_serial_number(version["name"])
                 attributed_versions.append(
                     await attribute_vulnerabilities(package["name"], version)
                 )
+                versions[index] = attributed_versions
                 new_requirements.append(requirement)
         created_versions = await create_versions(
             "NPMPackage",

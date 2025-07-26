@@ -7,7 +7,7 @@ from aiohttp import ClientConnectorError, ContentTypeError
 from app.cache import get_cache, set_cache
 from app.http_session import get_session
 from app.logger import logger
-from app.utils.others import version_to_serial_number
+from app.utils import order_versions
 
 
 async def get_maven_versions(group_id: str, artifact_id: str) -> list[dict[str, Any]]:
@@ -35,46 +35,38 @@ async def get_maven_versions(group_id: str, artifact_id: str) -> list[dict[str, 
             start += 200
             if not response.get("response").get("docs", []):
                 break
-            for version in response.get("response", {}).get("docs", []):
-                name = version.get("v")
-                versions.append({"name": name, "serial_number": await version_to_serial_number(name)})
+            raw_versions = [v.get("v") for v in response.get("response", {}).get("docs", [])]
+            versions = await order_versions("MavenPackage", raw_versions)
         await set_cache(key, versions)
     return versions
 
 
 async def get_maven_version(group_id: str, artifact_id: str, version_name: str) -> dict[str, Any]:
-    key = f"version:{group_id}:{artifact_id}:{version_name}"
-    response = await get_cache(key)
-    if response:
-        version = response
-    else:
-        versions: list[dict[str, Any]] = []
-        session = await get_session()
-        start = 0
+    raw_versions: list[dict[str, Any]] = []
+    session = await get_session()
+    start = 0
+    while True:
+        url = f"https://search.maven.org/solrsearch/select?q=g:{group_id}+AND+a:{artifact_id}&core=gav&rows=200&start={start}"
         while True:
-            url = f"https://search.maven.org/solrsearch/select?q=g:{group_id}+AND+a:{artifact_id}&core=gav&rows=200&start={start}"
-            while True:
-                try:
-                    logger.info(f"Maven - {url}")
-                    async with session.get(url) as response:
-                        response = await response.json()
-                        await set_cache(url, response)
-                        break
-                except (ClientConnectorError, TimeoutError):
-                    await sleep(5)
-                except ContentTypeError:
-                    return versions
-            start += 200
-            if not response.get("response").get("docs", []):
-                break
-            versions.extend([version.get("v") for version in response.get("response", {}).get("docs", [])])
-        if version_name in versions:
-            version = {"name": version_name, "serial_number": await version_to_serial_number(version_name)}
-            await set_cache(key, version)
-        else:
-            raise ValueError(f"Version {version_name} not found for package {group_id}:{artifact_id}")
-    return version
-
+            try:
+                logger.info(f"Maven - {url}")
+                async with session.get(url) as response:
+                    response = await response.json()
+                    break
+            except (ClientConnectorError, TimeoutError):
+                await sleep(5)
+            except ContentTypeError:
+                return []
+        start += 200
+        if not response.get("response").get("docs", []):
+            break
+        raw_versions.extend([version.get("v") for version in response.get("response", {}).get("docs", [])])
+    versions = await order_versions("MavenPackage", raw_versions)
+    index = next((i for i, d in enumerate(versions) if d.get("name") == version_name), None)
+    if index is not None:
+        return versions[index:]
+    else:
+        raise ValueError(f"Version {version_name} not found for package {group_id}:{artifact_id}")
 
 async def get_maven_requirement(group_id: str, artifact_id: str, version_name: str) -> dict[str, list[str] | str]:
     key = f"requirement :{group_id}:{artifact_id}:{version_name}"

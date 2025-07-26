@@ -84,12 +84,12 @@ async def pypi_search_new_versions(package: dict[str, Any]) -> None:
     if count < len(versions):
         attributed_versions: list[dict[str, Any]] = []
         actual_versions = await read_versions_names_by_package("PyPIPackage", package["name"])
-        for version in versions:
+        for index, version in enumerate(versions):
             if version["name"] not in actual_versions:
-                version["serial_number"] = await version_to_serial_number(version["name"])
                 attributed_versions.append(
                     await attribute_vulnerabilities(package["name"], version)
                 )
+                versions[index] = attributed_versions
         created_versions = await create_versions(
             "PyPIPackage",
             package["name"],
