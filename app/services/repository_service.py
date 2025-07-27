@@ -82,28 +82,32 @@ async def read_graph_for_info_operation(
         {{
             relationshipFilter: 'REQUIRE>|HAVE>',
             labelFilter: 'Version|{node_type}',
-            maxLevel: -1,
+            maxLevel: $max_level,
             bfs: true,
             uniqueness: 'NODE_GLOBAL'
         }}
     ) YIELD path
-    WITH last(nodes(path)) AS pkg, length(path) - 1 AS depth
-    WHERE '{node_type}' IN labels(pkg)
-    OPTIONAL MATCH (pkg)-[:HAVE]->(v:Version)
+    WITH 
+        last(nodes(path)) AS pkg, 
+        length(path) - 1 AS depth,
+        last(relationships(path)) AS rel
+    WHERE '{node_type}' IN labels(pkg) AND type(rel) = 'REQUIRE'
+    OPTIONAL MATCH (pkg:{node_type})-[:HAVE]->(v:Version)
     WITH
         pkg,
         depth,
-        collect({{
+        collect(DISTINCT {{
             name: v.name,
             mean: v.mean,
             weighted_mean: v.weighted_mean,
             vulnerability_count: v.vulnerabilities
-        }}) AS versions
-    WITH
-        {{
-            package_name: pkg.name,
-            package_vendor: pkg.vendor,
-            versions: versions
+        }}) AS versions,
+        rel.constraints AS constraints
+    WITH {{
+        package_name: pkg.name,
+        package_vendor: pkg.vendor,
+        package_constraints: constraints,
+        versions: versions
         }} AS enriched_pkg,
         depth
     WITH
