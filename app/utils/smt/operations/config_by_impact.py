@@ -15,7 +15,7 @@ async def execute_config_by_impact(model: SMTModel, impact: int) -> list[dict[st
     solver.add(model.domain)
     while solver.check() == sat:
         config = solver.model()
-        sanitized_config = config_sanitizer(config)
+        sanitized_config = await config_sanitizer(model.node_type, config)
         result.append(sanitized_config)
         break
     if solver.check() == unknown:

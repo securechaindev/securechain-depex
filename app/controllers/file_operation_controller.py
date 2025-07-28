@@ -15,7 +15,6 @@ from app.services import (
     read_data_for_smt_transform,
     read_graph_for_info_operation,
     read_operation_result,
-    read_releases_by_serial_numbers,
     read_requirement_file_moment,
     read_smt_text,
     replace_operation_result,
@@ -127,8 +126,6 @@ async def minimize_impact(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         result = await execute_minimize_impact(smt_model, min_max_impact_request.limit)
-        if not isinstance(result, str):
-            result = await read_releases_by_serial_numbers(min_max_impact_request.node_type.value, result)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
@@ -167,8 +164,6 @@ async def maximize_impact(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         result = await execute_maximize_impact(smt_model, min_max_impact_request.limit)
-        if not isinstance(result, str):
-            result = await read_releases_by_serial_numbers(min_max_impact_request.node_type.value, result)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
@@ -207,8 +202,6 @@ async def filter_configs(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         result = await execute_filter_configs(smt_model, filter_configs_request.max_threshold, filter_configs_request.min_threshold, filter_configs_request.limit)
-        if not isinstance(result, str):
-            result = await read_releases_by_serial_numbers(filter_configs_request.node_type.value, result)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {

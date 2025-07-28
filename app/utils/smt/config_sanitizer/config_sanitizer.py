@@ -1,8 +1,10 @@
 from z3 import IntNumRef, ModelRef, RatNumRef
 
+from app.services import read_releases_by_serial_numbers
 
-def config_sanitizer(config: ModelRef) -> dict[str, float | int]:
-    sanitize_config: dict[str, float | int] = {}
+
+async def config_sanitizer(node_type: str, config: ModelRef) -> dict[str, float | int]:
+    final_config: dict[str, float | int] = {}
     aux: dict[str, float | int] = {}
     for var in config:
         value: float | int = 0
@@ -19,8 +21,8 @@ def config_sanitizer(config: ModelRef) -> dict[str, float | int]:
         if "impact_" in str(var):
             aux[str(var)] = value
         else:
-            sanitize_config[str(var)] = value
+            final_config[str(var)] = value
     for impact_var, impact in aux.items():
-        if impact_var.replace("impact_", "") in sanitize_config:
-            sanitize_config[impact_var] = impact
-    return sanitize_config
+        if impact_var.replace("impact_", "") in final_config:
+            final_config[impact_var] = impact
+    return await read_releases_by_serial_numbers(node_type, final_config)

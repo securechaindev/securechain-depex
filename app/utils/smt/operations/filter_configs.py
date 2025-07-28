@@ -15,7 +15,7 @@ async def execute_filter_configs(model: SMTModel, max_threshold: float, min_thre
     solver.add(And([model.domain, max_ctc, min_ctc]))
     while len(result) < limit and solver.check() == sat:
         config = solver.model()
-        sanitized_config = config_sanitizer(config)
+        sanitized_config = await config_sanitizer(model.node_type, config)
         result.append(sanitized_config)
         block = []
         for var in config:

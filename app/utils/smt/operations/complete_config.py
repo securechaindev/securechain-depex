@@ -16,7 +16,7 @@ async def execute_complete_config(model: SMTModel, config: dict[str, int]) -> li
         solver.add(Int(package) == serial_number)
     while solver.check() == sat:
         config = solver.model()
-        sanitized_config = config_sanitizer(config)
+        sanitized_config = await config_sanitizer(model.node_type, config)
         result.append(sanitized_config)
         break
     if solver.check() == unknown:

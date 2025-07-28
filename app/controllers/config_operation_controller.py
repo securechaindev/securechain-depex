@@ -12,7 +12,6 @@ from app.schemas import (
 )
 from app.services import (
     read_data_for_smt_transform,
-    read_releases_by_serial_numbers,
     read_serial_numbers_by_releases,
     read_smt_text,
     replace_smt_text,
@@ -85,8 +84,6 @@ async def complete_config(
             await replace_smt_text(smt_text_id, model_text)
         config = await read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
         result = await execute_complete_config(smt_model, config)
-        if not isinstance(result, str):
-            result = await read_releases_by_serial_numbers(complete_config_request.node_type.value, result)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
@@ -125,8 +122,6 @@ async def config_by_impact(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         result = execute_config_by_impact(smt_model, config_by_impact_request.impact)
-        if not isinstance(result, str):
-            result = await read_releases_by_serial_numbers(config_by_impact_request.node_type.value, result)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {

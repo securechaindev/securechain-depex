@@ -14,7 +14,7 @@ async def execute_maximize_impact(model: SMTModel, limit: int) -> list[dict[str,
     solver.add(model.domain)
     while len(result) < limit and solver.check() == sat:
         config = solver.model()
-        sanitized_config = config_sanitizer(config)
+        sanitized_config = await config_sanitizer(model.node_type, config)
         result.append(sanitized_config)
         block = []
         for var in config:

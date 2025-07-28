@@ -15,26 +15,23 @@ async def read_versions_names_by_package(node_type: str, package_name: str) -> l
 
 async def read_releases_by_serial_numbers(
     node_type: str,
-    configs: list[dict[str, int]]
+    config: dict[str, int]
 ) -> list[dict[str, str | float | int]]:
-    sanitized_configs: list[dict[str, str | float | int]] = []
     query = f"""
     MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
     WHERE v.serial_number = $serial_number AND parent.name = $package
     RETURN v.name
     """
-    for config in configs:
-        sanitized_config: dict[str, str | float | int] = {}
-        for var, value in config.items():
-            async with get_graph_db_driver().session() as session:
-                result = await session.run(query, package=var, serial_number=value)
-                record = await result.single()
-            if record:
-                sanitized_config.update({var: record[0]})
-            else:
-                sanitized_config.update({var: value})
-        sanitized_configs.append(sanitized_config)
-    return sanitized_configs
+    sanitized_config: dict[str, str | float | int] = {}
+    for var, value in config.items():
+        async with get_graph_db_driver().session() as session:
+            result = await session.run(query, package=var, serial_number=value)
+            record = await result.single()
+        if record:
+            sanitized_config.update({var: record[0]})
+        else:
+            sanitized_config.update({var: value})
+    return sanitized_config
 
 
 async def read_serial_numbers_by_releases(
