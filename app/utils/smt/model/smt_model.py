@@ -45,8 +45,8 @@ class SMTModel:
 
     def transform(self) -> str:
         for key in ["direct", "indirect"]:
-            for rel_requires in self.source_data["requires"].get(key, []):
-                getattr(self, f"transform_{key}_package")(rel_requires)
+            for require in self.source_data["require"].get(key, []):
+                getattr(self, f"transform_{key}_package")(require)
 
         file_risk_name = f"file_risk_{self.source_data['name']}"
         self.var_domain.add(f"(declare-const {file_risk_name} Real)")
@@ -64,33 +64,33 @@ class SMTModel:
         return model_text
 
 
-    def transform_direct_package(self, rel_requires: dict[str, Any]) -> None:
-        filtered_versions = self.filter_versions(rel_requires["dependency"], rel_requires["constraints"])
+    def transform_direct_package(self, require: dict[str, Any]) -> None:
+        filtered_versions = self.filter_versions(require["package"], require["constraints"])
         if filtered_versions:
-            self.directs.append(rel_requires["dependency"])
-            var_impact = f"impact_{rel_requires['dependency']}"
+            self.directs.append(require["package"])
+            var_impact = f"impact_{require['package']}"
             self.impacts.add(var_impact)
-            self.var_domain.add(f"(declare-const {rel_requires['dependency']} Int)")
+            self.var_domain.add(f"(declare-const {require["package"]} Int)")
             self.var_domain.add(f"(declare-const {var_impact} Real)")
-            self.build_direct_contraint(rel_requires["dependency"], list(filtered_versions.keys()))
-            self.transform_versions(filtered_versions, rel_requires["dependency"], "direct")
+            self.build_direct_contraint(require["package"], list(filtered_versions.keys()))
+            self.transform_versions(filtered_versions, require["package"], "direct")
 
 
-    def transform_indirect_package(self, rel_requires: dict[str, Any]) -> None:
-        filtered_versions = self.filter_versions(rel_requires["dependency"], rel_requires["constraints"])
+    def transform_indirect_package(self, require: dict[str, Any]) -> None:
+        filtered_versions = self.filter_versions(require["package"], require["constraints"])
         if filtered_versions:
-            var_impact = f"impact_{rel_requires['dependency']}"
+            var_impact = f"impact_{require["package"]}"
             self.impacts.add(var_impact)
-            self.var_domain.add(f"(declare-const {rel_requires['dependency']} Int)")
+            self.var_domain.add(f"(declare-const {require["package"]} Int)")
             self.var_domain.add(f"(declare-const {var_impact} Real)")
-            self.var_domain.add(f"(declare-const {rel_requires['parent_version_name']} Int)")
+            self.var_domain.add(f"(declare-const {require["parent_version_name"]} Int)")
             self.append_indirect_constraint(
-                rel_requires["dependency"],
+                require["package"],
                 list(filtered_versions.keys()),
-                rel_requires["parent_version_name"],
-                rel_requires["parent_serial_number"],
+                require["parent_version_name"],
+                require["parent_serial_number"],
             )
-            self.transform_versions(filtered_versions, rel_requires["dependency"], "indirect")
+            self.transform_versions(filtered_versions, require["package"], "indirect")
 
 
     def transform_versions(self, versions: dict[int, int], var: str, _type: str) -> None:
@@ -101,15 +101,15 @@ class SMTModel:
                 self.ctcs.setdefault(var, {.0: {-1}}).setdefault(impact, set()).add(version)
 
 
-    def filter_versions(self, dependency: str, constraints: str) -> dict[int, int]:
-        key = f"{dependency}{constraints}"
+    def filter_versions(self, package: str, constraints: str) -> dict[int, int]:
+        key = f"{package}{constraints}"
         filtered_versions = self.filtered_versions.setdefault(key, {})
         if not filtered_versions:
             try:
                 constraints = constraints.replace(" ", "")
                 versions_range = self.range_type.from_native(constraints) if constraints != "any" else None
-                for version in self.source_data["have"][dependency]:
-                    if constraints == "any" or self.version_type(version["release"]) in versions_range:
+                for version in self.source_data["have"][package]:
+                    if constraints == "any" or self.version_type(version["name"]) in versions_range:
                         filtered_versions[version["serial_number"]] = version[self.agregator]
             except Exception:
                 pass
@@ -142,14 +142,22 @@ class SMTModel:
             for impact, versions in impacts.items():
                 self.ctc_domain += f"(=> {self.group_versions(var,  list(versions))} (= impact_{var} {impact})) "
 
+    
+    @staticmethod
+    def create_constraint_for_group_descendent(var: str, group: list[int]) -> str:
+        return (
+            f"(= {var} {group[0]})"
+            if len(group) == 1
+            else f"(and (>= {var} {group[-1]}) (<= {var} {group[0]}))"
+        )
 
-    def group_versions(self, var: str, versions: list[int]) -> str:
-        key = (var, frozenset(versions))
-        if key in self.constraint_cache:
-            return self.constraint_cache[key]
-        expr = f"(or {' '.join(f'(= {var} {v})' for v in sorted(versions))})"
-        self.constraint_cache[key] = expr
-        return expr
+    @staticmethod
+    def create_constraint_for_group_ascendent(var: str, group: list[int]) -> str:
+        return (
+            f"(= {var} {group[0]})"
+            if len(group) == 1
+            else f"(and (>= {var} {group[0]}) (<= {var} {group[-1]}))"
+        )
 
 
     def sum(self) -> str:

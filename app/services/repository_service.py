@@ -156,7 +156,7 @@ async def read_data_for_smt_transform(
         CASE type(relationship)
             WHEN 'REQUIRE' THEN {
                 parent_serial_number: startnode(relationship).serial_number,
-                dependency: endnode(relationship).name,
+                package: endnode(relationship).name,
                 constraints: relationship.constraints,
                 parent_version_name: relationship.parent_version_name,
                 type: CASE
@@ -165,11 +165,11 @@ async def read_data_for_smt_transform(
                         ELSE "indirect"
                     END
             }
-        END AS requires_raw,
+        END AS require_raw,
         CASE type(relationship)
             WHEN 'HAVE' THEN {
-                dependency: startnode(relationship).name,
-                release: endnode(relationship).name,
+                package: startnode(relationship).name,
+                name: endnode(relationship).name,
                 serial_number: endnode(relationship).serial_number,
                 mean: endnode(relationship).mean,
                 weighted_mean: endnode(relationship).weighted_mean
@@ -177,13 +177,13 @@ async def read_data_for_smt_transform(
         END AS have_raw,
         rf
     WITH rf,
-        [r IN collect(requires_raw) WHERE r.type = "direct" OR r.parent_serial_number IS NOT NULL] AS requires,
+        [r IN collect(require_raw) WHERE r.type = "direct" OR r.parent_serial_number IS NOT NULL] AS require,
         [h IN collect(have_raw) WHERE  h.serial_number IS NOT NULL] AS have
     RETURN {
         name: rf.name,
         moment: rf.moment,
-        requires: apoc.map.groupByMulti(apoc.coll.sortMaps(requires, "parent_serial_number"), "type"),
-        have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, "serial_number"), "dependency")
+        require: apoc.map.groupByMulti(apoc.coll.sortMaps(require, "parent_serial_number"), "type"),
+        have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, "serial_number"), "package")
     }
     """
     async with get_graph_db_driver().session() as session:
