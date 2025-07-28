@@ -1,17 +1,17 @@
-from .complete_config import CompleteConfig
-from .config_by_impact import ConfigByImpact
-from .filter_configs import FilterConfigs
-from .maximize_impact import MaximizeImpact
-from .minimize_impact import MinimizeImpact
-from .valid_config import ValidConfig
-from .valid_graph import ValidGraph
+from .complete_config import execute_complete_config
+from .config_by_impact import execute_config_by_impact
+from .filter_configs import execute_filter_configs
+from .maximize_impact import execute_maximize_impact
+from .minimize_impact import execute_minimize_impact
+from .valid_config import execute_valid_config
+from .valid_graph import execute_valid_graph
 
 __all__ = [
-    "CompleteConfig",
-    "ConfigByImpact",
-    "FilterConfigs",
-    "MaximizeImpact",
-    "MinimizeImpact",
-    "ValidConfig",
-    "ValidGraph",
+    "execute_complete_config",
+    "execute_config_by_impact",
+    "execute_filter_configs",
+    "execute_maximize_impact",
+    "execute_minimize_impact",
+    "execute_valid_config",
+    "execute_valid_graph",
 ]

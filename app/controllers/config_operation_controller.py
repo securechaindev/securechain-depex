@@ -18,11 +18,11 @@ from app.services import (
     replace_smt_text,
 )
 from app.utils import (
-    CompleteConfig,
-    ConfigByImpact,
+    execute_complete_config,
+    execute_config_by_impact,
     JWTBearer,
     SMTModel,
-    ValidConfig,
+    execute_valid_config,
     json_encoder,
 )
 
@@ -40,16 +40,16 @@ async def valid_config(
         smt_model = SMTModel(graph_data, valid_config_request.node_type.value, valid_config_request.agregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+            await smt_model.convert(smt_text["text"])
         else:
-            model_text = smt_model.transform()
+            model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        operation = ValidConfig(await read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config))
-        operation.execute(smt_model)
+        config = await read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config)
+        result = await execute_valid_config(smt_model, config)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
-                    "result": operation.get_result(),
+                    "result": result,
                     "code": "success",
                     "message": "Operation Valid Configuration executed successfully"
                 }
@@ -79,18 +79,14 @@ async def complete_config(
         smt_model = SMTModel(graph_data, complete_config_request.node_type.value, complete_config_request.agregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+            await smt_model.convert(smt_text["text"])
         else:
-            model_text = smt_model.transform()
+            model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        smt_model = smt_model
-        operation = CompleteConfig(
-            await read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
-        )
-        operation.execute(smt_model)
-        result = operation.get_result()
+        config = await read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
+        result = await execute_complete_config(smt_model, config)
         if not isinstance(result, str):
-            result = await read_releases_by_serial_numbers(complete_config_request.node_type.value, operation.get_result())
+            result = await read_releases_by_serial_numbers(complete_config_request.node_type.value, result)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
@@ -124,16 +120,13 @@ async def config_by_impact(
         smt_model = SMTModel(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.agregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+            await smt_model.convert(smt_text["text"])
         else:
-            model_text = smt_model.transform()
+            model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        smt_model = smt_model
-        operation = ConfigByImpact(config_by_impact_request.impact)
-        operation.execute(smt_model)
-        result = operation.get_result()
+        result = execute_config_by_impact(smt_model, config_by_impact_request.impact)
         if not isinstance(result, str):
-            result = await read_releases_by_serial_numbers(config_by_impact_request.node_type.value, operation.get_result())
+            result = await read_releases_by_serial_numbers(config_by_impact_request.node_type.value, result)
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {

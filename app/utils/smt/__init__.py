@@ -1,19 +1,19 @@
 from .operations import (
-    CompleteConfig,
-    ConfigByImpact,
-    FilterConfigs,
-    MaximizeImpact,
-    MinimizeImpact,
-    ValidConfig,
-    ValidGraph,
+    execute_complete_config,
+    execute_config_by_impact,
+    execute_filter_configs,
+    execute_maximize_impact,
+    execute_minimize_impact,
+    execute_valid_config,
+    execute_valid_graph,
 )
 
 __all__ = [
-    "CompleteConfig",
-    "ConfigByImpact",
-    "FilterConfigs",
-    "MaximizeImpact",
-    "MinimizeImpact",
-    "ValidConfig",
-    "ValidGraph",
+    "execute_complete_config",
+    "execute_config_by_impact",
+    "execute_filter_configs",
+    "execute_maximize_impact",
+    "execute_minimize_impact",
+    "execute_valid_config",
+    "execute_valid_graph",
 ]
