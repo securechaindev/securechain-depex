@@ -7,7 +7,7 @@ from aiohttp import ClientConnectorError, ContentTypeError
 from app.cache import get_cache, set_cache
 from app.http_session import get_session
 from app.logger import logger
-from app.utils import order_versions
+from app.utils.others import order_versions
 
 
 async def get_maven_versions(group_id: str, artifact_id: str) -> list[dict[str, Any]]:

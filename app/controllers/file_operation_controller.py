@@ -64,7 +64,6 @@ async def file_info(
                     indirect_package["versions"],
                     indirect_package["package_constraints"]
                 )
-        result = await filter_versions(file_info_request.node_type.value,result)
         await replace_operation_result(operation_result_id, result)
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({
@@ -82,7 +81,7 @@ async def valid_graph(
     valid_graph_request: Annotated[ValidGraphRequest, Body()]
 ) -> JSONResponse:
     graph_data = await read_data_for_smt_transform(valid_graph_request.requirement_file_id, valid_graph_request.max_level)
-    smt_text_id = f"{valid_graph_request.requirement_file_id}-{valid_graph_request.max_level}"
+    smt_text_id = f"{valid_graph_request.requirement_file_id}:{valid_graph_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, valid_graph_request.node_type.value, "mean")
         smt_text = await read_smt_text(smt_text_id)
@@ -118,7 +117,7 @@ async def minimize_impact(
     min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
     graph_data = await read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_level)
-    smt_text_id = f"{min_max_impact_request.requirement_file_id}-{min_max_impact_request.max_level}"
+    smt_text_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
         smt_text = await read_smt_text(smt_text_id)
@@ -158,7 +157,7 @@ async def maximize_impact(
     min_max_impact_request: Annotated[MinMaxImpactRequest, Body()]
 ) -> JSONResponse:
     graph_data = await read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_level)
-    smt_text_id = f"{min_max_impact_request.requirement_file_id}-{min_max_impact_request.max_level}"
+    smt_text_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
         smt_text = await read_smt_text(smt_text_id)
@@ -198,7 +197,7 @@ async def filter_configs(
     filter_configs_request: Annotated[FilterConfigsRequest, Body()]
 ) -> JSONResponse:
     graph_data = await read_data_for_smt_transform(filter_configs_request.requirement_file_id, filter_configs_request.max_level)
-    smt_text_id = f"{filter_configs_request.requirement_file_id}-{filter_configs_request.max_level}"
+    smt_text_id = f"{filter_configs_request.requirement_file_id}:{filter_configs_request.max_level}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, filter_configs_request.node_type.value, filter_configs_request.agregator)
         smt_text = await read_smt_text(smt_text_id)
