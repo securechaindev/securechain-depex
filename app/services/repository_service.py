@@ -126,10 +126,10 @@ async def read_graph_for_info_operation(
             )
         ) AS indirect_by_depth
     RETURN {{
-        directDependencies: direct_deps,
-        totalDirectDependencies: size(direct_deps),
-        indirectDependenciesByDepth: apoc.map.removeKey(indirect_by_depth, null),
-        totalIndirectDependencies: size(indirect_info)
+        direct_dependencies: direct_deps,
+        total_direct_dependencies: size(direct_deps),
+        indirect_dependencies_by_depth: apoc.map.removeKey(indirect_by_depth, null),
+        total_indirect_dependencies: size(indirect_info)
     }}
     """
     async with get_graph_db_driver().session() as session:

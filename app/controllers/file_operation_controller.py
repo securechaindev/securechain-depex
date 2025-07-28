@@ -29,6 +29,7 @@ from app.utils import (
     SMTModel,
     ValidGraph,
     json_encoder,
+    filter_versions,
 )
 
 router = APIRouter()
@@ -50,6 +51,20 @@ async def file_info(
             file_info_request.requirement_file_id,
             file_info_request.max_level
         )
+        for direct_package in result["direct_dependencies"]:
+            direct_package["versions"] = await filter_versions(
+                file_info_request.node_type.value,
+                direct_package["versions"],
+                direct_package["package_constraints"]
+            )
+        for _, indirect_packages in result["indirect_dependencies_by_depth"].items():
+            for indirect_package in indirect_packages:
+                indirect_package["versions"] = await filter_versions(
+                    file_info_request.node_type.value,
+                    indirect_package["versions"],
+                    indirect_package["package_constraints"]
+                )
+        result = await filter_versions(file_info_request.node_type.value,result)
         await replace_smt_result(smt_result_id, result)
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({
