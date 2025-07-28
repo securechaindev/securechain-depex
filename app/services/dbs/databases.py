@@ -26,7 +26,7 @@ def get_collection(collection_name: str) -> AsyncIOMotorCollection:
     match collection_name:
         case "smt_text":
             return securechain_db.get_collection(collection_name)
-        case "smt_result":
+        case "operation_result":
             return securechain_db.get_collection(collection_name)
         case "vulnerabilities":
             return vulnerabilities_db.get_collection(collection_name)

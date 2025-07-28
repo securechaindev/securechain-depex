@@ -34,8 +34,10 @@ from .requirement_file_service import (
 from .smt_service import (
     replace_smt_text,
     read_smt_text,
-    replace_smt_result,
-    read_smt_result,
+)
+from .operation_service import (
+    replace_operation_result,
+    read_operation_result,
 )
 from .version_service import (
     count_number_of_versions_by_package,
@@ -70,8 +72,8 @@ __all__ = [
     "read_requirement_file_moment",
     "read_serial_numbers_by_releases",
     "read_smt_text",
-    "replace_smt_result",
-    "read_smt_result",
+    "replace_operation_result",
+    "read_operation_result",
     "read_version_status_by_package_and_name",
     "read_versions_names_by_package",
     "read_vulnerabilities_by_package_and_version",

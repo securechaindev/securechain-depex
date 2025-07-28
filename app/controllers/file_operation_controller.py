@@ -18,8 +18,8 @@ from app.services import (
     read_requirement_file_moment,
     read_smt_text,
     replace_smt_text,
-    read_smt_result,
-    replace_smt_result,
+    read_operation_result,
+    replace_operation_result,
 )
 from app.utils import (
     FilterConfigs,
@@ -40,11 +40,11 @@ async def file_info(
     request: Request,
     file_info_request: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
-    smt_result_id = f"{file_info_request.node_type.value}:{file_info_request.requirement_file_id}:{file_info_request.max_level}"
-    smt_result = await read_smt_result(smt_result_id)
+    operation_result_id = f"{file_info_request.node_type.value}:{file_info_request.requirement_file_id}:{file_info_request.max_level}"
+    operation_result = await read_operation_result(operation_result_id)
     req_file_moment = await read_requirement_file_moment(file_info_request.requirement_file_id)
-    if smt_result is not None and smt_result["moment"].replace(tzinfo=UTC) > req_file_moment.replace(tzinfo=UTC):
-        result = smt_result["result"]
+    if operation_result is not None and operation_result["moment"].replace(tzinfo=UTC) > req_file_moment.replace(tzinfo=UTC):
+        result = operation_result["result"]
     else:
         result = await read_graph_for_info_operation(
             file_info_request.node_type.value,
@@ -65,7 +65,7 @@ async def file_info(
                     indirect_package["package_constraints"]
                 )
         result = await filter_versions(file_info_request.node_type.value,result)
-        await replace_smt_result(smt_result_id, result)
+        await replace_operation_result(operation_result_id, result)
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({
             "result": result,
