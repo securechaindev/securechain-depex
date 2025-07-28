@@ -14,12 +14,12 @@ from app.schemas import (
 from app.services import (
     read_data_for_smt_transform,
     read_graph_for_info_operation,
+    read_operation_result,
     read_releases_by_serial_numbers,
     read_requirement_file_moment,
     read_smt_text,
-    replace_smt_text,
-    read_operation_result,
     replace_operation_result,
+    replace_smt_text,
 )
 from app.utils import (
     FilterConfigs,
@@ -28,8 +28,8 @@ from app.utils import (
     MinimizeImpact,
     SMTModel,
     ValidGraph,
-    json_encoder,
     filter_versions,
+    json_encoder,
 )
 
 router = APIRouter()

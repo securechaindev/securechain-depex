@@ -6,8 +6,8 @@ from .graph_builders import (
 )
 from .others import (
     JWTBearer,
-    json_encoder,
     filter_versions,
+    json_encoder,
     order_versions,
 )
 from .smt import (
@@ -33,9 +33,9 @@ __all__ = [
     "ValidGraph",
     "create_package",
     "create_version",
+    "filter_versions",
     "init_repository_graph",
     "json_encoder",
-    "filter_versions",
     "order_versions",
     "search_new_versions",
 ]

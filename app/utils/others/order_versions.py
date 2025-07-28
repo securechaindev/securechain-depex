@@ -1,12 +1,12 @@
 from typing import Any
 
 from univers.versions import (
-    Version,
-    PypiVersion,
-    NugetVersion,
     MavenVersion,
-    SemverVersion,
+    NugetVersion,
+    PypiVersion,
     RubygemsVersion,
+    SemverVersion,
+    Version,
 )
 
 

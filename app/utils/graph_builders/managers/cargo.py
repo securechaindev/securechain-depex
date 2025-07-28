@@ -12,7 +12,6 @@ from app.services import (
     relate_packages,
     update_package_moment,
 )
-from app.utils import order_versions
 
 from .vulnerabilities import attribute_vulnerabilities
 

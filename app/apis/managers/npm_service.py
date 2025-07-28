@@ -27,7 +27,7 @@ async def get_npm_versions(package_name: str) -> tuple[list[dict[str, Any]], lis
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
                 return [], []
-        raw_versions = [version for version in response.get("versions", {}).keys()]
+        raw_versions = list(response.get("versions", {}).keys())
         versions = await order_versions("NPMPackage", raw_versions)
         requirements = [data.get("dependencies", {}) for data in response.get("versions", {}).values()]
         await set_cache(package_name, (versions, requirements))

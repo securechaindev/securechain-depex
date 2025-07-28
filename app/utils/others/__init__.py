@@ -6,10 +6,10 @@ from .order_versions import order_versions
 from .parse_pypi_constraints import parse_pypi_constraints
 
 __all__ = [
-    "filter_versions",
     "JWTBearer",
-    "order_versions",
+    "filter_versions",
     "get_first_position",
     "json_encoder",
+    "order_versions",
     "parse_pypi_constraints",
 ]

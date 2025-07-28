@@ -9,8 +9,8 @@ from app.http_session import get_session
 from app.logger import logger
 from app.utils.others import (
     get_first_position,
-    parse_pypi_constraints,
     order_versions,
+    parse_pypi_constraints,
 )
 
 
@@ -32,7 +32,7 @@ async def get_pypi_versions(package_name: str) -> list[dict[str, Any]]:
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
                 return []
-        raw_versions = [version for version in response.get("releases", {})]
+        raw_versions = list(response.get("releases", {}))
         versions = await order_versions("PyPIPackage", raw_versions)
         await set_cache(package_name, versions)
     return versions

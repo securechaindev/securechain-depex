@@ -12,7 +12,6 @@ from app.services import (
     relate_packages,
     update_package_moment,
 )
-from app.utils.others import version_to_serial_number
 
 from .vulnerabilities import attribute_vulnerabilities
 

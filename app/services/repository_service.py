@@ -87,8 +87,8 @@ async def read_graph_for_info_operation(
             uniqueness: 'NODE_GLOBAL'
         }}
     ) YIELD path
-    WITH 
-        last(nodes(path)) AS pkg, 
+    WITH
+        last(nodes(path)) AS pkg,
         length(path) - 1 AS depth,
         last(relationships(path)) AS rel
     WHERE '{node_type}' IN labels(pkg) AND type(rel) = 'REQUIRE'

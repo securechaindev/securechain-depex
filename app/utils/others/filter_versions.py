@@ -1,21 +1,21 @@
 from typing import Any
 
-from univers.versions import (
-    Version,
-    PypiVersion,
-    NugetVersion,
-    MavenVersion,
-    SemverVersion,
-    RubygemsVersion,
-)
 from univers.version_range import (
-    VersionRange,
-    PypiVersionRange,
-    NugetVersionRange,
-    MavenVersionRange,
-    NpmVersionRange,
     CargoVersionRange,
     GemVersionRange,
+    MavenVersionRange,
+    NpmVersionRange,
+    NugetVersionRange,
+    PypiVersionRange,
+    VersionRange,
+)
+from univers.versions import (
+    MavenVersion,
+    NugetVersion,
+    PypiVersion,
+    RubygemsVersion,
+    SemverVersion,
+    Version,
 )
 
 
