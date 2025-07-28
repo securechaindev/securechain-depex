@@ -5,7 +5,7 @@ from z3 import ArithRef, BoolRef, Real, parse_smt2_string
 from app.utils.others import filter_versions
 
 
-class SMTModel():
+class SMTModel:
     def __init__(self, source_data: dict[str, Any], node_type: str, agregator: str) -> None:
         self.source_data = source_data
         self.agregator = agregator

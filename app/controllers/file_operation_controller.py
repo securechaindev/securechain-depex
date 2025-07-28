@@ -21,11 +21,11 @@ from app.services import (
     replace_smt_text,
 )
 from app.utils import (
-    execute_filter_configs,
     JWTBearer,
+    SMTModel,
+    execute_filter_configs,
     execute_maximize_impact,
     execute_minimize_impact,
-    SMTModel,
     execute_valid_graph,
     filter_versions,
     json_encoder,

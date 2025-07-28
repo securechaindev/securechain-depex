@@ -17,10 +17,10 @@ from app.services import (
     replace_smt_text,
 )
 from app.utils import (
-    execute_complete_config,
-    execute_config_by_impact,
     JWTBearer,
     SMTModel,
+    execute_complete_config,
+    execute_config_by_impact,
     execute_valid_config,
     json_encoder,
 )
