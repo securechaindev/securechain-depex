@@ -19,9 +19,9 @@ services:
       retries: 10
       start_period: 300s
 
-  securechain-user-login:
-    container_name: securechain-user-login
-    image: ghcr.io/securechaindev/securechain-user-login:latest
+  securechain-auth:
+    container_name: securechain-auth
+    image: ghcr.io/securechaindev/securechain-auth:latest
     env_file:
       - ../app/.env
     ports:
