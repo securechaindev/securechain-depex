@@ -9,7 +9,7 @@ from app.apis import (
     get_rubygems_version,
 )
 from app.schemas import InitVersionRequest
-from app.services import create_versions
+from app.services import create_versions, update_versions_serial_number
 
 from .managers import (
     cargo_extract_packages,
@@ -23,15 +23,20 @@ from .managers.vulnerabilities import attribute_vulnerabilities
 
 
 async def create_version(init_version_request: InitVersionRequest) -> None:
-    versions, requirement = await get_version(init_version_request)
-    versions[0] = await attribute_vulnerabilities(
+    new_version, versions_to_update, requirement = await get_version(init_version_request)
+    new_version_attributed = await attribute_vulnerabilities(
         init_version_request.node_type.value,
-        versions[0]
+        new_version
     )
     created_versions = await create_versions(
         init_version_request.node_type.value,
         init_version_request.package_name,
-        versions
+        [new_version_attributed]
+    )
+    await update_versions_serial_number(
+        init_version_request.node_type.value,
+        init_version_request.package_name,
+        versions_to_update
     )
     match init_version_request.node_type.value:
         case "CargoPackage":
@@ -55,10 +60,11 @@ async def get_version(
 ) -> dict[str, Any]:
     match init_version_request.node_type.value:
         case "CargoPackage":
-            return (await get_cargo_version(
+            new_version, versions_to_update = await get_cargo_version(
                 init_version_request.package_name,
                 init_version_request.version_name
-            ), None)
+            )
+            return new_version, versions_to_update, None
         case "NPMPackage":
             return await get_npm_version(
                 init_version_request.package_name,
@@ -73,20 +79,23 @@ async def get_version(
             if ":" not in init_version_request.package_name:
                 raise ValueError("Maven package name must be in the format 'group_id:artifact_id'")
             group_id, artifact_id = init_version_request.package_name.split(":")
-            return (await get_maven_version(
+            new_version, versions_to_update = await get_maven_version(
                 group_id,
                 artifact_id,
                 init_version_request.version_name
-            ), None)
+            )
+            return new_version, versions_to_update, None
         case "PyPIPackage":
-            return (await get_pypi_version(
+            new_version, versions_to_update = await get_pypi_version(
                 init_version_request.package_name,
                 init_version_request.version_name
-            ), None)
+            )
+            return new_version, versions_to_update, None
         case "RubyGemsPackage":
-            return (await get_rubygems_version(
+            new_version, versions_to_update = await get_rubygems_version(
                 init_version_request.package_name,
                 init_version_request.version_name
-            ), None)
+            )
+            return new_version, versions_to_update, None
         case _:
             raise ValueError(f"Unsupported node type: {init_version_request.node_type.value}")

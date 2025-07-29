@@ -31,7 +31,7 @@ async def analyze_pom_xml(
                 version_text = properties.get(property_key, "any")
             if not any(char in version_text for char in ["[", "]", "(", ")"]):
                 version_text = f"[{version_text}]"
-            requirement_files[requirement_file_name]["requirement"][(group_id_text, artifact_id_text)] = version_text
+            requirement_files[requirement_file_name]["requirement"][f"{group_id_text}:{artifact_id_text}"] = version_text
     except Exception:
         pass
     return requirement_files

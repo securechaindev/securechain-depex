@@ -74,7 +74,7 @@ async def get_nuget_versions(package_name: str) -> tuple[list[dict[str, Any]], l
     return versions, requirements
 
 
-async def get_nuget_version(package_name: str, version_name: str) -> tuple[dict[str, Any], dict[str, Any]]:
+async def get_nuget_version(package_name: str, version_name: str) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
     url = f"https://api.nuget.org/v3/registration5-gz-semver2/{package_name}/index.json"
     session = await get_session()
     while True:
@@ -117,6 +117,6 @@ async def get_nuget_version(package_name: str, version_name: str) -> tuple[dict[
     versions = await order_versions("NuGetPackage", raw_versions)
     index = next((i for i, d in enumerate(versions) if d.get("name") == version_name), None)
     if index is not None:
-        return versions[index:], requirements[index]
+        return versions[index], versions[index + 1:], requirements[index]
     else:
         raise ValueError(f"Version {version_name} not found for package {package_name}")

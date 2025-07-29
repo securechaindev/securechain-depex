@@ -11,6 +11,7 @@ from app.services import (
     read_versions_names_by_package,
     relate_packages,
     update_package_moment,
+    update_versions_serial_number,
 )
 
 from .vulnerabilities import attribute_vulnerabilities
@@ -74,21 +75,22 @@ async def nuget_search_new_versions(package: dict[str, Any]) -> None:
     versions, requirements = await get_nuget_versions(package["name"])
     count = await count_number_of_versions_by_package("NuGetPackage", package["name"])
     if count < len(versions):
-        attributed_versions: list[dict[str, Any]] = []
+        new_attributed_versions: list[dict[str, Any]] = []
         new_requirements = []
         actual_versions = await read_versions_names_by_package("NuGetPackage", package["name"])
         for index, (version, requirement) in enumerate(zip(versions, requirements)):
             if version["name"] not in actual_versions:
-                attributed_versions.append(
+                new_attributed_versions.append(
                     await attribute_vulnerabilities(package["name"], version)
                 )
-                versions[index] = attributed_versions
+                del versions[index]
                 new_requirements.append(requirement)
         created_versions = await create_versions(
             "NuGetPackage",
             package["name"],
-            attributed_versions
+            new_attributed_versions
         )
+        await update_versions_serial_number("NuGetPackage", package["name"], versions)
         for version, requirement in zip(created_versions, new_requirements):
             await nuget_generate_packages(requirement, version["id"], package["name"])
     await update_package_moment("NuGetPackage", package["name"])

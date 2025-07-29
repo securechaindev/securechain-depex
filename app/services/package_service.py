@@ -59,24 +59,19 @@ async def create_versions(
     node_type: str,
     package_name: str,
     versions: list[dict[str, Any]]
-) -> dict[str, Any]:
+) -> list[dict[str, Any]]:
     query = f"""
-    MATCH (p:{node_type}{{name: $package_name}})
-    WITH p, $versions AS versions
-    UNWIND versions AS version
-    MERGE (v:Version {{name: version.name}})
-    ON CREATE SET
-        v.serial_number = version.serial_number,
-        v.mean = version.mean,
-        v.weighted_mean = version.weighted_mean,
-        v.vulnerabilities = version.vulnerabilities,
-        v._justCreated = true
-    ON MATCH SET
-        v.serial_number = version.serial_number
-    MERGE (p)-[:HAVE]->(v)
-    WITH v
-    WHERE exists(v._justCreated)
-    REMOVE v._justCreated
+    MATCH(p:{node_type}{{name:$package_name}})
+    WITH p AS package
+    UNWIND $versions AS version
+    CREATE(v:Version{{
+        name: version.name,
+        serial_number: version.serial_number,
+        mean: version.mean,
+        weighted_mean: version.weighted_mean,
+        vulnerabilities: version.vulnerabilities
+    }})
+    CREATE (package)-[rel_v:HAVE]->(v)
     RETURN collect({{name: v.name, id: elementid(v)}})
     """
     async with get_graph_db_driver().session() as session:

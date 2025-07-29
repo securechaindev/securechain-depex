@@ -1,3 +1,5 @@
+from typing import Any
+
 from .dbs.databases import get_graph_db_driver
 
 
@@ -51,6 +53,27 @@ async def read_serial_numbers_by_releases(
         if record:
             sanitized_config.update({package: record[0]})
     return sanitized_config
+
+
+async def update_versions_serial_number(
+    node_type: str,
+    package_name: str,
+    versions: list[dict[str, Any]],
+) -> None:
+    query = f"""
+    MATCH (p:{node_type} {{name: $package_name}})-[:HAVE]->(v:Version)
+    WITH v, $versions AS input_versions
+    UNWIND input_versions AS version
+    WITH v, version
+    WHERE v.name = version.name
+    SET v.serial_number = version.serial_number
+    """
+    async with get_graph_db_driver().session() as session:
+        await session.run(
+            query,
+            package_name=package_name,
+            versions=versions,
+        )
 
 
 async def count_number_of_versions_by_package(node_type: str, package_name: str) -> int:

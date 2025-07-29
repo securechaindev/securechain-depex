@@ -41,7 +41,7 @@ async def get_maven_versions(group_id: str, artifact_id: str) -> list[dict[str, 
     return versions
 
 
-async def get_maven_version(group_id: str, artifact_id: str, version_name: str) -> dict[str, Any]:
+async def get_maven_version(group_id: str, artifact_id: str, version_name: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     raw_versions: list[dict[str, Any]] = []
     session = await get_session()
     start = 0
@@ -64,7 +64,7 @@ async def get_maven_version(group_id: str, artifact_id: str, version_name: str) 
     versions = await order_versions("MavenPackage", raw_versions)
     index = next((i for i, d in enumerate(versions) if d.get("name") == version_name), None)
     if index is not None:
-        return versions[index:]
+        return versions[index], versions[index + 1:]
     else:
         raise ValueError(f"Version {version_name} not found for package {group_id}:{artifact_id}")
 

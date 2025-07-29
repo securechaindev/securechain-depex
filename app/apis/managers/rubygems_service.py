@@ -33,7 +33,7 @@ async def get_rubygems_versions(package_name: str) -> list[dict[str, Any]]:
     return versions
 
 
-async def get_rubygems_version(package_name: str, version_name: str) -> dict[str, Any]:
+async def get_rubygems_version(package_name: str, version_name: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     url = f"https://rubygems.org/api/v1/versions/{package_name}.json"
     session = await get_session()
     while True:
@@ -50,7 +50,7 @@ async def get_rubygems_version(package_name: str, version_name: str) -> dict[str
     versions = await order_versions("RubyGemsPackage", raw_versions)
     index = next((i for i, d in enumerate(versions) if d.get("name") == version_name), None)
     if index is not None:
-        return versions[index:]
+        return versions[index], versions[index + 1:]
     else:
         raise ValueError(f"Version {version_name} not found for package {package_name}")
 

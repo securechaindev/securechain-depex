@@ -11,6 +11,7 @@ from app.services import (
     read_versions_names_by_package,
     relate_packages,
     update_package_moment,
+    update_versions_serial_number,
 )
 
 from .vulnerabilities import attribute_vulnerabilities
@@ -81,19 +82,20 @@ async def cargo_search_new_versions(package: dict[str, Any]) -> None:
     versions = await get_cargo_versions(package["name"])
     count = await count_number_of_versions_by_package("CargoPackage", package["name"])
     if count < len(versions):
-        attributed_versions: list[dict[str, Any]] = []
+        new_attributed_versions: list[dict[str, Any]] = []
         actual_versions = await read_versions_names_by_package("CargoPackage", package["name"])
         for index, version in enumerate(versions):
             if version["name"] not in actual_versions:
-                attributed_versions.append(
+                new_attributed_versions.append(
                     await attribute_vulnerabilities(package["name"], version)
                 )
-                versions[index] = attributed_versions
+                del versions[index]
         created_versions = await create_versions(
             "CargoPackage",
             package["name"],
-            attributed_versions,
+            new_attributed_versions,
         )
+        await update_versions_serial_number("CargoPackage", package["name"], versions)
         for version in created_versions:
             await cargo_extract_packages(package["name"], version)
     await update_package_moment("CargoPackage", package["name"])

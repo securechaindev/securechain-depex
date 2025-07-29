@@ -44,6 +44,7 @@ from .version_service import (
     read_releases_by_serial_numbers,
     read_serial_numbers_by_releases,
     read_versions_names_by_package,
+    update_versions_serial_number,
 )
 from .vulnerability_service import read_vulnerabilities_by_package_and_version
 
@@ -84,4 +85,5 @@ __all__ = [
     "update_repository_moment",
     "update_requirement_file_moment",
     "update_requirement_rel_constraints",
+    "update_versions_serial_number",
 ]
