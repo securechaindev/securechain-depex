@@ -12,13 +12,6 @@ services:
       - '8002:8000'
     networks:
       - securechain
-    healthcheck:
-      test: curl --fail http://localhost:8000/health || exit 1
-      interval: 100s
-      timeout: 100s
-      retries: 10
-      start_period: 300s
-
   securechain-auth:
     container_name: securechain-auth
     image: ghcr.io/securechaindev/securechain-auth:latest
@@ -28,12 +21,6 @@ services:
       - '8001:8000'
     networks:
       - securechain
-    healthcheck:
-      test: curl --fail http://localhost:8000/health || exit 1
-      interval: 100s
-      timeout: 100s
-      retries: 10
-      start_period: 300s
 
 networks:
   securechain:
