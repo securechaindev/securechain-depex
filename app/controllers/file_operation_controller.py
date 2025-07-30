@@ -33,9 +33,16 @@ from app.utils import (
 
 router = APIRouter()
 
-@router.post("/operation/file/file_info", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@router.post(
+    "/operation/file/file_info",
+    summary="Get Requirement File Information",
+    description="Retrieve information about a specific requirement file.",
+    response_description="Requirement File information.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/File"]
+)
 @limiter.limit("5/minute")
-async def file_info(
+async def requirement_file_info(
     request: Request,
     file_info_request: Annotated[FileInfoRequest, Body()]
 ) -> JSONResponse:
@@ -73,7 +80,14 @@ async def file_info(
     )
 
 
-@router.post("/operation/file/valid_graph", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@router.post(
+    "/operation/file/valid_graph",
+    summary="Validate Requirement File Graph",
+    description="Validate the graph of a requirement file up to a specified level.",
+    response_description="Validation result of the requirement file graph.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/File"]
+)
 @limiter.limit("5/minute")
 async def valid_graph(
     request: Request,
@@ -109,7 +123,14 @@ async def valid_graph(
         )
 
 
-@router.post("/operation/file/minimize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@router.post(
+    "/operation/file/minimize_impact",
+    summary="Minimize Impact of Requirement File",
+    description="Get the minimized impact and configuration of a specific requirement file.",
+    response_description="Minimized Impact Configuration.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/File"]
+)
 @limiter.limit("5/minute")
 async def minimize_impact(
     request: Request,
@@ -147,7 +168,14 @@ async def minimize_impact(
         )
 
 
-@router.post("/operation/file/maximize_impact", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@router.post(
+    "/operation/file/maximize_impact",
+    summary="Maximize Impact of Requirement File",
+    description="Get the maximized impact and configuration of a specific requirement file.",
+    response_description="Maximized Impact Configuration.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/File"]
+)
 @limiter.limit("5/minute")
 async def maximize_impact(
     request: Request,
@@ -185,7 +213,14 @@ async def maximize_impact(
         )
 
 
-@router.post("/operation/file/filter_configs", dependencies=[Depends(JWTBearer())], tags=["operation/file"])
+@router.post(
+    "/operation/file/filter_configs",
+    summary="Filter Configurations of Requirement File",
+    description="Get the filtered configurations of a specific requirement file.",
+    response_description="Filtered Configurations.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/File"]
+)
 @limiter.limit("5/minute")
 async def filter_configs(
     request: Request,

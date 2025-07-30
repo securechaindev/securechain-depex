@@ -33,7 +33,14 @@ from app.utils import (
 
 router = APIRouter()
 
-@router.get("/graph/repositories/{user_id}", dependencies=[Depends(JWTBearer())], tags=["graph"])
+@router.get(
+    "/graph/repositories/{user_id}",
+    summary="Get User Repositories",
+    description="Retrieve a list of repositories for a specific user.",
+    response_description="List of user repositories.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Graph"]
+)
 @limiter.limit("25/minute")
 async def get_repositories(request: Request, get_repositories_request: GetRepositoriesRequest = Depends()) -> JSONResponse:
     repositories = await read_repositories_by_user_id(get_repositories_request.user_id)
@@ -44,7 +51,13 @@ async def get_repositories(request: Request, get_repositories_request: GetReposi
     }))
 
 
-@router.get("/graph/package/status", tags=["graph"])
+@router.get(
+    "/graph/package/status",
+    summary="Get Package Status",
+    description="Retrieve the status of a specific package.",
+    response_description="Package status.",
+    tags=["Secure Chain Depex - Graph"]
+)
 @limiter.limit("25/minute")
 async def get_package_status(request: Request, get_package_status_request: GetPackageStatusRequest = Depends()) -> JSONResponse:
     package = await read_package_status_by_name(get_package_status_request.node_type.value, get_package_status_request.package_name)
@@ -68,7 +81,13 @@ async def get_package_status(request: Request, get_package_status_request: GetPa
     )
 
 
-@router.get("/graph/version/status", tags=["graph"])
+@router.get(
+    "/graph/version/status",
+    summary="Get Version Status",
+    description="Retrieve the status of a specific version.",
+    response_description="Version status.",
+    tags=["Secure Chain Depex - Graph"]
+)
 @limiter.limit("25/minute")
 async def get_version_status(request: Request, get_version_status_request: GetVersionStatusRequest = Depends()) -> JSONResponse:
     version = await read_version_status_by_package_and_name(
@@ -96,7 +115,14 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
     )
 
 
-@router.post("/graph/version/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+@router.post(
+    "/graph/version/init",
+    summary="Initialize Version",
+    description="Initialize a specific version.",
+    response_description="Version initialization status.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Graph"]
+)
 @limiter.limit("25/minute")
 async def init_version(request: Request, init_version_request: InitVersionRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     exists = await exists_version(init_version_request.node_type.value, init_version_request.package_name, init_version_request.version_name)
@@ -135,7 +161,14 @@ async def init_version(request: Request, init_version_request: InitVersionReques
         )
 
 
-@router.post("/graph/package/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+@router.post(
+    "/graph/package/init",
+    summary="Initialize Package",
+    description="Initialize a specific package.",
+    response_description="Package initialization status.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Graph"]
+)
 @limiter.limit("25/minute")
 async def init_package(request: Request, init_package_request: InitPackageRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     package = await read_package_by_name(init_package_request.node_type.value, init_package_request.package_name)
@@ -154,7 +187,14 @@ async def init_package(request: Request, init_package_request: InitPackageReques
     )
 
 
-@router.post("/graph/repository/init", dependencies=[Depends(JWTBearer())], tags=["graph"])
+@router.post(
+    "/graph/repository/init",
+    summary="Initialize Repository",
+    description="Initialize a specific repository.",
+    response_description="Repository initialization status.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Graph"]
+)
 @limiter.limit("25/minute")
 async def init_repository(request: Request, init_graph_request: InitRepositoryRequest, background_tasks: BackgroundTasks) -> JSONResponse:
     last_repository_update = await read_repositories_update(

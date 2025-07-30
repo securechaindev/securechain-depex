@@ -27,7 +27,14 @@ from app.utils import (
 
 router = APIRouter()
 
-@router.post("/operation/config/valid_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
+@router.post(
+    "/operation/config/valid_config",
+    summary="Validate a Configuration",
+    description="Validate the configuration based on a requirement file and maximum level.",
+    response_description="Returns the result of the validation.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/Config"]
+)
 @limiter.limit("5/minute")
 async def valid_config(
     request: Request,
@@ -66,7 +73,14 @@ async def valid_config(
         )
 
 
-@router.post("/operation/config/complete_config", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
+@router.post(
+    "/operation/config/complete_config",
+    summary="Complete a Configuration",
+    description="Complete the configuration based on a requirement file and maximum level.",
+    response_description="Returns the result of the completion.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/Config"]
+)
 @limiter.limit("5/minute")
 async def complete_config(
     request: Request,
@@ -105,7 +119,14 @@ async def complete_config(
         )
 
 
-@router.post("/operation/config/config_by_impact", dependencies=[Depends(JWTBearer())], tags=["operation/config"])
+@router.post(
+    "/operation/config/config_by_impact",
+    summary="Complete a Configuration by Impact",
+    description="Complete the configuration based on a requirement file, maximum level, and impact.",
+    response_description="Returns the result of the completion by impact.",
+    dependencies=[Depends(JWTBearer())],
+    tags=["Secure Chain Depex - Operation/Config"]
+)
 @limiter.limit("5/minute")
 async def config_by_impact(
     request: Request,
