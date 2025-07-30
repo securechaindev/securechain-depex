@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.exception_handler import (
     http_exception_handler,
     request_validation_exception_handler,
@@ -44,7 +45,7 @@ app.state.limiter = limiter
 app.middleware("http")(log_request_middleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
