@@ -83,3 +83,4 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 ## Links
 - [Secure Chain Team](mailto:hi@securechain.dev)
 - [Secure Chain Organization](https://github.com/securechaindev)
+- [Secure Chain Documentation](https://securechaindev.github.io/)
