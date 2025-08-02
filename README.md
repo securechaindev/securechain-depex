@@ -36,13 +36,13 @@ Ensure you have the `securechain` Docker network created. If not, create it with
 docker network create securechain
 ```
 
-#### 4. Start the application
+### 4. Start the application
 Run the command from the project root:
 ```bash
 docker compose -f dev/docker-compose.yml up --build
 ```
 
-#### 5. Access the application
+### 5. Access the application
 The API will be available at [http://localhost:8002](http://localhost:8002). You can access the API documentation at [http://localhost:8002/docs](http://localhost:8002/docs). Also, in [http://localhost:8001/docs](http://localhost:8001/docs) you can access the auth API documetation.
 
 ## Python Environment
