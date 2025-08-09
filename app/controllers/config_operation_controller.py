@@ -56,8 +56,7 @@ async def valid_config(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
                     "result": result,
-                    "code": "success",
-                    "message": "Operation Valid Configuration executed successfully"
+                    "code": "valid_config_success",
                 }
             )
         )
@@ -67,7 +66,6 @@ async def valid_config(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )
@@ -102,8 +100,7 @@ async def complete_config(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
                     "result": result,
-                    "code": "success",
-                    "message": "Operation Complete Configuration executed successfully"
+                    "code": "complete_config_success",
                 }
             )
         )
@@ -113,7 +110,6 @@ async def complete_config(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )
@@ -147,8 +143,7 @@ async def config_by_impact(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
                     "result": result,
-                    "code": "success",
-                    "message": "Operation Config by Impact executed successfully"
+                    "code": "config_by_impact_success",
                 }
             )
         )
@@ -158,7 +153,6 @@ async def config_by_impact(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )

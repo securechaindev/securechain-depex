@@ -74,8 +74,7 @@ async def requirement_file_info(
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder({
             "result": result,
-            "code": "success",
-            "message": "File information retrieved successfully"
+            "code": "file_info_success",
         })
     )
 
@@ -107,8 +106,7 @@ async def valid_graph(
         return JSONResponse(
             status_code=status.HTTP_200_OK, content=json_encoder({
                 "result": result,
-                "code": "success",
-                "message": "Operation Valid Graph executed successfully"
+                "code": "valid_graph_success",
             })
         )
     else:
@@ -117,7 +115,6 @@ async def valid_graph(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )
@@ -151,8 +148,7 @@ async def minimize_impact(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
                     "result": result,
-                    "code": "success",
-                    "message": "Operation Minimize Impact executed successfully"
+                    "code": "minimize_impact_success",
                 }
             )
         )
@@ -162,7 +158,6 @@ async def minimize_impact(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )
@@ -196,8 +191,7 @@ async def maximize_impact(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
                     "result": result,
-                    "code": "success",
-                    "message": "Operation Maximize Impact executed successfully"
+                    "code": "maximize_impact_success"
                 }
             )
         )
@@ -207,7 +201,6 @@ async def maximize_impact(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )
@@ -241,8 +234,7 @@ async def filter_configs(
             status_code=status.HTTP_200_OK, content=json_encoder(
                 {
                     "result": result,
-                    "code": "success",
-                    "message": "Operation Filter Configs executed successfully"
+                    "code": "filter_configs_success",
                 }
             )
         )
@@ -252,7 +244,6 @@ async def filter_configs(
             content=json_encoder(
                 {
                     "code": "no_dependencies",
-                    "message": "No dependencies found for the provided requirement file ID and max level"
                 }
             ),
         )
