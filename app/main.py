@@ -15,6 +15,7 @@ from app.http_session import close_session
 from app.limiter import limiter
 from app.middleware import log_request_middleware
 from app.router import api_router
+from app.config import settings
 
 DESCRIPTION = """
 Depex is a tool that allows you to reason over the entire configuration space of the Software Supply Chain of an open-source software repository.
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Secure Chain Depex Tool",
+    docs_url=settings.DOCS_URL,
     version="1.0.0",
     description=DESCRIPTION,
     contact={
@@ -45,7 +47,7 @@ app.state.limiter = limiter
 app.middleware("http")(log_request_middleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.SERVICES_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

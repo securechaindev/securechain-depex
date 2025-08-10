@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     VULN_DB_URI: str = ""
     VULN_DB_USER: str = ""
     VULN_DB_PASSWORD: str = ""
-    ALLOWED_ORIGINS: list[str] = []
+    DOCS_URL: str | None = None
+    SERVICES_ALLOWED_ORIGINS: list[str] = []
     ALGORITHM: str = ""
     JWT_ACCESS_SECRET_KEY: str = ""
     GITHUB_GRAPHQL_API_KEY: str = ""
