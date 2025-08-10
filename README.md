@@ -36,13 +36,22 @@ Ensure you have the `securechain` Docker network created. If not, create it with
 docker network create securechain
 ```
 
-#### 4. Start the application
+### 4. Databases containers
+
+For graphs and vulnerabilities information you need to download the zipped [data dumps]() from Zenodo. Once you have unzipped the dumps, inside the root folder run the command:
+'''bash
+docker compose up --build
+'''
+
+The containerized databases will also be seeded automatically.
+
+### 5. Start the application
 Run the command from the project root:
 ```bash
 docker compose -f dev/docker-compose.yml up --build
 ```
 
-#### 5. Access the application
+### 6. Access the application
 The API will be available at [http://localhost:8002](http://localhost:8002). You can access the API documentation at [http://localhost:8002/docs](http://localhost:8002/docs). Also, in [http://localhost:8001/docs](http://localhost:8001/docs) you can access the auth API documetation.
 
 ## Python Environment
@@ -74,3 +83,4 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 ## Links
 - [Secure Chain Team](mailto:hi@securechain.dev)
 - [Secure Chain Organization](https://github.com/securechaindev)
+- [Secure Chain Documentation](https://securechaindev.github.io/)
