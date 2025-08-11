@@ -1,28 +1,28 @@
-from typing import Any
+# security.py
+from typing import Any, Dict
 
-from fastapi import HTTPException, Request
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jwt import decode
+from fastapi import HTTPException, Request, status
+from jwt import decode, ExpiredSignatureError, InvalidTokenError
 
 from app.config import settings
 
 
-async def verify_access_token(token: str) -> dict[str, Any]:
-    payload = decode(token, settings.JWT_ACCESS_SECRET_KEY, algorithms=[settings.ALGORITHM])
-    return payload
+class JWTBearer:
+    def __init__(self, cookie_name: str = "access_token"):
+        self.cookie_name = cookie_name
 
-
-class JWTBearer(HTTPBearer):
-    def __init__(self, auto_error: bool = True):
-        super().__init__(auto_error=auto_error)
-
-    async def __call__(self, request: Request):
-        credentials: HTTPAuthorizationCredentials | None = await super().__call__(request)
-        if credentials:
-            if not credentials.scheme == "Bearer":
-                raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
-            if not await verify_access_token(credentials.credentials):
-                raise HTTPException(status_code=403, detail="Invalid token or expired token.")
-            return credentials.credentials
-        else:
-            raise HTTPException(status_code=403, detail="Invalid authorization code.")
+    async def __call__(self, request: Request) -> Dict[str, Any]:
+        token = request.cookies.get(self.cookie_name)
+        if not token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        try:
+            payload = decode(
+                token,
+                settings.JWT_ACCESS_SECRET_KEY,
+                algorithms=[settings.ALGORITHM],
+            )
+        except ExpiredSignatureError:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+        except InvalidTokenError:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        return payload
