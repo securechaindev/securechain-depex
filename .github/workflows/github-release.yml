@@ -59,6 +59,7 @@ jobs:
           platforms: linux/arm64
           tags: |
             ghcr.io/${{ github.repository_owner }}/securechain-depex:latest-arm64
+            ghcr.io/${{ github.repository_owner }}/securechain-depex:${{ steps.get_variables.outputs.VERSION }}-arm64
 
       - name: Build amd64 image
         uses: docker/build-push-action@v5
@@ -68,4 +69,4 @@ jobs:
           platforms: linux/amd64
           tags: |
             ghcr.io/${{ github.repository_owner }}/securechain-depex:latest
-            ghcr.io/${{ github.repository_owner }}/securechain-depex:${{ steps.get_variables.outputs.VERSION }}            ghcr.io/${{ github.repository_owner }}/securechain-depex:${{ steps.get_variables.outputs.VERSION }}-arm64
+            ghcr.io/${{ github.repository_owner }}/securechain-depex:${{ steps.get_variables.outputs.VERSION }}
