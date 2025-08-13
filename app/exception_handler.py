@@ -14,18 +14,16 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
             msg = str(msg)
     detail = {
         "code": "validation_error",
-        "message": msg
     }
-    logger.info(detail)
+    logger.info(msg)
     return JSONResponse(status_code=422, content=detail)
 
 
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse | Response:
     detail = {
         "code": "http_error",
-        "message": exc.detail
     }
-    logger.warning(detail)
+    logger.warning(exc.detail)
     return JSONResponse(status_code=exc.status_code, content=detail)
 
 
@@ -33,7 +31,6 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     _, exception_value, _ = exc_info()
     detail = {
         "code": "internal_error",
-        "message": str(exception_value)
     }
-    logger.error(detail)
+    logger.error(str(exception_value))
     return JSONResponse(status_code=500, content=detail)
