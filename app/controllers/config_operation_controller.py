@@ -51,15 +51,7 @@ async def valid_config(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         config = await read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config)
-        result = await execute_valid_config(smt_model, config)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(
-                {
-                    "result": result,
-                    "code": "valid_config_success",
-                }
-            )
-        )
+        return await execute_valid_config(smt_model, config)
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -95,15 +87,7 @@ async def complete_config(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         config = await read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
-        result = await execute_complete_config(smt_model, config)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(
-                {
-                    "result": result,
-                    "code": "complete_config_success",
-                }
-            )
-        )
+        return await execute_complete_config(smt_model, config)
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -138,15 +122,7 @@ async def config_by_impact(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        result = execute_config_by_impact(smt_model, config_by_impact_request.impact)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(
-                {
-                    "result": result,
-                    "code": "config_by_impact_success",
-                }
-            )
-        )
+        return execute_config_by_impact(smt_model, config_by_impact_request.impact)
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,

@@ -1,10 +1,14 @@
 from z3 import Abs, Optimize, sat, unknown
 
+from fastapi import status
+from fastapi.responses import JSONResponse
+
 from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
+from app.utils import json_encoder
 
 
-async def execute_config_by_impact(model: SMTModel, impact: int) -> list[dict[str, float | int]] | str:
+async def execute_config_by_impact(model: SMTModel, impact: int) -> JSONResponse:
     solver = Optimize()
     solver.set("timeout", 3000)
     result = []
@@ -13,13 +17,19 @@ async def execute_config_by_impact(model: SMTModel, impact: int) -> list[dict[st
         obj = Abs(impact - impact)
         solver.minimize(obj)
     solver.add(model.domain)
-    while solver.check() == sat:
+    if solver.check() == sat:
         config = solver.model()
         sanitized_config = await config_sanitizer(model.node_type, config)
         result.append(sanitized_config)
-        break
-    if solver.check() == unknown:
-        result = (
-            "Execution timed out after 3 seconds. The complexity of the model is too high, try lowering the maximum level of the graph."
+        code = "operation_success"
+    elif solver.check() == unknown:
+        result = ""
+        code = "smt_timeout"
+    return JSONResponse(
+        status_code=status.HTTP_200_OK, content=json_encoder(
+            {
+                "result": result,
+                "code": code,
+            }
         )
-    return result
+    )

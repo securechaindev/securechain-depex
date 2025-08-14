@@ -57,25 +57,37 @@ async def requirement_file_info(
             file_info_request.requirement_file_id,
             file_info_request.max_level
         )
-        for direct_package in result["direct_dependencies"]:
-            direct_package["versions"] = await filter_versions(
-                file_info_request.node_type.value,
-                direct_package["versions"],
-                direct_package["package_constraints"]
-            )
-        for _, indirect_packages in result["indirect_dependencies_by_depth"].items():
-            for indirect_package in indirect_packages:
-                indirect_package["versions"] = await filter_versions(
+        if operation_result["total_direct_dependencies"] == 0:
+            for direct_package in result["direct_dependencies"]:
+                direct_package["versions"] = await filter_versions(
                     file_info_request.node_type.value,
-                    indirect_package["versions"],
-                    indirect_package["package_constraints"]
+                    direct_package["versions"],
+                    direct_package["package_constraints"]
                 )
+            for _, indirect_packages in result["indirect_dependencies_by_depth"].items():
+                for indirect_package in indirect_packages:
+                    indirect_package["versions"] = await filter_versions(
+                        file_info_request.node_type.value,
+                        indirect_package["versions"],
+                        indirect_package["package_constraints"]
+                    )
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=json_encoder(
+                    {
+                        "code": "no_dependencies",
+                    }
+                ),
+            )
         await replace_operation_result(operation_result_id, result)
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder({
-            "result": result,
-            "code": "file_info_success",
-        })
+        status_code=status.HTTP_200_OK, content=json_encoder(
+            {
+                "result": result,
+                "code": "file_info_success",
+            }
+        )
     )
 
 
@@ -102,16 +114,10 @@ async def valid_graph(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        result = execute_valid_graph(smt_model)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder({
-                "result": result,
-                "code": "valid_graph_success",
-            })
-        )
+        return execute_valid_graph(smt_model)
     else:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_200_OK,
             content=json_encoder(
                 {
                     "code": "no_dependencies",
@@ -143,18 +149,10 @@ async def minimize_impact(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        result = await execute_minimize_impact(smt_model, min_max_impact_request.limit)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(
-                {
-                    "result": result,
-                    "code": "minimize_impact_success",
-                }
-            )
-        )
+        return await execute_minimize_impact(smt_model, min_max_impact_request.limit)
     else:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_200_OK,
             content=json_encoder(
                 {
                     "code": "no_dependencies",
@@ -186,18 +184,10 @@ async def maximize_impact(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        result = await execute_maximize_impact(smt_model, min_max_impact_request.limit)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(
-                {
-                    "result": result,
-                    "code": "maximize_impact_success"
-                }
-            )
-        )
+        return await execute_maximize_impact(smt_model, min_max_impact_request.limit)
     else:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_200_OK,
             content=json_encoder(
                 {
                     "code": "no_dependencies",
@@ -229,18 +219,10 @@ async def filter_configs(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        result = await execute_filter_configs(smt_model, filter_configs_request.max_threshold, filter_configs_request.min_threshold, filter_configs_request.limit)
-        return JSONResponse(
-            status_code=status.HTTP_200_OK, content=json_encoder(
-                {
-                    "result": result,
-                    "code": "filter_configs_success",
-                }
-            )
-        )
+        return await execute_filter_configs(smt_model, filter_configs_request.max_threshold, filter_configs_request.min_threshold, filter_configs_request.limit)
     else:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_200_OK,
             content=json_encoder(
                 {
                     "code": "no_dependencies",
