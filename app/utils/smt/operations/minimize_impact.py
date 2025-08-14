@@ -1,11 +1,10 @@
-from z3 import Optimize, Or, sat, unknown
-
 from fastapi import status
 from fastapi.responses import JSONResponse
+from z3 import Optimize, Or, sat, unknown
 
+from app.utils import json_encoder
 from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
-from app.utils import json_encoder
 
 
 async def execute_minimize_impact(model: SMTModel, limit: int) -> JSONResponse:
@@ -31,7 +30,7 @@ async def execute_minimize_impact(model: SMTModel, limit: int) -> JSONResponse:
         result = ""
         code = "smt_timeout"
     else:
-        code = "operation_success"   
+        code = "operation_success"
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder(
             {

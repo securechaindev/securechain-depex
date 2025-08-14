@@ -1,11 +1,10 @@
-from z3 import Optimize, Or, sat, unknown
-
 from fastapi import status
 from fastapi.responses import JSONResponse
+from z3 import Optimize, Or, sat, unknown
 
+from app.utils import json_encoder
 from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
-from app.utils import json_encoder
 
 
 async def execute_maximize_impact(model: SMTModel, limit: int) -> JSONResponse:

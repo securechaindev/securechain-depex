@@ -1,10 +1,9 @@
-from z3 import Solver, sat, unknown
-
 from fastapi import status
 from fastapi.responses import JSONResponse
+from z3 import Solver, sat, unknown
 
-from app.utils.smt.model import SMTModel
 from app.utils import json_encoder
+from app.utils.smt.model import SMTModel
 
 
 async def execute_valid_graph(model: SMTModel) -> JSONResponse:

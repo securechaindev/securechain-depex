@@ -1,11 +1,10 @@
-from z3 import And, Or, Solver, sat, unknown
-
 from fastapi import status
 from fastapi.responses import JSONResponse
+from z3 import And, Or, Solver, sat, unknown
 
+from app.utils import json_encoder
 from app.utils.smt.config_sanitizer import config_sanitizer
 from app.utils.smt.model import SMTModel
-from app.utils import json_encoder
 
 
 async def execute_filter_configs(model: SMTModel, max_threshold: float, min_threshold: float, limit: int) -> JSONResponse:
