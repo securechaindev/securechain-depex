@@ -1,6 +1,6 @@
 from fastapi import status
 from fastapi.responses import JSONResponse
-from z3 import And, Or, Solver, sat, unknown
+from z3 import And, Or, Solver, sat, unknown, AstVector
 
 from app.utils import json_encoder
 from app.utils.smt.config_sanitizer import config_sanitizer
@@ -15,7 +15,9 @@ async def execute_filter_configs(model: SMTModel, max_threshold: float, min_thre
     solver = Solver()
     result = []
     solver.set("timeout", 3000)
-    solver.add(And([model.domain, max_ctc, min_ctc]))
+    domain_parts = list(model.domain) if isinstance(model.domain, AstVector) else [model.domain]
+    expr = And(*(domain_parts + [max_ctc, min_ctc]))
+    solver.add(expr)
     while len(result) < limit and solver.check() == sat:
         config = solver.model()
         sanitized_config = await config_sanitizer(model.node_type, config)
