@@ -1,5 +1,7 @@
 from datetime import datetime
 from typing import Any
+from neo4j.exceptions import Neo4jError
+from fastapi.exceptions import HTTPException
 
 from .dbs.databases import get_graph_db_driver
 
@@ -89,7 +91,7 @@ async def read_graph_for_info_operation(
     ) YIELD path
     WITH
         last(nodes(path)) AS pkg,
-        length(path) - 1 AS depth,
+        (length(path) - 1) / 2 AS depth,
         last(relationships(path)) AS rel
     WHERE '{node_type}' IN labels(pkg) AND type(rel) = 'REQUIRE'
     OPTIONAL MATCH (pkg:{node_type})-[:HAVE]->(v:Version)
@@ -132,14 +134,23 @@ async def read_graph_for_info_operation(
         total_indirect_dependencies: size(indirect_info)
     }}
     """
-    async with get_graph_db_driver().session() as session:
-        result = await session.run(
-            query,
-            requirement_file_id=requirement_file_id,
-            max_level=max_level
-        )
-        record = await result.single()
-    return record[0] if record else None
+    try:
+        async with get_graph_db_driver().session() as session:
+            result = await session.run(
+                query,
+                requirement_file_id=requirement_file_id,
+                max_level=max_level
+            )
+            record = await result.single()
+        return record[0] if record else None
+
+    except Neo4jError as e:
+        if getattr(e, "code", "") == "Neo.TransientError.General.MemoryPoolOutOfMemoryError":
+            raise HTTPException(
+                status_code=500,
+                detail={"code": "memory_out"}
+            )
+        raise
 
 
 async def read_data_for_smt_transform(
@@ -147,44 +158,35 @@ async def read_data_for_smt_transform(
     max_level: int
 ) -> dict[str, Any]:
     query = """
-    MATCH (rf: RequirementFile)
+    MATCH (rf:RequirementFile)
     WHERE elementid(rf) = $requirement_file_id
     CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level})
     YIELD relationships
-    UNWIND relationships AS relationship
-    WITH
-        CASE type(relationship)
-            WHEN 'REQUIRE' THEN {
-                parent_serial_number: startnode(relationship).serial_number,
-                package: endnode(relationship).name,
-                constraints: relationship.constraints,
-                parent_version_name: relationship.parent_version_name,
-                type: CASE
-                        WHEN relationship.parent_version_name IS NULL
-                        THEN "direct"
-                        ELSE "indirect"
-                    END
-            }
-        END AS require_raw,
-        CASE type(relationship)
-            WHEN 'HAVE' THEN {
-                package: startnode(relationship).name,
-                name: endnode(relationship).name,
-                serial_number: endnode(relationship).serial_number,
-                mean: endnode(relationship).mean,
-                weighted_mean: endnode(relationship).weighted_mean
-            }
-        END AS have_raw,
-        rf
     WITH rf,
-        [r IN collect(require_raw) WHERE r.type = "direct" OR r.parent_serial_number IS NOT NULL] AS require,
-        [h IN collect(have_raw) WHERE  h.serial_number IS NOT NULL] AS have
+        [rel IN relationships WHERE type(rel) = 'REQUIRE' |
+            {
+            parent_serial_number: startNode(rel).serial_number,
+            package: endNode(rel).name,
+            constraints: rel.constraints,
+            parent_version_name: rel.parent_version_name,
+            type: CASE WHEN rel.parent_version_name IS NULL THEN 'direct' ELSE 'indirect' END
+            }
+        ] AS require,
+        [rel IN relationships WHERE type(rel) = 'HAVE' |
+            {
+            package: startNode(rel).name,
+            name: endNode(rel).name,
+            serial_number: endNode(rel).serial_number,
+            mean: endNode(rel).mean,
+            weighted_mean: endNode(rel).weighted_mean
+            }
+        ] AS have
     RETURN {
-        name: rf.name,
-        moment: rf.moment,
-        require: apoc.map.groupByMulti(apoc.coll.sortMaps(require, "parent_serial_number"), "type"),
-        have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, "serial_number"), "package")
-    }
+    name: rf.name,
+    moment: rf.moment,
+    require: apoc.map.groupByMulti(apoc.coll.sortMaps(require, 'parent_serial_number'), 'type'),
+    have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, 'serial_number'), 'package')
+    }    
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(
