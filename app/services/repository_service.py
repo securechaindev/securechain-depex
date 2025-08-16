@@ -1,9 +1,20 @@
 from datetime import datetime
 from typing import Any
+from neo4j import unit_of_work
 from neo4j.exceptions import Neo4jError
 from fastapi.exceptions import HTTPException
 
 from .dbs.databases import get_graph_db_driver
+
+
+@unit_of_work(timeout=3)
+async def read_graph(tx, query, requirement_file_id, max_level):
+    result = await tx.run(
+        query,
+        requirement_file_id=requirement_file_id,
+        max_level=max_level
+    )
+    return await result.single()
 
 
 async def create_repository(repository: dict[str, Any]) -> str:
@@ -136,18 +147,18 @@ async def read_graph_for_info_operation(
     """
     try:
         async with get_graph_db_driver().session() as session:
-            result = await session.run(
+            record = await session.execute_read(
+                read_graph,
                 query,
-                requirement_file_id=requirement_file_id,
-                max_level=max_level
+                requirement_file_id,
+                max_level
             )
-            record = await result.single()
-        return record[0] if record else None
-
+            return record[0] if record else None
     except Neo4jError as e:
-        if getattr(e, "code", "") == "Neo.TransientError.General.MemoryPoolOutOfMemoryError":
+        if (getattr(e, "code", "") == "Neo.TransientError.General.MemoryPoolOutOfMemoryError" or
+            getattr(e, "code", "") == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"):
             raise HTTPException(
-                status_code=500,
+                status_code=507,
                 detail={"code": "memory_out"}
             )
         raise
@@ -188,14 +199,23 @@ async def read_data_for_smt_transform(
     have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, 'serial_number'), 'package')
     }    
     """
-    async with get_graph_db_driver().session() as session:
-        result = await session.run(
-            query,
-            requirement_file_id=requirement_file_id,
-            max_level=max_level
-        )
-        record = await result.single()
-    return record[0] if record else None
+    try:
+        async with get_graph_db_driver().session() as session:
+            record = await session.execute_read(
+                read_graph,
+                query,
+                requirement_file_id,
+                max_level
+            )
+            return record[0] if record else None
+    except Neo4jError as e:
+        if (getattr(e, "code", "") == "Neo.TransientError.General.MemoryPoolOutOfMemoryError" or
+            getattr(e, "code", "") == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"):
+            raise HTTPException(
+                status_code=507,
+                detail={"code": "memory_out"}
+            )
+        raise
 
 
 async def read_repositories_by_user_id(user_id: str) -> dict[str, Any]:
