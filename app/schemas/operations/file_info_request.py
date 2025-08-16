@@ -6,11 +6,11 @@ from app.schemas.validators import validate_max_level
 
 
 class FileInfoRequest(BaseModel):
-    node_type: NodeType = Field(...)
     requirement_file_id: str = Field(
         pattern=NEO4J_ID_PATTERN
     )
     max_level: int = Field(...)
+    node_type: NodeType = Field(...)
 
     @field_validator("max_level")
     def validate_max_level(cls, value):

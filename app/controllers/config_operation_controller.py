@@ -43,7 +43,7 @@ async def valid_config(
     graph_data = await read_data_for_smt_transform(valid_config_request.requirement_file_id, valid_config_request.max_level)
     smt_text_id = f"{valid_config_request.requirement_file_id}:{valid_config_request.max_level}"
     if graph_data["name"] is not None:
-        smt_model = SMTModel(graph_data, valid_config_request.node_type.value, valid_config_request.agregator)
+        smt_model = SMTModel(graph_data, valid_config_request.node_type.value, valid_config_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             await smt_model.convert(smt_text["text"])
@@ -79,7 +79,7 @@ async def complete_config(
     graph_data = await read_data_for_smt_transform(complete_config_request.requirement_file_id, complete_config_request.max_level)
     smt_text_id = f"{complete_config_request.requirement_file_id}:{complete_config_request.max_level}"
     if graph_data["name"] is not None:
-        smt_model = SMTModel(graph_data, complete_config_request.node_type.value, complete_config_request.agregator)
+        smt_model = SMTModel(graph_data, complete_config_request.node_type.value, complete_config_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             await smt_model.convert(smt_text["text"])
@@ -115,14 +115,14 @@ async def config_by_impact(
     graph_data = await read_data_for_smt_transform(config_by_impact_request.requirement_file_id, config_by_impact_request.max_level)
     smt_text_id = f"{config_by_impact_request.requirement_file_id}:{config_by_impact_request.max_level}"
     if graph_data["name"] is not None:
-        smt_model = SMTModel(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.agregator)
+        smt_model = SMTModel(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             await smt_model.convert(smt_text["text"])
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        return execute_config_by_impact(smt_model, config_by_impact_request.impact)
+        return await execute_config_by_impact(smt_model, config_by_impact_request.impact)
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,

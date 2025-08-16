@@ -6,9 +6,9 @@ from app.utils.others import filter_versions
 
 
 class SMTModel:
-    def __init__(self, source_data: dict[str, Any], node_type: str, agregator: str) -> None:
+    def __init__(self, source_data: dict[str, Any], node_type: str, aggregator: str) -> None:
         self.source_data = source_data
-        self.agregator = agregator
+        self.aggregator = aggregator
         self.node_type = node_type
         self.domain: BoolRef = None
         self.func_obj: ArithRef = None
@@ -50,7 +50,7 @@ class SMTModel:
 
     async def transform_direct_package(self, require: dict[str, Any]) -> None:
         filtered_versions = await filter_versions(self.node_type, self.source_data["have"][require["package"]], require["constraints"])
-        versions_impacts: dict[int, int] = {version.get("serial_number"): version[self.agregator] for version in filtered_versions}
+        versions_impacts: dict[int, int] = {version.get("serial_number"): version[self.aggregator] for version in filtered_versions}
         versions_names = list(versions_impacts.keys())
         self.directs.append(require["package"])
         var_impact = f"impact_{require['package']}"
@@ -66,7 +66,7 @@ class SMTModel:
 
     async def transform_indirect_package(self, require: dict[str, Any]) -> None:
         filtered_versions = await filter_versions(self.node_type, self.source_data["have"][require["package"]], require["constraints"])
-        versions_impacts: dict[int, int] = {version.get("serial_number"): version[self.agregator] for version in filtered_versions}
+        versions_impacts: dict[int, int] = {version.get("serial_number"): version[self.aggregator] for version in filtered_versions}
         versions_names = list(versions_impacts.keys())
         await self.append_indirect_constraint(
             require["package"],
@@ -79,7 +79,10 @@ class SMTModel:
 
 
     async def transform_versions(self, versions: dict[int, int], var: str, require: dict[str, Any] | None = None) -> None:
-        if not require or require["parent_serial_number"] in self.filtered_versions[require["parent_version_name"]]:
+        if not require or (
+            require["parent_version_name"] in self.filtered_versions and
+            require["parent_serial_number"] in self.filtered_versions[require["parent_version_name"]]
+        ):
             _default = {}
             if require:
                 self.impacts.add(f"impact_{require['package']}")
@@ -93,15 +96,14 @@ class SMTModel:
     async def append_indirect_constraint(
         self, child: str, versions: list[int], parent: str, version: int
     ) -> None:
-        if versions:
-            if version in self.filtered_versions[parent]:
-                self.childs.setdefault(
-                    await self.group_versions(child, versions, False), {}
-                ).setdefault(parent, set()).add(version)
-                if child not in self.directs:
-                    self.parents.setdefault(child, {}).setdefault(parent, set()).add(
-                        version
-                    )
+        if versions and parent in self.filtered_versions and version in self.filtered_versions[parent]:
+            self.childs.setdefault(
+                await self.group_versions(child, versions, False), {}
+            ).setdefault(parent, set()).add(version)
+            if child not in self.directs:
+                self.parents.setdefault(child, {}).setdefault(parent, set()).add(
+                    version
+                )
 
 
     async def build_direct_contraint(self, var: str, versions: list[int]) -> None:

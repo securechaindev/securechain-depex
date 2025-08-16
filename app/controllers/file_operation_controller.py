@@ -57,7 +57,7 @@ async def requirement_file_info(
             file_info_request.requirement_file_id,
             file_info_request.max_level
         )
-        if operation_result["total_direct_dependencies"] == 0:
+        if result["total_direct_dependencies"] != 0:
             for direct_package in result["direct_dependencies"]:
                 direct_package["versions"] = await filter_versions(
                     file_info_request.node_type.value,
@@ -114,7 +114,7 @@ async def valid_graph(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        return execute_valid_graph(smt_model)
+        return await execute_valid_graph(smt_model)
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -142,7 +142,7 @@ async def minimize_impact(
     graph_data = await read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_level)
     smt_text_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
-        smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
+        smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             await smt_model.convert(smt_text["text"])
@@ -177,7 +177,7 @@ async def maximize_impact(
     graph_data = await read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_level)
     smt_text_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_level}"
     if graph_data["name"] is not None:
-        smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.agregator)
+        smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             await smt_model.convert(smt_text["text"])
@@ -212,7 +212,7 @@ async def filter_configs(
     graph_data = await read_data_for_smt_transform(filter_configs_request.requirement_file_id, filter_configs_request.max_level)
     smt_text_id = f"{filter_configs_request.requirement_file_id}:{filter_configs_request.max_level}"
     if graph_data["name"] is not None:
-        smt_model = SMTModel(graph_data, filter_configs_request.node_type.value, filter_configs_request.agregator)
+        smt_model = SMTModel(graph_data, filter_configs_request.node_type.value, filter_configs_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
             await smt_model.convert(smt_text["text"])

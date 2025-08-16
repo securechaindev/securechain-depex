@@ -1,9 +1,9 @@
-from .agregator import Agregator
+from .aggregator import Aggregator
 from .manager import Manager
 from .node_type import NodeType
 
 __all__ = [
-    "Agregator",
+    "Aggregator",
     "Manager",
     "NodeType"
 ]
