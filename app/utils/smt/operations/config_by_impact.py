@@ -12,8 +12,8 @@ async def execute_config_by_impact(model: SMTModel, impact: int) -> JSONResponse
     solver.set("timeout", 3000)
     result = []
     if model.func_obj is not None:
-        impact = model.func_obj
-        obj = Abs(impact - impact)
+        impact_obj = model.func_obj
+        obj = Abs(impact - impact_obj)
         solver.minimize(obj)
     solver.add(model.domain)
     if solver.check() == sat:
