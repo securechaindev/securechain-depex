@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Any
+
+from fastapi.exceptions import HTTPException
 from neo4j import unit_of_work
 from neo4j.exceptions import Neo4jError
-from fastapi.exceptions import HTTPException
 
 from .dbs.databases import get_graph_db_driver
 
@@ -112,6 +113,7 @@ async def read_graph_for_info_operation(
         collect(DISTINCT {{
             name: v.name,
             mean: v.mean,
+            serial_number: v.serial_number,
             weighted_mean: v.weighted_mean,
             vulnerability_count: v.vulnerabilities
         }}) AS versions,
@@ -155,12 +157,16 @@ async def read_graph_for_info_operation(
             )
             return record[0] if record else None
     except Neo4jError as e:
-        if (getattr(e, "code", "") == "Neo.TransientError.General.MemoryPoolOutOfMemoryError" or
-            getattr(e, "code", "") == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"):
+        code = getattr(e, "code", "") or ""
+        if (
+            code == "Neo.TransientError.General.MemoryPoolOutOfMemoryError"
+            or code == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"
+            or code == "Neo.ClientError.Transaction.TransactionTimedOut"
+        ):
             raise HTTPException(
                 status_code=507,
                 detail={"code": "memory_out"}
-            )
+            ) from e
         raise
 
 
@@ -193,11 +199,11 @@ async def read_data_for_smt_transform(
             }
         ] AS have
     RETURN {
-    name: rf.name,
-    moment: rf.moment,
-    require: apoc.map.groupByMulti(apoc.coll.sortMaps(require, 'parent_serial_number'), 'type'),
-    have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, 'serial_number'), 'package')
-    }    
+        name: rf.name,
+        moment: rf.moment,
+        require: apoc.map.groupByMulti(apoc.coll.sortMaps(require, 'parent_serial_number'), 'type'),
+        have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, 'serial_number'), 'package')
+    }
     """
     try:
         async with get_graph_db_driver().session() as session:
@@ -209,12 +215,16 @@ async def read_data_for_smt_transform(
             )
             return record[0] if record else None
     except Neo4jError as e:
-        if (getattr(e, "code", "") == "Neo.TransientError.General.MemoryPoolOutOfMemoryError" or
-            getattr(e, "code", "") == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"):
+        code = getattr(e, "code", "") or ""
+        if (
+            code == "Neo.TransientError.General.MemoryPoolOutOfMemoryError"
+            or code == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"
+            or code == "Neo.ClientError.Transaction.TransactionTimedOut"
+        ):
             raise HTTPException(
                 status_code=507,
                 detail={"code": "memory_out"}
-            )
+            ) from e
         raise
 
 
