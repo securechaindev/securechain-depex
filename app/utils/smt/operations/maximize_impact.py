@@ -33,7 +33,7 @@ async def execute_maximize_impact(model: SMTModel, limit: int) -> JSONResponse:
         status_code=status.HTTP_200_OK, content=json_encoder(
             {
                 "result": result,
-                "code": "operation_success",
+                "detail": "operation_success",
             }
         )
     )

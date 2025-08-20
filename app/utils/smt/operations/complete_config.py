@@ -28,7 +28,7 @@ async def execute_complete_config(model: SMTModel, config: dict[str, int]) -> JS
         status_code=status.HTTP_200_OK, content=json_encoder(
             {
                 "result": result,
-                "code": "operation_success",
+                "detail": "operation_success",
             }
         )
     )

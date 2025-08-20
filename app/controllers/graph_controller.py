@@ -46,7 +46,7 @@ async def get_repositories(request: Request, get_repositories_request: GetReposi
     repositories = await read_repositories_by_user_id(get_repositories_request.user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({
         "repositories": repositories,
-        "code": "get_repositories_success",
+        "detail": "get_repositories_success",
     }))
 
 
@@ -65,7 +65,7 @@ async def get_package_status(request: Request, get_package_status_request: GetPa
             status_code=status.HTTP_404_NOT_FOUND,
             content=json_encoder(
                 {
-                    "code": "package_not_found",
+                    "detail": "package_not_found",
                 }
             ),
         )
@@ -73,7 +73,7 @@ async def get_package_status(request: Request, get_package_status_request: GetPa
         status_code=status.HTTP_200_OK,
         content=json_encoder({
             "package": package,
-            "code": "get_package_status_success",
+            "detail": "get_package_status_success",
         })
     )
 
@@ -97,7 +97,7 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
             status_code=status.HTTP_404_NOT_FOUND,
             content=json_encoder(
                 {
-                    "code": "version_not_found",
+                    "detail": "version_not_found",
                 }
             ),
         )
@@ -105,7 +105,7 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
         status_code=status.HTTP_200_OK,
         content=json_encoder({
             "version": version,
-            "code": "get_version_status_success",
+            "detail": "get_version_status_success",
         }),
     )
 
@@ -129,7 +129,7 @@ async def init_version(request: Request, init_version_request: InitVersionReques
                 status_code=status.HTTP_200_OK,
                 content=json_encoder(
                     {
-                        "code": "version_initializing",
+                        "detail": "version_initializing",
                     }
                 ),
             )
@@ -138,7 +138,7 @@ async def init_version(request: Request, init_version_request: InitVersionReques
                 status_code=status.HTTP_404_NOT_FOUND,
                 content=json_encoder(
                     {
-                        "code": "package_not_found",
+                        "detail": "package_not_found",
                     }
                 ),
             )
@@ -147,7 +147,7 @@ async def init_version(request: Request, init_version_request: InitVersionReques
             status_code=status.HTTP_409_CONFLICT,
             content=json_encoder(
                 {
-                    "code": "version_already_exists",
+                    "detail": "version_already_exists",
                 }
             ),
         )
@@ -172,7 +172,7 @@ async def init_package(request: Request, init_package_request: InitPackageReques
         status_code=status.HTTP_200_OK,
         content=json_encoder(
             {
-                "code": "package_initializing",
+                "detail": "package_initializing",
             }
         ),
     )
@@ -200,7 +200,7 @@ async def init_repository(request: Request, init_graph_request: InitRepositoryRe
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=json_encoder(
                     {
-                        "code": "no_repo",
+                        "detail": "no_repo",
                     }
                 ),
             )
@@ -209,7 +209,7 @@ async def init_repository(request: Request, init_graph_request: InitRepositoryRe
         status_code=status.HTTP_200_OK,
         content=json_encoder(
             {
-                "code": "init_repo",
+                "detail": "init_repo",
             }
         ),
     )

@@ -18,7 +18,7 @@ def health_check(request: Request):
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder(
             {
-                "code": "healthy",
+                "detail": "healthy",
             }
         )
     )

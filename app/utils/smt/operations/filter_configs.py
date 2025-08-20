@@ -36,7 +36,7 @@ async def execute_filter_configs(model: SMTModel, max_threshold: float, min_thre
         status_code=status.HTTP_200_OK, content=json_encoder(
             {
                 "result": result,
-                "code": "operation_success",
+                "detail": "operation_success",
             }
         )
     )

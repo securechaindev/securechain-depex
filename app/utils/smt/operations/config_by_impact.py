@@ -27,7 +27,7 @@ async def execute_config_by_impact(model: SMTModel, impact: int) -> JSONResponse
         status_code=status.HTTP_200_OK, content=json_encoder(
             {
                 "result": result,
-                "code": "operation_success",
+                "detail": "operation_success",
             }
         )
     )

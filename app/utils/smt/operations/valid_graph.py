@@ -19,7 +19,7 @@ async def execute_valid_graph(model: SMTModel) -> JSONResponse:
         status_code=status.HTTP_200_OK, content=json_encoder(
             {
                 "result": result,
-                "code": "operation_success",
+                "detail": "operation_success",
             }
         )
     )
