@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi.exceptions import HTTPException
 from neo4j import unit_of_work
 from neo4j.exceptions import Neo4jError
+
+from app.exceptions import MemoryOutException
 
 from .dbs.databases import get_graph_db_driver
 
@@ -156,18 +157,14 @@ async def read_graph_for_info_operation(
                 max_level
             )
             return record[0] if record else None
-    except Neo4jError as e:
-        code = getattr(e, "code", "") or ""
+    except Neo4jError as err:
+        code = getattr(err, "code", "") or ""
         if (
             code == "Neo.TransientError.General.MemoryPoolOutOfMemoryError"
             or code == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"
             or code == "Neo.ClientError.Transaction.TransactionTimedOut"
         ):
-            raise HTTPException(
-                status_code=507,
-                detail={"code": "memory_out"}
-            ) from e
-        raise
+            raise MemoryOutException() from err
 
 
 async def read_data_for_smt_transform(
@@ -214,18 +211,14 @@ async def read_data_for_smt_transform(
                 max_level
             )
             return record[0] if record else None
-    except Neo4jError as e:
-        code = getattr(e, "code", "") or ""
+    except Neo4jError as err:
+        code = getattr(err, "code", "") or ""
         if (
             code == "Neo.TransientError.General.MemoryPoolOutOfMemoryError"
             or code == "Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration"
             or code == "Neo.ClientError.Transaction.TransactionTimedOut"
         ):
-            raise HTTPException(
-                status_code=507,
-                detail={"code": "memory_out"}
-            ) from e
-        raise
+            raise MemoryOutException() from err
 
 
 async def read_repositories_by_user_id(user_id: str) -> dict[str, Any]:

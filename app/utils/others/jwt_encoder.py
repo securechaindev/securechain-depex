@@ -1,9 +1,14 @@
 from typing import Any
 
-from fastapi import HTTPException, Request, status
+from fastapi import Request
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
 
 from app.config import settings
+from app.exceptions import (
+    ExpiredTokenException,
+    InvalidTokenException,
+    NotAuthenticatedException,
+)
 
 
 class JWTBearer:
@@ -13,7 +18,7 @@ class JWTBearer:
     async def __call__(self, request: Request) -> dict[str, Any]:
         token = request.cookies.get(self.cookie_name)
         if not token:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+            raise NotAuthenticatedException()
         try:
             payload = decode(
                 token,
@@ -21,13 +26,7 @@ class JWTBearer:
                 algorithms=[settings.ALGORITHM],
             )
         except ExpiredSignatureError as err:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token expired",
-            ) from err
+            raise ExpiredTokenException() from err
         except InvalidTokenError as err:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token",
-            ) from err
+            raise InvalidTokenException() from err
         return payload

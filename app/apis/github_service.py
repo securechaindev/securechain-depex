@@ -2,9 +2,9 @@ from asyncio import TimeoutError, sleep
 from datetime import datetime
 
 from aiohttp import ClientConnectorError, ClientSession
-from dateutil.parser import parse
 
 from app.config import settings
+from app.exceptions.exceptions import InvalidRepositoryException
 
 headers_github = {
     "Accept": "application/vnd.github.hawkgirl-preview+json",
@@ -46,12 +46,18 @@ async def get_last_commit_date_github(owner: str, name: str) -> datetime | bool:
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
-    if response["data"]["repository"]:
-        if "defaultBranchRef" in response["data"]["repository"]:
-            return parse(
-                response["data"]["repository"]["defaultBranchRef"]["target"]["history"][
-                    "edges"
-                ][0]["node"]["author"]["date"]
-            )
+    date = (
+        response.get("data", {})
+            .get("repository", {})
+            .get("defaultBranchRef", {})
+            .get("target", {})
+            .get("history", {})
+            .get("edges", [{}])[0]
+            .get("node", {})
+            .get("author", {})
+            .get("date")
+    )
+    if date:
+        return datetime.fromisoformat(date)
     else:
-        return False
+        raise InvalidRepositoryException()
