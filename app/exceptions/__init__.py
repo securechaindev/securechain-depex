@@ -4,6 +4,7 @@ from .exceptions import (
     InvalidTokenException,
     MemoryOutException,
     NotAuthenticatedException,
+    SMTTimeoutException,
 )
 
 __all__ = [
@@ -11,5 +12,6 @@ __all__ = [
     "InvalidRepositoryException",
     "InvalidTokenException",
     "MemoryOutException",
-    "NotAuthenticatedException"
+    "NotAuthenticatedException",
+    "SMTTimeoutException"
 ]

@@ -24,3 +24,8 @@ class InvalidTokenException(HTTPException):
 class MemoryOutException(HTTPException):
     def __init__(self):
         super().__init__(status_code=507, code="memory_out")
+
+
+class SMTTimeoutException(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=507, code="smt_timeout")
