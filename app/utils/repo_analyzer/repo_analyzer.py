@@ -1,5 +1,5 @@
 from glob import glob
-from os import makedirs, system
+from os import makedirs
 from os.path import exists, isdir, join
 from shutil import rmtree
 
@@ -29,7 +29,6 @@ nuget_files = ["packages.config"]
 ruby_files = ["Gemfile", "Gemfile.lock"]
 cargo_files = ["Cargo.toml", "Cargo.lock"]
 all_files = set(pypi_files + npm_files + maven_files + nuget_files + ruby_files + cargo_files)
-
 
 async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str]]:
     requirement_files: dict[str, dict[str, dict | str]] = {}
@@ -84,12 +83,12 @@ async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str
             requirement_files = await analyze_cargo_lock(
                 requirement_files, repository_path, requirement_file_name
             )
-    system("rm -rf " + repository_path)
+    rmtree(repository_path)
     return requirement_files
 
 
 async def download_repository(owner: str, name: str) -> str:
-    repository_path = f"repositories/{name}"
+    repository_path = f"repositories/{owner}/{name}"
     if exists(repository_path):
         rmtree(repository_path)
     makedirs(repository_path)
@@ -100,7 +99,7 @@ async def download_repository(owner: str, name: str) -> str:
             return repository_path
         contents = await resp.json()
     for item in contents:
-        if item["type"] == "file" and item["name"] in all_files:
+        if item["type"] == "file" and any(extension in item["name"] for extension in all_files):
             raw_url = item["download_url"]
             async with session.get(raw_url) as file_resp:
                 if file_resp.status == 200:
