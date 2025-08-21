@@ -19,15 +19,7 @@ async def get_last_commit_date_github(owner: str, name: str) -> datetime | bool:
             defaultBranchRef {{
                 target {{
                     ... on Commit {{
-                        history(first: 1) {{
-                            edges {{
-                                node {{
-                                    author {{
-                                        date
-                                    }}
-                                }}
-                            }}
-                        }}
+                        committedDate
                     }}
                 }}
             }}
@@ -46,18 +38,14 @@ async def get_last_commit_date_github(owner: str, name: str) -> datetime | bool:
                     break
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
-    date = (
-        response.get("data", {})
-            .get("repository", {})
-            .get("defaultBranchRef", {})
-            .get("target", {})
-            .get("history", {})
-            .get("edges", [{}])[0]
-            .get("node", {})
-            .get("author", {})
-            .get("date")
-    )
-    if date:
-        return datetime.fromisoformat(date)
-    else:
+    repo = response.get("data", {}).get("repository")
+    if not repo or not repo.get("defaultBranchRef"):
         raise InvalidRepositoryException()
+    date_str = (
+        repo["defaultBranchRef"]
+        .get("target", {})
+        .get("committedDate")
+    )
+    if not date_str:
+        raise InvalidRepositoryException()
+    return datetime.fromisoformat(date_str)
