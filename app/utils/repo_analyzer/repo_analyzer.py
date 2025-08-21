@@ -60,7 +60,7 @@ async def repo_analyzer(owner: str, name: str) -> dict[str, dict[str, dict | str
             requirement_files = await analyze_setup_py(
                 requirement_files, repository_path, requirement_file_name
             )
-        elif "requirements.txt" == requirement_file_name:
+        elif "requirements.txt" in requirement_file_name:
             requirement_files = await analyze_requirements_txt(
                 requirement_files, repository_path, requirement_file_name
             )
