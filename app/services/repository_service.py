@@ -10,11 +10,11 @@ from .dbs.databases import get_graph_db_driver
 
 
 @unit_of_work(timeout=3)
-async def read_graph(tx, query, requirement_file_id, max_level):
+async def read_graph(tx, query, requirement_file_id, max_depth):
     result = await tx.run(
         query,
         requirement_file_id=requirement_file_id,
-        max_level=max_level
+        max_depth=max_depth
     )
     return await result.single()
 
@@ -87,7 +87,7 @@ async def read_repository_by_id(repository_id: str) -> dict[str, str]:
 async def read_graph_for_info_operation(
     node_type: str,
     requirement_file_id: str,
-    max_level: int
+    max_depth: int
 ) -> dict[str, Any]:
     query = f"""
     MATCH (rf:RequirementFile)
@@ -97,7 +97,7 @@ async def read_graph_for_info_operation(
         {{
             relationshipFilter: 'REQUIRE>|HAVE>',
             labelFilter: 'Version|{node_type}',
-            maxLevel: $max_level,
+            maxLevel: $max_depth,
             bfs: true,
             uniqueness: 'NODE_GLOBAL'
         }}
@@ -154,7 +154,7 @@ async def read_graph_for_info_operation(
                 read_graph,
                 query,
                 requirement_file_id,
-                max_level
+                max_depth
             )
             return record[0] if record else None
     except Neo4jError as err:
@@ -169,12 +169,12 @@ async def read_graph_for_info_operation(
 
 async def read_data_for_smt_transform(
     requirement_file_id: str,
-    max_level: int
+    max_depth: int
 ) -> dict[str, Any]:
     query = """
     MATCH (rf:RequirementFile)
     WHERE elementid(rf) = $requirement_file_id
-    CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_level})
+    CALL apoc.path.subgraphAll(rf, {relationshipFilter: '>', maxLevel: $max_depth})
     YIELD relationships
     WITH rf,
         [rel IN relationships WHERE type(rel) = 'REQUIRE' |
@@ -208,7 +208,7 @@ async def read_data_for_smt_transform(
                 read_graph,
                 query,
                 requirement_file_id,
-                max_level
+                max_depth
             )
             return record[0] if record else None
     except Neo4jError as err:

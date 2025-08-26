@@ -1,3 +1,3 @@
-from .max_level_validator import validate_max_level
+from .max_depth_validator import validate_max_depth
 
-__all__ = ["validate_max_level"]
+__all__ = ["validate_max_depth"]

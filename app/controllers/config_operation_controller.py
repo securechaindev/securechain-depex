@@ -40,8 +40,8 @@ async def valid_config(
     request: Request,
     valid_config_request: Annotated[ValidConfigRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(valid_config_request.requirement_file_id, valid_config_request.max_level)
-    smt_text_id = f"{valid_config_request.requirement_file_id}:{valid_config_request.max_level}"
+    graph_data = await read_data_for_smt_transform(valid_config_request.requirement_file_id, valid_config_request.max_depth)
+    smt_text_id = f"{valid_config_request.requirement_file_id}:{valid_config_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, valid_config_request.node_type.value, valid_config_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
@@ -76,8 +76,8 @@ async def complete_config(
     request: Request,
     complete_config_request: Annotated[CompleteConfigRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(complete_config_request.requirement_file_id, complete_config_request.max_level)
-    smt_text_id = f"{complete_config_request.requirement_file_id}:{complete_config_request.max_level}"
+    graph_data = await read_data_for_smt_transform(complete_config_request.requirement_file_id, complete_config_request.max_depth)
+    smt_text_id = f"{complete_config_request.requirement_file_id}:{complete_config_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, complete_config_request.node_type.value, complete_config_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
@@ -112,8 +112,8 @@ async def config_by_impact(
     request: Request,
     config_by_impact_request: Annotated[ConfigByImpactRequest, Body()]
 ) -> JSONResponse:
-    graph_data = await read_data_for_smt_transform(config_by_impact_request.requirement_file_id, config_by_impact_request.max_level)
-    smt_text_id = f"{config_by_impact_request.requirement_file_id}:{config_by_impact_request.max_level}"
+    graph_data = await read_data_for_smt_transform(config_by_impact_request.requirement_file_id, config_by_impact_request.max_depth)
+    smt_text_id = f"{config_by_impact_request.requirement_file_id}:{config_by_impact_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.aggregator)
         smt_text = await read_smt_text(smt_text_id)
