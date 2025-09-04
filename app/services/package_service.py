@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from .dbs.databases import get_graph_db_driver
+from .dbs import get_graph_db_driver
 
 
 async def create_package_and_versions(

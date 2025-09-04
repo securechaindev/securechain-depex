@@ -1,6 +1,6 @@
 from typing import Any
 
-from .dbs.databases import get_graph_db_driver
+from .dbs import get_graph_db_driver
 
 
 async def read_versions_names_by_package(node_type: str, package_name: str) -> list[str]:

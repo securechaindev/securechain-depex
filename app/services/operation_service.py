@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from .dbs.databases import get_collection
+from .dbs import get_collection
 
 
 async def replace_operation_result(operation_result_id: str, result: dict[str, Any]) -> None:

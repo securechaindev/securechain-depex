@@ -6,7 +6,7 @@ from neo4j.exceptions import Neo4jError
 
 from app.exceptions import MemoryOutException
 
-from .dbs.databases import get_graph_db_driver
+from .dbs import get_graph_db_driver
 
 
 @unit_of_work(timeout=3)
