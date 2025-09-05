@@ -74,7 +74,7 @@ async def requirement_file_info(
         else:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
-                content=json_encoder(
+                content= await json_encoder(
                     {
                         "detail": "no_dependencies",
                     }
@@ -82,7 +82,7 @@ async def requirement_file_info(
             )
         await replace_operation_result(operation_result_id, result)
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(
+        status_code=status.HTTP_200_OK, content= await json_encoder(
             {
                 "result": result,
                 "detail": "file_info_success",
@@ -118,7 +118,7 @@ async def valid_graph(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "no_dependencies",
                 }
@@ -153,7 +153,7 @@ async def minimize_impact(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "no_dependencies",
                 }
@@ -188,7 +188,7 @@ async def maximize_impact(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "no_dependencies",
                 }
@@ -223,7 +223,7 @@ async def filter_configs(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "no_dependencies",
                 }

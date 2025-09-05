@@ -14,9 +14,9 @@ router = APIRouter()
     tags=["Secure Chain Depex Health"]
 )
 @limiter.limit("25/minute")
-def health_check(request: Request):
+async def health_check(request: Request):
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(
+        status_code=status.HTTP_200_OK, content= await json_encoder(
             {
                 "detail": "healthy",
             }

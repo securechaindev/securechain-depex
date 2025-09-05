@@ -25,7 +25,7 @@ async def execute_complete_config(model: SMTModel, config: dict[str, int]) -> JS
     elif solver.check() == unknown:
         raise SMTTimeoutException()
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(
+        status_code=status.HTTP_200_OK, content= await json_encoder(
             {
                 "result": result,
                 "detail": "operation_success",

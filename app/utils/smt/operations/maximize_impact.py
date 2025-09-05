@@ -30,7 +30,7 @@ async def execute_maximize_impact(model: SMTModel, limit: int) -> JSONResponse:
     if solver.check() == unknown:
         raise SMTTimeoutException()
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(
+        status_code=status.HTTP_200_OK, content= await json_encoder(
             {
                 "result": result,
                 "detail": "operation_success",

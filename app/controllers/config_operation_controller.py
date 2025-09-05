@@ -55,7 +55,7 @@ async def valid_config(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "no_dependencies",
                 }
@@ -91,7 +91,7 @@ async def complete_config(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "no_dependencies",
                 }
@@ -126,7 +126,7 @@ async def config_by_impact(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "no_dependencies",
                 }

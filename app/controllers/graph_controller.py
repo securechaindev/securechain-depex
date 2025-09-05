@@ -44,7 +44,7 @@ router = APIRouter()
 @limiter.limit("25/minute")
 async def get_repositories(request: Request, get_repositories_request: GetRepositoriesRequest = Depends()) -> JSONResponse:
     repositories = await read_repositories_by_user_id(get_repositories_request.user_id)
-    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder({
+    return JSONResponse(status_code=status.HTTP_200_OK, content= await json_encoder({
         "repositories": repositories,
         "detail": "get_repositories_success",
     }))
@@ -63,7 +63,7 @@ async def get_package_status(request: Request, get_package_status_request: GetPa
     if not package:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "package_not_found",
                 }
@@ -71,7 +71,7 @@ async def get_package_status(request: Request, get_package_status_request: GetPa
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=json_encoder({
+        content= await json_encoder({
             "package": package,
             "detail": "get_package_status_success",
         })
@@ -95,7 +95,7 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
     if not version:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "version_not_found",
                 }
@@ -103,7 +103,7 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=json_encoder({
+        content= await json_encoder({
             "version": version,
             "detail": "get_version_status_success",
         }),
@@ -127,7 +127,7 @@ async def init_version(request: Request, init_version_request: InitVersionReques
             background_tasks.add_task(create_version, init_version_request)
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
-                content=json_encoder(
+                content= await json_encoder(
                     {
                         "detail": "version_initializing",
                     }
@@ -136,7 +136,7 @@ async def init_version(request: Request, init_version_request: InitVersionReques
         else:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content=json_encoder(
+                content= await json_encoder(
                     {
                         "detail": "package_not_found",
                     }
@@ -145,7 +145,7 @@ async def init_version(request: Request, init_version_request: InitVersionReques
     else:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
-            content=json_encoder(
+            content= await json_encoder(
                 {
                     "detail": "version_already_exists",
                 }
@@ -170,7 +170,7 @@ async def init_package(request: Request, init_package_request: InitPackageReques
         background_tasks.add_task(search_new_versions, package, init_package_request.node_type.value)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=json_encoder(
+        content= await json_encoder(
             {
                 "detail": "package_initializing",
             }
@@ -198,7 +198,7 @@ async def init_repository(request: Request, init_graph_request: InitRepositoryRe
         if not last_commit_date:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content=json_encoder(
+                content= await json_encoder(
                     {
                         "detail": "no_repo",
                     }
@@ -207,7 +207,7 @@ async def init_repository(request: Request, init_graph_request: InitRepositoryRe
         background_tasks.add_task(init_repository_graph, init_graph_request, last_repository_update, last_commit_date)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=json_encoder(
+        content= await json_encoder(
             {
                 "detail": "init_repo",
             }

@@ -24,7 +24,7 @@ async def execute_config_by_impact(model: SMTModel, impact: int) -> JSONResponse
     elif solver.check() == unknown:
         raise SMTTimeoutException()
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(
+        status_code=status.HTTP_200_OK, content= await json_encoder(
             {
                 "result": result,
                 "detail": "operation_success",

@@ -33,7 +33,7 @@ async def execute_filter_configs(model: SMTModel, max_threshold: float, min_thre
     if solver.check() == unknown:
         raise SMTTimeoutException()
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(
+        status_code=status.HTTP_200_OK, content= await json_encoder(
             {
                 "result": result,
                 "detail": "operation_success",

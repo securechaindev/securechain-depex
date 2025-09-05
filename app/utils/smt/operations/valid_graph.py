@@ -16,7 +16,7 @@ async def execute_valid_graph(model: SMTModel) -> JSONResponse:
     else:
         result = solver.check() == sat
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content=json_encoder(
+        status_code=status.HTTP_200_OK, content= await json_encoder(
             {
                 "result": result,
                 "detail": "operation_success",
