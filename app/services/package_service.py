@@ -27,8 +27,8 @@ async def create_package_and_versions(
     query = f"""
     {query_part1}
     MERGE(p:{node_type}{{{"group_id:$group_id, artifact_id:$artifact_id," if node_type == "MavenPackage" else ""}name:$name}})
-    ON CREATE SET p.vendor = $vendor, p.moment = $moment
-    ON MATCH SET p.vendor = $vendor, p.moment = $moment
+    ON CREATE SET p.vendor = $vendor, p.moment = $moment, p.repository_url = $repository_url
+    ON MATCH SET p.moment = $moment
     {query_part3}
     WITH p AS package
     UNWIND $versions AS version
@@ -37,7 +37,8 @@ async def create_package_and_versions(
         serial_number: version.serial_number,
         mean: version.mean,
         weighted_mean: version.weighted_mean,
-        vulnerabilities: version.vulnerabilities
+        vulnerabilities: version.vulnerabilities,
+        release_date: version.release_date
     }})
     CREATE (package)-[rel_v:HAVE]->(v)
     RETURN collect({{name: v.name, id: elementid(v)}})
@@ -69,7 +70,8 @@ async def create_versions(
         serial_number: version.serial_number,
         mean: version.mean,
         weighted_mean: version.weighted_mean,
-        vulnerabilities: version.vulnerabilities
+        vulnerabilities: version.vulnerabilities,
+        release_date: version.release_date
     }})
     CREATE (package)-[rel_v:HAVE]->(v)
     RETURN collect({{name: v.name, id: elementid(v)}})

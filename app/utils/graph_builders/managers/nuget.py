@@ -53,7 +53,7 @@ async def nuget_create_package(
     parent_id: str | None = None,
     parent_version_name: str | None = None,
 ) -> None:
-    versions, requirements = await get_nuget_versions(package_name)
+    versions, requirements, repository_url, vendor = await get_nuget_versions(package_name)
     if versions:
         attributed_versions = [
             await attribute_vulnerabilities(package_name, version)
@@ -61,7 +61,12 @@ async def nuget_create_package(
         ]
         created_versions = await create_package_and_versions(
             "NuGetPackage",
-            {"name": package_name, "vendor": "n/a", "moment": datetime.now()},
+            {
+                "name": package_name,
+                "vendor": vendor if vendor else "n/a",
+                "repository_url": repository_url if repository_url else "n/a",
+                "moment": datetime.now()
+            },
             attributed_versions,
             constraints,
             parent_id,

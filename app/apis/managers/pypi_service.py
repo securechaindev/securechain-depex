@@ -9,16 +9,34 @@ from app.http_session import get_session
 from app.logger import logger
 from app.utils.others import (
     get_first_position,
+    looks_like_repo,
+    normalize_repo_url,
     order_versions,
     parse_pypi_constraints,
 )
 
 
+async def get_pypi_url_vendor(response: dict[str, Any]) -> tuple[str, str]:
+    raw_url = response.get("info", {}).get("home_page")
+    norm_url = await normalize_repo_url(raw_url)
+    if await looks_like_repo(norm_url):
+        vendor = norm_url.split("/")[-2]
+        return norm_url, vendor
+    else:
+        project_urls = response.get("info", {}).get("project_urls") or {}
+        for _, raw_url in project_urls.items():
+            norm_url = await normalize_repo_url(raw_url)
+            if await looks_like_repo(norm_url):
+                vendor = norm_url.split("/")[-2]
+                return norm_url, vendor
+    return "", ""
+
+
 # TODO: En las nuevas actualizaciones de la API JSON se debería devolver la info de forma diferente, estar atento a nuevas versiones.
-async def get_pypi_versions(package_name: str) -> list[dict[str, Any]]:
+async def get_pypi_versions(package_name: str) -> tuple[list[dict[str, Any]], str, str]:
     response = await get_cache(package_name)
     if response:
-        versions = response
+        versions, repository_url, vendor = response
     else:
         url = f"https://pypi.python.org/pypi/{package_name}/json"
         session = await get_session()
@@ -31,11 +49,17 @@ async def get_pypi_versions(package_name: str) -> list[dict[str, Any]]:
             except (ClientConnectorError, TimeoutError):
                 await sleep(5)
             except (JSONDecodeError, ContentTypeError):
-                return []
-        raw_versions = list(response.get("releases", {}))
+                return [], "", ""
+        raw_versions = []
+        for version, files in (response.get("releases") or {}).items():
+            upload_time = None
+            if files:
+                upload_time = files[0].get("upload_time_iso_8601") or files[0].get("upload_time")
+            raw_versions.append({"name": version, "release_date": upload_time})
         versions = await order_versions("PyPIPackage", raw_versions)
-        await set_cache(package_name, versions)
-    return versions
+        repository_url, vendor = await get_pypi_url_vendor(response)
+        await set_cache(package_name, (versions, repository_url, vendor))
+    return versions, repository_url, vendor
 
 
 async def get_pypi_version(package_name: str, version_name: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -51,7 +75,13 @@ async def get_pypi_version(package_name: str, version_name: str) -> tuple[dict[s
             await sleep(5)
         except (JSONDecodeError, ContentTypeError):
             return {}
-    versions = await order_versions("PyPIPackage", response.get("releases", {}).keys())
+    raw_versions = []
+    for version, files in (response.get("releases") or {}).items():
+        upload_time = None
+        if files:
+            upload_time = files[0].get("upload_time_iso_8601") or files[0].get("upload_time")
+        raw_versions.append({"name": version, "release_date": upload_time})
+    versions = await order_versions("PyPIPackage", raw_versions)
     index = next((i for i, d in enumerate(versions) if d.get("name") == version_name), None)
     if index is not None:
         return versions[index], versions[index + 1:]
@@ -59,11 +89,11 @@ async def get_pypi_version(package_name: str, version_name: str) -> tuple[dict[s
         raise ValueError(f"Version {version_name} not found for package {package_name}")
 
 
-async def get_pypi_requirement(package_name: str, version_name: str) -> dict[str, list[str] | str]:
+async def get_pypi_package(package_name: str, version_name: str) -> dict[str, Any]:
     key = f"requirement:{package_name}:{version_name}"
     response = await get_cache(key)
     if response:
-        require_packages = response
+        requirement = response
     else:
         url = f"https://pypi.python.org/pypi/{package_name}/{version_name}/json"
         session = await get_session()
@@ -79,7 +109,7 @@ async def get_pypi_requirement(package_name: str, version_name: str) -> dict[str
             except (JSONDecodeError, ContentTypeError):
                 await set_cache(url, "error")
                 return {}
-        require_packages: dict[str, Any] = {}
+        requirement: dict[str, Any] = {}
         for dependency in response.get("info", {}).get("requires_dist", []) or []:
             data = dependency.split(";")
             if "python-version" in data[0]:
@@ -96,6 +126,6 @@ async def get_pypi_requirement(package_name: str, version_name: str) -> dict[str
                 data[0] = data[0][:pos_1] + data[0][pos_2:]
             data = data[0].replace("(", "").replace(")", "").replace(" ", "").replace("'", "")
             pos = await get_first_position(data, ["<", ">", "=", "!", "~"])
-            require_packages[data[:pos].lower()] = await parse_pypi_constraints(data[pos:])
-        await set_cache(key, require_packages)
-    return require_packages
+            requirement[data[:pos].lower()] = await parse_pypi_constraints(data[pos:])
+        await set_cache(key, requirement)
+    return requirement

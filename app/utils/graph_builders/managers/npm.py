@@ -53,16 +53,22 @@ async def npm_create_package(
     parent_id: str | None = None,
     parent_version_name: str | None = None
 ) -> None:
-    versions, requirements = await get_npm_versions(package_name)
+    versions, requirements, repository_url, vendor = await get_npm_versions(package_name)
     if versions:
         attributed_versions = [
             await attribute_vulnerabilities(package_name, version)
             for version in versions
         ]
-        vendor = package_name.split("/")[0] if "@" in package_name else "n/a"
+        if not vendor:
+            vendor = package_name.split("/")[0] if "@" in package_name else "n/a"
         created_versions = await create_package_and_versions(
             "NPMPackage",
-            {"name": package_name, "vendor": vendor, "moment": datetime.now()},
+            {
+                "name": package_name,
+                "vendor": vendor if vendor else "patata",
+                "repository_url": repository_url if repository_url else "n/a",
+                "moment": datetime.now()
+            },
             attributed_versions,
             constraints,
             parent_id,

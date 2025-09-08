@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.apis import get_maven_requirement, get_maven_versions
+from app.apis import get_maven_package, get_maven_versions
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
@@ -50,9 +50,9 @@ async def maven_create_package(
     artifact_id: str,
     constraints: str | None = None,
     parent_id: str | None = None,
-    parent_version_name: str | None = None,
+    parent_version_name: str | None = None
 ) -> None:
-    versions = await get_maven_versions(group_id, artifact_id)
+    versions, repository_url, vendor = await get_maven_versions(group_id, artifact_id)
     if versions:
         attributed_versions = [
             await attribute_vulnerabilities(f"{group_id}:{artifact_id}", version)
@@ -60,7 +60,14 @@ async def maven_create_package(
         ]
         created_versions = await create_package_and_versions(
             "MavenPackage",
-            {"group_id": group_id, "artifact_id": artifact_id, "name": f"{group_id}:{artifact_id}", "vendor": "n/a", "moment": datetime.now()},
+            {
+                "group_id": group_id,
+                "artifact_id": artifact_id,
+                "name": f"{group_id}:{artifact_id}",
+                "vendor": vendor if vendor else "n/a",
+                "repository_url": repository_url if repository_url else "n/a",
+                "moment": datetime.now()
+            },
             attributed_versions,
             constraints,
             parent_id,
@@ -75,7 +82,7 @@ async def maven_extract_packages(
     parent_artifact_id: str,
     version: dict[str, Any]
 ) -> None:
-    requirement = await get_maven_requirement(
+    requirement = await get_maven_package(
         parent_group_id,
         parent_artifact_id,
         version["name"],

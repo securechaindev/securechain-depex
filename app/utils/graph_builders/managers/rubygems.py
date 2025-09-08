@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from app.apis import get_rubygems_requirement, get_rubygems_versions
+from app.apis import get_rubygems_package, get_rubygems_versions
 from app.services import (
     count_number_of_versions_by_package,
     create_package_and_versions,
@@ -48,9 +48,9 @@ async def rubygems_create_package(
     package_name: str,
     constraints: str | None = None,
     parent_id: str | None = None,
-    parent_version_name: str | None = None,
+    parent_version_name: str | None = None
 ) -> None:
-    versions = await get_rubygems_versions(package_name)
+    versions, repository_url, vendor = await get_rubygems_versions(package_name)
     if versions:
         attributed_versions = [
             await attribute_vulnerabilities(package_name, version)
@@ -58,7 +58,12 @@ async def rubygems_create_package(
         ]
         created_versions = await create_package_and_versions(
             "RubyGemsPackage",
-            {"name": package_name, "vendor": "n/a", "moment": datetime.now()},
+            {
+                "name": package_name,
+                "vendor": vendor if vendor else "n/a",
+                "repository_url": repository_url if repository_url else "n/a",
+                "moment": datetime.now()
+            },
             attributed_versions,
             constraints,
             parent_id,
@@ -72,7 +77,7 @@ async def rubygems_extract_packages(
     parent_package_name: str,
     version: dict[str, Any]
 ) -> None:
-    requirement = await get_rubygems_requirement(
+    requirement = await get_rubygems_package(
         parent_package_name, version["name"]
     )
     await rubygems_generate_packages(requirement, version["id"], parent_package_name)
