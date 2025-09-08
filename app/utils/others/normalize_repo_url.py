@@ -32,5 +32,5 @@ async def normalize_repo_url(url: str | None) -> str | None:
     if git_match:
         host = parsed.netloc.lower()
         if any(platform in host for platform in ['github.com', 'gitlab.com', 'bitbucket.org']):
-            clean = git_match.group(1)    
+            clean = git_match.group(1)
     return clean

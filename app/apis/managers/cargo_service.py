@@ -10,7 +10,7 @@ from app.logger import logger
 from app.utils.others import looks_like_repo, normalize_repo_url, order_versions
 
 
-async def get_cargo_url_vendor(response: dict[str, Any]) -> tuple[str, str]:     
+async def get_cargo_url_vendor(response: dict[str, Any]) -> tuple[str, str]:
     raw_url = response.get("crate", {}).get("repository")
     norm_url = await normalize_repo_url(raw_url)
     if norm_url and await looks_like_repo(norm_url):

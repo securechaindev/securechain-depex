@@ -40,8 +40,8 @@ class SMTModel:
         str_sum = await self.sum()
         self.ctc_domain += f"(= {file_risk_name} {str_sum})"
         for indirect_var in self.indirect_vars:
-            self.var_domain.add(f"(declare-const {indirect_var} Int)")
-            self.var_domain.add(f"(declare-const impact_{indirect_var} Real)")
+            self.var_domain.add(f"(declare-const |{indirect_var}| Int)")
+            self.var_domain.add(f"(declare-const |impact_{indirect_var}| Real)")
         model_text = f"{' '.join(self.var_domain)} (assert (and {self.ctc_domain}))"
         self.domain = parse_smt2_string(model_text)
         self.func_obj = Real(file_risk_name)
@@ -52,10 +52,10 @@ class SMTModel:
         filtered_versions = await filter_versions(self.node_type, self.source_data["have"][require["package"]], require["constraints"])
         versions_impacts: dict[int, int] = {version.get("serial_number"): version[self.aggregator] for version in filtered_versions}
         versions_names = list(versions_impacts.keys())
-        self.directs.append(require["package"])
-        var_impact = f"impact_{require['package']}"
+        self.directs.append(f"|{require["package"]}|")
+        var_impact = f"|impact_{require['package']}|"
         self.impacts.add(var_impact)
-        self.var_domain.add(f"(declare-const {require['package']} Int)")
+        self.var_domain.add(f"(declare-const |{require['package']}| Int)")
         self.var_domain.add(f"(declare-const {var_impact} Real)")
         await self.build_direct_contraint(
             require["package"], versions_names
@@ -85,7 +85,7 @@ class SMTModel:
         ):
             _default = {}
             if require:
-                self.impacts.add(f"impact_{require['package']}")
+                self.impacts.add(f"|impact_{require['package']}|")
                 self.indirect_vars.add(var)
                 self.indirect_vars.add(require["parent_version_name"])
                 _default = {.0: {-1}}
@@ -119,13 +119,13 @@ class SMTModel:
                 self.ctc_domain += f"(=> {await self.group_versions(parent, list(parent_versions), True)} {versions}) "
         for child, _ in self.parents.items():
             for parent, parent_versions in _.items():
-                self.ctc_domain += f"(=> (not {await self.group_versions(parent, list(parent_versions), True)}) (= {child} -1)) "
+                self.ctc_domain += f"(=> (not {await self.group_versions(parent, list(parent_versions), True)}) (= |{child}| -1)) "
 
 
     async def build_impact_constraints(self) -> None:
         for var, _ in self.ctcs.items():
             for impact, versions in _.items():
-                self.ctc_domain += f"(=> {await self.group_versions(var, list(versions), True)} (= impact_{var} {impact})) "
+                self.ctc_domain += f"(=> {await self.group_versions(var, list(versions), True)} (= |impact_{var}| {impact})) "
 
 
     async def group_versions(
@@ -143,9 +143,9 @@ class SMTModel:
             if versions[i] == versions[i - 1] + step:
                 current_group.append(versions[i])
             else:
-                constraints.append(await self.create_constraint_for_group(var, current_group, ascending))
+                constraints.append(await self.create_constraint_for_group(f"|{var}|", current_group, ascending))
                 current_group = [versions[i]]
-        constraints.append(await self.create_constraint_for_group(var, current_group, ascending))
+        constraints.append(await self.create_constraint_for_group(f"|{var}|", current_group, ascending))
         return constraints[0] if len(constraints) == 1 else f"(or {' '.join(constraints)})"
 
 

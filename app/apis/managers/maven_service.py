@@ -1,4 +1,5 @@
 from asyncio import TimeoutError, sleep
+from datetime import datetime
 from typing import Any
 from xml.etree.ElementTree import ParseError, fromstring
 
@@ -8,7 +9,6 @@ from app.cache import get_cache, set_cache
 from app.http_session import get_session
 from app.logger import logger
 from app.utils.others import looks_like_repo, normalize_repo_url, order_versions
-from datetime import datetime
 
 
 async def get_maven_url_vendor(group_id: str, artifact_id: str, version: str) -> tuple[str, str]:
@@ -158,8 +158,8 @@ async def get_maven_package(group_id: str, artifact_id: str, version_name: str) 
                 dep_group_id = dep.find("mvn:groupId", namespace).text
                 dep_artifact_id = dep.find("mvn:artifactId", namespace).text
                 dep_version = dep.find("mvn:version", namespace)
-                dep_version_text = dep_version.text if dep_version is not None else "latest"
-                if not any(char in dep_version_text for char in ["[", "]", "(", ")"]):
+                dep_version_text = dep_version.text if dep_version is not None else "any"
+                if dep_version_text != "any" and not any(char in dep_version_text for char in ["[", "]", "(", ")"]):
                     dep_version_text = "[" + dep_version_text + "]"
                 requirement[f"{dep_group_id}:{dep_artifact_id}"] = dep_version_text
         except ParseError:

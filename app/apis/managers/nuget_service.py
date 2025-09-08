@@ -55,7 +55,7 @@ async def get_nuget_versions(package_name: str) -> tuple[list[dict[str, Any]], l
                 raw_url = catalog_entry.get("repositoryUrl")
                 norm_url = await normalize_repo_url(raw_url)
                 if norm_url and await looks_like_repo(norm_url):
-                    repository_url = norm_url 
+                    repository_url = norm_url
                     vendor = norm_url.split("/")[-2]
                 raw_versions.append({
                     "name": name,
