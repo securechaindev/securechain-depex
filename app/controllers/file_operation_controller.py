@@ -36,7 +36,7 @@ router = APIRouter()
 @router.post(
     "/operation/file/file_info",
     summary="Get Requirement File Information",
-    description="Retrieve information about a specific requirement file.",
+    description="Retrieve information about dependnecy graph of a specific requirement file.",
     response_description="Requirement File information.",
     dependencies=[Depends(JWTBearer())],
     tags=["Secure Chain Depex - Operation/File"]

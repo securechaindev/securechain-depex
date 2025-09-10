@@ -14,6 +14,7 @@ from app.schemas import (
     InitVersionRequest,
 )
 from app.services import (
+    create_user_repository_rel,
     exists_package,
     exists_version,
     read_package_by_name,
@@ -21,7 +22,6 @@ from app.services import (
     read_repositories_by_user_id,
     read_repositories_update,
     read_version_status_by_package_and_name,
-    create_user_repository_rel
 )
 from app.utils import (
     JWTBearer,
