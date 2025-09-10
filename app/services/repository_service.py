@@ -46,7 +46,7 @@ async def create_user_repository_rel(repository_id: str, user_id: str) -> None:
     RETURN elementid(r) AS id
     """
     async with get_graph_db_driver().session() as session:
-        result = await session.run(query, repository_id, user_id)
+        result = await session.run(query, repository_id=repository_id, user_id=user_id)
         record = await result.single()
     return record[0]
 

@@ -36,6 +36,7 @@ from .managers import (
 
 
 async def init_repository_graph(init_graph_request: InitRepositoryRequest, last_repository_update: dict[str, datetime | bool], last_commit_date: datetime) -> None:
+    repository_id = last_repository_update["id"]
     if last_commit_date is not None and (
         not last_repository_update["moment"]
         or last_repository_update["moment"].replace(tzinfo=UTC)
@@ -53,9 +54,6 @@ async def init_repository_graph(init_graph_request: InitRepositoryRequest, last_
                 raw_requirement_files, repository_id
             )
         else:
-            await create_user_repository_rel(
-                repository_id, init_graph_request.user_id
-            )
             await update_repository_is_complete(
                 repository_id, False
             )
@@ -65,6 +63,9 @@ async def init_repository_graph(init_graph_request: InitRepositoryRequest, last_
         await update_repository_is_complete(
             repository_id, True
         )
+    await create_user_repository_rel(
+        repository_id, init_graph_request.user_id
+    )
 
 
 async def extract_repository(

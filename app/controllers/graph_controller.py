@@ -21,6 +21,7 @@ from app.services import (
     read_repositories_by_user_id,
     read_repositories_update,
     read_version_status_by_package_and_name,
+    create_user_repository_rel
 )
 from app.utils import (
     JWTBearer,
@@ -205,6 +206,10 @@ async def init_repository(request: Request, init_graph_request: InitRepositoryRe
                 ),
             )
         background_tasks.add_task(init_repository_graph, init_graph_request, last_repository_update, last_commit_date)
+    else:
+        await create_user_repository_rel(
+            last_repository_update["id"], init_graph_request.user_id
+        )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content= await json_encoder(
