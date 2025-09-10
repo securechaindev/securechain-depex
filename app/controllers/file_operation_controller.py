@@ -13,7 +13,7 @@ from app.schemas import (
 )
 from app.services import (
     read_data_for_smt_transform,
-    read_graph_for_info_operation,
+    read_graph_for_req_file_info_operation,
     read_operation_result,
     read_requirement_file_moment,
     read_smt_text,
@@ -52,7 +52,7 @@ async def requirement_file_info(
     if operation_result is not None and operation_result["moment"].replace(tzinfo=UTC) > req_file_moment.replace(tzinfo=UTC):
         result = operation_result["result"]
     else:
-        result = await read_graph_for_info_operation(
+        result = await read_graph_for_req_file_info_operation(
             file_info_request.node_type.value,
             file_info_request.requirement_file_id,
             file_info_request.max_depth

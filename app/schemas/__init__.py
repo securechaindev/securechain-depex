@@ -12,6 +12,7 @@ from .operations import (
     FileInfoRequest,
     FilterConfigsRequest,
     MinMaxImpactRequest,
+    PackageInfoRequest,
     ValidConfigRequest,
     ValidGraphRequest,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "InitRepositoryRequest",
     "InitVersionRequest",
     "MinMaxImpactRequest",
+    "PackageInfoRequest",
     "ValidConfigRequest",
-    "ValidGraphRequest",
+    "ValidGraphRequest"
 ]
