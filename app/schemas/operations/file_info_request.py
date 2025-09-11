@@ -19,5 +19,5 @@ class FileInfoRequest(BaseModel):
     @model_validator(mode='before')
     def set_max_depth_to_square(cls, values):
         if values.get('max_depth') != -1:
-            values['max_depth'] = values.get('max_depth', 1) * 2
+            values['max_depth'] = (values.get('max_depth', 1) * 2) - 1
         return values

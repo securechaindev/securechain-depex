@@ -114,7 +114,7 @@ async def read_graph_for_req_file_info_operation(
     ) YIELD path
     WITH
         last(nodes(path)) AS pkg,
-        (length(path) - 1) / 2 AS depth,
+        (length(path) + 1) / 2 AS depth,
         last(relationships(path)) AS rel
     WHERE '{node_type}' IN labels(pkg) AND type(rel) = 'REQUIRE'
     OPTIONAL MATCH (pkg:{node_type})-[:HAVE]->(v:Version)
@@ -130,14 +130,14 @@ async def read_graph_for_req_file_info_operation(
         }}) AS versions,
         rel.constraints AS constraints
     WITH {{
-        package_name: pkg.name,
-        package_vendor: pkg.vendor,
-        package_constraints: constraints,
-        versions: versions
+            package_name: pkg.name,
+            package_vendor: pkg.vendor,
+            package_constraints: constraints,
+            versions: versions
         }} AS enriched_pkg,
         depth
     WITH
-        collect(CASE WHEN depth = 0 THEN enriched_pkg END) AS direct_deps,
+        collect(CASE WHEN depth = 1 THEN enriched_pkg END) AS direct_deps,
         collect(CASE WHEN depth > 1 THEN {{node: enriched_pkg, depth: depth}} END) AS indirect_info
     WITH
         direct_deps,
@@ -196,7 +196,7 @@ async def read_graph_for_package_info_operation(
     ) YIELD path
     WITH
         last(nodes(path)) AS pkg,
-        (length(path) - 1) / 2 AS depth,
+        length(path) / 2 AS depth,
         last(relationships(path)) AS rel
     WHERE '{node_type}' IN labels(pkg) AND type(rel) = 'REQUIRE'
     OPTIONAL MATCH (pkg:{node_type})-[:HAVE]->(v:Version)
@@ -212,14 +212,14 @@ async def read_graph_for_package_info_operation(
         }}) AS versions,
         rel.constraints AS constraints
     WITH {{
-        package_name: pkg.name,
-        package_vendor: pkg.vendor,
-        package_constraints: constraints,
-        versions: versions
+            package_name: pkg.name,
+            package_vendor: pkg.vendor,
+            package_constraints: constraints,
+            versions: versions
         }} AS enriched_pkg,
         depth
     WITH
-        collect(CASE WHEN depth = 0 THEN enriched_pkg END) AS direct_deps,
+        collect(CASE WHEN depth = 1 THEN enriched_pkg END) AS direct_deps,
         collect(CASE WHEN depth > 1 THEN {{node: enriched_pkg, depth: depth}} END) AS indirect_info
     WITH
         direct_deps,
