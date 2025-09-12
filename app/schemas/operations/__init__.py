@@ -6,6 +6,7 @@ from .min_max_impact_request import MinMaxImpactRequest
 from .package_info_request import PackageInfoRequest
 from .valid_config_request import ValidConfigRequest
 from .valid_graph_request import ValidGraphRequest
+from .version_info_request import VersionInfoRequest
 
 __all__ = [
     "CompleteConfigRequest",
@@ -15,5 +16,6 @@ __all__ = [
     "MinMaxImpactRequest",
     "PackageInfoRequest",
     "ValidConfigRequest",
-    "ValidGraphRequest"
+    "ValidGraphRequest",
+    "VersionInfoRequest"
 ]

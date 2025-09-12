@@ -7,6 +7,7 @@ from .package_service import (
     create_versions,
     exists_package,
     exists_version,
+    read_graph_for_package_ssc_info_operation,
     read_package_by_name,
     read_package_status_by_name,
     read_packages_by_requirement_file,
@@ -17,9 +18,6 @@ from .package_service import (
 from .repository_service import (
     create_repository,
     create_user_repository_rel,
-    read_data_for_smt_transform,
-    read_graph_for_package_info_operation,
-    read_graph_for_req_file_info_operation,
     read_repositories,
     read_repositories_by_user_id,
     read_repositories_update,
@@ -31,6 +29,8 @@ from .requirement_file_service import (
     create_requirement_file,
     delete_requirement_file,
     delete_requirement_file_rel,
+    read_data_for_smt_transform,
+    read_graph_for_req_file_info_operation,
     read_requirement_file_moment,
     read_requirement_files_by_repository,
     update_requirement_file_moment,
@@ -42,6 +42,7 @@ from .smt_service import (
 )
 from .version_service import (
     count_number_of_versions_by_package,
+    read_graph_for_version_ssc_info_operation,
     read_releases_by_serial_numbers,
     read_serial_numbers_by_releases,
     read_versions_names_by_package,
@@ -61,8 +62,9 @@ __all__ = [
     "exists_package",
     "exists_version",
     "read_data_for_smt_transform",
-    "read_graph_for_package_info_operation",
+    "read_graph_for_package_ssc_info_operation",
     "read_graph_for_req_file_info_operation",
+    "read_graph_for_version_ssc_info_operation",
     "read_operation_result",
     "read_package_by_name",
     "read_package_status_by_name",
@@ -87,5 +89,5 @@ __all__ = [
     "update_repository_moment",
     "update_requirement_file_moment",
     "update_requirement_rel_constraints",
-    "update_versions_serial_number",
+    "update_versions_serial_number"
 ]

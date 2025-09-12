@@ -15,6 +15,7 @@ from .operations import (
     PackageInfoRequest,
     ValidConfigRequest,
     ValidGraphRequest,
+    VersionInfoRequest,
 )
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     "MinMaxImpactRequest",
     "PackageInfoRequest",
     "ValidConfigRequest",
-    "ValidGraphRequest"
+    "ValidGraphRequest",
+    "VersionInfoRequest"
 ]
