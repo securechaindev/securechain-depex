@@ -20,7 +20,7 @@ from app.utils import (
 router = APIRouter()
 
 @router.post(
-    "/operation/package/package_ssc_info",
+    "/operation/ssc/package_ssc_info",
     summary="Get Package SSC Information",
     description="Retrieve information about the software supply chain of a specific package.",
     response_description="SSC package information.",
@@ -77,10 +77,10 @@ async def package_ssc_info(
 
 
 @router.post(
-    "/operation/package/version_ssc_info",
+    "/operation/ssc/version_ssc_info",
     summary="Get Package Version SSC Information",
     description="Retrieve information about the software supply chain of a specific package version.",
-    response_description="SSC vackage version information.",
+    response_description="SSC package version information.",
     dependencies=[Depends(JWTBearer())],
     tags=["Secure Chain Depex - Operation/SSC"]
 )
