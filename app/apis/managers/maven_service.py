@@ -97,7 +97,11 @@ async def get_maven_versions(group_id: str, artifact_id: str) -> tuple[list[dict
                     "release_date": datetime.fromtimestamp(timestamp_s)
                 })
         versions = await order_versions("MavenPackage", raw_versions)
-        repository_url, vendor = await get_maven_url_vendor(group_id, artifact_id, versions[-1]["name"])
+        repository_url, vendor = await get_maven_url_vendor(
+            group_id,
+            artifact_id,
+            next(reversed(versions), {}).get("name")
+        )
         await set_cache(key, (versions, repository_url, vendor))
     return versions, repository_url, vendor
 
