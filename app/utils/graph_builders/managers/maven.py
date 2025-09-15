@@ -89,7 +89,6 @@ async def maven_extract_packages(
     )
     await maven_generate_packages(requirement, version.get("id"), f"{parent_group_id}:{parent_artifact_id}")
 
-from app.logger import logger
 async def maven_search_new_versions(package: dict[str, Any]) -> None:
     versions, _, _ = await get_maven_versions(package.get("group_id"), package.get("artifact_id"))
     count = await count_number_of_versions_by_package("MavenPackage", package.get("name"))
