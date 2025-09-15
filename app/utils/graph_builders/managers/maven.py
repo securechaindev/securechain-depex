@@ -17,11 +17,11 @@ from app.services import (
 from .vulnerabilities import attribute_vulnerabilities
 
 
-async def maven_create_requirement_file(requirement_file_name: str, file: Any, repository_id: str) -> None:
+async def maven_create_requirement_file(requirement_file_name: str, file: dict[str, Any], repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
-        {"name": requirement_file_name, "manager": file["manager"], "moment": datetime.now()}, repository_id
+        {"name": requirement_file_name, "manager": file.get("manager"), "moment": datetime.now()}, repository_id
     )
-    await maven_generate_packages(file["requirement"], new_req_file_id)
+    await maven_generate_packages(file.get("requirement"), new_req_file_id)
 
 
 async def maven_generate_packages(
@@ -37,7 +37,7 @@ async def maven_generate_packages(
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
             package["constraints"] = constraints
-            if package["moment"] < datetime.now() - timedelta(days=10):
+            if package.get("moment") < datetime.now() - timedelta(days=10):
                 await maven_search_new_versions(package)
             known_packages.append(package)
         else:
@@ -85,29 +85,29 @@ async def maven_extract_packages(
     requirement = await get_maven_package(
         parent_group_id,
         parent_artifact_id,
-        version["name"],
+        version.get("name"),
     )
-    await maven_generate_packages(requirement, version["id"], f"{parent_group_id}:{parent_artifact_id}")
+    await maven_generate_packages(requirement, version.get("id"), f"{parent_group_id}:{parent_artifact_id}")
 
-
+from app.logger import logger
 async def maven_search_new_versions(package: dict[str, Any]) -> None:
-    versions = await get_maven_versions(package["group_id"], package["artifact_id"])
-    count = await count_number_of_versions_by_package("MavenPackage", package["name"])
+    versions, _, _ = await get_maven_versions(package.get("group_id"), package.get("artifact_id"))
+    count = await count_number_of_versions_by_package("MavenPackage", package.get("name"))
     if count < len(versions):
         new_attributed_versions: list[dict[str, Any]] = []
-        actual_versions = await read_versions_names_by_package("MavenPackage", package["name"])
+        actual_versions = await read_versions_names_by_package("MavenPackage", package.get("name"))
         for index, version in enumerate(versions):
-            if version["name"] not in actual_versions:
+            if version.get("name") not in actual_versions:
                 new_attributed_versions.append(
-                    await attribute_vulnerabilities(package["name"], version)
+                    await attribute_vulnerabilities(package.get("name"), version)
                 )
                 del versions[index]
         created_versions = await create_versions(
             "MavenPackage",
-            package["name"],
+            package.get("name"),
             new_attributed_versions,
         )
-        await update_versions_serial_number("MavenPackage", package["name"], versions)
+        await update_versions_serial_number("MavenPackage", package.get("name"), versions)
         for version in created_versions:
-            await maven_extract_packages(package["group_id"], package["artifact_id"], version)
-    await update_package_moment("MavenPackage", package["name"])
+            await maven_extract_packages(package.get("group_id"), package.get("artifact_id"), version)
+    await update_package_moment("MavenPackage", package.get("name"))

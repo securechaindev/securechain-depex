@@ -17,11 +17,11 @@ from app.services import (
 from .vulnerabilities import attribute_vulnerabilities
 
 
-async def nuget_create_requirement_file(requirement_file_name: str, file: Any, repository_id: str) -> None:
+async def nuget_create_requirement_file(requirement_file_name: str, file: dict[str, Any], repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
-        {"name": requirement_file_name, "manager": file["manager"], "moment": datetime.now()}, repository_id
+        {"name": requirement_file_name, "manager": file.get("manager"), "moment": datetime.now()}, repository_id
     )
-    await nuget_generate_packages(file["requirement"], new_req_file_id)
+    await nuget_generate_packages(file.get("requirement"), new_req_file_id)
 
 
 async def nuget_generate_packages(
@@ -37,7 +37,7 @@ async def nuget_generate_packages(
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
             package["constraints"] = constraints
-            if package["moment"] < datetime.now() - timedelta(days=10):
+            if package.get("moment") < datetime.now() - timedelta(days=10):
                 await nuget_search_new_versions(package)
             known_packages.append(package)
         else:
@@ -73,29 +73,29 @@ async def nuget_create_package(
             parent_version_name,
         )
         for requirement, created_version in zip(requirements, created_versions):
-            await nuget_generate_packages(requirement, created_version["id"], package_name)
+            await nuget_generate_packages(requirement, created_version.get("id"), package_name)
 
 
 async def nuget_search_new_versions(package: dict[str, Any]) -> None:
-    versions, requirements = await get_nuget_versions(package["name"])
-    count = await count_number_of_versions_by_package("NuGetPackage", package["name"])
+    versions, requirements = await get_nuget_versions(package.get("name"))
+    count = await count_number_of_versions_by_package("NuGetPackage", package.get("name"))
     if count < len(versions):
         new_attributed_versions: list[dict[str, Any]] = []
         new_requirements = []
-        actual_versions = await read_versions_names_by_package("NuGetPackage", package["name"])
+        actual_versions = await read_versions_names_by_package("NuGetPackage", package.get("name"))
         for index, (version, requirement) in enumerate(zip(versions, requirements)):
-            if version["name"] not in actual_versions:
+            if version.get("name") not in actual_versions:
                 new_attributed_versions.append(
-                    await attribute_vulnerabilities(package["name"], version)
+                    await attribute_vulnerabilities(package.get("name"), version)
                 )
                 del versions[index]
                 new_requirements.append(requirement)
         created_versions = await create_versions(
             "NuGetPackage",
-            package["name"],
+            package.get("name"),
             new_attributed_versions
         )
-        await update_versions_serial_number("NuGetPackage", package["name"], versions)
+        await update_versions_serial_number("NuGetPackage", package.get("name"), versions)
         for version, requirement in zip(created_versions, new_requirements):
-            await nuget_generate_packages(requirement, version["id"], package["name"])
-    await update_package_moment("NuGetPackage", package["name"])
+            await nuget_generate_packages(requirement, version.get("id"), package.get("name"))
+    await update_package_moment("NuGetPackage", package.get("name"))

@@ -17,11 +17,11 @@ from app.services import (
 from .vulnerabilities import attribute_vulnerabilities
 
 
-async def rubygems_create_requirement_file(requirement_file_name: str, file: Any, repository_id: str) -> None:
+async def rubygems_create_requirement_file(requirement_file_name: str, file: dict[str, Any], repository_id: str) -> None:
     new_req_file_id = await create_requirement_file(
-        {"name": requirement_file_name, "manager": "rubygems", "moment": datetime.now()}, repository_id
+        {"name": requirement_file_name, "manager": file.get("manager"), "moment": datetime.now()}, repository_id
     )
-    await rubygems_generate_packages(file["requirement"], new_req_file_id)
+    await rubygems_generate_packages(file.get("requirement"), new_req_file_id)
 
 
 async def rubygems_generate_packages(
@@ -36,7 +36,7 @@ async def rubygems_generate_packages(
             package["parent_id"] = parent_id
             package["parent_version_name"] = parent_version_name
             package["constraints"] = constraints
-            if package["moment"] < datetime.now() - timedelta(days=10):
+            if package.get("moment") < datetime.now() - timedelta(days=10):
                 await rubygems_search_new_versions(package)
             known_packages.append(package)
         else:
@@ -78,29 +78,29 @@ async def rubygems_extract_packages(
     version: dict[str, Any]
 ) -> None:
     requirement = await get_rubygems_package(
-        parent_package_name, version["name"]
+        parent_package_name, version.get("name")
     )
-    await rubygems_generate_packages(requirement, version["id"], parent_package_name)
+    await rubygems_generate_packages(requirement, version.get("id"), parent_package_name)
 
 
 async def rubygems_search_new_versions(package: dict[str, Any]) -> None:
-    versions = await get_rubygems_versions(package["name"])
-    count = await count_number_of_versions_by_package("RubyGemsPackage", package["name"])
+    versions, _, _ = await get_rubygems_versions(package.get("name"))
+    count = await count_number_of_versions_by_package("RubyGemsPackage", package.get("name"))
     if count < len(versions):
         new_attributed_versions: list[dict[str, Any]] = []
-        actual_versions = await read_versions_names_by_package("RubyGemsPackage", package["name"])
+        actual_versions = await read_versions_names_by_package("RubyGemsPackage", package.get("name"))
         for index, version in enumerate(versions):
-            if version["name"] not in actual_versions:
+            if version.get("name") not in actual_versions:
                 new_attributed_versions.append(
-                    await attribute_vulnerabilities(package["name"], version)
+                    await attribute_vulnerabilities(package.get("name"), version)
                 )
                 del versions[index]
         created_versions = await create_versions(
             "RubyGemsPackage",
-            package["name"],
+            package.get("name"),
             new_attributed_versions,
         )
-        await update_versions_serial_number("RubyGemsPackage", package["name"], versions)
+        await update_versions_serial_number("RubyGemsPackage", package.get("name"), versions)
         for version in created_versions:
-            await rubygems_extract_packages(package["name"], version)
-    await update_package_moment("RubyGemsPackage", package["name"])
+            await rubygems_extract_packages(package.get("name"), version)
+    await update_package_moment("RubyGemsPackage", package.get("name"))
