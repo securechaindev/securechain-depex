@@ -6,11 +6,7 @@ from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.exception_handler import (
-    http_exception_handler,
-    request_validation_exception_handler,
-    unhandled_exception_handler,
-)
+from app.exception_handler import ExceptionHandler
 from app.http_session import close_session
 from app.limiter import limiter
 from app.middleware import log_request_middleware
@@ -52,8 +48,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
-app.add_exception_handler(HTTPException, http_exception_handler)
-app.add_exception_handler(Exception, unhandled_exception_handler)
+app.add_exception_handler(RequestValidationError, ExceptionHandler.request_validation_exception_handler)
+app.add_exception_handler(HTTPException, ExceptionHandler.http_exception_handler)
+app.add_exception_handler(Exception, ExceptionHandler.unhandled_exception_handler)
+
 
 app.include_router(api_router)
