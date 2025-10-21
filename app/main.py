@@ -9,7 +9,7 @@ from app.config import settings
 from app.exception_handler import ExceptionHandler
 from app.http_session import close_session
 from app.limiter import limiter
-from app.middleware import log_request_middleware
+from app.middleware import LogRequestMiddleware
 from app.router import api_router
 
 DESCRIPTION = """
@@ -39,7 +39,7 @@ app = FastAPI(
 )
 
 app.state.limiter = limiter
-app.middleware("http")(log_request_middleware)
+app.add_middleware(LogRequestMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.SERVICES_ALLOWED_ORIGINS,
