@@ -1,0 +1,54 @@
+from z3 import IntNumRef, ModelRef, RatNumRef
+
+from app.services import read_releases_by_serial_numbers
+
+
+class ConfigSanitizer:
+    @staticmethod
+    async def sanitize(node_type: str, config: ModelRef) -> dict[str, float | int]:
+        final_config: dict[str, float | int] = {}
+        impact_vars: dict[str, float | int] = {}
+
+        for var in config:
+            value = ConfigSanitizer.extract_variable_value(config, var)
+            if value is None:
+                continue
+
+            var_name = str(var)
+            if "impact_" in var_name:
+                impact_vars[var_name] = value
+            else:
+                final_config[var_name] = value
+
+        ConfigSanitizer.process_impact_variables(final_config, impact_vars)
+
+        return await read_releases_by_serial_numbers(node_type, final_config)
+
+    @staticmethod
+    def extract_variable_value(config: ModelRef, var) -> float | int | None:
+        var_name = str(var)
+
+        if any(char in var_name for char in ("/0", "func_obj")):
+            return None
+
+        if isinstance(config[var], RatNumRef):
+            return round(
+                config[var].numerator_as_long() / config[var].denominator_as_long(), 2
+            )
+
+        if isinstance(config[var], IntNumRef):
+            value = config[var].as_long()
+            if value == -1:
+                return None
+            return value
+
+        return 0
+
+    @staticmethod
+    def process_impact_variables(
+        final_config: dict[str, float | int], impact_vars: dict[str, float | int]
+    ) -> None:
+        for impact_var, impact_value in impact_vars.items():
+            base_var = impact_var.replace("impact_", "")
+            if base_var in final_config:
+                final_config[impact_var] = impact_value

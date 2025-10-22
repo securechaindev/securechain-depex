@@ -2,7 +2,7 @@ from typing import Any
 
 from z3 import ArithRef, BoolRef, Real, parse_smt2_string
 
-from app.utils.others import filter_versions
+from app.utils import filter_versions
 
 
 class SMTModel:
