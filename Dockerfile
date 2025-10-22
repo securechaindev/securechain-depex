@@ -1,20 +1,28 @@
-FROM python:3.13.2-slim AS builder
+FROM python:3.13-slim AS builder
 
-WORKDIR /install
+WORKDIR /build
 
-COPY requirements.txt .
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip && \
-    pip install --prefix=/install/deps --no-cache-dir -r requirements.txt
+ENV PATH="/root/.local/bin:$PATH"
 
-FROM python:3.13.2-slim AS runtime
+COPY pyproject.toml uv.lock README.md ./
+
+RUN /root/.local/bin/uv sync --frozen --no-group dev --no-cache
+
+FROM python:3.13-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PATH="/build/.venv/bin:$PATH"
 
 WORKDIR /app
 
-COPY --from=builder /install/deps /usr/local
+COPY --from=builder /build/.venv /build/.venv
+
 COPY ./app ./app
 
 EXPOSE 8000
