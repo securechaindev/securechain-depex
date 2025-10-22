@@ -1,21 +1,22 @@
 from xml.etree.ElementTree import fromstring
 
+from .base_analyzer import RequirementFileAnalyzer
 
-async def analyze_pom_xml(
-    requirement_files: dict[str, dict[str, dict | str]],
-    repository_path: str,
-    requirement_file_name: str,
-) -> dict[str, dict[str, dict | str]]:
-    try:
-        with open(f"{repository_path}/{requirement_file_name}", encoding="utf-8") as file:
+
+class PomXmlAnalyzer(RequirementFileAnalyzer):
+    def __init__(self):
+        super().__init__("Maven")
+
+    async def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+        packages = {}
+        with open(f"{repository_path}/{filename}", encoding="utf-8") as file:
             pom_xml = file.read()
         root = fromstring(pom_xml)
-        requirement_file_name = requirement_file_name.replace("/master/", "").replace("/main/", "")
-        requirement_files[requirement_file_name] = {"manager": "Maven", "requirement": {}}
         namespace = "{http://maven.apache.org/POM/4.0.0}"
         dependencies = root.findall(f".//{namespace}dependency")
         properties = {
-            prop.tag.replace(namespace, ""): prop.text for prop in root.findall(f".//{namespace}properties/*")
+            prop.tag.replace(namespace, ""): prop.text
+            for prop in root.findall(f".//{namespace}properties/*")
         }
         for dep in dependencies:
             group_id = dep.find(f"{namespace}groupId")
@@ -29,9 +30,9 @@ async def analyze_pom_xml(
             if version_text.startswith("${") and version_text.endswith("}"):
                 property_key = version_text[2:-1]
                 version_text = properties.get(property_key, "any")
-            if version_text != "any" and not any(char in version_text for char in ["[", "]", "(", ")"]):
+            if version_text != "any" and not any(
+                char in version_text for char in ["[", "]", "(", ")"]
+            ):
                 version_text = f"[{version_text}]"
-            requirement_files[requirement_file_name]["requirement"][f"{group_id_text}:{artifact_id_text}"] = version_text
-    except Exception:
-        pass
-    return requirement_files
+            packages[f"{group_id_text}:{artifact_id_text}"] = version_text
+        return packages
