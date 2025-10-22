@@ -3,7 +3,7 @@ from json import dumps
 from redis import Redis
 from redis.exceptions import ResponseError
 
-from app.config import settings
+from app.settings import settings
 from app.schemas import PackageMessageSchema
 
 
