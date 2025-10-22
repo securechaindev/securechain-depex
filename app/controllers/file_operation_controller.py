@@ -4,6 +4,13 @@ from fastapi import APIRouter, Body, Depends, Request, status
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
+from app.domain.smt import (
+    FilterConfigsOperation,
+    MaximizeImpactOperation,
+    MinimizeImpactOperation,
+    SMTModel,
+    ValidGraphOperation,
+)
 from app.limiter import limiter
 from app.schemas import (
     FileInfoRequest,
@@ -20,16 +27,7 @@ from app.services import (
     replace_operation_result,
     replace_smt_text,
 )
-from app.utils import (
-    JWTBearer,
-    SMTModel,
-    execute_filter_configs,
-    execute_maximize_impact,
-    execute_minimize_impact,
-    execute_valid_graph,
-    filter_versions,
-    json_encoder,
-)
+from app.utils import JWTBearer, filter_versions, json_encoder
 
 router = APIRouter()
 
@@ -114,7 +112,16 @@ async def valid_graph(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        return await execute_valid_graph(smt_model)
+        result = await ValidGraphOperation.execute(smt_model)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=await json_encoder(
+                {
+                    "result": result,
+                    "detail": "operation_success",
+                }
+            ),
+        )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -149,7 +156,16 @@ async def minimize_impact(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        return await execute_minimize_impact(smt_model, min_max_impact_request.limit)
+        result = await MinimizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=await json_encoder(
+                {
+                    "result": result,
+                    "detail": "operation_success",
+                }
+            ),
+        )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -184,7 +200,16 @@ async def maximize_impact(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        return await execute_maximize_impact(smt_model, min_max_impact_request.limit)
+        result = await MaximizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=await json_encoder(
+                {
+                    "result": result,
+                    "detail": "operation_success",
+                }
+            ),
+        )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -219,7 +244,21 @@ async def filter_configs(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        return await execute_filter_configs(smt_model, filter_configs_request.max_threshold, filter_configs_request.min_threshold, filter_configs_request.limit)
+        result = await FilterConfigsOperation.execute(
+            smt_model,
+            filter_configs_request.max_threshold,
+            filter_configs_request.min_threshold,
+            filter_configs_request.limit,
+        )
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=await json_encoder(
+                {
+                    "result": result,
+                    "detail": "operation_success",
+                }
+            ),
+        )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,

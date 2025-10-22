@@ -4,6 +4,12 @@ from fastapi import APIRouter, Body, Depends, Request, status
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
+from app.domain.smt import (
+    CompleteConfigOperation,
+    ConfigByImpactOperation,
+    SMTModel,
+    ValidConfigOperation,
+)
 from app.limiter import limiter
 from app.schemas import (
     CompleteConfigRequest,
@@ -16,14 +22,7 @@ from app.services import (
     read_smt_text,
     replace_smt_text,
 )
-from app.utils import (
-    JWTBearer,
-    SMTModel,
-    execute_complete_config,
-    execute_config_by_impact,
-    execute_valid_config,
-    json_encoder,
-)
+from app.utils import JWTBearer, json_encoder
 
 router = APIRouter()
 
@@ -51,7 +50,16 @@ async def valid_config(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         config = await read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config)
-        return await execute_valid_config(smt_model, config)
+        result = await ValidConfigOperation.execute(smt_model, config)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=await json_encoder(
+                {
+                    "result": result,
+                    "detail": "operation_success",
+                }
+            ),
+        )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -87,7 +95,16 @@ async def complete_config(
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
         config = await read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
-        return await execute_complete_config(smt_model, config)
+        result = await CompleteConfigOperation.execute(smt_model, config)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=await json_encoder(
+                {
+                    "result": result,
+                    "detail": "operation_success",
+                }
+            ),
+        )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -122,7 +139,16 @@ async def config_by_impact(
         else:
             model_text = await smt_model.transform()
             await replace_smt_text(smt_text_id, model_text)
-        return await execute_config_by_impact(smt_model, config_by_impact_request.impact)
+        result = await ConfigByImpactOperation.execute(smt_model, config_by_impact_request.impact)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=await json_encoder(
+                {
+                    "result": result,
+                    "detail": "operation_success",
+                }
+            ),
+        )
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
