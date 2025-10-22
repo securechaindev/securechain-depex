@@ -1,18 +1,19 @@
 from datetime import datetime
 from typing import Any
 
-from .dbs import get_collection
+from app.database import DatabaseManager
 
 
-async def replace_operation_result(operation_result_id: str, result: dict[str, Any]) -> None:
-    operation_result_collection = get_collection("operation_result")
-    await operation_result_collection.replace_one(
-        {"operation_result_id": operation_result_id},
-        {"operation_result_id": operation_result_id, "result": result, "moment": datetime.now()},
-        upsert=True,
-    )
+class OperationService:
+    def __init__(self, db: DatabaseManager):
+        self._operation_result_collection = db.get_operation_result_collection()
 
+    async def replace_operation_result(self, operation_result_id: str, result: dict[str, Any]) -> None:
+        await self._operation_result_collection.replace_one(
+            {"operation_result_id": operation_result_id},
+            {"operation_result_id": operation_result_id, "result": result, "moment": datetime.now()},
+            upsert=True,
+        )
 
-async def read_operation_result(operation_result_id: str) -> dict[str, Any]:
-    operation_result_collection = get_collection("operation_result")
-    return await operation_result_collection.find_one({"operation_result_id": operation_result_id})
+    async def read_operation_result(self, operation_result_id: str) -> dict[str, Any]:
+        return await self._operation_result_collection.find_one({"operation_result_id": operation_result_id})

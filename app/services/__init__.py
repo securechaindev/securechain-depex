@@ -1,83 +1,15 @@
-from .operation_service import (
-    read_operation_result,
-    replace_operation_result,
-)
-from .package_service import (
-    exists_package,
-    exists_version,
-    read_graph_for_package_ssc_info_operation,
-    read_package_by_name,
-    read_package_status_by_name,
-    read_packages_by_requirement_file,
-    read_version_status_by_package_and_name,
-)
-from .repository_service import (
-    create_repository,
-    create_user_repository_rel,
-    read_repositories_by_user_id,
-    read_repository_by_id,
-    read_repository_by_owner_and_name,
-    update_repository_is_complete,
-    update_repository_moment,
-)
-from .requirement_file_service import (
-    create_requirement_file,
-    delete_requirement_file,
-    delete_requirement_file_rel,
-    read_data_for_smt_transform,
-    read_graph_for_req_file_info_operation,
-    read_requirement_file_moment,
-    read_requirement_files_by_repository,
-    update_requirement_file_moment,
-    update_requirement_rel_constraints,
-)
-from .smt_service import (
-    read_smt_text,
-    replace_smt_text,
-)
-from .version_service import (
-    count_number_of_versions_by_package,
-    read_graph_for_version_ssc_info_operation,
-    read_releases_by_serial_numbers,
-    read_serial_numbers_by_releases,
-    read_versions_names_by_package,
-    update_versions_serial_number,
-)
-from .vulnerability_service import read_vulnerabilities_by_package_and_version
+from .operation_service import OperationService
+from .package_service import PackageService
+from .repository_service import RepositoryService
+from .requirement_file_service import RequirementFileService
+from .smt_service import SMTService
+from .version_service import VersionService
 
 __all__ = [
-    "count_number_of_versions_by_package",
-    "create_repository",
-    "create_requirement_file",
-    "create_user_repository_rel",
-    "delete_requirement_file",
-    "delete_requirement_file_rel",
-    "exists_package",
-    "exists_version",
-    "read_data_for_smt_transform",
-    "read_graph_for_package_ssc_info_operation",
-    "read_graph_for_req_file_info_operation",
-    "read_graph_for_version_ssc_info_operation",
-    "read_operation_result",
-    "read_package_by_name",
-    "read_package_status_by_name",
-    "read_packages_by_requirement_file",
-    "read_releases_by_serial_numbers",
-    "read_repositories_by_user_id",
-    "read_repository_by_id",
-    "read_repository_by_owner_and_name",
-    "read_requirement_file_moment",
-    "read_requirement_files_by_repository",
-    "read_serial_numbers_by_releases",
-    "read_smt_text",
-    "read_version_status_by_package_and_name",
-    "read_versions_names_by_package",
-    "read_vulnerabilities_by_package_and_version",
-    "replace_operation_result",
-    "replace_smt_text",
-    "update_repository_is_complete",
-    "update_repository_moment",
-    "update_requirement_file_moment",
-    "update_requirement_rel_constraints",
-    "update_versions_serial_number",
+    "OperationService",
+    "PackageService",
+    "RepositoryService",
+    "RequirementFileService",
+    "SMTService",
+    "VersionService",
 ]
