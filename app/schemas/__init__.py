@@ -4,7 +4,9 @@ from .graphs import (
     GetVersionStatusRequest,
     InitPackageRequest,
     InitRepositoryRequest,
-    InitVersionRequest,
+)
+from .messages import (
+    PackageMessageSchema,
 )
 from .operations import (
     CompleteConfigRequest,
@@ -28,9 +30,9 @@ __all__ = [
     "GetVersionStatusRequest",
     "InitPackageRequest",
     "InitRepositoryRequest",
-    "InitVersionRequest",
     "MinMaxImpactRequest",
     "PackageInfoRequest",
+    "PackageMessageSchema",
     "ValidConfigRequest",
     "ValidGraphRequest",
     "VersionInfoRequest"

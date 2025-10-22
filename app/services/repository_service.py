@@ -11,7 +11,6 @@ async def create_repository(repository: dict[str, Any]) -> str:
         owner: $owner,
         name: $name,
         moment: $moment,
-        add_extras: $add_extras,
         is_complete: $is_complete
     })
     CREATE (u)-[rel:OWN]->(r)
@@ -33,29 +32,18 @@ async def create_user_repository_rel(repository_id: str, user_id: str) -> None:
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, repository_id=repository_id, user_id=user_id)
         record = await result.single()
-    return record[0]
+    return record["id"]
 
 
-async def read_repositories_update(owner: str, name: str) -> dict[str, datetime | bool]:
+async def read_repository_by_owner_and_name(owner: str, name: str) -> dict[str, Any] | None:
     query = """
     MATCH(r: Repository{owner: $owner, name: $name})
-    RETURN {moment: r.moment, is_complete: r.is_complete, id: elementid(r)}
+    RETURN r{{id: elementid(r), .*}} AS repository
     """
     async with get_graph_db_driver().session() as session:
         result = await session.run(query, owner=owner, name=name)
         record = await result.single()
-    return record[0] if record else {"moment": None, "is_complete": True, "id": None}
-
-
-async def read_repositories(owner: str, name: str) -> str:
-    query = """
-    MATCH(r: Repository{owner: $owner, name: $name})
-    RETURN elementid(r)
-    """
-    async with get_graph_db_driver().session() as session:
-        result = await session.run(query, owner=owner, name=name)
-        record = await result.single()
-    return record[0] if record else None
+    return record["repository"] if record else None
 
 
 async def read_repository_by_id(repository_id: str) -> dict[str, str]:

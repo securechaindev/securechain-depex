@@ -3,8 +3,6 @@ from .operation_service import (
     replace_operation_result,
 )
 from .package_service import (
-    create_package_and_versions,
-    create_versions,
     exists_package,
     exists_version,
     read_graph_for_package_ssc_info_operation,
@@ -12,16 +10,13 @@ from .package_service import (
     read_package_status_by_name,
     read_packages_by_requirement_file,
     read_version_status_by_package_and_name,
-    relate_packages,
-    update_package_moment,
 )
 from .repository_service import (
     create_repository,
     create_user_repository_rel,
-    read_repositories,
     read_repositories_by_user_id,
-    read_repositories_update,
     read_repository_by_id,
+    read_repository_by_owner_and_name,
     update_repository_is_complete,
     update_repository_moment,
 )
@@ -52,11 +47,9 @@ from .vulnerability_service import read_vulnerabilities_by_package_and_version
 
 __all__ = [
     "count_number_of_versions_by_package",
-    "create_package_and_versions",
     "create_repository",
     "create_requirement_file",
     "create_user_repository_rel",
-    "create_versions",
     "delete_requirement_file",
     "delete_requirement_file_rel",
     "exists_package",
@@ -70,10 +63,9 @@ __all__ = [
     "read_package_status_by_name",
     "read_packages_by_requirement_file",
     "read_releases_by_serial_numbers",
-    "read_repositories",
     "read_repositories_by_user_id",
-    "read_repositories_update",
     "read_repository_by_id",
+    "read_repository_by_owner_and_name",
     "read_requirement_file_moment",
     "read_requirement_files_by_repository",
     "read_serial_numbers_by_releases",
@@ -81,13 +73,11 @@ __all__ = [
     "read_version_status_by_package_and_name",
     "read_versions_names_by_package",
     "read_vulnerabilities_by_package_and_version",
-    "relate_packages",
     "replace_operation_result",
     "replace_smt_text",
-    "update_package_moment",
     "update_repository_is_complete",
     "update_repository_moment",
     "update_requirement_file_moment",
     "update_requirement_rel_constraints",
-    "update_versions_serial_number"
+    "update_versions_serial_number",
 ]

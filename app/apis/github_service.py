@@ -4,7 +4,7 @@ from datetime import datetime
 from aiohttp import ClientConnectorError, ClientSession
 
 from app.config import settings
-from app.exceptions.exceptions import InvalidRepositoryException
+from app.exceptions import InvalidRepositoryException
 
 headers_github = {
     "Accept": "application/vnd.github.hawkgirl-preview+json",

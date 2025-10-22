@@ -5,7 +5,13 @@ from app.schemas.enums import NodeType
 
 class InitPackageRequest(BaseModel):
     node_type: NodeType = Field(...)
-    package_name: str  = Field(...)
+    package_name: str = Field(...)
+    vendor: str = Field(default="n/a")
+    repository_url: str | None = Field(default=None)
+    constraints: str | None = Field(default=None)
+    parent_id: str | None = Field(default=None)
+    parent_version: str | None = Field(default=None)
+    refresh: bool = Field(default=False)
 
     @model_validator(mode='before')
     def set_package_name_to_lowercase(cls, values):

@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta
-
 from fastapi import APIRouter, BackgroundTasks, Depends, Request, status
 from fastapi.responses import JSONResponse
 
 from app.apis import get_last_commit_date_github
+from app.domain import RepositoryInitializer
+from app.exceptions import InvalidRepositoryException
 from app.limiter import limiter
 from app.schemas import (
     GetPackageStatusRequest,
@@ -11,25 +11,18 @@ from app.schemas import (
     GetVersionStatusRequest,
     InitPackageRequest,
     InitRepositoryRequest,
-    InitVersionRequest,
+    PackageMessageSchema,
 )
 from app.services import (
-    create_user_repository_rel,
-    exists_package,
-    exists_version,
-    read_package_by_name,
     read_package_status_by_name,
     read_repositories_by_user_id,
-    read_repositories_update,
+    read_repository_by_owner_and_name,
     read_version_status_by_package_and_name,
 )
 from app.utils import (
     JWTBearer,
-    create_package,
-    create_version,
-    init_repository_graph,
+    RedisQueue,
     json_encoder,
-    search_new_versions,
 )
 
 router = APIRouter()
@@ -112,109 +105,112 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
 
 
 @router.post(
-    "/graph/version/init",
-    summary="Initialize Version",
-    description="Initialize a specific version.",
-    response_description="Version initialization status.",
-    dependencies=[Depends(JWTBearer())],
-    tags=["Secure Chain Depex - Graph"]
-)
-@limiter.limit("25/minute")
-async def init_version(request: Request, init_version_request: InitVersionRequest, background_tasks: BackgroundTasks) -> JSONResponse:
-    exists = await exists_version(init_version_request.node_type.value, init_version_request.package_name, init_version_request.version_name)
-    if not exists:
-        exists = await exists_package(init_version_request.node_type.value, init_version_request.package_name)
-        if exists:
-            background_tasks.add_task(create_version, init_version_request)
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content= await json_encoder(
-                    {
-                        "detail": "version_initializing",
-                    }
-                ),
-            )
-        else:
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content= await json_encoder(
-                    {
-                        "detail": "package_not_found",
-                    }
-                ),
-            )
-    else:
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content= await json_encoder(
-                {
-                    "detail": "version_already_exists",
-                }
-            ),
-        )
-
-
-@router.post(
     "/graph/package/init",
     summary="Initialize Package",
-    description="Initialize a specific package.",
-    response_description="Package initialization status.",
+    description="Queue a package for extraction and analysis. The package will be processed asynchronously by Dagster.",
+    response_description="Package queuing status.",
     dependencies=[Depends(JWTBearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
-async def init_package(request: Request, init_package_request: InitPackageRequest, background_tasks: BackgroundTasks) -> JSONResponse:
-    package = await read_package_by_name(init_package_request.node_type.value, init_package_request.package_name)
-    if not package:
-        background_tasks.add_task(create_package, init_package_request)
-    elif package["moment"] < datetime.now() - timedelta(days=10):
-        background_tasks.add_task(search_new_versions, package, init_package_request.node_type.value)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content= await json_encoder(
-            {
-                "detail": "package_initializing",
-            }
-        ),
-    )
+async def init_package(request: Request, init_package_request: InitPackageRequest) -> JSONResponse:
+    try:
+        message = PackageMessageSchema(
+            node_type=init_package_request.node_type.value,
+            package=init_package_request.package_name,
+            vendor=init_package_request.vendor,
+            repository_url=init_package_request.repository_url,
+            constraints=init_package_request.constraints,
+            parent_id=init_package_request.parent_id,
+            parent_version=init_package_request.parent_version,
+            refresh=init_package_request.refresh,
+        )
+
+        redis_queue = RedisQueue.from_env()
+        msg_id = redis_queue.add_package_message(message)
+
+        return JSONResponse(
+            status_code=status.HTTP_202_ACCEPTED,
+            content=await json_encoder({
+                "detail": "package_queued_for_processing",
+                "message_id": msg_id,
+                "package": init_package_request.package_name,
+            }),
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=await json_encoder({
+                "detail": "error_queuing_package",
+                "error": str(e),
+            }),
+        )
 
 
 @router.post(
     "/graph/repository/init",
     summary="Initialize Repository",
-    description="Initialize a specific repository.",
+    description="Initialize a repository by creating it in the graph and queuing its packages for extraction.",
     response_description="Repository initialization status.",
     dependencies=[Depends(JWTBearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
-async def init_repository(request: Request, init_graph_request: InitRepositoryRequest, background_tasks: BackgroundTasks) -> JSONResponse:
-    last_repository_update = await read_repositories_update(
-        init_graph_request.owner, init_graph_request.name
-    )
-    if last_repository_update["is_complete"]:
-        last_commit_date = await get_last_commit_date_github(
-            init_graph_request.owner, init_graph_request.name
-        )
-        if not last_commit_date:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content= await json_encoder(
-                    {
-                        "detail": "no_repo",
-                    }
-                ),
+async def init_repository(
+    request: Request,
+    init_repository_request: InitRepositoryRequest,
+    background_tasks: BackgroundTasks
+) -> JSONResponse:
+    try:
+        try:
+            last_commit_date = await get_last_commit_date_github(
+                init_repository_request.owner,
+                init_repository_request.name
             )
-        background_tasks.add_task(init_repository_graph, init_graph_request, last_repository_update, last_commit_date)
-    else:
-        await create_user_repository_rel(
-            last_repository_update["id"], init_graph_request.user_id
+        except InvalidRepositoryException:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=await json_encoder({
+                    "detail": "repository_not_found_on_github",
+                }),
+            )
+
+        repository = await read_repository_by_owner_and_name(
+            init_repository_request.owner,
+            init_repository_request.name
         )
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content= await json_encoder(
-            {
-                "detail": "init_repo",
-            }
-        ),
-    )
+
+        if repository is None or repository["is_complete"]:
+            background_tasks.add_task(
+                RepositoryInitializer().init_repository,
+                init_repository_request.owner,
+                init_repository_request.name,
+                init_repository_request.user_id,
+                repository,
+                last_commit_date,
+            )
+
+            return JSONResponse(
+                status_code=status.HTTP_202_ACCEPTED,
+                content=await json_encoder({
+                    "detail": "repository_queued_for_processing",
+                    "repository": f"{init_repository_request.owner}/{init_repository_request.name}",
+                }),
+            )
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content=await json_encoder({
+                    "detail": "repository_processing_in_progress",
+                    "repository_id": repository["id"],
+                }),
+            )
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=await json_encoder({
+                "detail": "error_initializing_repository",
+                "error": str(e),
+            }),
+        )
