@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     JWT_ACCESS_SECRET_KEY: str = ""
     GITHUB_GRAPHQL_API_KEY: str = ""
 
+    # Redis Configuration
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_STREAM: str = "package-extraction"
+    REDIS_GROUP: str = "extractors"
+    REDIS_CONSUMER: str = "package-consumer"
+
 
     class Config:
         env_file = ".env"
