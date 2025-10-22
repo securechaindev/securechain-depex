@@ -5,8 +5,8 @@ from motor.motor_asyncio import (
 )
 from neo4j import AsyncDriver, AsyncGraphDatabase
 
-from app.settings import settings
 from app.logger import logger
+from app.settings import settings
 
 
 class DatabaseManager:

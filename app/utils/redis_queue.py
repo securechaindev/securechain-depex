@@ -3,8 +3,8 @@ from json import dumps
 from redis import Redis
 from redis.exceptions import ResponseError
 
-from app.settings import settings
 from app.schemas import PackageMessageSchema
+from app.settings import settings
 
 
 class RedisQueue:

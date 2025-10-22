@@ -4,12 +4,12 @@ from fastapi import Request
 from fastapi.security import HTTPBearer
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
 
-from app.settings import settings
 from app.exceptions import (
     ExpiredTokenException,
     InvalidTokenException,
     NotAuthenticatedException,
 )
+from app.settings import settings
 
 
 class JWTBearer(HTTPBearer):

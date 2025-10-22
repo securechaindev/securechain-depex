@@ -1,10 +1,10 @@
-from asyncio import TimeoutError, sleep
+from asyncio import sleep
 from datetime import datetime
 
 from aiohttp import ClientConnectorError, ClientSession
 
-from app.settings import settings
 from app.exceptions import InvalidRepositoryException
+from app.settings import settings
 
 headers_github = {
     "Accept": "application/vnd.github.hawkgirl-preview+json",

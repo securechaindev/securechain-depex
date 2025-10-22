@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Any
 
 from neo4j import unit_of_work

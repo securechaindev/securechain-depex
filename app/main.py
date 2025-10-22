@@ -5,13 +5,13 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from app.settings import settings
 from app.database import DatabaseManager
 from app.exception_handler import ExceptionHandler
 from app.http_session import close_session
 from app.limiter import limiter
 from app.middleware import LogRequestMiddleware
 from app.router import api_router
+from app.settings import settings
 
 DESCRIPTION = """
 Depex is a tool that allows you to reason over the entire configuration space of the Software Supply Chain of an open-source software repository.

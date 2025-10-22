@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 from univers.version_range import (
     CargoVersionRange,
@@ -20,7 +20,7 @@ from univers.versions import (
 
 
 class VersionFilter:
-    VERSION_RANGE_MAP = {
+    VERSION_RANGE_MAP: ClassVar[dict[str, tuple[type[Version], type[VersionRange]]]] = {
         "PyPIPackage": (PypiVersion, PypiVersionRange),
         "NPMPackage": (SemverVersion, NpmVersionRange),
         "CargoPackage": (SemverVersion, CargoVersionRange),
