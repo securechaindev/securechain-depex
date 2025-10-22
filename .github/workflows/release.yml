@@ -1,24 +1,36 @@
 name: Publish GitHub Release
 
 on:
+  workflow_run:
+    workflows: ["Lint & Test"]
+    types:
+      - completed
+    branches:
+      - main
   push:
     tags:
       - "*"
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   push_to_registry:
     name: Push GitHub Release
-    if: github.ref_type == 'tag'
+    if: |
+      github.ref_type == 'tag' &&
+      (github.event_name == 'push' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Automated Version Bump
         id: changelog
         uses: Requarks/changelog-action@v1
         with:
-          token: ${{ secrets.GIT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
           writeToFile: false
           excludeTypes: other
@@ -33,7 +45,7 @@ jobs:
       - name: Publish release github
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.GIT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: ${{ steps.get_variables.outputs.IS_PRERELEASE }}
           tag_name: ${{ steps.get_variables.outputs.VERSION }}
           body: ${{ steps.changelog.outputs.changes }}
@@ -49,7 +61,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GIT_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push multi-arch image
         uses: docker/build-push-action@v5
