@@ -5,7 +5,8 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from app.config import settings
+from app.settings import settings
+from app.database import DatabaseManager
 from app.exception_handler import ExceptionHandler
 from app.http_session import close_session
 from app.limiter import limiter
@@ -18,7 +19,10 @@ Depex is a tool that allows you to reason over the entire configuration space of
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    db_manager = DatabaseManager()
+    await db_manager.initialize()
     yield
+    await db_manager.close()
     await close_session()
 
 app = FastAPI(

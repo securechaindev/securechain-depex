@@ -2,6 +2,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Request, status
 from fastapi.responses import JSONResponse
 
 from app.apis import get_last_commit_date_github
+from app.dependencies import (
+    get_json_encoder,
+    get_jwt_bearer,
+    get_package_service,
+    get_repository_service,
+)
 from app.domain import RepositoryInitializer
 from app.exceptions import InvalidRepositoryException
 from app.limiter import limiter
@@ -13,17 +19,8 @@ from app.schemas import (
     InitRepositoryRequest,
     PackageMessageSchema,
 )
-from app.services import (
-    read_package_status_by_name,
-    read_repositories_by_user_id,
-    read_repository_by_owner_and_name,
-    read_version_status_by_package_and_name,
-)
-from app.utils import (
-    JWTBearer,
-    RedisQueue,
-    json_encoder,
-)
+from app.services import PackageService, RepositoryService
+from app.utils import JSONEncoder, RedisQueue
 
 router = APIRouter()
 
@@ -32,13 +29,18 @@ router = APIRouter()
     summary="Get User Repositories",
     description="Retrieve a list of repositories for a specific user.",
     response_description="List of user repositories.",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(get_jwt_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
-async def get_repositories(request: Request, get_repositories_request: GetRepositoriesRequest = Depends()) -> JSONResponse:
-    repositories = await read_repositories_by_user_id(get_repositories_request.user_id)
-    return JSONResponse(status_code=status.HTTP_200_OK, content= await json_encoder({
+async def get_repositories(
+    request: Request,
+    get_repositories_request: GetRepositoriesRequest = Depends(),
+    repository_service: RepositoryService = Depends(get_repository_service),
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
+) -> JSONResponse:
+    repositories = await repository_service.read_repositories_by_user_id(get_repositories_request.user_id)
+    return JSONResponse(status_code=status.HTTP_200_OK, content= await json_encoder.encode({
         "repositories": repositories,
         "detail": "get_repositories_success",
     }))
@@ -52,12 +54,17 @@ async def get_repositories(request: Request, get_repositories_request: GetReposi
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
-async def get_package_status(request: Request, get_package_status_request: GetPackageStatusRequest = Depends()) -> JSONResponse:
-    package = await read_package_status_by_name(get_package_status_request.node_type.value, get_package_status_request.package_name)
+async def get_package_status(
+    request: Request,
+    get_package_status_request: GetPackageStatusRequest = Depends(),
+    package_service: PackageService = Depends(get_package_service),
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
+) -> JSONResponse:
+    package = await package_service.read_package_status_by_name(get_package_status_request.node_type.value, get_package_status_request.package_name)
     if not package:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content= await json_encoder(
+            content= await json_encoder.encode(
                 {
                     "detail": "package_not_found",
                 }
@@ -65,7 +72,7 @@ async def get_package_status(request: Request, get_package_status_request: GetPa
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content= await json_encoder({
+        content= await json_encoder.encode({
             "package": package,
             "detail": "get_package_status_success",
         })
@@ -80,8 +87,13 @@ async def get_package_status(request: Request, get_package_status_request: GetPa
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
-async def get_version_status(request: Request, get_version_status_request: GetVersionStatusRequest = Depends()) -> JSONResponse:
-    version = await read_version_status_by_package_and_name(
+async def get_version_status(
+    request: Request,
+    get_version_status_request: GetVersionStatusRequest = Depends(),
+    package_service: PackageService = Depends(get_package_service),
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
+) -> JSONResponse:
+    version = await package_service.read_version_status_by_package_and_name(
         get_version_status_request.node_type.value,
         get_version_status_request.package_name,
         get_version_status_request.version_name
@@ -89,7 +101,7 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
     if not version:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content= await json_encoder(
+            content= await json_encoder.encode(
                 {
                     "detail": "version_not_found",
                 }
@@ -97,7 +109,7 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content= await json_encoder({
+        content= await json_encoder.encode({
             "version": version,
             "detail": "get_version_status_success",
         }),
@@ -109,11 +121,15 @@ async def get_version_status(request: Request, get_version_status_request: GetVe
     summary="Initialize Package",
     description="Queue a package for extraction and analysis. The package will be processed asynchronously by Dagster.",
     response_description="Package queuing status.",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(get_jwt_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
-async def init_package(request: Request, init_package_request: InitPackageRequest) -> JSONResponse:
+async def init_package(
+    request: Request,
+    init_package_request: InitPackageRequest,
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
+) -> JSONResponse:
     try:
         message = PackageMessageSchema(
             node_type=init_package_request.node_type.value,
@@ -131,7 +147,7 @@ async def init_package(request: Request, init_package_request: InitPackageReques
 
         return JSONResponse(
             status_code=status.HTTP_202_ACCEPTED,
-            content=await json_encoder({
+            content=await json_encoder.encode({
                 "detail": "package_queued_for_processing",
                 "message_id": msg_id,
                 "package": init_package_request.package_name,
@@ -140,7 +156,7 @@ async def init_package(request: Request, init_package_request: InitPackageReques
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=await json_encoder({
+            content=await json_encoder.encode({
                 "detail": "error_queuing_package",
                 "error": str(e),
             }),
@@ -152,14 +168,16 @@ async def init_package(request: Request, init_package_request: InitPackageReques
     summary="Initialize Repository",
     description="Initialize a repository by creating it in the graph and queuing its packages for extraction.",
     response_description="Repository initialization status.",
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(get_jwt_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
 async def init_repository(
     request: Request,
     init_repository_request: InitRepositoryRequest,
-    background_tasks: BackgroundTasks
+    background_tasks: BackgroundTasks,
+    repository_service: RepositoryService = Depends(get_repository_service),
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     try:
         try:
@@ -170,12 +188,12 @@ async def init_repository(
         except InvalidRepositoryException:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content=await json_encoder({
+                content=await json_encoder.encode({
                     "detail": "repository_not_found_on_github",
                 }),
             )
 
-        repository = await read_repository_by_owner_and_name(
+        repository = await repository_service.read_repository_by_owner_and_name(
             init_repository_request.owner,
             init_repository_request.name
         )
@@ -192,7 +210,7 @@ async def init_repository(
 
             return JSONResponse(
                 status_code=status.HTTP_202_ACCEPTED,
-                content=await json_encoder({
+                content=await json_encoder.encode({
                     "detail": "repository_queued_for_processing",
                     "repository": f"{init_repository_request.owner}/{init_repository_request.name}",
                 }),
@@ -200,7 +218,7 @@ async def init_repository(
         else:
             return JSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
-                content=await json_encoder({
+                content=await json_encoder.encode({
                     "detail": "repository_processing_in_progress",
                     "repository_id": repository["id"],
                 }),
@@ -209,7 +227,7 @@ async def init_repository(
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=await json_encoder({
+            content=await json_encoder.encode({
                 "detail": "error_initializing_repository",
                 "error": str(e),
             }),

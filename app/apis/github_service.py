@@ -3,7 +3,7 @@ from datetime import datetime
 
 from aiohttp import ClientConnectorError, ClientSession
 
-from app.config import settings
+from app.settings import settings
 from app.exceptions import InvalidRepositoryException
 
 headers_github = {
