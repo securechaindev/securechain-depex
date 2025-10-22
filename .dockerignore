@@ -1,0 +1,78 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.dmypy.json
+dmypy.json
+
+# Virtual environments
+.venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+auth-env/
+
+# uv
+.uv/
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Environment files
+.env
+.envrc
+.envr
+
+# Documentation
+LICENSE
+*.md
+!README.md
+
+# Logs
+logs/
+*.log
+errors.log*
+
+# Tests
+tests/
+*.coverage
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Development
+dev/
+Dockerfile
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
