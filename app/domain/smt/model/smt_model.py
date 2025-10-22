@@ -2,7 +2,7 @@ from typing import Any
 
 from z3 import ArithRef, BoolRef, Real, parse_smt2_string
 
-from app.utils import filter_versions
+from app.utils import VersionFilter
 
 
 class SMTModel:
@@ -49,7 +49,7 @@ class SMTModel:
 
 
     async def transform_direct_package(self, require: dict[str, Any]) -> None:
-        filtered_versions = await filter_versions(self.node_type, self.source_data["have"][require["package"]], require["constraints"])
+        filtered_versions = await VersionFilter.filter_versions(self.node_type, self.source_data["have"][require["package"]], require["constraints"])
         versions_impacts: dict[int, int] = {version.get("serial_number"): version[self.aggregator] for version in filtered_versions}
         versions_names = list(versions_impacts.keys())
         self.directs.append(f"|{require["package"]}|")
@@ -65,7 +65,7 @@ class SMTModel:
 
 
     async def transform_indirect_package(self, require: dict[str, Any]) -> None:
-        filtered_versions = await filter_versions(self.node_type, self.source_data["have"][require["package"]], require["constraints"])
+        filtered_versions = await VersionFilter.filter_versions(self.node_type, self.source_data["have"][require["package"]], require["constraints"])
         versions_impacts: dict[int, int] = {version.get("serial_number"): version[self.aggregator] for version in filtered_versions}
         versions_names = list(versions_impacts.keys())
         await self.append_indirect_constraint(
