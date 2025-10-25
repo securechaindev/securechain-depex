@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = { text = "GPL-3.0-or-later" }
 dependencies = [
+    "setuptools==80.9.0",
     "fastapi==0.116.1",
     "uvicorn==0.35.0",
     "pydantic-settings==2.10.1",
