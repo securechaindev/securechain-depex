@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from z3 import IntNumRef, ModelRef, RatNumRef
 
 from app.dependencies import ServiceContainer
@@ -5,9 +7,19 @@ from app.services import VersionService
 
 
 class ConfigSanitizer:
+    instance: ConfigSanitizer | None = None
+    initialized: bool = False
+
+    def __new__(cls) -> ConfigSanitizer:
+        if cls.instance is None:
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
     def __init__(self):
-        container = ServiceContainer()
-        self.version_service: VersionService = container.get_version_service()
+        if not ConfigSanitizer.initialized:
+            container = ServiceContainer()
+            self.version_service: VersionService = container.get_version_service()
+            ConfigSanitizer.initialized = True
 
     async def sanitize(self, node_type: str, config: ModelRef) -> dict[str, float | int]:
         final_config: dict[str, float | int] = {}

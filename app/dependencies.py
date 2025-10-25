@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.apis import GitHubService
 from app.database import DatabaseManager
 from app.services import (
     OperationService,
@@ -10,7 +11,6 @@ from app.services import (
     VersionService,
 )
 from app.utils import JSONEncoder, JWTBearer, RedisQueue
-from app.apis import GitHubService
 
 
 class ServiceContainer:
@@ -66,7 +66,7 @@ class ServiceContainer:
         if self.operation_service is None:
             self.operation_service = OperationService(self.get_db())
         return self.operation_service
-    
+
     def get_github_service(self) -> GitHubService:
         if self.github_service is None:
             self.github_service = GitHubService()

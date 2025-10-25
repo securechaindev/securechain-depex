@@ -3,12 +3,12 @@ from fastapi.responses import JSONResponse
 
 from app.apis import GitHubService
 from app.dependencies import (
+    get_github_service,
     get_json_encoder,
     get_jwt_bearer,
     get_package_service,
     get_redis_queue,
     get_repository_service,
-    get_github_service,
 )
 from app.domain import RepositoryInitializer
 from app.exceptions import InvalidRepositoryException
