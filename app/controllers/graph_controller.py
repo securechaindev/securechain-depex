@@ -42,7 +42,7 @@ async def get_repositories(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     repositories = await repository_service.read_repositories_by_user_id(get_repositories_request.user_id)
-    return JSONResponse(status_code=status.HTTP_200_OK, content= await json_encoder.encode({
+    return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder.encode({
         "repositories": repositories,
         "detail": "get_repositories_success",
     }))
@@ -66,7 +66,7 @@ async def get_package_status(
     if not package:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "package_not_found",
                 }
@@ -74,7 +74,7 @@ async def get_package_status(
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content= await json_encoder.encode({
+        content=json_encoder.encode({
             "package": package,
             "detail": "get_package_status_success",
         })
@@ -103,7 +103,7 @@ async def get_version_status(
     if not version:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "version_not_found",
                 }
@@ -111,7 +111,7 @@ async def get_version_status(
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content= await json_encoder.encode({
+        content=json_encoder.encode({
             "version": version,
             "detail": "get_version_status_success",
         }),
@@ -149,7 +149,7 @@ async def init_package(
 
         return JSONResponse(
             status_code=status.HTTP_202_ACCEPTED,
-            content=await json_encoder.encode({
+            content=json_encoder.encode({
                 "detail": "package_queued_for_processing",
                 "message_id": msg_id,
                 "package": init_package_request.package_name,
@@ -158,7 +158,7 @@ async def init_package(
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=await json_encoder.encode({
+            content=json_encoder.encode({
                 "detail": "error_queuing_package",
                 "error": str(e),
             }),
@@ -191,7 +191,7 @@ async def init_repository(
         except InvalidRepositoryException:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
-                content=await json_encoder.encode({
+                content=json_encoder.encode({
                     "detail": "repository_not_found_on_github",
                 }),
             )
@@ -213,7 +213,7 @@ async def init_repository(
 
             return JSONResponse(
                 status_code=status.HTTP_202_ACCEPTED,
-                content=await json_encoder.encode({
+                content=json_encoder.encode({
                     "detail": "repository_queued_for_processing",
                     "repository": f"{init_repository_request.owner}/{init_repository_request.name}",
                 }),
@@ -221,7 +221,7 @@ async def init_repository(
         else:
             return JSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
-                content=await json_encoder.encode({
+                content=json_encoder.encode({
                     "detail": "repository_processing_in_progress",
                     "repository_id": repository["id"],
                 }),
@@ -230,7 +230,7 @@ async def init_repository(
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=await json_encoder.encode({
+            content=json_encoder.encode({
                 "detail": "error_initializing_repository",
                 "error": str(e),
             }),

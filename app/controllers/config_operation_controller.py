@@ -59,7 +59,7 @@ async def valid_config(
         result = await ValidConfigOperation.execute(smt_model, config)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "result": result,
                     "detail": "operation_success",
@@ -69,7 +69,7 @@ async def valid_config(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "no_dependencies",
                 }
@@ -108,7 +108,7 @@ async def complete_config(
         result = await CompleteConfigOperation.execute(smt_model, config)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "result": result,
                     "detail": "operation_success",
@@ -118,7 +118,7 @@ async def complete_config(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "no_dependencies",
                 }
@@ -155,7 +155,7 @@ async def config_by_impact(
         result = await ConfigByImpactOperation.execute(smt_model, config_by_impact_request.impact)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "result": result,
                     "detail": "operation_success",
@@ -165,7 +165,7 @@ async def config_by_impact(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "no_dependencies",
                 }

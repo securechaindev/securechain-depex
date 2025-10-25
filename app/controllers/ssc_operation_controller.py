@@ -60,7 +60,7 @@ async def package_ssc_info(
         else:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
-                content= await json_encoder.encode(
+                content=json_encoder.encode(
                     {
                         "detail": "no_dependencies",
                     }
@@ -68,7 +68,7 @@ async def package_ssc_info(
             )
         await operation_service.replace_operation_result(operation_result_id, result)
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content= await json_encoder.encode(
+        status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
                 "result": result,
                 "detail": "file_info_success",
@@ -121,7 +121,7 @@ async def version_ssc_info(
         else:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
-                content= await json_encoder.encode(
+                content=json_encoder.encode(
                     {
                         "detail": "no_dependencies",
                     }
@@ -129,7 +129,7 @@ async def version_ssc_info(
             )
         await operation_service.replace_operation_result(operation_result_id, result)
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content= await json_encoder.encode(
+        status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
                 "result": result,
                 "detail": "file_info_success",

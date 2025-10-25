@@ -74,7 +74,7 @@ async def requirement_file_info(
         else:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
-                content= await json_encoder.encode(
+                content=json_encoder.encode(
                     {
                         "detail": "no_dependencies",
                     }
@@ -82,7 +82,7 @@ async def requirement_file_info(
             )
         await operation_service.replace_operation_result(operation_result_id, result)
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content= await json_encoder.encode(
+        status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
                 "result": result,
                 "detail": "file_info_success",
@@ -120,7 +120,7 @@ async def valid_graph(
         result = await ValidGraphOperation.execute(smt_model)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "result": result,
                     "detail": "operation_success",
@@ -130,7 +130,7 @@ async def valid_graph(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "no_dependencies",
                 }
@@ -167,7 +167,7 @@ async def minimize_impact(
         result = await MinimizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "result": result,
                     "detail": "operation_success",
@@ -177,7 +177,7 @@ async def minimize_impact(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "no_dependencies",
                 }
@@ -214,7 +214,7 @@ async def maximize_impact(
         result = await MaximizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "result": result,
                     "detail": "operation_success",
@@ -224,7 +224,7 @@ async def maximize_impact(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "no_dependencies",
                 }
@@ -266,7 +266,7 @@ async def filter_configs(
         )
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "result": result,
                     "detail": "operation_success",
@@ -276,7 +276,7 @@ async def filter_configs(
     else:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content= await json_encoder.encode(
+            content=json_encoder.encode(
                 {
                     "detail": "no_dependencies",
                 }

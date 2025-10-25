@@ -20,7 +20,7 @@ async def health_check(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ):
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content= await json_encoder.encode(
+        status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
                 "detail": "healthy",
             }
