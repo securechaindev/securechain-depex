@@ -9,7 +9,7 @@ from app.services import (
     SMTService,
     VersionService,
 )
-from app.utils import JSONEncoder, JWTBearer
+from app.utils import JSONEncoder, JWTBearer, RedisQueue
 from app.apis import GitHubService
 
 
@@ -23,6 +23,7 @@ class ServiceContainer:
     smt_service: SMTService | None = None
     operation_service: OperationService | None = None
     github_service: GitHubService | None = None
+    redis_queue: RedisQueue | None = None
     json_encoder: JSONEncoder | None = None
     jwt_bearer: JWTBearer | None = None
 
@@ -71,6 +72,11 @@ class ServiceContainer:
             self.github_service = GitHubService()
         return self.github_service
 
+    def get_redis_queue(self) -> RedisQueue:
+        if self.redis_queue is None:
+            self.redis_queue = RedisQueue.from_env()
+        return self.redis_queue
+
     def get_json_encoder(self) -> JSONEncoder:
         if self.json_encoder is None:
             self.json_encoder = JSONEncoder()
@@ -112,6 +118,10 @@ def get_operation_service() -> OperationService:
 
 def get_github_service() -> GitHubService:
     return ServiceContainer().get_github_service()
+
+
+def get_redis_queue() -> RedisQueue:
+    return ServiceContainer().get_redis_queue()
 
 
 def get_json_encoder() -> JSONEncoder:

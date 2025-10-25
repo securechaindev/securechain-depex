@@ -6,6 +6,7 @@ from app.dependencies import (
     get_json_encoder,
     get_jwt_bearer,
     get_package_service,
+    get_redis_queue,
     get_repository_service,
     get_github_service,
 )
@@ -129,6 +130,7 @@ async def get_version_status(
 async def init_package(
     request: Request,
     init_package_request: InitPackageRequest,
+    redis_queue: RedisQueue = Depends(get_redis_queue),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     try:
@@ -143,7 +145,6 @@ async def init_package(
             refresh=init_package_request.refresh,
         )
 
-        redis_queue = RedisQueue.from_env()
         msg_id = redis_queue.add_package_message(message)
 
         return JSONResponse(
@@ -183,7 +184,7 @@ async def init_repository(
 ) -> JSONResponse:
     try:
         try:
-            last_commit_date = await github_service.get_last_commit_date_github(
+            last_commit_date = await github_service.get_last_commit_date(
                 init_repository_request.owner,
                 init_repository_request.name
             )
