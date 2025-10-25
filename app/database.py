@@ -7,8 +7,12 @@ from motor.motor_asyncio import (
 )
 from neo4j import AsyncDriver, AsyncGraphDatabase
 
-from app.logger import logger
 from app.settings import settings
+
+
+def _get_logger():
+    from app.dependencies import get_logger
+    return get_logger()
 
 
 class DatabaseManager:
@@ -24,6 +28,7 @@ class DatabaseManager:
         return cls.instance
 
     async def initialize(self) -> None:
+        logger = _get_logger()
         if self.mongo_client is None:
             logger.info("Initializing MongoDB connection pool...")
             self.mongo_client = AsyncIOMotorClient(
@@ -47,6 +52,7 @@ class DatabaseManager:
             logger.info("Neo4j driver initialized")
 
     async def close(self) -> None:
+        logger = _get_logger()
         if self.mongo_client:
             logger.info("Closing MongoDB connection...")
             self.mongo_client.close()

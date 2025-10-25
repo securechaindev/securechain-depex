@@ -1,4 +1,5 @@
-from functools import lru_cache
+from __future__ import annotations
+
 from logging import INFO, Formatter, getLogger
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -7,10 +8,10 @@ from pathlib import Path
 class LoggerManager:
     def __init__(
         self,
-        log_file: str = "errors.log",
+        log_file: str = "logs/errors.log",
         max_bytes: int = 5 * 1024 * 1024,
         backup_count: int = 5,
-    ):
+    ) -> None:
         self.logger = getLogger("securechain")
         self.logger.setLevel(INFO)
         self.logger.propagate = False
@@ -43,9 +44,3 @@ class LoggerManager:
 
     def debug(self, msg: str, *args, **kwargs):
         self.logger.debug(msg, *args, **kwargs)
-
-@lru_cache
-def get_logger() -> LoggerManager:
-    return LoggerManager("logs/errors.log")
-
-logger: LoggerManager = get_logger()
