@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from app.database import DatabaseManager
+from app.dependencies import ServiceContainer
 from app.schemas import PackageMessageSchema
 from app.services import (
     PackageService,
@@ -14,12 +14,12 @@ from .repo_analyzer import RepositoryAnalyzer
 
 
 class RepositoryInitializer:
-    def __init__(self, redis_queue: RedisQueue | None = None):
-        self.redis_queue = redis_queue or RedisQueue.from_env()
-        db = DatabaseManager()
-        self.repository_service = RepositoryService(db)
-        self.requirement_file_service = RequirementFileService(db)
-        self.package_service = PackageService(db)
+    def __init__(self):
+        container = ServiceContainer()
+        self.redis_queue: RedisQueue = container.get_redis_queue()
+        self.repository_service: RepositoryService = container.get_repository_service()
+        self.requirement_file_service: RequirementFileService = container.get_requirement_file_service()
+        self.package_service: PackageService = container.get_package_service()
 
     async def init_repository(
         self,

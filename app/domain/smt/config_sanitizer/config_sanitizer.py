@@ -1,13 +1,13 @@
 from z3 import IntNumRef, ModelRef, RatNumRef
 
-from app.database import DatabaseManager
+from app.dependencies import ServiceContainer
 from app.services import VersionService
 
 
 class ConfigSanitizer:
     def __init__(self):
-        db = DatabaseManager()
-        self.version_service = VersionService(db)
+        container = ServiceContainer()
+        self.version_service: VersionService = container.get_version_service()
 
     async def sanitize(self, node_type: str, config: ModelRef) -> dict[str, float | int]:
         final_config: dict[str, float | int] = {}
