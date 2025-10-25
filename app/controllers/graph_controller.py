@@ -1,12 +1,13 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, Request, status
 from fastapi.responses import JSONResponse
 
-from app.apis import get_last_commit_date_github
+from app.apis import GitHubService
 from app.dependencies import (
     get_json_encoder,
     get_jwt_bearer,
     get_package_service,
     get_repository_service,
+    get_github_service,
 )
 from app.domain import RepositoryInitializer
 from app.exceptions import InvalidRepositoryException
@@ -177,11 +178,12 @@ async def init_repository(
     init_repository_request: InitRepositoryRequest,
     background_tasks: BackgroundTasks,
     repository_service: RepositoryService = Depends(get_repository_service),
+    github_service: GitHubService = Depends(get_github_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     try:
         try:
-            last_commit_date = await get_last_commit_date_github(
+            last_commit_date = await github_service.get_last_commit_date_github(
                 init_repository_request.owner,
                 init_repository_request.name
             )

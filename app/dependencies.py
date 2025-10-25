@@ -8,6 +8,7 @@ from app.services import (
     VersionService,
 )
 from app.utils import JSONEncoder, JWTBearer
+from app.apis import GitHubService
 
 
 class ServiceContainer:
@@ -19,6 +20,7 @@ class ServiceContainer:
     version_service: VersionService | None = None
     smt_service: SMTService | None = None
     operation_service: OperationService | None = None
+    github_service: GitHubService | None = None
     json_encoder: JSONEncoder | None = None
     jwt_bearer: JWTBearer | None = None
 
@@ -61,6 +63,11 @@ class ServiceContainer:
         if self.operation_service is None:
             self.operation_service = OperationService(self.get_db())
         return self.operation_service
+    
+    def get_github_service(self) -> GitHubService:
+        if self.github_service is None:
+            self.github_service = GitHubService()
+        return self.github_service
 
     def get_json_encoder(self) -> JSONEncoder:
         if self.json_encoder is None:
@@ -99,6 +106,10 @@ def get_smt_service() -> SMTService:
 
 def get_operation_service() -> OperationService:
     return ServiceContainer().get_operation_service()
+
+
+def get_github_service() -> GitHubService:
+    return ServiceContainer().get_github_service()
 
 
 def get_json_encoder() -> JSONEncoder:
