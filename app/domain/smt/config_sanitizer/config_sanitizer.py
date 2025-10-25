@@ -1,16 +1,20 @@
 from z3 import IntNumRef, ModelRef, RatNumRef
 
-from app.services import read_releases_by_serial_numbers
+from app.database import DatabaseManager
+from app.services import VersionService
 
 
 class ConfigSanitizer:
-    @staticmethod
-    async def sanitize(node_type: str, config: ModelRef) -> dict[str, float | int]:
+    def __init__(self):
+        db = DatabaseManager()
+        self.version_service = VersionService(db)
+
+    async def sanitize(self, node_type: str, config: ModelRef) -> dict[str, float | int]:
         final_config: dict[str, float | int] = {}
         impact_vars: dict[str, float | int] = {}
 
         for var in config:
-            value = ConfigSanitizer.extract_variable_value(config, var)
+            value = self.extract_variable_value(config, var)
             if value is None:
                 continue
 
@@ -20,9 +24,9 @@ class ConfigSanitizer:
             else:
                 final_config[var_name] = value
 
-        ConfigSanitizer.process_impact_variables(final_config, impact_vars)
+        self.process_impact_variables(final_config, impact_vars)
 
-        return await read_releases_by_serial_numbers(node_type, final_config)
+        return await self.version_service.read_releases_by_serial_numbers(node_type, final_config)
 
     @staticmethod
     def extract_variable_value(config: ModelRef, var) -> float | int | None:

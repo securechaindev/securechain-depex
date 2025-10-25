@@ -16,6 +16,7 @@ class FilterConfigsOperation:
             min_ctc = impact >= min_threshold
         solver = Solver()
         result = []
+        config_sanitizer = ConfigSanitizer()
         solver.set("timeout", 3000)
         domain_parts = (
             list(model.domain) if isinstance(model.domain, AstVector) else [model.domain]
@@ -24,7 +25,7 @@ class FilterConfigsOperation:
         solver.add(expr)
         while len(result) < limit and solver.check() == sat:
             config = solver.model()
-            sanitized_config = await ConfigSanitizer.sanitize(model.node_type, config)
+            sanitized_config = await config_sanitizer.sanitize(model.node_type, config)
             result.append(sanitized_config)
             block = []
             for var in config:

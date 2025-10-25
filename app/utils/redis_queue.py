@@ -21,19 +21,12 @@ class RedisQueue:
         return cls(settings.REDIS_HOST, settings.REDIS_PORT, settings.REDIS_DB)
 
     def add_package_message(self, message: PackageMessageSchema) -> str:
-        """
-        Añade un mensaje de paquete a la cola de Redis.
-        Retorna el ID del mensaje añadido.
-        """
         message_dict = message.model_dump(mode="json")
         raw_json = dumps(message_dict)
         msg_id = self.r.xadd(settings.REDIS_STREAM, {"data": raw_json})
         return msg_id
 
     def read_batch(self, count: int = 20, block_ms: int | None = None) -> list[tuple[str, str]]:
-        """
-        Devuelve lista de (msg_id, raw_json) desde el consumer group.
-        """
         resp = self.r.xreadgroup(
             settings.REDIS_GROUP,
             settings.REDIS_CONSUMER,

@@ -11,13 +11,14 @@ class MaximizeImpactOperation:
         solver = Optimize()
         solver.set("timeout", 3000)
         result = []
+        config_sanitizer = ConfigSanitizer()
         if model.func_obj is not None:
             impact = model.func_obj
             solver.maximize(impact)
         solver.add(model.domain)
         while len(result) < limit and solver.check() == sat:
             config = solver.model()
-            sanitized_config = await ConfigSanitizer.sanitize(model.node_type, config)
+            sanitized_config = await config_sanitizer.sanitize(model.node_type, config)
             result.append(sanitized_config)
             block = []
             for var in config:

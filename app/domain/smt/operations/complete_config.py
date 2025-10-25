@@ -13,6 +13,7 @@ class CompleteConfigOperation:
         solver = Optimize()
         solver.set("timeout", 3000)
         result = []
+        config_sanitizer = ConfigSanitizer()
         if model.func_obj is not None:
             impact = model.func_obj
             solver.minimize(impact)
@@ -21,7 +22,7 @@ class CompleteConfigOperation:
             solver.add(Int(package) == serial_number)
         if solver.check() == sat:
             config = solver.model()
-            sanitized_config = await ConfigSanitizer.sanitize(model.node_type, config)
+            sanitized_config = await config_sanitizer.sanitize(model.node_type, config)
             result.append(sanitized_config)
         elif solver.check() == unknown:
             raise SMTTimeoutException()
