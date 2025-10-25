@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from asyncio import run
+from typing import ClassVar
 
 from .base_analyzer import RequirementFileAnalyzer
 from .cargo_lock_analyzer import CargoLockAnalyzer
@@ -16,8 +19,17 @@ from .setup_py_analyzer import SetupPyAnalyzer
 
 
 class AnalyzerRegistry:
-    def __init__(self):
-        self._analyzers = {
+    instance: ClassVar[AnalyzerRegistry | None] = None
+    analyzers: dict[str, RequirementFileAnalyzer]
+
+    def __new__(cls) -> AnalyzerRegistry:
+        if cls.instance is None:
+            cls.instance = super().__new__(cls)
+            cls.instance.initialize()
+        return cls.instance
+
+    def initialize(self) -> None:
+        self.analyzers = {
             "Cargo.lock": CargoLockAnalyzer(),
             "Cargo.toml": CargoTomlAnalyzer(),
             "Gemfile": GemfileAnalyzer(),
@@ -33,7 +45,7 @@ class AnalyzerRegistry:
         }
 
     def get_analyzer(self, filename: str) -> RequirementFileAnalyzer | None:
-        return self._analyzers.get(filename)
+        return self.analyzers.get(filename)
 
     def analyze(
         self,
