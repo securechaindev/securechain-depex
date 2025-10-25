@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from app.database import DatabaseManager
 from app.services import (
     OperationService,
@@ -12,7 +14,7 @@ from app.apis import GitHubService
 
 
 class ServiceContainer:
-    instance: "ServiceContainer" | None = None
+    instance: ServiceContainer | None = None
     db_manager: DatabaseManager | None = None
     repository_service: RepositoryService | None = None
     requirement_file_service: RequirementFileService | None = None
@@ -24,7 +26,7 @@ class ServiceContainer:
     json_encoder: JSONEncoder | None = None
     jwt_bearer: JWTBearer | None = None
 
-    def __new__(cls) -> "ServiceContainer":
+    def __new__(cls) -> ServiceContainer:
         if cls.instance is None:
             cls.instance = super().__new__(cls)
         return cls.instance
