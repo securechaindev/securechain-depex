@@ -36,11 +36,6 @@ class Settings(BaseSettings):
     DB_SMT_TEXT_COLLECTION: str = "smt_text"
     DB_OPERATION_RESULT_COLLECTION: str = "operation_result"
 
-
-    class Config:
-        env_file = ".env"
-
-
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
