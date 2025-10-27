@@ -37,10 +37,21 @@ class RepositoryAnalyzer:
         makedirs(repository_path)
 
         session = await get_session()
-        url = f"https://api.github.com/repos/{owner}/{name}/contents"
+        await self.download_directory_contents(session, owner, name, "", repository_path)
+        return repository_path
+
+    async def download_directory_contents(
+        self,
+        session,
+        owner: str,
+        name: str,
+        path: str,
+        repository_path: str,
+    ) -> None:
+        url = f"https://api.github.com/repos/{owner}/{name}/contents/{path}"
         async with session.get(url) as resp:
             if resp.status != 200:
-                return repository_path
+                return
             contents = await resp.json()
 
         for item in contents:
@@ -51,10 +62,17 @@ class RepositoryAnalyzer:
                 async with session.get(raw_url) as file_resp:
                     if file_resp.status == 200:
                         file_content = await file_resp.text()
-                        filepath = join(repository_path, item["name"])
+                        relative_path = item["path"]
+                        filepath = join(repository_path, relative_path)
+                        file_dir = filepath.rsplit("/", 1)[0]
+                        if not exists(file_dir):
+                            makedirs(file_dir)
                         async with open(filepath, "w") as f:
                             await f.write(file_content)
-        return repository_path
+            elif item["type"] == "dir":
+                await self.download_directory_contents(
+                    session, owner, name, item["path"], repository_path
+                )
 
     async def get_req_files_names(self, directory_path: str) -> list[str]:
         requirement_files = []
