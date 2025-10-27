@@ -63,7 +63,6 @@ class RepositoryAnalyzer:
             if not isdir(_path) and self.is_req_file(_path):
                 requirement_files.append(
                     _path.replace(directory_path, "")
-                    .replace(directory_path, "")
                     .replace("/", "")
                 )
         return requirement_files
