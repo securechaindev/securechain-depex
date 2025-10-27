@@ -113,9 +113,9 @@ async def valid_graph(
         smt_model = SMTModel(graph_data, valid_graph_request.node_type.value, "mean")
         smt_text = await smt_service.read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            await smt_model.convert(smt_text["text"])
+            smt_model.convert(smt_text["text"])
         else:
-            model_text = await smt_model.transform()
+            model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         result = await ValidGraphOperation.execute(smt_model)
         return JSONResponse(
@@ -160,9 +160,9 @@ async def minimize_impact(
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.aggregator)
         smt_text = await smt_service.read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            await smt_model.convert(smt_text["text"])
+            smt_model.convert(smt_text["text"])
         else:
-            model_text = await smt_model.transform()
+            model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         result = await MinimizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
         return JSONResponse(
@@ -207,9 +207,9 @@ async def maximize_impact(
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.aggregator)
         smt_text = await smt_service.read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            await smt_model.convert(smt_text["text"])
+            smt_model.convert(smt_text["text"])
         else:
-            model_text = await smt_model.transform()
+            model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         result = await MaximizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
         return JSONResponse(
@@ -254,9 +254,9 @@ async def filter_configs(
         smt_model = SMTModel(graph_data, filter_configs_request.node_type.value, filter_configs_request.aggregator)
         smt_text = await smt_service.read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            await smt_model.convert(smt_text["text"])
+            smt_model.convert(smt_text["text"])
         else:
-            model_text = await smt_model.transform()
+            model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         result = await FilterConfigsOperation.execute(
             smt_model,

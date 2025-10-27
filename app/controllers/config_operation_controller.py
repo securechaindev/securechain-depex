@@ -51,9 +51,9 @@ async def valid_config(
         smt_model = SMTModel(graph_data, valid_config_request.node_type.value, valid_config_request.aggregator)
         smt_text = await smt_service.read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            await smt_model.convert(smt_text["text"])
+            smt_model.convert(smt_text["text"])
         else:
-            model_text = await smt_model.transform()
+            model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         config = await version_service.read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config)
         result = await ValidConfigOperation.execute(smt_model, config)
@@ -100,9 +100,9 @@ async def complete_config(
         smt_model = SMTModel(graph_data, complete_config_request.node_type.value, complete_config_request.aggregator)
         smt_text = await smt_service.read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            await smt_model.convert(smt_text["text"])
+            smt_model.convert(smt_text["text"])
         else:
-            model_text = await smt_model.transform()
+            model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         config = await version_service.read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
         result = await CompleteConfigOperation.execute(smt_model, config)
@@ -148,9 +148,9 @@ async def config_by_impact(
         smt_model = SMTModel(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.aggregator)
         smt_text = await smt_service.read_smt_text(smt_text_id)
         if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            await smt_model.convert(smt_text["text"])
+            smt_model.convert(smt_text["text"])
         else:
-            model_text = await smt_model.transform()
+            model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         result = await ConfigByImpactOperation.execute(smt_model, config_by_impact_request.impact)
         return JSONResponse(
