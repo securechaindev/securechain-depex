@@ -36,3 +36,42 @@ class RequirementFileAnalyzer(ABC):
         if version.count(".") == 2 and not any(op in version for op in ["<", ">", "=", "!", "~"]):
             return f"== {version}"
         return version
+
+    @staticmethod
+    def is_compatible_python_version(version_marker: str) -> bool:
+        compatible_versions = (
+            '== "3.9"' in version_marker
+            or '<= "3.9"' in version_marker
+            or '>= "3.9"' in version_marker
+            or '>= "3"' in version_marker
+            or '<= "3"' in version_marker
+            or '>= "2' in version_marker
+            or '> "2' in version_marker
+        )
+        return compatible_versions
+
+    @staticmethod
+    def should_skip_dependency(dependency_parts: list[str]) -> bool:
+        if len(dependency_parts) <= 1:
+            return False
+
+        marker = dependency_parts[1]
+
+        if "extra" in marker:
+            return True
+
+        if "python_version" in marker:
+            return not RequirementFileAnalyzer.is_compatible_python_version(marker)
+
+        return False
+
+    @staticmethod
+    def clean_dependency_name(dependency_name: str) -> str:
+        cleaned = (
+            dependency_name
+            .replace("(", "")
+            .replace(")", "")
+            .replace(" ", "")
+            .replace("'", "")
+        )
+        return cleaned
