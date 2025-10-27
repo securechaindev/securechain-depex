@@ -3,6 +3,7 @@ from z3 import Int, Optimize, sat, unknown
 from app.domain.smt.config_sanitizer import ConfigSanitizer
 from app.domain.smt.model import SMTModel
 from app.exceptions import SMTTimeoutException
+from app.settings import settings
 
 
 class CompleteConfigOperation:
@@ -11,7 +12,7 @@ class CompleteConfigOperation:
         model: SMTModel, config: dict[str, int]
     ) -> list[dict[str, float | int]]:
         solver = Optimize()
-        solver.set("timeout", 3000)
+        solver.set("timeout", settings.SMT_SOLVER_TIMEOUT_MS)
         result = []
         config_sanitizer = ConfigSanitizer()
         if model.func_obj is not None:

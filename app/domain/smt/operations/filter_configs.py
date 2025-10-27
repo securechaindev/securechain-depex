@@ -3,6 +3,7 @@ from z3 import And, AstVector, Or, Solver, sat, unknown
 from app.domain.smt.config_sanitizer import ConfigSanitizer
 from app.domain.smt.model import SMTModel
 from app.exceptions import SMTTimeoutException
+from app.settings import settings
 
 
 class FilterConfigsOperation:
@@ -17,7 +18,7 @@ class FilterConfigsOperation:
         solver = Solver()
         result = []
         config_sanitizer = ConfigSanitizer()
-        solver.set("timeout", 3000)
+        solver.set("timeout", settings.SMT_SOLVER_TIMEOUT_MS)
         domain_parts = (
             list(model.domain) if isinstance(model.domain, AstVector) else [model.domain]
         )
