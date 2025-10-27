@@ -6,19 +6,20 @@ from shutil import rmtree
 from aiofiles import open
 
 from app.constants import ALL_REQUIREMENT_FILES
-from app.http_session import get_session
+from app.http_session import HTTPSessionManager
 
 from .requirement_files import AnalyzerRegistry
 
 
 class RepositoryAnalyzer:
-    def __init__(self):
+    def __init__(self, http_session: HTTPSessionManager):
         self.registry = AnalyzerRegistry()
+        self.http_session = http_session
 
     async def analyze(self, owner: str, name: str) -> dict[str, dict[str, dict | str]]:
         requirement_files: dict[str, dict[str, dict | str]] = {}
         repository_path = await self.download_repository(owner, name)
-        
+
         try:
             requirement_file_names = await self.get_req_files_names(repository_path)
 
@@ -31,7 +32,7 @@ class RepositoryAnalyzer:
         finally:
             if exists(repository_path):
                 rmtree(repository_path)
-        
+
         return requirement_files
 
     async def download_repository(self, owner: str, name: str) -> str:
@@ -40,7 +41,7 @@ class RepositoryAnalyzer:
             rmtree(repository_path)
         makedirs(repository_path)
 
-        session = await get_session()
+        session = await self.http_session.get_session()
         await self.download_directory_contents(session, owner, name, "", repository_path)
         return repository_path
 

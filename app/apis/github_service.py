@@ -1,14 +1,16 @@
 from asyncio import sleep
 from datetime import datetime
 
-from aiohttp import ClientConnectorError, ClientSession
+from aiohttp import ClientConnectorError
 
 from app.exceptions import InvalidRepositoryException
+from app.http_session import HTTPSessionManager
 from app.settings import settings
 
 
 class GitHubService:
-    def __init__(self):
+    def __init__(self, http_session: HTTPSessionManager):
+        self.http_session = http_session
         self.headers = {
             "Accept": "application/vnd.github.hawkgirl-preview+json",
             "Authorization": f"Bearer {settings.GITHUB_GRAPHQL_API_KEY}",
@@ -29,18 +31,18 @@ class GitHubService:
             }}
         }}
         """
-        async with ClientSession() as session:
-            while True:
-                try:
-                    async with session.post(
-                        self.api_url,
-                        json={"query": query},
-                        headers=self.headers,
-                    ) as response:
-                        response = await response.json()
-                        break
-                except (ClientConnectorError, TimeoutError):
-                    await sleep(5)
+        session = await self.http_session.get_session()
+        while True:
+            try:
+                async with session.post(
+                    self.api_url,
+                    json={"query": query},
+                    headers=self.headers,
+                ) as response:
+                    response = await response.json()
+                    break
+            except (ClientConnectorError, TimeoutError):
+                await sleep(5)
 
         repo = response.get("data", {}).get("repository")
         if not repo or not repo.get("defaultBranchRef"):

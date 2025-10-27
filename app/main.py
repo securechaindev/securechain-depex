@@ -6,8 +6,8 @@ from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
 from app.database import DatabaseManager
+from app.dependencies import get_http_session
 from app.exception_handler import ExceptionHandler
-from app.http_session import close_session
 from app.limiter import limiter
 from app.middleware import LogRequestMiddleware
 from app.router import api_router
@@ -23,7 +23,8 @@ async def lifespan(app: FastAPI):
     await db_manager.initialize()
     yield
     await db_manager.close()
-    await close_session()
+    http_session = get_http_session()
+    await http_session.close()
 
 app = FastAPI(
     title="Secure Chain Depex Tool",

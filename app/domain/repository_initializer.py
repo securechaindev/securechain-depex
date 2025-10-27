@@ -20,6 +20,7 @@ class RepositoryInitializer:
         self.repository_service: RepositoryService = container.get_repository_service()
         self.requirement_file_service: RequirementFileService = container.get_requirement_file_service()
         self.package_service: PackageService = container.get_package_service()
+        self.repo_analyzer: RepositoryAnalyzer = RepositoryAnalyzer(container.get_http_session())
 
     async def init_repository(
         self,
@@ -29,8 +30,7 @@ class RepositoryInitializer:
         repository: dict[str, Any] | None,
         last_commit_date: datetime,
     ) -> str:
-        repo_analyzer = RepositoryAnalyzer()
-        raw_requirement_files = await repo_analyzer.analyze(owner, name)
+        raw_requirement_files = await self.repo_analyzer.analyze(owner, name)
 
         if repository is None:
             repository_data = {

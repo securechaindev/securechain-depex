@@ -1,14 +1,16 @@
 from aiohttp import ClientSession
 
-session: ClientSession | None = None
 
-async def get_session() -> ClientSession:
-    global session
-    if session is None or session.closed:
-        session = ClientSession()
-    return session
+class HTTPSessionManager:
+    def __init__(self):
+        self._session: ClientSession | None = None
 
-async def close_session():
-    global session
-    if session and not session.closed:
-        await session.close()
+    async def get_session(self) -> ClientSession:
+        if self._session is None or self._session.closed:
+            self._session = ClientSession()
+        return self._session
+
+    async def close(self) -> None:
+        if self._session and not self._session.closed:
+            await self._session.close()
+            self._session = None
