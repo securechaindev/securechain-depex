@@ -157,7 +157,7 @@ class RepositoryInitializer:
         req_file_id: str
     ) -> None:
         for package_name, constraints in packages.items():
-            node_type = self.get_node_type(manager)
+            node_type = ManagerNodeTypeMapper.manager_to_node_type(manager)
 
             if not await self.package_service.exists_package(node_type, package_name):
                 message = PackageMessageSchema(
@@ -172,6 +172,3 @@ class RepositoryInitializer:
                 )
 
                 self.redis_queue.add_package_message(message)
-
-    def get_node_type(self, manager: str) -> str:
-        return ManagerNodeTypeMapper.manager_to_node_type(manager)
