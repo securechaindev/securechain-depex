@@ -4,11 +4,13 @@ from app.schemas.validators import validate_max_depth
 
 
 class BaseSchemaWithMaxDepth(BaseModel):
-    @field_validator("max_depth")
+    @field_validator("max_depth", check_fields=False)
+    @classmethod
     def validate_max_depth(cls, value):
         return validate_max_depth(value)
 
     @model_validator(mode='before')
+    @classmethod
     def set_max_depth_to_square(cls, values):
         if values.get('max_depth') != -1:
             values['max_depth'] = values.get('max_depth', 1) * 2
@@ -16,11 +18,13 @@ class BaseSchemaWithMaxDepth(BaseModel):
 
 
 class BaseSchemaWithMaxDepthMinusOne(BaseModel):
-    @field_validator("max_depth")
+    @field_validator("max_depth", check_fields=False)
+    @classmethod
     def validate_max_depth(cls, value):
         return validate_max_depth(value)
 
     @model_validator(mode='before')
+    @classmethod
     def set_max_depth_to_square(cls, values):
         if values.get('max_depth') != -1:
             values['max_depth'] = (values.get('max_depth', 1) * 2) - 1
@@ -29,6 +33,7 @@ class BaseSchemaWithMaxDepthMinusOne(BaseModel):
 
 class BaseSchemaWithPackageName(BaseModel):
     @model_validator(mode='before')
+    @classmethod
     def set_package_name_to_lowercase(cls, values):
         if 'package_name' in values:
             values['package_name'] = values['package_name'].lower()
