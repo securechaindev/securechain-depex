@@ -11,10 +11,6 @@ class FilterConfigsOperation:
     async def execute(
         model: SMTModel, max_threshold: float, min_threshold: float, limit: int
     ) -> list[dict[str, float | int]]:
-        if model.func_obj is not None:
-            impact = model.func_obj
-            max_ctc = impact <= max_threshold
-            min_ctc = impact >= min_threshold
         solver = Solver()
         result = []
         config_sanitizer = ConfigSanitizer()
@@ -22,7 +18,13 @@ class FilterConfigsOperation:
         domain_parts = (
             list(model.domain) if isinstance(model.domain, AstVector) else [model.domain]
         )
-        expr = And([*domain_parts, max_ctc, min_ctc])
+        if model.func_obj is not None:
+            impact = model.func_obj
+            max_ctc = impact <= max_threshold
+            min_ctc = impact >= min_threshold
+            expr = And([*domain_parts, max_ctc, min_ctc])
+        else:
+            expr = And(domain_parts)
         solver.add(expr)
         while len(result) < limit and solver.check() == sat:
             config = solver.model()
