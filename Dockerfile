@@ -1,17 +1,14 @@
 FROM python:3.13-slim AS builder
 
+ENV UV_SYSTEM_PYTHON=1
+
 WORKDIR /build
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
-    curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    rm -rf /var/lib/apt/lists/*
-
-ENV PATH="/root/.local/bin:$PATH"
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 COPY pyproject.toml uv.lock README.md ./
 
-RUN /root/.local/bin/uv sync --frozen --no-group dev --no-cache
+RUN uv sync --frozen --no-cache
 
 FROM python:3.13-slim AS runtime
 
@@ -19,11 +16,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/build/.venv/bin:$PATH"
 
-WORKDIR /app
+WORKDIR /
 
 COPY --from=builder /build/.venv /build/.venv
 
-COPY ./app ./app
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY app ./app
 
 EXPOSE 8000
 
