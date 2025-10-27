@@ -34,7 +34,7 @@ class VersionFilter:
         return VersionFilter.VERSION_RANGE_MAP.get(node_type, (Version, VersionRange))
 
     @staticmethod
-    async def filter_versions(node_type: str, versions: list[dict[str, Any]], constraints: str) -> list[dict[str, Any]]:
+    def filter_versions(node_type: str, versions: list[dict[str, Any]], constraints: str) -> list[dict[str, Any]]:
         if constraints == "any":
             return versions
         version_type, version_range_type = VersionFilter.get_version_range_type(node_type)

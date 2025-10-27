@@ -45,14 +45,14 @@ async def package_ssc_info(
         )
         if result["total_direct_dependencies"] != 0:
             for direct_package in result["direct_dependencies"]:
-                direct_package["versions"] = await VersionFilter.filter_versions(
+                direct_package["versions"] = VersionFilter.filter_versions(
                     package_info_request.node_type.value,
                     direct_package["versions"],
                     direct_package["package_constraints"]
                 )
             for _, indirect_packages in result["indirect_dependencies_by_depth"].items():
                 for indirect_package in indirect_packages:
-                    indirect_package["versions"] = await VersionFilter.filter_versions(
+                    indirect_package["versions"] = VersionFilter.filter_versions(
                         package_info_request.node_type.value,
                         indirect_package["versions"],
                         indirect_package["package_constraints"]
@@ -106,14 +106,14 @@ async def version_ssc_info(
         )
         if result["total_direct_dependencies"] != 0:
             for direct_package in result["direct_dependencies"]:
-                direct_package["versions"] = await VersionFilter.filter_versions(
+                direct_package["versions"] = VersionFilter.filter_versions(
                     version_info_request.node_type.value,
                     direct_package["versions"],
                     direct_package["package_constraints"]
                 )
             for _, indirect_packages in result["indirect_dependencies_by_depth"].items():
                 for indirect_package in indirect_packages:
-                    indirect_package["versions"] = await VersionFilter.filter_versions(
+                    indirect_package["versions"] = VersionFilter.filter_versions(
                         version_info_request.node_type.value,
                         indirect_package["versions"],
                         indirect_package["package_constraints"]
