@@ -18,16 +18,20 @@ class RepositoryAnalyzer:
     async def analyze(self, owner: str, name: str) -> dict[str, dict[str, dict | str]]:
         requirement_files: dict[str, dict[str, dict | str]] = {}
         repository_path = await self.download_repository(owner, name)
-        requirement_file_names = await self.get_req_files_names(repository_path)
+        
+        try:
+            requirement_file_names = await self.get_req_files_names(repository_path)
 
-        for requirement_file_name in requirement_file_names:
-            analyzer = self.registry.get_analyzer(requirement_file_name)
-            if analyzer:
-                requirement_files = await analyzer.analyze(
-                    requirement_files, repository_path, requirement_file_name
-                )
-
-        rmtree(repository_path)
+            for requirement_file_name in requirement_file_names:
+                analyzer = self.registry.get_analyzer(requirement_file_name)
+                if analyzer:
+                    requirement_files = await analyzer.analyze(
+                        requirement_files, repository_path, requirement_file_name
+                    )
+        finally:
+            if exists(repository_path):
+                rmtree(repository_path)
+        
         return requirement_files
 
     async def download_repository(self, owner: str, name: str) -> str:
