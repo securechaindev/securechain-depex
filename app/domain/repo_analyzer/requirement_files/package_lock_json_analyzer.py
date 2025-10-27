@@ -7,7 +7,7 @@ class PackageLockJsonAnalyzer(RequirementFileAnalyzer):
     def __init__(self):
         super().__init__("NPM")
 
-    async def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+    def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
         packages = {}
         with open(f"{repository_path}/{filename}") as file:
             data = load(file)

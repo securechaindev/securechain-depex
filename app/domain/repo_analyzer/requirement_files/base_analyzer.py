@@ -18,7 +18,7 @@ class RequirementFileAnalyzer(ABC):
         }
 
         try:
-            packages = await self._parse_file(repository_path, requirement_file_name)
+            packages = self._parse_file(repository_path, requirement_file_name)
             requirement_files[requirement_file_name]["packages"] = packages
         except Exception:
             pass
@@ -26,7 +26,7 @@ class RequirementFileAnalyzer(ABC):
         return requirement_files
 
     @abstractmethod
-    async def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+    def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
         pass
 
     def _normalize_filename(self, filename: str) -> str:

@@ -7,7 +7,7 @@ class PomXmlAnalyzer(RequirementFileAnalyzer):
     def __init__(self):
         super().__init__("Maven")
 
-    async def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+    def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
         packages = {}
         with open(f"{repository_path}/{filename}", encoding="utf-8") as file:
             pom_xml = file.read()

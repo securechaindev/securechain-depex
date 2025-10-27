@@ -8,7 +8,7 @@ class SetupPyAnalyzer(RequirementFileAnalyzer):
     def __init__(self):
         super().__init__("PyPI")
 
-    async def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+    def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
         packages = {}
         with open(f"{repository_path}/{filename}") as f:
             matches: list[str] = findall(
@@ -40,8 +40,8 @@ class SetupPyAnalyzer(RequirementFileAnalyzer):
                 if "python_version" in dependency[1] and not python_version:
                     continue
             if "[" in dependency[0]:
-                pos_1 = await PyPiConstraintParser.get_first_op_position(dependency[0], ["["])
-                pos_2 = await PyPiConstraintParser.get_first_op_position(dependency[0], ["]"]) + 1
+                pos_1 = PyPiConstraintParser.get_first_op_position(dependency[0], ["["])
+                pos_2 = PyPiConstraintParser.get_first_op_position(dependency[0], ["]"]) + 1
                 dependency[0] = dependency[0][:pos_1] + dependency[0][pos_2:]
             dependency = (
                 dependency[0]
@@ -50,8 +50,8 @@ class SetupPyAnalyzer(RequirementFileAnalyzer):
                 .replace(" ", "")
                 .replace("'", "")
             )
-            pos = await PyPiConstraintParser.get_first_op_position(dependency, ["<", ">", "=", "!", "~"])
-            packages[dependency[:pos].lower()] = await PyPiConstraintParser.parse_pypi_constraints(
+            pos = PyPiConstraintParser.get_first_op_position(dependency, ["<", ">", "=", "!", "~"])
+            packages[dependency[:pos].lower()] = PyPiConstraintParser.parse_pypi_constraints(
                 dependency[pos:]
             )
         return packages

@@ -1,6 +1,6 @@
 class PyPiConstraintParser:
     @staticmethod
-    async def get_first_op_position(data: str, operators: list[str]) -> int:
+    def get_first_op_position(data: str, operators: list[str]) -> int:
         if not any(operator in data for operator in operators):
             return len(data)
         for index, char in enumerate(data):
@@ -9,7 +9,7 @@ class PyPiConstraintParser:
         return 0
 
     @staticmethod
-    async def parse_pypi_constraints(raw_constraints: str) -> str:
+    def parse_pypi_constraints(raw_constraints: str) -> str:
         if raw_constraints:
             ctcs = []
             for ctc in raw_constraints.split(","):
@@ -19,13 +19,13 @@ class PyPiConstraintParser:
                 else:
                     ctcs.append(ctc.strip())
             if ctcs:
-                clean_ctcs = await PyPiConstraintParser.clean_pypi_constraints(ctcs)
+                clean_ctcs = PyPiConstraintParser.clean_pypi_constraints(ctcs)
                 if clean_ctcs:
                     return clean_ctcs
         return "any"
 
     @staticmethod
-    async def clean_pypi_constraints(raw_constraints: list[str]) -> str:
+    def clean_pypi_constraints(raw_constraints: list[str]) -> str:
         constraints = []
         for raw_constraint in raw_constraints:
             try:

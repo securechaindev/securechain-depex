@@ -117,7 +117,7 @@ async def valid_graph(
         else:
             model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
-        result = await ValidGraphOperation.execute(smt_model)
+        result = ValidGraphOperation.execute(smt_model)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(

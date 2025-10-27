@@ -7,7 +7,7 @@ class PackageConfigAnalyzer(RequirementFileAnalyzer):
     def __init__(self):
         super().__init__("NuGet")
 
-    async def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+    def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
         packages = {}
         tree = ElementTree.parse(f"{repository_path}/{filename}")
         root = tree.getroot()

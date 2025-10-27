@@ -7,7 +7,7 @@ from app.settings import settings
 
 class ValidConfigOperation:
     @staticmethod
-    async def execute(model: SMTModel, config: dict[str, int]) -> bool:
+    def execute(model: SMTModel, config: dict[str, int]) -> bool:
         solver = Solver()
         solver.set("timeout", settings.SMT_SOLVER_TIMEOUT_MS)
         solver.add(model.domain)

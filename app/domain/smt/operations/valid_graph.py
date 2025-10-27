@@ -7,7 +7,7 @@ from app.settings import settings
 
 class ValidGraphOperation:
     @staticmethod
-    async def execute(model: SMTModel) -> bool:
+    def execute(model: SMTModel) -> bool:
         solver = Solver()
         solver.set("timeout", settings.SMT_SOLVER_TIMEOUT_MS)
         solver.add(model.domain)

@@ -21,7 +21,7 @@ class RepositoryAnalyzer:
         repository_path = await self.download_repository(owner, name)
 
         try:
-            requirement_file_names = await self.get_req_files_names(repository_path)
+            requirement_file_names = self.get_req_files_names(repository_path)
 
             for requirement_file_name in requirement_file_names:
                 analyzer = self.registry.get_analyzer(requirement_file_name)
@@ -79,7 +79,7 @@ class RepositoryAnalyzer:
                     session, owner, name, item["path"], repository_path
                 )
 
-    async def get_req_files_names(self, directory_path: str) -> list[str]:
+    def get_req_files_names(self, directory_path: str) -> list[str]:
         requirement_files = []
         paths = glob(directory_path + "/**", recursive=True)
         for _path in paths:

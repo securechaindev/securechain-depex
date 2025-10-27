@@ -17,7 +17,7 @@ class JWTBearer(HTTPBearer):
         super().__init__(auto_error=False)
         self.cookie_name = cookie_name
 
-    async def __call__(self, request: Request) -> dict[str, Any]:
+    def __call__(self, request: Request) -> dict[str, Any]:
         token = request.cookies.get(self.cookie_name)
         if not token:
             raise NotAuthenticatedException()

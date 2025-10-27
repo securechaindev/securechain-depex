@@ -56,7 +56,7 @@ async def valid_config(
             model_text = smt_model.transform()
             await smt_service.replace_smt_text(smt_text_id, model_text)
         config = await version_service.read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config)
-        result = await ValidConfigOperation.execute(smt_model, config)
+        result = ValidConfigOperation.execute(smt_model, config)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
