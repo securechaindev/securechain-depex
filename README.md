@@ -54,31 +54,163 @@ docker compose -f dev/docker-compose.yml up --build
 ### 6. Access the application
 The API will be available at [http://localhost:8002](http://localhost:8002). You can access the API documentation at [http://localhost:8002/docs](http://localhost:8002/docs). Also, in [http://localhost:8001/docs](http://localhost:8001/docs) you can access the auth API documetation.
 
-## Python Environment
-The project uses Python 3.13 and the dependencies are listed in `requirements.txt`.
+### 7. Visualize the graph database
+Access Neo4j browser interface at [http://localhost:7474](http://localhost:7474/browser/) to visualize and query the dependency graphs.
 
-### Setting up the development environment
+### 8. Monitor databases
+- **MongoDB Compass:** Connect to MongoDB at `mongodb://localhost:27017` to browse documents
+- **Redis:** Connect to `localhost:6379` to monitor cache
+
+## Python Environment
+The project uses Python 3.13 and **uv** as the package manager for faster and more reliable dependency management.
+
+### Setting up the development environment with uv
+
+1. **Install uv** (if not already installed):
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   uv sync
+   ```
+
+3. **Activate the virtual environment** (uv creates it automatically):
+   ```bash
+   source .venv/bin/activate
+   ```
+
+4. **Run the application**:
+   ```bash
+   uv run uvicorn app.main:app --reload
+   ```
+
+5. **Run tests**:
+   ```bash
+   uv run pytest --cov=app --cov-report=term-missing
+   ```
+
+### Alternative: Traditional pip setup
 
 1. **Create a virtual environment**:
    ```bash
-   python3.13 -m venv depex-env
+   python3.13 -m venv .venv
    ```
 
 2. **Activate the virtual environment**:
    ```bash
-   source depex-env/bin/activate
+   source .venv/bin/activate
    ```
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   pip install -e .
    ```
 
+## Testing
+
+The project uses pytest with coverage tracking. Current coverage: **84%** (407 tests passing).
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run tests with coverage report
+uv run pytest --cov=app --cov-report=term-missing --cov-report=html
+
+# Run specific test file
+uv run pytest tests/unit/controllers/test_graph_controller.py -v
+
+# Run only unit tests
+uv run pytest tests/unit/ -v
+```
+
+## Code Quality
+
+The project uses **Ruff** for linting and formatting:
+
+```bash
+# Check for linting issues
+uv run ruff check app/
+
+# Format code
+uv run ruff format app/
+```
+
+## Project Structure
+
+```
+securechain-depex/
+├── app/                      # Main application code
+│   ├── controllers/          # API endpoints (FastAPI routes)
+│   ├── services/             # Business logic layer
+│   ├── domain/               # Domain models and core logic
+│   │   ├── repo_analyzer/    # Dependency file analyzers
+│   │   └── smt/              # SMT solver operations
+│   ├── schemas/              # Pydantic models for validation
+│   ├── utils/                # Utility functions
+│   ├── exceptions/           # Custom exceptions
+│   └── main.py              # Application entry point
+├── tests/                    # Test suite
+│   ├── unit/                # Unit tests (84% coverage)
+│   └── integration/         # Integration tests
+├── dev/                     # Development Docker files
+└── pyproject.toml           # Project dependencies (uv)
+```
+
+## Technology Stack
+
+- **Python 3.13+** - Programming language
+- **FastAPI** - Modern async web framework
+- **uv** - Fast Python package manager (Rust-based)
+- **MongoDB** - Document database for operations and metadata
+- **Neo4j** - Graph database for dependency relationships
+- **Redis** - In-memory cache for performance
+- **Z3 Solver** - SMT solver for constraint resolution
+- **Motor** - Async MongoDB driver
+- **Pydantic** - Data validation using Python type hints
+- **Pytest** - Testing framework with async support
+
+## Features
+
+- 🔍 **Multi-ecosystem support:** Analyzes Python, JavaScript, Ruby, Rust, Java, and PHP dependencies
+- 🧮 **SMT-based reasoning:** Uses Z3 solver to find optimal dependency configurations
+- 📊 **Graph analysis:** Visualize and query dependency graphs using Neo4j
+- ⚡ **High performance:** Async architecture with Redis caching
+- 🔒 **Secure:** JWT authentication and rate limiting
+- 📝 **Well-documented:** OpenAPI/Swagger documentation at `/docs`
+- ✅ **Well-tested:** 84% code coverage with 407 tests
+
 ## Contributing
+
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
+### How to Contribute
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes with tests
+4. Run tests: `uv run pytest --cov=app`
+5. Run linter: `uv run ruff check app/`
+6. Format code: `uv run ruff format app/`
+7. Commit your changes (`git commit -m 'Add amazing feature'`)
+8. Push to the branch (`git push origin feature/amazing-feature`)
+9. Open a Pull Request
+
+Please ensure:
+- All tests pass
+- Code coverage is maintained or improved
+- Code follows the project's style guide (Ruff)
+- Commit messages are clear and descriptive
+
 ## License
+
 [GNU General Public License 3.0](https://www.gnu.org/licenses/gpl-3.0.html)
+
+This project is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This project is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 ## Links
 - [Secure Chain Team](mailto:hi@securechain.dev)
