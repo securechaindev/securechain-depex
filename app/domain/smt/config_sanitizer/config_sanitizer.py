@@ -7,19 +7,15 @@ from app.services import VersionService
 
 
 class ConfigSanitizer:
-    instance: ConfigSanitizer | None = None
-    initialized: bool = False
+    _instance: ConfigSanitizer | None = None
+    _version_service: VersionService | None = None
 
     def __new__(cls) -> ConfigSanitizer:
-        if cls.instance is None:
-            cls.instance = super().__new__(cls)
-        return cls.instance
-
-    def __init__(self):
-        if not ConfigSanitizer.initialized:
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
             container = ServiceContainer()
-            self.version_service: VersionService = container.get_version_service()
-            ConfigSanitizer.initialized = True
+            cls._version_service = container.get_version_service()
+        return cls._instance
 
     async def sanitize(self, node_type: str, config: ModelRef) -> dict[str, float | int]:
         final_config: dict[str, float | int] = {}
@@ -38,7 +34,7 @@ class ConfigSanitizer:
 
         self.process_impact_variables(final_config, impact_vars)
 
-        return await self.version_service.read_releases_by_serial_numbers(node_type, final_config)
+        return await self._version_service.read_releases_by_serial_numbers(node_type, final_config)
 
     @staticmethod
     def extract_variable_value(config: ModelRef, var) -> float | int | None:
