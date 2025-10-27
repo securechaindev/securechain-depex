@@ -1,5 +1,9 @@
 from abc import ABC, abstractmethod
 
+from regex import findall
+
+from app.settings import settings
+
 
 class RequirementFileAnalyzer(ABC):
     def __init__(self, manager: str):
@@ -39,16 +43,37 @@ class RequirementFileAnalyzer(ABC):
 
     @staticmethod
     def is_compatible_python_version(version_marker: str) -> bool:
-        compatible_versions = (
-            '== "3.9"' in version_marker
-            or '<= "3.9"' in version_marker
-            or '>= "3.9"' in version_marker
-            or '>= "3"' in version_marker
-            or '<= "3"' in version_marker
-            or '>= "2' in version_marker
-            or '> "2' in version_marker
-        )
-        return compatible_versions
+        version_pattern = r'([<>=!]+)\s*["\']?(\d+)(?:\.(\d+))?(?:\.(\d+))?["\']?'
+        matches = findall(version_pattern, version_marker)
+
+        if not matches:
+            return True
+
+        min_major = settings.MIN_PYTHON_VERSION_MAJOR
+        min_minor = settings.MIN_PYTHON_VERSION_MINOR
+
+        for operator, major, minor, _ in matches:
+            major_ver = int(major)
+            minor_ver = int(minor) if minor else 0
+
+            if major_ver < 3:
+                if operator.startswith('>'):
+                    continue
+                return False
+
+            if major_ver == 3:
+                if operator == '==':
+                    return (major_ver, minor_ver) >= (min_major, min_minor)
+                elif operator.startswith('>='):
+                    return True
+                elif operator.startswith('>'):
+                    return (min_major, min_minor) > (major_ver, minor_ver)
+                elif operator.startswith('<='):
+                    return True
+                elif operator.startswith('<'):
+                    return (major_ver, minor_ver) > (min_major, min_minor)
+
+        return True
 
     @staticmethod
     def should_skip_dependency(dependency_parts: list[str]) -> bool:

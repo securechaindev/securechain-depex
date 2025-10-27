@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     # SMT Solver Configuration
     SMT_SOLVER_TIMEOUT_MS: int = 3000
 
+    # Python Version Configuration
+    MIN_PYTHON_VERSION_MAJOR: int = 3
+    MIN_PYTHON_VERSION_MINOR: int = 13
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
