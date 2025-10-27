@@ -1,14 +1,10 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field
 
+from app.schemas.base_schema import BaseSchemaWithPackageName
 from app.schemas.enums import NodeType
 
 
-class GetVersionStatusRequest(BaseModel):
+class GetVersionStatusRequest(BaseSchemaWithPackageName):
     node_type: NodeType = Field(...)
     package_name: str = Field(...)
-    version_name: str  = Field(...)
-
-    @model_validator(mode='before')
-    def set_package_name_to_lowercase(cls, values):
-        values['package_name'] = values.get('package_name', '').lower()
-        return values
+    version_name: str = Field(...)
