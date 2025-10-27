@@ -25,6 +25,5 @@ jobs:
       - name: Analysing the code with Ruff
         run: uv run ruff check app
 
-      # - name: Run tests
-      #   run: uv run pytest -v
-
+      - name: Run tests
+        run: uv run pytest -v
