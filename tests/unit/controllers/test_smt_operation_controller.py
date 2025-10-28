@@ -1,28 +1,26 @@
-"""Unit tests for smt_operation_controller."""
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
-from fastapi import Request, status
+from json import loads
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 import pytz
+from fastapi import Request, status
 
 from app.controllers.smt_operation_controller import (
-    valid_graph,
-    minimize_impact,
-    maximize_impact,
-    filter_configs,
-    valid_config,
     complete_config,
     config_by_impact,
+    filter_configs,
+    maximize_impact,
+    minimize_impact,
+    valid_config,
+    valid_graph,
 )
 from app.schemas.enums import NodeType
 
 
 class TestSMTOperationController:
-    """Test suite for smt_operation_controller."""
-
     @pytest.fixture
     def mock_request(self):
-        """Create a mock FastAPI request."""
         request = MagicMock(spec=Request)
         request.client = MagicMock()
         request.client.host = "127.0.0.1"
@@ -30,35 +28,28 @@ class TestSMTOperationController:
 
     @pytest.fixture
     def mock_json_encoder(self):
-        """Create a mock JSON encoder."""
         encoder = MagicMock()
         encoder.encode = MagicMock(side_effect=lambda x: x)
         return encoder
 
     @pytest.fixture
     def mock_requirement_file_service(self):
-        """Create a mock requirement file service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_version_service(self):
-        """Create a mock version service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_smt_service(self):
-        """Create a mock SMT service."""
         return AsyncMock()
-
-    # Test for valid_graph - no dependencies case
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
     async def test_valid_graph_no_dependencies(
-        self, mock_limiter, mock_request,
+        self, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_smt_service, mock_json_encoder
     ):
-        """Test valid_graph returns no_dependencies when graph has no deps."""
         mock_requirement_file_service.read_data_for_smt_transform.return_value = {
             "name": None,
             "moment": datetime(2023, 11, 1, tzinfo=pytz.UTC)
@@ -78,19 +69,15 @@ class TestSMTOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
-
-    # Test for minimize_impact - no dependencies case
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
     async def test_minimize_impact_no_dependencies(
-        self, mock_limiter, mock_request,
+        self, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_smt_service, mock_json_encoder
     ):
-        """Test minimize_impact returns no_dependencies when graph has no deps."""
         mock_requirement_file_service.read_data_for_smt_transform.return_value = {
             "name": None,
             "moment": datetime(2023, 11, 1, tzinfo=pytz.UTC)
@@ -111,19 +98,15 @@ class TestSMTOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
-
-    # Test for maximize_impact - no dependencies case
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
     async def test_maximize_impact_no_dependencies(
-        self, mock_limiter, mock_request,
+        self, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_smt_service, mock_json_encoder
     ):
-        """Test maximize_impact returns no_dependencies when graph has no deps."""
         mock_requirement_file_service.read_data_for_smt_transform.return_value = {
             "name": None,
             "moment": datetime(2023, 11, 1, tzinfo=pytz.UTC)
@@ -144,19 +127,15 @@ class TestSMTOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
-
-    # Test for filter_configs - no dependencies case
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
     async def test_filter_configs_no_dependencies(
-        self, mock_limiter, mock_request,
+        self, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_smt_service, mock_json_encoder
     ):
-        """Test filter_configs returns no_dependencies when graph has no deps."""
         mock_requirement_file_service.read_data_for_smt_transform.return_value = {
             "name": None,
             "moment": datetime(2023, 11, 1, tzinfo=pytz.UTC)
@@ -178,19 +157,15 @@ class TestSMTOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
-
-    # Test for valid_config - no dependencies case
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
     async def test_valid_config_no_dependencies(
-        self, mock_limiter, mock_request,
+        self, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_version_service, mock_smt_service, mock_json_encoder
     ):
-        """Test valid_config returns no_dependencies when graph has no deps."""
         mock_requirement_file_service.read_data_for_smt_transform.return_value = {
             "name": None,
             "moment": datetime(2023, 11, 1, tzinfo=pytz.UTC)
@@ -212,19 +187,15 @@ class TestSMTOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
-
-    # Test for complete_config - no dependencies case
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
     async def test_complete_config_no_dependencies(
-        self, mock_limiter, mock_request,
+        self, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_version_service, mock_smt_service, mock_json_encoder
     ):
-        """Test complete_config returns no_dependencies when graph has no deps."""
         mock_requirement_file_service.read_data_for_smt_transform.return_value = {
             "name": None,
             "moment": datetime(2023, 11, 1, tzinfo=pytz.UTC)
@@ -246,19 +217,15 @@ class TestSMTOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
-
-    # Test for config_by_impact - no dependencies case
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
     async def test_config_by_impact_no_dependencies(
-        self, mock_limiter, mock_request,
+        self, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_smt_service, mock_json_encoder
     ):
-        """Test config_by_impact returns no_dependencies when graph has no deps."""
         mock_requirement_file_service.read_data_for_smt_transform.return_value = {
             "name": None,
             "moment": datetime(2023, 11, 1, tzinfo=pytz.UTC)
@@ -279,6 +246,5 @@ class TestSMTOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"

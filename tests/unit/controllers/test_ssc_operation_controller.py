@@ -1,24 +1,22 @@
-"""Unit tests for ssc_operation_controller."""
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
-from fastapi import Request, status
+from json import loads
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 import pytz
+from fastapi import Request, status
 
 from app.controllers.ssc_operation_controller import (
-    requirement_file_info,
     package_ssc_info,
+    requirement_file_info,
     version_ssc_info,
 )
 from app.schemas.enums import NodeType
 
 
 class TestSSCOperationController:
-    """Test suite for ssc_operation_controller."""
-
     @pytest.fixture
     def mock_request(self):
-        """Create a mock FastAPI request."""
         request = MagicMock(spec=Request)
         request.client = MagicMock()
         request.client.host = "127.0.0.1"
@@ -26,41 +24,33 @@ class TestSSCOperationController:
 
     @pytest.fixture
     def mock_json_encoder(self):
-        """Create a mock JSON encoder."""
         encoder = MagicMock()
         encoder.encode = MagicMock(side_effect=lambda x: x)
         return encoder
 
     @pytest.fixture
     def mock_requirement_file_service(self):
-        """Create a mock requirement file service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_package_service(self):
-        """Create a mock package service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_version_service(self):
-        """Create a mock version service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_operation_service(self):
-        """Create a mock operation service."""
         return AsyncMock()
-
-    # Tests for requirement_file_info
 
     @pytest.mark.asyncio
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_requirement_file_info_with_cache(
-        self, mock_version_filter, mock_limiter, mock_request, 
+        self, _mock_version_filter, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_operation_service, mock_json_encoder
     ):
-        """Test requirement_file_info returns cached result when available."""
         cached_result = {
             "total_direct_dependencies": 2,
             "direct_dependencies": [],
@@ -86,11 +76,9 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["result"] == cached_result
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "file_info_success"
         mock_operation_service.replace_operation_result.assert_not_called()
 
@@ -98,13 +86,12 @@ class TestSSCOperationController:
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_requirement_file_info_compute_with_dependencies(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, mock_version_filter, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_operation_service, mock_json_encoder
     ):
-        """Test requirement_file_info computes result when cache is stale."""
         mock_operation_service.read_operation_result.return_value = None
         mock_requirement_file_service.read_requirement_file_moment.return_value = datetime(2023, 11, 1, tzinfo=pytz.UTC)
-        
+
         computed_result = {
             "total_direct_dependencies": 1,
             "direct_dependencies": [
@@ -141,20 +128,18 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["result"]["total_direct_dependencies"] == 1
         mock_operation_service.replace_operation_result.assert_called_once()
-        assert mock_version_filter.filter_versions.call_count == 2  # direct + indirect
+        assert mock_version_filter.filter_versions.call_count == 2
 
     @pytest.mark.asyncio
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_requirement_file_info_no_dependencies(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, _mock_version_filter, _mock_limiter, mock_request,
         mock_requirement_file_service, mock_operation_service, mock_json_encoder
     ):
-        """Test requirement_file_info returns no_dependencies when none exist."""
         mock_operation_service.read_operation_result.return_value = None
         mock_requirement_file_service.read_requirement_file_moment.return_value = datetime(2023, 11, 1, tzinfo=pytz.UTC)
         mock_requirement_file_service.read_graph_for_req_file_info_operation.return_value = {
@@ -177,21 +162,17 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
         mock_operation_service.replace_operation_result.assert_not_called()
-
-    # Tests for package_ssc_info
 
     @pytest.mark.asyncio
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_package_ssc_info_with_cache(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, _mock_version_filter, _mock_limiter, mock_request,
         mock_package_service, mock_operation_service, mock_json_encoder
     ):
-        """Test package_ssc_info returns cached result when available."""
         cached_result = {
             "total_direct_dependencies": 3,
             "direct_dependencies": [],
@@ -215,8 +196,7 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["result"] == cached_result
         mock_operation_service.replace_operation_result.assert_not_called()
 
@@ -224,12 +204,11 @@ class TestSSCOperationController:
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_package_ssc_info_compute_with_dependencies(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, mock_version_filter, _mock_limiter, mock_request,
         mock_package_service, mock_operation_service, mock_json_encoder
     ):
-        """Test package_ssc_info computes result when no cache."""
         mock_operation_service.read_operation_result.return_value = None
-        
+
         computed_result = {
             "total_direct_dependencies": 2,
             "direct_dependencies": [
@@ -258,8 +237,7 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["result"]["total_direct_dependencies"] == 2
         mock_operation_service.replace_operation_result.assert_called_once()
 
@@ -267,10 +245,9 @@ class TestSSCOperationController:
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_package_ssc_info_no_dependencies(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, _mock_version_filter, _mock_limiter, mock_request,
         mock_package_service, mock_operation_service, mock_json_encoder
     ):
-        """Test package_ssc_info returns no_dependencies when none exist."""
         mock_operation_service.read_operation_result.return_value = None
         mock_package_service.read_graph_for_package_ssc_info_operation.return_value = {
             "total_direct_dependencies": 0,
@@ -292,21 +269,17 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
         mock_operation_service.replace_operation_result.assert_not_called()
-
-    # Tests for version_ssc_info
 
     @pytest.mark.asyncio
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_version_ssc_info_with_cache(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, _mock_version_filter, _mock_limiter, mock_request,
         mock_version_service, mock_operation_service, mock_json_encoder
     ):
-        """Test version_ssc_info returns cached result when available."""
         cached_result = {
             "total_direct_dependencies": 5,
             "direct_dependencies": [],
@@ -331,8 +304,7 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["result"] == cached_result
         mock_operation_service.replace_operation_result.assert_not_called()
 
@@ -340,12 +312,11 @@ class TestSSCOperationController:
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_version_ssc_info_compute_with_dependencies(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, mock_version_filter, _mock_limiter, mock_request,
         mock_version_service, mock_operation_service, mock_json_encoder
     ):
-        """Test version_ssc_info computes result when no cache."""
         mock_operation_service.read_operation_result.return_value = None
-        
+
         computed_result = {
             "total_direct_dependencies": 1,
             "direct_dependencies": [
@@ -375,8 +346,7 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["result"]["total_direct_dependencies"] == 1
         mock_operation_service.replace_operation_result.assert_called_once()
 
@@ -384,10 +354,9 @@ class TestSSCOperationController:
     @patch("app.controllers.ssc_operation_controller.limiter")
     @patch("app.controllers.ssc_operation_controller.VersionFilter")
     async def test_version_ssc_info_no_dependencies(
-        self, mock_version_filter, mock_limiter, mock_request,
+        self, _mock_version_filter, _mock_limiter, mock_request,
         mock_version_service, mock_operation_service, mock_json_encoder
     ):
-        """Test version_ssc_info returns no_dependencies when none exist."""
         mock_operation_service.read_operation_result.return_value = None
         mock_version_service.read_graph_for_version_ssc_info_operation.return_value = {
             "total_direct_dependencies": 0,
@@ -410,7 +379,6 @@ class TestSSCOperationController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "no_dependencies"
         mock_operation_service.replace_operation_result.assert_not_called()

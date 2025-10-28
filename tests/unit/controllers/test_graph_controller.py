@@ -1,25 +1,22 @@
-"""Unit tests for graph_controller."""
-import pytest
+from json import loads
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi import Request, status
 
 from app.controllers.graph_controller import (
-    get_repositories,
     get_package_status,
+    get_repositories,
     get_version_status,
-    init_package,
     init_repository,
 )
-from app.schemas.enums import NodeType
 from app.exceptions import InvalidRepositoryException
+from app.schemas.enums import NodeType
 
 
 class TestGraphController:
-    """Test suite for graph_controller."""
-
     @pytest.fixture
     def mock_request(self):
-        """Create a mock FastAPI request."""
         request = MagicMock(spec=Request)
         request.client = MagicMock()
         request.client.host = "127.0.0.1"
@@ -27,37 +24,31 @@ class TestGraphController:
 
     @pytest.fixture
     def mock_json_encoder(self):
-        """Create a mock JSON encoder."""
         encoder = MagicMock()
         encoder.encode = MagicMock(side_effect=lambda x: x)
         return encoder
 
     @pytest.fixture
     def mock_repository_service(self):
-        """Create a mock repository service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_package_service(self):
-        """Create a mock package service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_github_service(self):
-        """Create a mock GitHub service."""
         return AsyncMock()
 
     @pytest.fixture
     def mock_redis_queue(self):
-        """Create a mock Redis queue."""
         return MagicMock()
 
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_get_repositories_success(
-        self, mock_limiter, mock_request, mock_repository_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_repository_service, mock_json_encoder
     ):
-        """Test get_repositories returns repositories successfully."""
         mock_repos = [
             {"id": "1", "name": "repo1", "owner": "user1"},
             {"id": "2", "name": "repo2", "owner": "user1"}
@@ -75,8 +66,7 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["repositories"] == mock_repos
         assert response_data["detail"] == "get_repositories_success"
         mock_repository_service.read_repositories_by_user_id.assert_called_once_with("user1")
@@ -84,9 +74,8 @@ class TestGraphController:
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_get_package_status_found(
-        self, mock_limiter, mock_request, mock_package_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_package_service, mock_json_encoder
     ):
-        """Test get_package_status returns package when found."""
         mock_package = {"name": "fastapi", "status": "active"}
         mock_package_service.read_package_status_by_name.return_value = mock_package
 
@@ -102,8 +91,7 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["package"] == mock_package
         assert response_data["detail"] == "get_package_status_success"
         mock_package_service.read_package_status_by_name.assert_called_once_with(
@@ -113,9 +101,8 @@ class TestGraphController:
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_get_package_status_not_found(
-        self, mock_limiter, mock_request, mock_package_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_package_service, mock_json_encoder
     ):
-        """Test get_package_status returns 404 when package not found."""
         mock_package_service.read_package_status_by_name.return_value = None
 
         get_package_status_request = MagicMock()
@@ -130,8 +117,7 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert "not_found" in response_data["detail"]
         mock_package_service.read_package_status_by_name.assert_called_once_with(
             NodeType.pypi_package.value, "nonexistent"
@@ -140,9 +126,8 @@ class TestGraphController:
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_get_version_status_found(
-        self, mock_limiter, mock_request, mock_package_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_package_service, mock_json_encoder
     ):
-        """Test get_version_status returns version when found."""
         mock_version = {"version": "1.0.0", "status": "stable"}
         mock_package_service.read_version_status_by_package_and_name.return_value = mock_version
 
@@ -159,8 +144,7 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["version"] == mock_version
         assert response_data["detail"] == "get_version_status_success"
         mock_package_service.read_version_status_by_package_and_name.assert_called_once_with(
@@ -170,9 +154,8 @@ class TestGraphController:
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_get_version_status_not_found(
-        self, mock_limiter, mock_request, mock_package_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_package_service, mock_json_encoder
     ):
-        """Test get_version_status returns 404 when version not found."""
         mock_package_service.read_version_status_by_package_and_name.return_value = None
 
         get_version_status_request = MagicMock()
@@ -188,8 +171,7 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert "not_found" in response_data["detail"]
         mock_package_service.read_version_status_by_package_and_name.assert_called_once_with(
             NodeType.pypi_package.value, "fastapi", "999.0.0"
@@ -199,9 +181,8 @@ class TestGraphController:
     @patch("app.controllers.graph_controller.RepositoryInitializer")
     @patch("app.controllers.graph_controller.limiter")
     async def test_init_repository_success_new_repo(
-        self, mock_limiter, mock_repo_initializer, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
+        self, _mock_limiter, mock_repo_initializer, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
     ):
-        """Test init_repository queues new repository successfully."""
         mock_github_service.get_last_commit_date.return_value = "2023-01-01"
         mock_repository_service.read_repository_by_owner_and_name.return_value = None
 
@@ -222,8 +203,7 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_202_ACCEPTED
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "repository_queued_for_processing"
         assert "testowner/testrepo" in response_data["repository"]
         mock_github_service.get_last_commit_date.assert_called_once_with("testowner", "testrepo")
@@ -233,9 +213,8 @@ class TestGraphController:
     @patch("app.controllers.graph_controller.RepositoryInitializer")
     @patch("app.controllers.graph_controller.limiter")
     async def test_init_repository_success_complete_repo(
-        self, mock_limiter, mock_repo_initializer, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
+        self, _mock_limiter, mock_repo_initializer, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
     ):
-        """Test init_repository queues complete repository for reprocessing."""
         mock_github_service.get_last_commit_date.return_value = "2023-01-01"
         mock_repository_service.read_repository_by_owner_and_name.return_value = {
             "id": "repo123",
@@ -259,17 +238,15 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_202_ACCEPTED
-        import json
-        response_data = json.loads(response.body)
+        response_data = loads(response.body)
         assert response_data["detail"] == "repository_queued_for_processing"
         background_tasks.add_task.assert_called_once()
 
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_init_repository_in_progress(
-        self, mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
     ):
-        """Test init_repository returns conflict when repository is being processed."""
         mock_github_service.get_last_commit_date.return_value = "2023-01-01"
         mock_repository_service.read_repository_by_owner_and_name.return_value = {
             "id": "repo123",
@@ -298,9 +275,8 @@ class TestGraphController:
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_init_repository_github_not_found(
-        self, mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
     ):
-        """Test init_repository returns 404 when repository not found on GitHub."""
         mock_github_service.get_last_commit_date.side_effect = InvalidRepositoryException()
 
         init_repository_request = MagicMock()
@@ -325,9 +301,8 @@ class TestGraphController:
     @pytest.mark.asyncio
     @patch("app.controllers.graph_controller.limiter")
     async def test_init_repository_error(
-        self, mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
+        self, _mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
     ):
-        """Test init_repository handles unexpected errors."""
         mock_github_service.get_last_commit_date.side_effect = Exception("Unexpected error")
 
         init_repository_request = MagicMock()

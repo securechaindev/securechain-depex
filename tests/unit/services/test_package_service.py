@@ -1,5 +1,3 @@
-"""Tests for PackageService."""
-
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -10,7 +8,6 @@ from app.services.package_service import PackageService
 
 
 class _TestNeo4jError(Neo4jError):
-    """Custom Neo4jError for testing with code support."""
     def __init__(self, message: str, code: str):
         super().__init__(message)
         self._code = code
@@ -21,11 +18,9 @@ class _TestNeo4jError(Neo4jError):
 
 
 class TestPackageService:
-    """Test suite for PackageService class."""
 
     @pytest.fixture
     def mock_db_manager(self):
-        """Create a mock DatabaseManager."""
         db_manager = MagicMock()
         driver = MagicMock()
         db_manager.get_neo4j_driver.return_value = driver
@@ -33,17 +28,14 @@ class TestPackageService:
 
     @pytest.fixture
     def package_service(self, mock_db_manager):
-        """Create PackageService instance with mocked database."""
         db_manager, _ = mock_db_manager
         return PackageService(db_manager)
 
     async def test_read_package_status_by_name_found(self, package_service, mock_db_manager):
-        """Test reading package status when package exists."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        # Mock result
         result_mock = AsyncMock()
         record = [{"name": "fastapi", "versions": [{"name": "0.100.0"}]}]
         result_mock.single.return_value = record
@@ -55,7 +47,6 @@ class TestPackageService:
         session_mock.run.assert_called_once()
 
     async def test_read_package_status_by_name_not_found(self, package_service, mock_db_manager):
-        """Test reading package status when package doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -69,7 +60,6 @@ class TestPackageService:
         assert status is None
 
     async def test_read_version_status_by_package_and_name_found(self, package_service, mock_db_manager):
-        """Test reading version status when version exists."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -86,7 +76,6 @@ class TestPackageService:
         assert version == {"id": "abc123", "name": "0.100.0", "mean": 5.5}
 
     async def test_read_version_status_by_package_and_name_not_found(self, package_service, mock_db_manager):
-        """Test reading version status when version doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -102,7 +91,6 @@ class TestPackageService:
         assert version is None
 
     async def test_read_packages_by_requirement_file_found(self, package_service, mock_db_manager):
-        """Test reading packages by requirement file when packages exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -118,7 +106,6 @@ class TestPackageService:
         session_mock.run.assert_called_once()
 
     async def test_read_packages_by_requirement_file_not_found(self, package_service, mock_db_manager):
-        """Test reading packages when requirement file doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -132,12 +119,10 @@ class TestPackageService:
         assert packages is None
 
     async def test_read_graph_for_package_ssc_info_operation_success(self, package_service, mock_db_manager):
-        """Test reading graph for SSC info operation."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        # Mock execute_read result
         graph_data = {
             "direct_dependencies": [
                 {
@@ -164,7 +149,6 @@ class TestPackageService:
         assert result["total_indirect_dependencies"] == 1
 
     async def test_read_graph_for_package_ssc_info_operation_not_found(self, package_service, mock_db_manager):
-        """Test reading graph when package doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -178,12 +162,10 @@ class TestPackageService:
         assert result is None
 
     async def test_read_graph_memory_out_error(self, package_service, mock_db_manager):
-        """Test read_graph raises MemoryOutException on memory error."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        # Simulate memory error
         error = _TestNeo4jError(
             message="Memory pool out of memory",
             code="Neo.TransientError.General.MemoryPoolOutOfMemoryError"
@@ -196,7 +178,6 @@ class TestPackageService:
             )
 
     async def test_read_graph_transaction_timeout_client(self, package_service, mock_db_manager):
-        """Test read_graph raises MemoryOutException on client timeout."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -213,7 +194,6 @@ class TestPackageService:
             )
 
     async def test_read_graph_transaction_timeout(self, package_service, mock_db_manager):
-        """Test read_graph raises MemoryOutException on transaction timeout."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -230,7 +210,6 @@ class TestPackageService:
             )
 
     async def test_exists_package_true(self, package_service, mock_db_manager):
-        """Test exists_package returns True when package exists."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -244,7 +223,6 @@ class TestPackageService:
         assert exists is True
 
     async def test_exists_package_false(self, package_service, mock_db_manager):
-        """Test exists_package returns False when package doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -258,7 +236,6 @@ class TestPackageService:
         assert exists is False
 
     async def test_exists_package_no_record(self, package_service, mock_db_manager):
-        """Test exists_package returns False when no record returned."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock

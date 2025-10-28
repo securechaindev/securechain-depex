@@ -1,4 +1,3 @@
-"""Tests for VersionService."""
 
 from unittest.mock import AsyncMock, MagicMock
 
@@ -10,7 +9,6 @@ from app.services.version_service import VersionService
 
 
 class _TestNeo4jError(Neo4jError):
-    """Custom Neo4jError for testing with code support."""
     def __init__(self, message: str, code: str):
         super().__init__(message)
         self._code = code
@@ -21,11 +19,9 @@ class _TestNeo4jError(Neo4jError):
 
 
 class TestVersionService:
-    """Test suite for VersionService class."""
 
     @pytest.fixture
     def mock_db_manager(self):
-        """Create a mock DatabaseManager."""
         db_manager = MagicMock()
         driver = MagicMock()
         db_manager.get_neo4j_driver.return_value = driver
@@ -33,17 +29,14 @@ class TestVersionService:
 
     @pytest.fixture
     def version_service(self, mock_db_manager):
-        """Create VersionService instance with mocked database."""
         db_manager, _ = mock_db_manager
         return VersionService(db_manager)
 
     async def test_read_releases_by_serial_numbers_all_found(self, version_service, mock_db_manager):
-        """Test reading releases when all serial numbers are found."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        # Mock responses for different packages
         result_mock1 = AsyncMock()
         result_mock1.single.return_value = ["0.100.0"]
         result_mock2 = AsyncMock()
@@ -58,12 +51,10 @@ class TestVersionService:
         assert session_mock.run.call_count == 2
 
     async def test_read_releases_by_serial_numbers_partial_found(self, version_service, mock_db_manager):
-        """Test reading releases when some serial numbers are not found."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        # First package found, second not found
         result_mock1 = AsyncMock()
         result_mock1.single.return_value = ["0.100.0"]
         result_mock2 = AsyncMock()
@@ -77,13 +68,11 @@ class TestVersionService:
         assert result == {"fastapi": "0.100.0", "unknown": 999}
 
     async def test_read_releases_by_serial_numbers_empty_config(self, version_service, mock_db_manager):
-        """Test reading releases with empty config."""
         result = await version_service.read_releases_by_serial_numbers("PyPIPackage", {})
 
         assert result == {}
 
     async def test_read_serial_numbers_by_releases_all_found(self, version_service, mock_db_manager):
-        """Test reading serial numbers when all releases are found."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -101,7 +90,6 @@ class TestVersionService:
         assert result == {"fastapi": 100, "pydantic": 200}
 
     async def test_read_serial_numbers_by_releases_not_found(self, version_service, mock_db_manager):
-        """Test reading serial numbers when releases are not found."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -117,13 +105,11 @@ class TestVersionService:
         assert result == {}
 
     async def test_read_serial_numbers_by_releases_empty_config(self, version_service, mock_db_manager):
-        """Test reading serial numbers with empty config."""
         result = await version_service.read_serial_numbers_by_releases("PyPIPackage", {})
 
         assert result == {}
 
     async def test_read_graph_for_version_ssc_info_operation_success(self, version_service, mock_db_manager):
-        """Test reading graph for version SSC info operation."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -153,7 +139,6 @@ class TestVersionService:
         assert result["total_direct_dependencies"] == 1
 
     async def test_read_graph_for_version_ssc_info_operation_not_found(self, version_service, mock_db_manager):
-        """Test reading graph when version doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -167,7 +152,6 @@ class TestVersionService:
         assert result is None
 
     async def test_read_graph_memory_out_error(self, version_service, mock_db_manager):
-        """Test read_graph raises MemoryOutException on memory error."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -184,7 +168,6 @@ class TestVersionService:
             )
 
     async def test_read_graph_transaction_timeout_client(self, version_service, mock_db_manager):
-        """Test read_graph raises MemoryOutException on client timeout."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -201,7 +184,6 @@ class TestVersionService:
             )
 
     async def test_read_graph_transaction_timeout(self, version_service, mock_db_manager):
-        """Test read_graph raises MemoryOutException on transaction timeout."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock

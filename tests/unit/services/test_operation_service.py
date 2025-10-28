@@ -1,4 +1,3 @@
-"""Unit tests for OperationService."""
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
@@ -8,11 +7,9 @@ from app.services.operation_service import OperationService
 
 
 class TestOperationService:
-    """Test suite for OperationService."""
 
     @pytest.fixture
     def mock_db(self):
-        """Create a mock DatabaseManager."""
         db = MagicMock()
         collection = AsyncMock()
         db.get_operation_result_collection.return_value = collection
@@ -20,7 +17,6 @@ class TestOperationService:
 
     @pytest.mark.asyncio
     async def test_replace_operation_result(self, mock_db):
-        """Test replacing an operation result."""
         db, collection = mock_db
         service = OperationService(db)
 
@@ -29,26 +25,21 @@ class TestOperationService:
 
         await service.replace_operation_result(operation_id, result_data)
 
-        # Verify replace_one was called with correct parameters
         collection.replace_one.assert_called_once()
         call_args = collection.replace_one.call_args
 
-        # Check filter
         assert call_args[0][0] == {"operation_result_id": operation_id}
 
-        # Check document structure
         doc = call_args[0][1]
         assert doc["operation_result_id"] == operation_id
         assert doc["result"] == result_data
         assert "moment" in doc
         assert isinstance(doc["moment"], datetime)
 
-        # Check upsert flag
         assert call_args[1]["upsert"] is True
 
     @pytest.mark.asyncio
     async def test_replace_operation_result_empty_data(self, mock_db):
-        """Test replacing an operation result with empty data."""
         db, collection = mock_db
         service = OperationService(db)
 
@@ -64,7 +55,6 @@ class TestOperationService:
 
     @pytest.mark.asyncio
     async def test_replace_operation_result_complex_data(self, mock_db):
-        """Test replacing an operation result with complex nested data."""
         db, collection = mock_db
         service = OperationService(db)
 
@@ -88,7 +78,6 @@ class TestOperationService:
 
     @pytest.mark.asyncio
     async def test_read_operation_result(self, mock_db):
-        """Test reading an operation result."""
         db, collection = mock_db
         service = OperationService(db)
 
@@ -103,17 +92,14 @@ class TestOperationService:
 
         result = await service.read_operation_result(operation_id)
 
-        # Verify find_one was called with correct filter
         collection.find_one.assert_called_once_with(
             {"operation_result_id": operation_id}
         )
 
-        # Verify result matches
         assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_read_operation_result_not_found(self, mock_db):
-        """Test reading a non-existent operation result."""
         db, collection = mock_db
         service = OperationService(db)
 
@@ -129,7 +115,6 @@ class TestOperationService:
 
     @pytest.mark.asyncio
     async def test_read_operation_result_with_data(self, mock_db):
-        """Test reading an operation result with actual data."""
         db, collection = mock_db
         service = OperationService(db)
 

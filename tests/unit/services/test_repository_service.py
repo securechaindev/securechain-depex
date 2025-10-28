@@ -1,4 +1,3 @@
-"""Tests for RepositoryService."""
 
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
@@ -9,11 +8,9 @@ from app.services.repository_service import RepositoryService
 
 
 class TestRepositoryService:
-    """Test suite for RepositoryService class."""
 
     @pytest.fixture
     def mock_db_manager(self):
-        """Create a mock DatabaseManager."""
         db_manager = MagicMock()
         driver = MagicMock()
         db_manager.get_neo4j_driver.return_value = driver
@@ -21,12 +18,10 @@ class TestRepositoryService:
 
     @pytest.fixture
     def repository_service(self, mock_db_manager):
-        """Create RepositoryService instance with mocked database."""
         db_manager, _ = mock_db_manager
         return RepositoryService(db_manager)
 
     async def test_create_repository_success(self, repository_service, mock_db_manager):
-        """Test creating a repository successfully."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -49,7 +44,6 @@ class TestRepositoryService:
         session_mock.run.assert_called_once()
 
     async def test_create_repository_no_record(self, repository_service, mock_db_manager):
-        """Test create_repository returns None when no record created."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -71,7 +65,6 @@ class TestRepositoryService:
         assert repo_id is None
 
     async def test_create_user_repository_rel_success(self, repository_service, mock_db_manager):
-        """Test creating user-repository relationship."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -86,7 +79,6 @@ class TestRepositoryService:
         session_mock.run.assert_called_once()
 
     async def test_read_repository_by_owner_and_name_found(self, repository_service, mock_db_manager):
-        """Test reading repository when it exists."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -110,7 +102,6 @@ class TestRepositoryService:
         assert repository["name"] == "depex"
 
     async def test_read_repository_by_owner_and_name_not_found(self, repository_service, mock_db_manager):
-        """Test reading repository when it doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -126,7 +117,6 @@ class TestRepositoryService:
         assert repository is None
 
     async def test_read_repositories_by_user_id_with_repos(self, repository_service, mock_db_manager):
-        """Test reading repositories by user ID when user has repos."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -159,7 +149,6 @@ class TestRepositoryService:
         assert len(repositories[0]["requirement_files"]) == 1
 
     async def test_read_repositories_by_user_id_no_repos(self, repository_service, mock_db_manager):
-        """Test reading repositories when user has no repos."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -173,7 +162,6 @@ class TestRepositoryService:
         assert repositories == []
 
     async def test_update_repository_is_complete_true(self, repository_service, mock_db_manager):
-        """Test updating repository is_complete to True."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -185,7 +173,6 @@ class TestRepositoryService:
         assert call_args[1]["is_complete"] is True
 
     async def test_update_repository_is_complete_false(self, repository_service, mock_db_manager):
-        """Test updating repository is_complete to False."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -197,7 +184,6 @@ class TestRepositoryService:
         assert call_args[1]["is_complete"] is False
 
     async def test_update_repository_moment(self, repository_service, mock_db_manager):
-        """Test updating repository moment."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock

@@ -1,4 +1,3 @@
-"""Unit tests for JSONEncoder utility."""
 from datetime import datetime
 
 import pytest
@@ -9,15 +8,12 @@ from app.utils.json_encoder import JSONEncoder
 
 
 class TestJSONEncoder:
-    """Test suite for JSONEncoder."""
 
     @pytest.fixture
     def encoder(self):
-        """Create a JSONEncoder instance."""
         return JSONEncoder()
 
     def test_encode_simple_dict(self, encoder):
-        """Test encoding a simple dictionary."""
         data = {"name": "test", "value": 42}
         result = encoder.encode(data)
 
@@ -25,7 +21,6 @@ class TestJSONEncoder:
         assert isinstance(result, dict)
 
     def test_encode_with_objectid(self, encoder):
-        """Test encoding ObjectId to string."""
         obj_id = ObjectId()
         data = {"_id": obj_id, "name": "test"}
 
@@ -36,7 +31,6 @@ class TestJSONEncoder:
         assert result["name"] == "test"
 
     def test_encode_with_datetime(self, encoder):
-        """Test encoding datetime to string."""
         now = datetime(2025, 10, 27, 12, 30, 45)
         data = {"timestamp": now, "event": "test"}
 
@@ -47,7 +41,6 @@ class TestJSONEncoder:
         assert result["event"] == "test"
 
     def test_encode_with_neo4j_datetime(self, encoder):
-        """Test encoding Neo4j DateTime to string."""
         neo_dt = DateTime(2025, 10, 27, 12, 30, 45)
         data = {"created": neo_dt, "type": "node"}
 
@@ -57,7 +50,6 @@ class TestJSONEncoder:
         assert result["type"] == "node"
 
     def test_encode_nested_dict(self, encoder):
-        """Test encoding nested dictionary."""
         obj_id = ObjectId()
         data = {
             "user": {
@@ -76,7 +68,6 @@ class TestJSONEncoder:
         assert result["active"] is True
 
     def test_encode_list_with_objectids(self, encoder):
-        """Test encoding list containing ObjectIds."""
         obj_ids = [ObjectId(), ObjectId(), ObjectId()]
         data = {"ids": obj_ids, "count": 3}
 
@@ -88,7 +79,6 @@ class TestJSONEncoder:
             assert isinstance(item, str)
 
     def test_encode_mixed_types(self, encoder):
-        """Test encoding mixed types."""
         data = {
             "string": "value",
             "number": 42,
@@ -104,14 +94,12 @@ class TestJSONEncoder:
         assert result == data
 
     def test_encode_empty_dict(self, encoder):
-        """Test encoding empty dictionary."""
         data = {}
         result = encoder.encode(data)
 
         assert result == {}
 
     def test_default_with_objectid(self, encoder):
-        """Test default method with ObjectId."""
         obj_id = ObjectId()
         result = encoder.default(obj_id)
 
@@ -119,7 +107,6 @@ class TestJSONEncoder:
         assert result == str(obj_id)
 
     def test_default_with_datetime(self, encoder):
-        """Test default method with datetime."""
         dt = datetime(2025, 10, 27)
         result = encoder.default(dt)
 
@@ -127,14 +114,12 @@ class TestJSONEncoder:
         assert "2025-10-27" in result
 
     def test_default_with_neo4j_datetime(self, encoder):
-        """Test default method with Neo4j DateTime."""
         neo_dt = DateTime(2025, 10, 27)
         result = encoder.default(neo_dt)
 
         assert isinstance(result, str)
 
     def test_default_with_unsupported_type(self, encoder):
-        """Test default method raises TypeError for unsupported types."""
 
         class CustomClass:
             pass
@@ -148,7 +133,6 @@ class TestJSONEncoder:
         assert "not JSON serializable" in str(exc_info.value)
 
     def test_encode_complex_structure(self, encoder):
-        """Test encoding complex nested structure."""
         data = {
             "packages": [
                 {

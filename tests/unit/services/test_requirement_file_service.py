@@ -1,4 +1,3 @@
-"""Tests for RequirementFileService."""
 
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
@@ -11,7 +10,6 @@ from app.services.requirement_file_service import RequirementFileService
 
 
 class _TestNeo4jError(Neo4jError):
-    """Custom Neo4jError for testing with code support."""
     def __init__(self, message: str, code: str):
         super().__init__(message)
         self._code = code
@@ -22,11 +20,9 @@ class _TestNeo4jError(Neo4jError):
 
 
 class TestRequirementFileService:
-    """Test suite for RequirementFileService class."""
 
     @pytest.fixture
     def mock_db_manager(self):
-        """Create a mock DatabaseManager."""
         db_manager = MagicMock()
         driver = MagicMock()
         db_manager.get_neo4j_driver.return_value = driver
@@ -34,12 +30,10 @@ class TestRequirementFileService:
 
     @pytest.fixture
     def req_file_service(self, mock_db_manager):
-        """Create RequirementFileService instance with mocked database."""
         db_manager, _ = mock_db_manager
         return RequirementFileService(db_manager)
 
     async def test_create_requirement_file_success(self, req_file_service, mock_db_manager):
-        """Test creating a requirement file successfully."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -60,7 +54,6 @@ class TestRequirementFileService:
         session_mock.run.assert_called_once()
 
     async def test_create_requirement_file_no_record(self, req_file_service, mock_db_manager):
-        """Test create_requirement_file returns None when no record created."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -80,7 +73,6 @@ class TestRequirementFileService:
         assert rf_id is None
 
     async def test_read_requirement_files_by_repository_found(self, req_file_service, mock_db_manager):
-        """Test reading requirement files when they exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -96,7 +88,6 @@ class TestRequirementFileService:
         assert files == {"requirements.txt": "rf123", "package.json": "rf456"}
 
     async def test_read_requirement_files_by_repository_not_found(self, req_file_service, mock_db_manager):
-        """Test reading requirement files when repository doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -110,7 +101,6 @@ class TestRequirementFileService:
         assert files is None
 
     async def test_read_requirement_file_moment_found(self, req_file_service, mock_db_manager):
-        """Test reading requirement file moment when it exists."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -125,7 +115,6 @@ class TestRequirementFileService:
         assert result == moment
 
     async def test_read_requirement_file_moment_not_found(self, req_file_service, mock_db_manager):
-        """Test reading moment when requirement file doesn't exist."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -139,7 +128,6 @@ class TestRequirementFileService:
         assert result is None
 
     async def test_read_data_for_smt_transform_success(self, req_file_service, mock_db_manager):
-        """Test reading data for SMT transform."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -164,7 +152,6 @@ class TestRequirementFileService:
         assert "have" in result
 
     async def test_read_data_for_smt_transform_memory_error(self, req_file_service, mock_db_manager):
-        """Test read_data_for_smt_transform raises MemoryOutException on memory error."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -179,7 +166,6 @@ class TestRequirementFileService:
             await req_file_service.read_data_for_smt_transform("rf123", 10)
 
     async def test_read_graph_for_req_file_info_operation_success(self, req_file_service, mock_db_manager):
-        """Test reading graph for requirement file info operation."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -207,7 +193,6 @@ class TestRequirementFileService:
         assert result["total_direct_dependencies"] == 1
 
     async def test_read_graph_for_req_file_info_operation_timeout(self, req_file_service, mock_db_manager):
-        """Test read_graph raises MemoryOutException on timeout."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -224,7 +209,6 @@ class TestRequirementFileService:
             )
 
     async def test_update_requirement_rel_constraints(self, req_file_service, mock_db_manager):
-        """Test updating requirement relationship constraints."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -236,7 +220,6 @@ class TestRequirementFileService:
         assert call_args[1]["constraints"] == ">=0.110.0"
 
     async def test_update_requirement_file_moment(self, req_file_service, mock_db_manager):
-        """Test updating requirement file moment."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -249,7 +232,6 @@ class TestRequirementFileService:
         assert isinstance(call_args[1]["moment"], datetime)
 
     async def test_delete_requirement_file(self, req_file_service, mock_db_manager):
-        """Test deleting a requirement file."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
@@ -261,7 +243,6 @@ class TestRequirementFileService:
         assert call_args[1]["requirement_file_name"] == "requirements.txt"
 
     async def test_delete_requirement_file_rel(self, req_file_service, mock_db_manager):
-        """Test deleting a requirement file relationship."""
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock

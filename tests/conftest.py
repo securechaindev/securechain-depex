@@ -1,4 +1,3 @@
-"""Pytest configuration and shared fixtures."""
 import asyncio
 from collections.abc import AsyncGenerator, Generator
 
@@ -13,7 +12,6 @@ from app.settings import settings
 
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
-    """Create an event loop for the test session."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
@@ -21,13 +19,11 @@ def event_loop() -> Generator:
 
 @pytest.fixture
 def client() -> TestClient:
-    """Create a test client for the FastAPI app."""
     return TestClient(app)
 
 
 @pytest.fixture
 async def mongo_client() -> AsyncGenerator[AsyncIOMotorClient]:
-    """Create a MongoDB test client."""
     client = AsyncIOMotorClient(settings.VULN_DB_URI)
     yield client
     client.close()
@@ -35,7 +31,6 @@ async def mongo_client() -> AsyncGenerator[AsyncIOMotorClient]:
 
 @pytest.fixture
 async def neo4j_driver() -> AsyncGenerator:
-    """Create a Neo4j test driver."""
     driver = AsyncGraphDatabase.driver(
         settings.GRAPH_DB_URI,
         auth=(settings.GRAPH_DB_USER, settings.GRAPH_DB_PASSWORD)
@@ -46,7 +41,6 @@ async def neo4j_driver() -> AsyncGenerator:
 
 @pytest.fixture
 def sample_repository_data() -> dict:
-    """Sample repository data for testing."""
     return {
         "owner": "test-owner",
         "name": "test-repo",
@@ -57,7 +51,6 @@ def sample_repository_data() -> dict:
 
 @pytest.fixture
 def sample_package_data() -> dict:
-    """Sample package data for testing."""
     return {
         "name": "fastapi",
         "manager": "PyPI",
@@ -67,7 +60,6 @@ def sample_package_data() -> dict:
 
 @pytest.fixture
 def sample_requirement_file() -> dict:
-    """Sample requirement file for testing."""
     return {
         "requirements.txt": {
             "manager": "PyPI",

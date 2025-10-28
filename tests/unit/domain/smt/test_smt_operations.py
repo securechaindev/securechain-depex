@@ -1,4 +1,3 @@
-"""Unit tests for SMT operations."""
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -14,11 +13,8 @@ from app.domain.smt.operations import (
 
 
 class TestFilterConfigsOperation:
-    """Test suite for FilterConfigsOperation."""
-
     @pytest.fixture
     def sample_model(self):
-        """Create a sample SMT model."""
         source_data = {
             "name": "test-file",
             "require": {
@@ -38,7 +34,6 @@ class TestFilterConfigsOperation:
 
     @pytest.mark.asyncio
     async def test_execute_returns_configs(self, sample_model):
-        """Test that execute returns filtered configurations."""
         with patch("app.domain.smt.operations.filter_configs.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 100, "impact": 5.0}
@@ -53,7 +48,6 @@ class TestFilterConfigsOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_multiple_configs(self, sample_model):
-        """Test execute with multiple configurations."""
         with patch("app.domain.smt.operations.filter_configs.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.side_effect = [
@@ -71,7 +65,6 @@ class TestFilterConfigsOperation:
 
     @pytest.mark.asyncio
     async def test_execute_respects_thresholds(self, sample_model):
-        """Test that execute respects max and min thresholds."""
         with patch("app.domain.smt.operations.filter_configs.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 100, "impact": 5.0}
@@ -85,7 +78,6 @@ class TestFilterConfigsOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_no_func_obj(self):
-        """Test execute when model has no func_obj (edge case)."""
         source_data = {
             "name": "test",
             "require": {"direct": [], "indirect": []},
@@ -100,7 +92,6 @@ class TestFilterConfigsOperation:
             mock_instance.sanitize.return_value = {"impact": 0.0}
             mock_sanitizer.return_value = mock_instance
 
-            # This should not raise UnboundLocalError anymore
             result = await FilterConfigsOperation.execute(
                 model, max_threshold=10.0, min_threshold=0.0, limit=1
             )
@@ -109,11 +100,8 @@ class TestFilterConfigsOperation:
 
 
 class TestMaximizeImpactOperation:
-    """Test suite for MaximizeImpactOperation."""
-
     @pytest.fixture
     def sample_model(self):
-        """Create a sample SMT model."""
         source_data = {
             "name": "test-file",
             "require": {
@@ -133,7 +121,6 @@ class TestMaximizeImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_maximizes_impact(self, sample_model):
-        """Test that execute maximizes impact."""
         with patch("app.domain.smt.operations.maximize_impact.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 101, "impact": 8.0}
@@ -146,7 +133,6 @@ class TestMaximizeImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_multiple_solutions(self, sample_model):
-        """Test execute with multiple solutions."""
         with patch("app.domain.smt.operations.maximize_impact.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.side_effect = [
@@ -162,7 +148,6 @@ class TestMaximizeImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_no_func_obj(self):
-        """Test execute when model has no func_obj."""
         source_data = {
             "name": "test",
             "require": {"direct": [], "indirect": []},
@@ -183,11 +168,9 @@ class TestMaximizeImpactOperation:
 
 
 class TestMinimizeImpactOperation:
-    """Test suite for MinimizeImpactOperation."""
 
     @pytest.fixture
     def sample_model(self):
-        """Create a sample SMT model."""
         source_data = {
             "name": "test-file",
             "require": {
@@ -207,7 +190,6 @@ class TestMinimizeImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_minimizes_impact(self, sample_model):
-        """Test that execute minimizes impact."""
         with patch("app.domain.smt.operations.minimize_impact.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 101, "impact": 2.0}
@@ -220,7 +202,6 @@ class TestMinimizeImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_multiple_solutions(self, sample_model):
-        """Test execute with multiple solutions."""
         with patch("app.domain.smt.operations.minimize_impact.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.side_effect = [
@@ -236,7 +217,6 @@ class TestMinimizeImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_no_func_obj(self):
-        """Test execute when model has no func_obj."""
         source_data = {
             "name": "test",
             "require": {"direct": [], "indirect": []},
@@ -257,11 +237,9 @@ class TestMinimizeImpactOperation:
 
 
 class TestCompleteConfigOperation:
-    """Test suite for CompleteConfigOperation."""
 
     @pytest.fixture
     def sample_model(self):
-        """Create a sample SMT model."""
         source_data = {
             "name": "test-file",
             "require": {
@@ -281,7 +259,6 @@ class TestCompleteConfigOperation:
 
     @pytest.mark.asyncio
     async def test_execute_completes_config(self, sample_model):
-        """Test that execute completes partial configuration."""
         with patch("app.domain.smt.operations.complete_config.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 100, "impact": 5.0}
@@ -295,7 +272,6 @@ class TestCompleteConfigOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_empty_config(self, sample_model):
-        """Test execute with empty configuration."""
         with patch("app.domain.smt.operations.complete_config.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 100, "impact": 5.0}
@@ -307,7 +283,6 @@ class TestCompleteConfigOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_no_func_obj(self):
-        """Test execute when model has no func_obj."""
         source_data = {
             "name": "test",
             "require": {"direct": [], "indirect": []},
@@ -328,11 +303,8 @@ class TestCompleteConfigOperation:
 
 
 class TestConfigByImpactOperation:
-    """Test suite for ConfigByImpactOperation."""
-
     @pytest.fixture
     def sample_model(self):
-        """Create a sample SMT model."""
         source_data = {
             "name": "test-file",
             "require": {
@@ -352,7 +324,6 @@ class TestConfigByImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_finds_config_by_impact(self, sample_model):
-        """Test that execute finds configuration closest to target impact."""
         with patch("app.domain.smt.operations.config_by_impact.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 100, "impact": 5.0}
@@ -365,7 +336,6 @@ class TestConfigByImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_different_impact(self, sample_model):
-        """Test execute with different target impact."""
         with patch("app.domain.smt.operations.config_by_impact.ConfigSanitizer") as mock_sanitizer:
             mock_instance = AsyncMock()
             mock_instance.sanitize.return_value = {"fastapi": 101, "impact": 3.0}
@@ -377,7 +347,6 @@ class TestConfigByImpactOperation:
 
     @pytest.mark.asyncio
     async def test_execute_with_no_func_obj(self):
-        """Test execute when model has no func_obj."""
         source_data = {
             "name": "test",
             "require": {"direct": [], "indirect": []},
