@@ -8,7 +8,7 @@ class SetupPyAnalyzer(RequirementFileAnalyzer):
     def __init__(self):
         super().__init__("PyPI")
 
-    def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+    def parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
         packages = {}
         with open(f"{repository_path}/{filename}") as f:
             matches: list[str] = findall(

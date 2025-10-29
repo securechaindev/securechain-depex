@@ -6,7 +6,7 @@ from app.database import DatabaseManager
 
 class RepositoryService:
     def __init__(self, db: DatabaseManager):
-        self._driver = db.get_neo4j_driver()
+        self.driver = db.get_neo4j_driver()
 
     async def create_repository(self, repository: dict[str, Any]) -> str:
         query = """
@@ -20,7 +20,7 @@ class RepositoryService:
         CREATE (u)-[rel:OWN]->(r)
         RETURN elementid(r) AS id
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, repository)
             record = await result.single()
         return record[0] if record else None
@@ -32,7 +32,7 @@ class RepositoryService:
         MERGE (u)-[rel:OWN]->(r)
         RETURN elementid(r) AS id
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, repository_id=repository_id, user_id=user_id)
             record = await result.single()
         return record["id"]
@@ -42,7 +42,7 @@ class RepositoryService:
         MATCH(r: Repository{owner: $owner, name: $name})
         RETURN r{{id: elementid(r), .*}} AS repository
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, owner=owner, name=name)
             record = await result.single()
         return record["repository"] if record else None
@@ -60,7 +60,7 @@ class RepositoryService:
         })
         """
         repositories = []
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, user_id=user_id)
             record = await result.single()
             repositories.extend(record[0] if record else [])
@@ -71,7 +71,7 @@ class RepositoryService:
         MATCH (r:Repository) WHERE elementid(r) = $repository_id
         SET r.is_complete = $is_complete
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             await session.run(query, repository_id=repository_id, is_complete=is_complete)
 
     async def update_repository_moment(self, repository_id: str) -> None:
@@ -79,5 +79,5 @@ class RepositoryService:
         MATCH (r:Repository) WHERE elementid(r) = $repository_id
         SET r.moment = $moment
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             await session.run(query, repository_id=repository_id, moment=datetime.now())

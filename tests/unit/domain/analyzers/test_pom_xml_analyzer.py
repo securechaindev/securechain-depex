@@ -31,7 +31,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {
             "org.springframework.boot:spring-boot-starter-web": "[3.0.2]",
@@ -48,7 +48,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {}
 
@@ -60,7 +60,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {}
 
@@ -77,7 +77,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {"junit:junit": "[4.13.2]"}
 
@@ -98,7 +98,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {
             "com.example:no-version": "any",
@@ -122,7 +122,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {"com.example:with-group": "[2.0.0]"}
 
@@ -143,7 +143,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {"com.example:with-artifact": "[2.0.0]"}
 
@@ -169,7 +169,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {
             "org.springframework.boot:spring-boot-starter": "[3.0.2]",
@@ -192,7 +192,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {"com.example:my-lib": "any"}
 
@@ -219,7 +219,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {
             "com.example:range1": "[1.0,2.0)",
@@ -257,7 +257,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {
             "com.example:standard": "[1.0.0]",
@@ -284,7 +284,7 @@ class TestPomXmlAnalyzer:
         </project>
         """
         with patch("builtins.open", mock_open(read_data=pom_xml_content)):
-            result = analyzer._parse_file("/fake/path", "pom.xml")
+            result = analyzer.parse_file("/fake/path", "pom.xml")
 
         assert result == {
             ":empty-group": "[1.0.0]",

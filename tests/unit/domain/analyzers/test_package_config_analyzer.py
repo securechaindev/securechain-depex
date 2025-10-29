@@ -30,7 +30,7 @@ class TestPackageConfigAnalyzer:
                 mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                     packages_config_content
                 )
-                result = analyzer._parse_file("/fake/path", "packages.config")
+                result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {
             "Newtonsoft.Json": "== 13.0.2",
@@ -47,7 +47,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {}
 
@@ -61,7 +61,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {"Serilog": "== 3.0.1"}
 
@@ -77,7 +77,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {
             "Package1": "== 1.0.0",
@@ -96,7 +96,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {
             "Package1": "== 1.0.0",
@@ -115,7 +115,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {
             "Pkg1": "== [1.0.0]",
@@ -133,7 +133,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {"Pkg": "1.0"}
 
@@ -147,7 +147,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {"Pkg": "1.2.3.4"}
 
@@ -164,7 +164,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {
             "Standard": "== 1.2.3",
@@ -184,7 +184,7 @@ class TestPackageConfigAnalyzer:
             mock_parse.return_value.getroot.return_value = ElementTree.fromstring(
                 packages_config_content
             )
-            result = analyzer._parse_file("/fake/path", "packages.config")
+            result = analyzer.parse_file("/fake/path", "packages.config")
 
         assert result == {
             "Package1": "== 1.0.0",

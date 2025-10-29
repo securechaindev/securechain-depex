@@ -9,11 +9,11 @@ from app.exceptions import MemoryOutException
 
 class VersionService:
     def __init__(self, db: DatabaseManager):
-        self._driver = db.get_neo4j_driver()
+        self.driver = db.get_neo4j_driver()
 
     @staticmethod
     @unit_of_work(timeout=3)
-    async def _read_graph_version(tx, query, package_name, version_name, max_depth):
+    async def read_graph_version(tx, query, package_name, version_name, max_depth):
         result = await tx.run(
             query,
             package_name=package_name,
@@ -34,7 +34,7 @@ class VersionService:
         """
         sanitized_config: dict[str, str | float | int] = {}
         for var, value in config.items():
-            async with self._driver.session() as session:
+            async with self.driver.session() as session:
                 result = await session.run(query, package=var, serial_number=value)
                 record = await result.single()
             if record:
@@ -55,7 +55,7 @@ class VersionService:
         RETURN v.serial_number
         """
         for package, release in config.items():
-            async with self._driver.session() as session:
+            async with self.driver.session() as session:
                 result = await session.run(query, package=package, release=release)
                 record = await result.single()
             if record:
@@ -128,9 +128,9 @@ class VersionService:
         }}
         """
         try:
-            async with self._driver.session() as session:
+            async with self.driver.session() as session:
                 record = await session.execute_read(
-                    self._read_graph_version,
+                    self.read_graph_version,
                     query,
                     package_name,
                     version_name,

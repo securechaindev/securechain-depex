@@ -23,7 +23,7 @@ class TestRequirementsTxtAnalyzer:
             req_file = Path(tmpdir) / "requirements.txt"
             req_file.write_text("fastapi>=0.100.0\nuvicorn==0.35.0\n")
 
-            result = analyzer._parse_file(tmpdir, "requirements.txt")
+            result = analyzer.parse_file(tmpdir, "requirements.txt")
             assert "fastapi" in result
             assert "uvicorn" in result
 
@@ -34,7 +34,7 @@ class TestRequirementsTxtAnalyzer:
             req_file = Path(tmpdir) / "requirements.txt"
             req_file.write_text("fastapi>=0.100.0\n# This is a comment\nuvicorn==0.35.0\n")
 
-            result = analyzer._parse_file(tmpdir, "requirements.txt")
+            result = analyzer.parse_file(tmpdir, "requirements.txt")
             assert "fastapi" in result
             assert "uvicorn" in result
 
@@ -45,7 +45,7 @@ class TestRequirementsTxtAnalyzer:
             req_file = Path(tmpdir) / "requirements.txt"
             req_file.write_text("fastapi[all]>=0.100.0\n")
 
-            result = analyzer._parse_file(tmpdir, "requirements.txt")
+            result = analyzer.parse_file(tmpdir, "requirements.txt")
             assert "fastapi" in result
 
 
@@ -57,7 +57,7 @@ class TestPackageJsonAnalyzer:
             pkg_file = Path(tmpdir) / "package.json"
             pkg_file.write_text('{"dependencies": {"express": "^4.18.0", "react": "^18.0.0"}}')
 
-            result = analyzer._parse_file(tmpdir, "package.json")
+            result = analyzer.parse_file(tmpdir, "package.json")
             assert "express" in result
             assert "react" in result
 
@@ -68,7 +68,7 @@ class TestPackageJsonAnalyzer:
             pkg_file = Path(tmpdir) / "package.json"
             pkg_file.write_text('{"name": "test-package"}')
 
-            result = analyzer._parse_file(tmpdir, "package.json")
+            result = analyzer.parse_file(tmpdir, "package.json")
             assert isinstance(result, dict)
             assert len(result) == 0
 
@@ -88,7 +88,7 @@ class TestPyprojectTomlAnalyzer:
             """
             toml_file.write_text(toml_content)
 
-            result = analyzer._parse_file(tmpdir, "pyproject.toml")
+            result = analyzer.parse_file(tmpdir, "pyproject.toml")
             assert "fastapi" in result
             assert "uvicorn" in result
 
@@ -99,7 +99,7 @@ class TestPyprojectTomlAnalyzer:
             toml_file = Path(tmpdir) / "pyproject.toml"
             toml_file.write_text("[project]\nname = 'test'\n")
 
-            result = analyzer._parse_file(tmpdir, "pyproject.toml")
+            result = analyzer.parse_file(tmpdir, "pyproject.toml")
             assert isinstance(result, dict)
 
 

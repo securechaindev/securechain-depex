@@ -13,7 +13,7 @@ class TestConfigSanitizer:
             mock_version_service = AsyncMock()
             mock_container.return_value.get_version_service.return_value = mock_version_service
             sanitizer = ConfigSanitizer()
-            sanitizer._version_service = mock_version_service
+            sanitizer.version_service = mock_version_service
             return sanitizer
 
     def test_singleton_pattern(self):
@@ -30,14 +30,14 @@ class TestConfigSanitizer:
         assert solver.check() == sat
         model = solver.model()
 
-        sanitizer._version_service.read_releases_by_serial_numbers.return_value = {
+        sanitizer.version_service.read_releases_by_serial_numbers.return_value = {
             "fastapi": "0.100.0"
         }
 
         result = await sanitizer.sanitize("PyPIPackage", model)
 
         assert "fastapi" in result
-        sanitizer._version_service.read_releases_by_serial_numbers.assert_called_once_with(
+        sanitizer.version_service.read_releases_by_serial_numbers.assert_called_once_with(
             "PyPIPackage", {"fastapi": 100}
         )
 
@@ -51,15 +51,15 @@ class TestConfigSanitizer:
         assert solver.check() == sat
         model = solver.model()
 
-        sanitizer._version_service.read_releases_by_serial_numbers.return_value = {
+        sanitizer.version_service.read_releases_by_serial_numbers.return_value = {
             "fastapi": "0.100.0",
             "impact_fastapi": 5.5
         }
 
         await sanitizer.sanitize("PyPIPackage", model)
 
-        sanitizer._version_service.read_releases_by_serial_numbers.assert_called_once()
-        call_args = sanitizer._version_service.read_releases_by_serial_numbers.call_args[0][1]
+        sanitizer.version_service.read_releases_by_serial_numbers.assert_called_once()
+        call_args = sanitizer.version_service.read_releases_by_serial_numbers.call_args[0][1]
         assert "fastapi" in call_args
         assert "impact_fastapi" in call_args
 
@@ -73,13 +73,13 @@ class TestConfigSanitizer:
         assert solver.check() == sat
         model = solver.model()
 
-        sanitizer._version_service.read_releases_by_serial_numbers.return_value = {
+        sanitizer.version_service.read_releases_by_serial_numbers.return_value = {
             "fastapi": "0.100.0"
         }
 
         await sanitizer.sanitize("PyPIPackage", model)
 
-        call_args = sanitizer._version_service.read_releases_by_serial_numbers.call_args[0][1]
+        call_args = sanitizer.version_service.read_releases_by_serial_numbers.call_args[0][1]
         assert "fastapi" in call_args
         assert "func_obj" not in call_args
 
@@ -168,7 +168,7 @@ class TestConfigSanitizer:
         assert solver.check() == sat
         model = solver.model()
 
-        sanitizer._version_service.read_releases_by_serial_numbers.return_value = {
+        sanitizer.version_service.read_releases_by_serial_numbers.return_value = {
             "fastapi": "0.100.0",
             "django": "4.2.0",
             "flask": "2.3.0"
@@ -176,7 +176,7 @@ class TestConfigSanitizer:
 
         await sanitizer.sanitize("PyPIPackage", model)
 
-        call_args = sanitizer._version_service.read_releases_by_serial_numbers.call_args[0][1]
+        call_args = sanitizer.version_service.read_releases_by_serial_numbers.call_args[0][1]
         assert len(call_args) == 3
         assert call_args["fastapi"] == 100
         assert call_args["django"] == 200
@@ -192,12 +192,12 @@ class TestConfigSanitizer:
         assert solver.check() == sat
         model = solver.model()
 
-        sanitizer._version_service.read_releases_by_serial_numbers.return_value = {
+        sanitizer.version_service.read_releases_by_serial_numbers.return_value = {
             "fastapi": "0.100.0"
         }
 
         await sanitizer.sanitize("PyPIPackage", model)
 
-        call_args = sanitizer._version_service.read_releases_by_serial_numbers.call_args[0][1]
+        call_args = sanitizer.version_service.read_releases_by_serial_numbers.call_args[0][1]
         assert "fastapi" in call_args
         assert "django" not in call_args

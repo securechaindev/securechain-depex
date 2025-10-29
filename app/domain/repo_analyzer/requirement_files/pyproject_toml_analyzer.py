@@ -8,7 +8,7 @@ class PyprojectTomlAnalyzer(RequirementFileAnalyzer):
     def __init__(self):
         super().__init__("PyPI")
 
-    def _parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
+    def parse_file(self, repository_path: str, filename: str) -> dict[str, str]:
         packages = {}
         file = load(f"{repository_path}/{filename}")
         if "project" in file and "dependencies" in file["project"]:

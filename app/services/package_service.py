@@ -9,11 +9,11 @@ from app.exceptions import MemoryOutException
 
 class PackageService:
     def __init__(self, db: DatabaseManager):
-        self._driver = db.get_neo4j_driver()
+        self.driver = db.get_neo4j_driver()
 
     @staticmethod
     @unit_of_work(timeout=3)
-    async def _read_graph_package(tx, query, package_name, max_depth):
+    async def read_graph_package(tx, query, package_name, max_depth):
         result = await tx.run(
             query,
             package_name=package_name,
@@ -27,7 +27,7 @@ class PackageService:
         WITH p, collect(v{{.*}}) AS versions
         RETURN p{{.*, versions: versions}}
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(
                 query,
                 package_name=package_name
@@ -40,7 +40,7 @@ class PackageService:
         MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
         RETURN v{{id: elementid(v), .*}}
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(
                 query,
                 package_name=package_name,
@@ -55,7 +55,7 @@ class PackageService:
         MATCH (rf)-[requirement_rel]->(package)
         RETURN apoc.map.fromPairs(collect([package.name, requirement_rel.constraints]))
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, requirement_file_id=requirement_file_id)
             record = await result.single()
         return record[0] if record else None
@@ -125,9 +125,9 @@ class PackageService:
         }}
         """
         try:
-            async with self._driver.session() as session:
+            async with self.driver.session() as session:
                 record = await session.execute_read(
-                    self._read_graph_package,
+                    self.read_graph_package,
                     query,
                     package_name,
                     max_depth
@@ -147,7 +147,7 @@ class PackageService:
         MATCH(p:{node_type}{{name:$package_name}})
         RETURN count(p) > 0
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, package_name=package_name)
             record = await result.single()
         return record[0] if record else False

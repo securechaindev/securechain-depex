@@ -10,11 +10,11 @@ from app.exceptions import MemoryOutException
 
 class RequirementFileService:
     def __init__(self, db: DatabaseManager):
-        self._driver = db.get_neo4j_driver()
+        self.driver = db.get_neo4j_driver()
 
     @staticmethod
     @unit_of_work(timeout=3)
-    async def _read_graph_req_file(tx, query, requirement_file_id, max_depth):
+    async def read_graph_req_file(tx, query, requirement_file_id, max_depth):
         result = await tx.run(
             query,
             requirement_file_id=requirement_file_id,
@@ -30,7 +30,7 @@ class RequirementFileService:
         CREATE (r)-[rel:USE]->(rf)
         RETURN elementid(rf) AS id
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, requirement_file, repository_id=repository_id)
             record = await result.single()
         return record["id"] if record else None
@@ -42,7 +42,7 @@ class RequirementFileService:
         MATCH (r)-[use_rel]->(requirement_file)
         RETURN apoc.map.fromPairs(collect([requirement_file.name, elementid(requirement_file)]))
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, repository_id=repository_id)
             record = await result.single()
         return record[0] if record else None
@@ -53,7 +53,7 @@ class RequirementFileService:
         WHERE elementid(rf) = $requirement_file_id
         RETURN rf.moment AS moment
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             result = await session.run(query, requirement_file_id=requirement_file_id)
             record = await result.single()
         return record[0] if record else None
@@ -95,9 +95,9 @@ class RequirementFileService:
         }
         """
         try:
-            async with self._driver.session() as session:
+            async with self.driver.session() as session:
                 record = await session.execute_read(
-                    self._read_graph_req_file,
+                    self.read_graph_req_file,
                     query,
                     requirement_file_id,
                     max_depth
@@ -178,9 +178,9 @@ class RequirementFileService:
         }}
         """
         try:
-            async with self._driver.session() as session:
+            async with self.driver.session() as session:
                 record = await session.execute_read(
-                    self._read_graph_req_file,
+                    self.read_graph_req_file,
                     query,
                     requirement_file_id,
                     max_depth
@@ -203,7 +203,7 @@ class RequirementFileService:
         WHERE package.name = $package_name
         SET requirement_rel.constraints = $constraints
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             await session.run(
                 query,
                 requirement_file_id=requirement_file_id,
@@ -217,7 +217,7 @@ class RequirementFileService:
         WHERE elementid(rf) = $requirement_file_id
         SET rf.moment = $moment
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             await session.run(
                 query, requirement_file_id=requirement_file_id, moment=datetime.now()
         )
@@ -230,7 +230,7 @@ class RequirementFileService:
         WHERE requirement_file.name = $requirement_file_name
         DELETE requirement_rel, use_rel, requirement_file
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             await session.run(
                 query, repository_id=repository_id, requirement_file_name=requirement_file_name
             )
@@ -243,7 +243,7 @@ class RequirementFileService:
         WHERE package.name = $package_name
         DELETE requirement_rel
         """
-        async with self._driver.session() as session:
+        async with self.driver.session() as session:
             await session.run(
                 query, requirement_file_id=requirement_file_id, package_name=package_name
             )

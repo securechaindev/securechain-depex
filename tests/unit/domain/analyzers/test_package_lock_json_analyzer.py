@@ -25,7 +25,7 @@ class TestPackageLockJsonAnalyzer:
             }
         }
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {
             "express": "== 4.18.2",
@@ -36,14 +36,14 @@ class TestPackageLockJsonAnalyzer:
     def test_parse_file_no_dependencies(self, analyzer):
         package_lock_data = {"name": "my-project", "version": "1.0.0"}
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {}
 
     def test_parse_file_empty_dependencies(self, analyzer):
         package_lock_data = {"dependencies": {}}
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {}
 
@@ -54,7 +54,7 @@ class TestPackageLockJsonAnalyzer:
             }
         }
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {"react": "== 18.2.0"}
 
@@ -67,7 +67,7 @@ class TestPackageLockJsonAnalyzer:
             }
         }
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {
             "package1": "== 1.0.0",
@@ -84,7 +84,7 @@ class TestPackageLockJsonAnalyzer:
             }
         }
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {
             "pkg1": "== ^1.0.0",
@@ -99,7 +99,7 @@ class TestPackageLockJsonAnalyzer:
             }
         }
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {"pkg": "1.0"}
 
@@ -110,7 +110,7 @@ class TestPackageLockJsonAnalyzer:
             }
         }
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {"pkg": "1.2.3.4"}
 
@@ -125,7 +125,7 @@ class TestPackageLockJsonAnalyzer:
             }
         }
         with patch("builtins.open", mock_open(read_data=json.dumps(package_lock_data))):
-            result = analyzer._parse_file("/fake/path", "package-lock.json")
+            result = analyzer.parse_file("/fake/path", "package-lock.json")
 
         assert result == {
             "standard": "== 1.2.3",

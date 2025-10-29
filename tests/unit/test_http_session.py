@@ -54,7 +54,7 @@ class TestHTTPSessionManager:
         await manager.close()
 
         assert session.closed
-        assert manager._session is None
+        assert manager.session is None
 
     @pytest.mark.asyncio
     async def test_close_when_no_session(self):
@@ -62,7 +62,7 @@ class TestHTTPSessionManager:
 
         await manager.close()
 
-        assert manager._session is None
+        assert manager.session is None
 
     @pytest.mark.asyncio
     async def test_close_when_already_closed(self):
@@ -74,7 +74,7 @@ class TestHTTPSessionManager:
         await manager.close()
 
         assert session.closed
-        assert manager._session is None
+        assert manager.session is None
 
     @pytest.mark.asyncio
     async def test_multiple_get_close_cycles(self):
@@ -86,7 +86,7 @@ class TestHTTPSessionManager:
 
             await manager.close()
             assert session.closed
-            assert manager._session is None
+            assert manager.session is None
 
     @pytest.mark.asyncio
     async def test_session_state_after_external_close(self):

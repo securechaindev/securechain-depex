@@ -30,7 +30,7 @@ class TestCargoLockAnalyzer:
         version = "0.6.4"
         """
         with patch("builtins.open", mock_open(read_data=cargo_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Cargo.lock")
+            result = analyzer.parse_file("/fake/path", "Cargo.lock")
 
         assert result == {
             "serde": "== 1.0.152",
@@ -44,7 +44,7 @@ class TestCargoLockAnalyzer:
         [metadata]
         """
         with patch("builtins.open", mock_open(read_data=cargo_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Cargo.lock")
+            result = analyzer.parse_file("/fake/path", "Cargo.lock")
 
         assert result == {}
 
@@ -55,7 +55,7 @@ class TestCargoLockAnalyzer:
         version = "0.2.139"
         """
         with patch("builtins.open", mock_open(read_data=cargo_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Cargo.lock")
+            result = analyzer.parse_file("/fake/path", "Cargo.lock")
 
         assert result == {"libc": "== 0.2.139"}
 
@@ -65,7 +65,7 @@ class TestCargoLockAnalyzer:
         some = "data"
         """
         with patch("builtins.open", mock_open(read_data=cargo_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Cargo.lock")
+            result = analyzer.parse_file("/fake/path", "Cargo.lock")
 
         assert result == {}
 
@@ -84,7 +84,7 @@ class TestCargoLockAnalyzer:
         version = "0.5.12"
         """
         with patch("builtins.open", mock_open(read_data=cargo_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Cargo.lock")
+            result = analyzer.parse_file("/fake/path", "Cargo.lock")
 
         assert result == {
             "package1": "== 1.0.0",

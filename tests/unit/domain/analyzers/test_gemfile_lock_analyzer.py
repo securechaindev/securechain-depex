@@ -25,7 +25,7 @@ class TestGemfileLockAnalyzer:
             pg (1.4.5)
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {
             "rails": "== 7.0.4",
@@ -42,7 +42,7 @@ class TestGemfileLockAnalyzer:
             rspec (< 4.0)
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {
             "nokogiri": ">= 1.6",
@@ -57,7 +57,7 @@ class TestGemfileLockAnalyzer:
         specs:
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {}
 
@@ -68,7 +68,7 @@ class TestGemfileLockAnalyzer:
             bundler (2.3.26)
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {"bundler": "== 2.3.26"}
 
@@ -81,7 +81,7 @@ class TestGemfileLockAnalyzer:
             less_than (< 5)
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {
             "standard_version": "== 1.0.0",
@@ -97,7 +97,7 @@ class TestGemfileLockAnalyzer:
             gem_two (1.0)
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {"gem_two": "1.0"}
 
@@ -108,7 +108,7 @@ class TestGemfileLockAnalyzer:
             gem_four (1.2.3.4)
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {"gem_four": "1.2.3.4"}
 
@@ -121,7 +121,7 @@ class TestGemfileLockAnalyzer:
             another (3.0.0)
         """
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
-            result = analyzer._parse_file("/fake/path", "Gemfile.lock")
+            result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {
             "indented": "== 1.0.0",

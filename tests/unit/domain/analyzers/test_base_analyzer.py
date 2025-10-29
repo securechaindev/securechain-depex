@@ -79,29 +79,29 @@ class TestBaseAnalyzer:
     def test_normalize_filename(self):
         analyzer = RequirementsTxtAnalyzer()
 
-        assert analyzer._normalize_filename("/master/requirements.txt") == "requirements.txt"
-        assert analyzer._normalize_filename("/main/package.json") == "package.json"
-        assert analyzer._normalize_filename("simple.txt") == "simple.txt"
+        assert analyzer.normalize_filename("/master/requirements.txt") == "requirements.txt"
+        assert analyzer.normalize_filename("/main/package.json") == "package.json"
+        assert analyzer.normalize_filename("simple.txt") == "simple.txt"
 
     def test_normalize_version_without_operator(self):
         analyzer = RequirementsTxtAnalyzer()
 
-        assert analyzer._normalize_version("1.0.0") == "== 1.0.0"
-        assert analyzer._normalize_version("2.3.4") == "== 2.3.4"
+        assert analyzer.normalize_version("1.0.0") == "== 1.0.0"
+        assert analyzer.normalize_version("2.3.4") == "== 2.3.4"
 
     def test_normalize_version_with_operator(self):
         analyzer = RequirementsTxtAnalyzer()
 
-        assert analyzer._normalize_version(">=1.0.0") == ">=1.0.0"
-        assert analyzer._normalize_version("<2.0.0") == "<2.0.0"
-        assert analyzer._normalize_version("==1.2.3") == "==1.2.3"
+        assert analyzer.normalize_version(">=1.0.0") == ">=1.0.0"
+        assert analyzer.normalize_version("<2.0.0") == "<2.0.0"
+        assert analyzer.normalize_version("==1.2.3") == "==1.2.3"
 
     def test_normalize_version_partial(self):
         analyzer = RequirementsTxtAnalyzer()
 
         # Partial versions (not 2 dots) should remain unchanged
-        assert analyzer._normalize_version("1.0") == "1.0"
-        assert analyzer._normalize_version("2") == "2"
+        assert analyzer.normalize_version("1.0") == "1.0"
+        assert analyzer.normalize_version("2") == "2"
 
     def test_clean_dependency_name(self):
         assert RequirementFileAnalyzer.clean_dependency_name("package") == "package"
