@@ -36,7 +36,7 @@ from app.utils import JSONEncoder
 router = APIRouter()
 
 @router.post(
-    "/operation/file/valid_graph",
+    "/operation/smt/valid_graph",
     summary="Validate Requirement File Graph",
     description="Validate the graph of a requirement file up to a specified level.",
     response_description="Validation result of the requirement file graph.",
@@ -83,7 +83,7 @@ async def valid_graph(
 
 
 @router.post(
-    "/operation/file/minimize_impact",
+    "/operation/smt/minimize_impact",
     summary="Minimize Impact of Requirement File",
     description="Get the minimized impact and configuration of a specific requirement file.",
     response_description="Minimized Impact Configuration.",
@@ -130,7 +130,7 @@ async def minimize_impact(
 
 
 @router.post(
-    "/operation/file/maximize_impact",
+    "/operation/smt/maximize_impact",
     summary="Maximize Impact of Requirement File",
     description="Get the maximized impact and configuration of a specific requirement file.",
     response_description="Maximized Impact Configuration.",
@@ -177,7 +177,7 @@ async def maximize_impact(
 
 
 @router.post(
-    "/operation/file/filter_configs",
+    "/operation/smt/filter_configs",
     summary="Filter Configurations of Requirement File",
     description="Get the filtered configurations of a specific requirement file.",
     response_description="Filtered Configurations.",
@@ -228,7 +228,7 @@ async def filter_configs(
         )
 
 @router.post(
-    "/operation/config/valid_config",
+    "/operation/smt/valid_config",
     summary="Validate a Configuration",
     description="Validate the configuration based on a requirement file and maximum level.",
     response_description="Returns the result of the validation.",
@@ -277,7 +277,7 @@ async def valid_config(
 
 
 @router.post(
-    "/operation/config/complete_config",
+    "/operation/smt/complete_config",
     summary="Complete a Configuration",
     description="Complete the configuration based on a requirement file and maximum level.",
     response_description="Returns the result of the completion.",
@@ -326,7 +326,7 @@ async def complete_config(
 
 
 @router.post(
-    "/operation/config/config_by_impact",
+    "/operation/smt/config_by_impact",
     summary="Complete a Configuration by Impact",
     description="Complete the configuration based on a requirement file, maximum level, and impact.",
     response_description="Returns the result of the completion by impact.",
