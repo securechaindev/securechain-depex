@@ -8,7 +8,7 @@ class RepositoryService:
     def __init__(self, db: DatabaseManager):
         self.driver = db.get_neo4j_driver()
 
-    async def create_repository(self, repository: dict[str, Any]) -> str:
+    async def create_repository(self, repository: dict[str, Any]) -> str | None:
         query = """
         MATCH(u:User) WHERE u._id = $user_id
         MERGE(r: Repository{
@@ -23,29 +23,27 @@ class RepositoryService:
         async with self.driver.session() as session:
             result = await session.run(query, repository)
             record = await result.single()
-        return record[0] if record else None
+        return record.get("id") if record else None
 
     async def create_user_repository_rel(self, repository_id: str, user_id: str) -> None:
         query = """
         MATCH(u:User) WHERE u._id = $user_id
         MATCH(r:Repository) WHERE elementid(r) = $repository_id
         MERGE (u)-[rel:OWN]->(r)
-        RETURN elementid(r) AS id
         """
         async with self.driver.session() as session:
             result = await session.run(query, repository_id=repository_id, user_id=user_id)
-            record = await result.single()
-        return record["id"]
+            await result.single()
 
     async def read_repository_by_owner_and_name(self, owner: str, name: str) -> dict[str, Any] | None:
         query = """
         MATCH(r: Repository{owner: $owner, name: $name})
-        RETURN r{{id: elementid(r), .*}} AS repository
+        RETURN r{id: elementid(r), .*} AS repository
         """
         async with self.driver.session() as session:
             result = await session.run(query, owner=owner, name=name)
             record = await result.single()
-        return record["repository"] if record else None
+        return record.get("repository") if record else None
 
     async def read_repositories_by_user_id(self, user_id: str) -> dict[str, Any]:
         query = """
@@ -57,14 +55,12 @@ class RepositoryService:
             name: r.name,
             is_complete: r.is_complete,
             requirement_files: requirement_files
-        })
+        }) AS repositories
         """
-        repositories = []
         async with self.driver.session() as session:
             result = await session.run(query, user_id=user_id)
             record = await result.single()
-            repositories.extend(record[0] if record else [])
-        return repositories
+            return record.get("repositories") if record else []
 
     async def update_repository_is_complete(self, repository_id: str, is_complete: bool) -> None:
         query = """

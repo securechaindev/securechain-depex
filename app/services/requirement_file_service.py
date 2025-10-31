@@ -22,7 +22,7 @@ class RequirementFileService:
         )
         return await result.single()
 
-    async def create_requirement_file(self, requirement_file: dict[str, Any], repository_id: str) -> str:
+    async def create_requirement_file(self, requirement_file: dict[str, Any], repository_id: str) -> str | None:
         query = """
         MATCH (r:Repository)
         WHERE elementid(r) = $repository_id
@@ -33,21 +33,21 @@ class RequirementFileService:
         async with self.driver.session() as session:
             result = await session.run(query, requirement_file, repository_id=repository_id)
             record = await result.single()
-        return record["id"] if record else None
+        return record.get("id") if record else None
 
-    async def read_requirement_files_by_repository(self, repository_id: str) -> dict[str, str]:
+    async def read_requirement_files_by_repository(self, repository_id: str) -> dict[str, str] | None:
         query = """
         MATCH (r:Repository)
         WHERE elementid(r) = $repository_id
         MATCH (r)-[use_rel]->(requirement_file)
-        RETURN apoc.map.fromPairs(collect([requirement_file.name, elementid(requirement_file)]))
+        RETURN apoc.map.fromPairs(collect([requirement_file.name, elementid(requirement_file)])) AS requirement_files
         """
         async with self.driver.session() as session:
             result = await session.run(query, repository_id=repository_id)
             record = await result.single()
-        return record[0] if record else None
+        return record.get("requirement_files") if record else None
 
-    async def read_requirement_file_moment(self, requirement_file_id: str) -> datetime:
+    async def read_requirement_file_moment(self, requirement_file_id: str) -> datetime | None:
         query = """
         MATCH (rf:RequirementFile)
         WHERE elementid(rf) = $requirement_file_id
@@ -56,13 +56,13 @@ class RequirementFileService:
         async with self.driver.session() as session:
             result = await session.run(query, requirement_file_id=requirement_file_id)
             record = await result.single()
-        return record[0] if record else None
+        return record.get("moment") if record else None
 
     async def read_data_for_smt_transform(
         self,
         requirement_file_id: str,
         max_depth: int
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         query = """
         MATCH (rf:RequirementFile)
         WHERE elementid(rf) = $requirement_file_id
@@ -92,7 +92,7 @@ class RequirementFileService:
             moment: rf.moment,
             require: apoc.map.groupByMulti(apoc.coll.sortMaps(require, 'parent_serial_number'), 'type'),
             have: apoc.map.groupByMulti(apoc.coll.sortMaps(have, 'serial_number'), 'package')
-        }
+        } As smt_info
         """
         try:
             async with self.driver.session() as session:
@@ -102,7 +102,7 @@ class RequirementFileService:
                     requirement_file_id,
                     max_depth
                 )
-                return record[0] if record else None
+                return record.get("smt_info") if record else None
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (
@@ -112,12 +112,12 @@ class RequirementFileService:
             ):
                 raise MemoryOutException() from err
 
-    async def read_graph_for_req_file_info_operation(
+    async def read_graph_for_req_file_ssc_info_operation(
         self,
         node_type: str,
         requirement_file_id: str,
         max_depth: int
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         query = f"""
         MATCH (rf:RequirementFile)
         WHERE elementid(rf) = $requirement_file_id
@@ -155,9 +155,14 @@ class RequirementFileService:
                 versions: versions
             }} AS enriched_pkg,
             depth
+        WITH enriched_pkg, depth
+        WHERE depth IS NOT NULL
         WITH
             collect(CASE WHEN depth = 1 THEN enriched_pkg END) AS direct_deps,
             collect(CASE WHEN depth > 1 THEN {{node: enriched_pkg, depth: depth}} END) AS indirect_info
+        WITH
+            [dep IN direct_deps WHERE dep IS NOT NULL] AS direct_deps,
+            [info IN indirect_info WHERE info IS NOT NULL] AS indirect_info
         WITH
             direct_deps,
             indirect_info,
@@ -175,7 +180,7 @@ class RequirementFileService:
             total_direct_dependencies: size(direct_deps),
             indirect_dependencies_by_depth: apoc.map.removeKey(indirect_by_depth, null),
             total_indirect_dependencies: size(indirect_info)
-        }}
+        }} AS ssc_req_file_info
         """
         try:
             async with self.driver.session() as session:
@@ -185,7 +190,7 @@ class RequirementFileService:
                     requirement_file_id,
                     max_depth
                 )
-                return record[0] if record else None
+                return record.get("ssc_req_file_info") if record else None
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (

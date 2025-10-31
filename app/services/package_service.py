@@ -21,11 +21,11 @@ class PackageService:
         )
         return await result.single()
 
-    async def read_package_status_by_name(self, node_type: str, package_name: str) -> dict[str, Any]:
+    async def read_package_status_by_name(self, node_type: str, package_name: str) -> dict[str, Any] | None:
         query = f"""
         MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version)
         WITH p, collect(v{{.*}}) AS versions
-        RETURN p{{.*, versions: versions}}
+        RETURN p{{.*, versions: versions}} AS package
         """
         async with self.driver.session() as session:
             result = await session.run(
@@ -33,12 +33,12 @@ class PackageService:
                 package_name=package_name
             )
             record = await result.single()
-        return record[0] if record else None
+        return record.get("package") if record else None
 
-    async def read_version_status_by_package_and_name(self, node_type: str, package_name: str, version_name: str) -> dict[str, Any]:
+    async def read_version_status_by_package_and_name(self, node_type: str, package_name: str, version_name: str) -> dict[str, Any] | None:
         query = f"""
         MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
-        RETURN v{{id: elementid(v), .*}}
+        RETURN v{{id: elementid(v), .*}} AS version
         """
         async with self.driver.session() as session:
             result = await session.run(
@@ -47,25 +47,25 @@ class PackageService:
                 version_name=version_name
             )
             record = await result.single()
-        return record[0] if record else None
+        return record.get("version") if record else None
 
-    async def read_packages_by_requirement_file(self, requirement_file_id: str) -> dict[str, str]:
+    async def read_packages_by_requirement_file(self, requirement_file_id: str) -> dict[str, str] | None:
         query = """
         MATCH (rf:RequirementFile) WHERE elementid(rf) = $requirement_file_id
         MATCH (rf)-[requirement_rel]->(package)
-        RETURN apoc.map.fromPairs(collect([package.name, requirement_rel.constraints]))
+        RETURN apoc.map.fromPairs(collect([package.name, requirement_rel.constraints])) AS requirement_files
         """
         async with self.driver.session() as session:
             result = await session.run(query, requirement_file_id=requirement_file_id)
             record = await result.single()
-        return record[0] if record else None
+        return record.get("requirement_files") if record else None
 
     async def read_graph_for_package_ssc_info_operation(
         self,
         node_type: str,
         package_name: str,
         max_depth: int
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         query = f"""
         MATCH (p:{node_type}{{name:$package_name}})
         CALL apoc.path.expandConfig(
@@ -102,9 +102,14 @@ class PackageService:
                 versions: versions
             }} AS enriched_pkg,
             depth
+        WITH enriched_pkg, depth
+        WHERE depth IS NOT NULL
         WITH
             collect(CASE WHEN depth = 1 THEN enriched_pkg END) AS direct_deps,
             collect(CASE WHEN depth > 1 THEN {{node: enriched_pkg, depth: depth}} END) AS indirect_info
+        WITH
+            [dep IN direct_deps WHERE dep IS NOT NULL] AS direct_deps,
+            [info IN indirect_info WHERE info IS NOT NULL] AS indirect_info
         WITH
             direct_deps,
             indirect_info,
@@ -122,7 +127,7 @@ class PackageService:
             total_direct_dependencies: size(direct_deps),
             indirect_dependencies_by_depth: apoc.map.removeKey(indirect_by_depth, null),
             total_indirect_dependencies: size(indirect_info)
-        }}
+        }} AS ssc_package_info
         """
         try:
             async with self.driver.session() as session:
@@ -132,7 +137,7 @@ class PackageService:
                     package_name,
                     max_depth
                 )
-                return record[0] if record else None
+                return record.get("ssc_package_info") if record else None
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (
@@ -144,8 +149,9 @@ class PackageService:
 
     async def exists_package(self, node_type: str, package_name: str) -> bool:
         query = f"""
-        MATCH(p:{node_type}{{name:$package_name}})
-        RETURN count(p) > 0
+        RETURN EXISTS {{
+            MATCH (p:{node_type}{{name: $package_name}})
+        }} AS exists
         """
         async with self.driver.session() as session:
             result = await session.run(query, package_name=package_name)

@@ -72,7 +72,7 @@ class VersionService:
         package_name: str,
         version_name: str,
         max_depth: int
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | None:
         query = f"""
         MATCH (:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
         CALL apoc.path.expandConfig(
@@ -109,9 +109,14 @@ class VersionService:
                 versions: versions
             }} AS enriched_pkg,
             depth
+        WITH enriched_pkg, depth
+        WHERE depth IS NOT NULL
         WITH
             collect(CASE WHEN depth = 1 THEN enriched_pkg END) AS direct_deps,
             collect(CASE WHEN depth > 1 THEN {{node: enriched_pkg, depth: depth}} END) AS indirect_info
+        WITH
+            [dep IN direct_deps WHERE dep IS NOT NULL] AS direct_deps,
+            [info IN indirect_info WHERE info IS NOT NULL] AS indirect_info
         WITH
             direct_deps,
             indirect_info,
@@ -129,7 +134,7 @@ class VersionService:
             total_direct_dependencies: size(direct_deps),
             indirect_dependencies_by_depth: apoc.map.removeKey(indirect_by_depth, null),
             total_indirect_dependencies: size(indirect_info)
-        }}
+        }} AS ssc_version_info
         """
         try:
             async with self.driver.session() as session:
@@ -140,7 +145,7 @@ class VersionService:
                     version_name,
                     max_depth
                 )
-                return record[0] if record else None
+                return record.get("ssc_version_info") if record else None
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (
