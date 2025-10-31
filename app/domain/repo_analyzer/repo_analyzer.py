@@ -60,20 +60,19 @@ class RepositoryAnalyzer:
             contents = await resp.json()
 
         for item in contents:
-            if item["type"] == "file" and any(
-                extension in item["name"] for extension in ALL_REQUIREMENT_FILES
-            ):
-                raw_url = item["download_url"]
-                async with session.get(raw_url) as file_resp:
-                    if file_resp.status == 200:
-                        file_content = await file_resp.text()
-                        relative_path = item["path"]
-                        filepath = join(repository_path, relative_path)
-                        file_dir = filepath.rsplit("/", 1)[0]
-                        if not exists(file_dir):
-                            makedirs(file_dir)
-                        async with open(filepath, "w") as f:
-                            await f.write(file_content)
+            if item["type"] == "file":
+                if any(extension in item["name"] for extension in ALL_REQUIREMENT_FILES):
+                    raw_url = item["download_url"]
+                    async with session.get(raw_url) as file_resp:
+                        if file_resp.status == 200:
+                            file_content = await file_resp.text()
+                            relative_path = item["path"]
+                            filepath = join(repository_path, relative_path)
+                            file_dir = filepath.rsplit("/", 1)[0]
+                            if not exists(file_dir):
+                                makedirs(file_dir)
+                            async with open(filepath, "w") as f:
+                                await f.write(file_content)
             elif item["type"] == "dir":
                 await self.download_directory_contents(
                     session, owner, name, item["path"], repository_path
@@ -84,10 +83,8 @@ class RepositoryAnalyzer:
         paths = glob(directory_path + "/**", recursive=True)
         for _path in paths:
             if not isdir(_path) and self.is_req_file(_path):
-                requirement_files.append(
-                    _path.replace(directory_path, "")
-                    .replace("/", "")
-                )
+                relative_path = _path.replace(directory_path + "/", "", 1)
+                requirement_files.append(relative_path)
         return requirement_files
 
     def is_req_file(self, requirement_file_name: str) -> bool:
