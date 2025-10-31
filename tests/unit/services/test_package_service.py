@@ -37,7 +37,7 @@ class TestPackageService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        record = [{"name": "fastapi", "versions": [{"name": "0.100.0"}]}]
+        record = {"package": {"name": "fastapi", "versions": [{"name": "0.100.0"}]}}
         result_mock.single.return_value = record
         session_mock.run.return_value = result_mock
 
@@ -65,7 +65,7 @@ class TestPackageService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        record = [{"id": "abc123", "name": "0.100.0", "mean": 5.5}]
+        record = {"version": {"id": "abc123", "name": "0.100.0", "mean": 5.5}}
         result_mock.single.return_value = record
         session_mock.run.return_value = result_mock
 
@@ -96,7 +96,7 @@ class TestPackageService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        record = [{"fastapi": ">=0.100.0", "pydantic": "^2.0"}]
+        record = {"requirement_files": {"fastapi": ">=0.100.0", "pydantic": "^2.0"}}
         result_mock.single.return_value = record
         session_mock.run.return_value = result_mock
 
@@ -138,7 +138,7 @@ class TestPackageService:
             },
             "total_indirect_dependencies": 1
         }
-        session_mock.execute_read.return_value = [graph_data]
+        session_mock.execute_read.return_value = {"ssc_package_info": graph_data}
 
         result = await package_service.read_graph_for_package_ssc_info_operation(
             "PyPIPackage", "fastapi", 3
@@ -215,7 +215,7 @@ class TestPackageService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        result_mock.single.return_value = [True]
+        result_mock.single.return_value = {"exists": True}
         session_mock.run.return_value = result_mock
 
         exists = await package_service.exists_package("PyPIPackage", "fastapi")
@@ -228,7 +228,7 @@ class TestPackageService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        result_mock.single.return_value = [False]
+        result_mock.single.return_value = {"exists": False}
         session_mock.run.return_value = result_mock
 
         exists = await package_service.exists_package("PyPIPackage", "nonexistent")

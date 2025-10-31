@@ -27,7 +27,7 @@ class TestRepositoryService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        result_mock.single.return_value = ["repo123"]
+        result_mock.single.return_value = {"id": "repo123"}
         session_mock.run.return_value = result_mock
 
         repository = {
@@ -70,12 +70,12 @@ class TestRepositoryService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        result_mock.single.return_value = {"id": "repo123"}
+        result_mock.single.return_value = None
         session_mock.run.return_value = result_mock
 
         rel_id = await repository_service.create_user_repository_rel("repo123", "user123")
 
-        assert rel_id == "repo123"
+        assert rel_id is None
         session_mock.run.assert_called_once()
 
     async def test_read_repository_by_owner_and_name_found(self, repository_service, mock_db_manager):
@@ -122,8 +122,8 @@ class TestRepositoryService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        result_mock.single.return_value = [
-            [
+        result_mock.single.return_value = {
+            "repositories": [
                 {
                     "owner": "securechaindev",
                     "name": "depex",
@@ -139,7 +139,7 @@ class TestRepositoryService:
                     "requirement_files": []
                 }
             ]
-        ]
+        }
         session_mock.run.return_value = result_mock
 
         repositories = await repository_service.read_repositories_by_user_id("user123")

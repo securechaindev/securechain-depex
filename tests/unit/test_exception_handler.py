@@ -27,7 +27,7 @@ class TestExceptionHandler:
             errors=[{"msg": "field required", "type": "value_error.missing"}]
         )
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             response = await ExceptionHandler.request_validation_exception_handler(
                 mock_request, exc
             )
@@ -45,7 +45,7 @@ class TestExceptionHandler:
             errors=[{"msg": custom_error, "type": "value_error"}]
         )
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             response = await ExceptionHandler.request_validation_exception_handler(
                 mock_request, exc
             )
@@ -65,7 +65,7 @@ class TestExceptionHandler:
             ]
         )
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             response = await ExceptionHandler.request_validation_exception_handler(
                 mock_request, exc
             )
@@ -80,7 +80,7 @@ class TestExceptionHandler:
     ):
         exc = HTTPException(status_code=404, detail="Resource not found")
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 404
@@ -93,7 +93,7 @@ class TestExceptionHandler:
     ):
         exc = HTTPException(status_code=400, detail={"error": "bad request"})
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 400
@@ -106,7 +106,7 @@ class TestExceptionHandler:
     ):
         exc = HTTPException(status_code=401, detail="Unauthorized")
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 401
@@ -118,7 +118,7 @@ class TestExceptionHandler:
     ):
         exc = HTTPException(status_code=403, detail="Forbidden")
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 403
@@ -128,7 +128,7 @@ class TestExceptionHandler:
     async def test_unhandled_exception_handler(self, mock_request, mock_logger):
         exc = ValueError("Something went wrong")
 
-        with patch("app.exception_handler.get_logger", return_value=mock_logger):
+        with patch("app.exception_handler.logger", mock_logger):
             with patch("app.exception_handler.exc_info", return_value=(None, exc, None)):
                 response = await ExceptionHandler.unhandled_exception_handler(
                     mock_request, exc
@@ -150,7 +150,7 @@ class TestExceptionHandler:
         ]
 
         for exc in exceptions:
-            with patch("app.exception_handler.get_logger", return_value=mock_logger):
+            with patch("app.exception_handler.logger", mock_logger):
                 with patch("app.exception_handler.exc_info", return_value=(None, exc, None)):
                     response = await ExceptionHandler.unhandled_exception_handler(
                         mock_request, exc

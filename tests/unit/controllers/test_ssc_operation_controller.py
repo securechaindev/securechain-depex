@@ -111,7 +111,7 @@ class TestSSCOperationController:
                 ]
             }
         }
-        mock_requirement_file_service.read_graph_for_req_file_info_operation.return_value = computed_result
+        mock_requirement_file_service.read_graph_for_req_file_ssc_info_operation.return_value = computed_result
         mock_version_filter.filter_versions.return_value = [{"version": "2.28.0"}]
 
         file_info_request = MagicMock()
@@ -142,7 +142,7 @@ class TestSSCOperationController:
     ):
         mock_operation_service.read_operation_result.return_value = None
         mock_requirement_file_service.read_requirement_file_moment.return_value = datetime(2023, 11, 1, tzinfo=pytz.UTC)
-        mock_requirement_file_service.read_graph_for_req_file_info_operation.return_value = {
+        mock_requirement_file_service.read_graph_for_req_file_ssc_info_operation.return_value = {
             "total_direct_dependencies": 0,
             "direct_dependencies": [],
             "indirect_dependencies_by_depth": {}

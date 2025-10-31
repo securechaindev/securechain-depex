@@ -37,30 +37,32 @@ class TestVersionService:
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        result_mock1 = AsyncMock()
-        result_mock1.single.return_value = ["0.100.0"]
-        result_mock2 = AsyncMock()
-        result_mock2.single.return_value = ["2.0.0"]
+        result_mock = AsyncMock()
+        result_mock.data.return_value = [
+            {"package": "fastapi", "name": "0.100.0"},
+            {"package": "pydantic", "name": "2.0.0"}
+        ]
 
-        session_mock.run.side_effect = [result_mock1, result_mock2]
+        session_mock.run.return_value = result_mock
 
         config = {"fastapi": 100, "pydantic": 200}
         result = await version_service.read_releases_by_serial_numbers("PyPIPackage", config)
 
         assert result == {"fastapi": "0.100.0", "pydantic": "2.0.0"}
-        assert session_mock.run.call_count == 2
+        assert session_mock.run.call_count == 1
 
     async def test_read_releases_by_serial_numbers_partial_found(self, version_service, mock_db_manager):
         _, driver = mock_db_manager
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        result_mock1 = AsyncMock()
-        result_mock1.single.return_value = ["0.100.0"]
-        result_mock2 = AsyncMock()
-        result_mock2.single.return_value = None
+        result_mock = AsyncMock()
+        result_mock.data.return_value = [
+            {"package": "fastapi", "name": "0.100.0"}
+            # "unknown" no está en los resultados, por lo que mantendrá el valor original
+        ]
 
-        session_mock.run.side_effect = [result_mock1, result_mock2]
+        session_mock.run.return_value = result_mock
 
         config = {"fastapi": 100, "unknown": 999}
         result = await version_service.read_releases_by_serial_numbers("PyPIPackage", config)
@@ -77,12 +79,13 @@ class TestVersionService:
         session_mock = AsyncMock()
         driver.session.return_value.__aenter__.return_value = session_mock
 
-        result_mock1 = AsyncMock()
-        result_mock1.single.return_value = [100]
-        result_mock2 = AsyncMock()
-        result_mock2.single.return_value = [200]
+        result_mock = AsyncMock()
+        result_mock.data.return_value = [
+            {"package": "fastapi", "serial_number": 100},
+            {"package": "pydantic", "serial_number": 200}
+        ]
 
-        session_mock.run.side_effect = [result_mock1, result_mock2]
+        session_mock.run.return_value = result_mock
 
         config = {"fastapi": "0.100.0", "pydantic": "2.0.0"}
         result = await version_service.read_serial_numbers_by_releases("PyPIPackage", config)
@@ -129,7 +132,10 @@ class TestVersionService:
             },
             "total_indirect_dependencies": 1
         }
-        session_mock.execute_read.return_value = [graph_data]
+        # execute_read devuelve el resultado del método read_graph_version
+        # que debe ser un objeto con el método .get()
+        record_mock = {"ssc_version_info": graph_data}
+        session_mock.execute_read.return_value = record_mock
 
         result = await version_service.read_graph_for_version_ssc_info_operation(
             "PyPIPackage", "fastapi", "0.100.0", 3

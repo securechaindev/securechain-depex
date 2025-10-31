@@ -277,7 +277,7 @@ class TestGraphController:
     async def test_init_repository_github_not_found(
         self, _mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
     ):
-        mock_github_service.get_last_commit_date.side_effect = InvalidRepositoryException()
+        mock_github_service.get_last_commit_date.side_effect = InvalidRepositoryException("testowner", "nonexistent")
 
         init_repository_request = MagicMock()
         init_repository_request.owner = "testowner"

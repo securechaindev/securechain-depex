@@ -78,9 +78,9 @@ class TestRequirementFileService:
         driver.session.return_value.__aenter__.return_value = session_mock
 
         result_mock = AsyncMock()
-        result_mock.single.return_value = [
-            {"requirements.txt": "rf123", "package.json": "rf456"}
-        ]
+        result_mock.single.return_value = {
+            "requirement_files": {"requirements.txt": "rf123", "package.json": "rf456"}
+        }
         session_mock.run.return_value = result_mock
 
         files = await req_file_service.read_requirement_files_by_repository("repo123")
@@ -107,7 +107,7 @@ class TestRequirementFileService:
 
         moment = datetime.now()
         result_mock = AsyncMock()
-        result_mock.single.return_value = [moment]
+        result_mock.single.return_value = {"moment": moment}
         session_mock.run.return_value = result_mock
 
         result = await req_file_service.read_requirement_file_moment("rf123")
@@ -143,7 +143,7 @@ class TestRequirementFileService:
                 "fastapi": [{"name": "0.100.0", "serial_number": 100}]
             }
         }
-        session_mock.execute_read.return_value = [smt_data]
+        session_mock.execute_read.return_value = {"smt_info": smt_data}
 
         result = await req_file_service.read_data_for_smt_transform("rf123", 3)
 
@@ -183,9 +183,9 @@ class TestRequirementFileService:
             "indirect_dependencies_by_depth": {},
             "total_indirect_dependencies": 0
         }
-        session_mock.execute_read.return_value = [graph_data]
+        session_mock.execute_read.return_value = {"ssc_req_file_info": graph_data}
 
-        result = await req_file_service.read_graph_for_req_file_info_operation(
+        result = await req_file_service.read_graph_for_req_file_ssc_info_operation(
             "PyPIPackage", "rf123", 3
         )
 
@@ -204,7 +204,7 @@ class TestRequirementFileService:
         session_mock.execute_read.side_effect = error
 
         with pytest.raises(MemoryOutException):
-            await req_file_service.read_graph_for_req_file_info_operation(
+            await req_file_service.read_graph_for_req_file_ssc_info_operation(
                 "PyPIPackage", "rf123", 5
             )
 
