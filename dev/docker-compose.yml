@@ -12,6 +12,8 @@ services:
       - '8002:8000'
     networks:
       - securechain
+    depends_on:
+      - redis
 
   securechain-auth:
     container_name: securechain-auth
@@ -23,8 +25,22 @@ services:
     networks:
       - securechain
 
+  redis:
+    container_name: securechain-redis
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - securechain
+    command: redis-server --appendonly yes
+
 networks:
   securechain:
     name: securechain
     external: true
     driver: bridge
+
+volumes:
+  redis-data:
