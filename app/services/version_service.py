@@ -26,21 +26,23 @@ class VersionService:
         self,
         node_type: str,
         config: dict[str, int]
-    ) -> list[dict[str, str | float | int]]:
+    ) -> dict[str, str | float | int]:
         query = f"""
+        UNWIND $items AS item
         MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
-        WHERE v.serial_number = $serial_number AND parent.name = $package
-        RETURN v.name
+        WHERE v.serial_number = item.serial_number AND parent.name = item.package
+        RETURN item.package AS package, v.name AS name
         """
-        sanitized_config: dict[str, str | float | int] = {}
-        for var, value in config.items():
-            async with self.driver.session() as session:
-                result = await session.run(query, package=var, serial_number=value)
-                record = await result.single()
-            if record:
-                sanitized_config.update({var: record[0]})
-            else:
-                sanitized_config.update({var: value})
+        items = [{"package": pkg, "serial_number": sn} for pkg, sn in config.items()]
+
+        async with self.driver.session() as session:
+            result = await session.run(query, items=items)
+            records = await result.data()
+
+        found = {record["package"]: record["name"] for record in records}
+
+        sanitized_config = {pkg: found.get(pkg, sn) for pkg, sn in config.items()}
+
         return sanitized_config
 
     async def read_serial_numbers_by_releases(
