@@ -1,5 +1,7 @@
 from aiohttp import ClientSession
 
+from app.settings import settings
+
 
 class HTTPSessionManager:
     def __init__(self):
@@ -7,7 +9,9 @@ class HTTPSessionManager:
 
     async def get_session(self) -> ClientSession:
         if self.session is None or self.session.closed:
-            self.session = ClientSession()
+            headers = {}
+            headers["Authorization"] = f"token {settings.GITHUB_GRAPHQL_API_KEY}"
+            self.session = ClientSession(headers=headers)
         return self.session
 
     async def close(self) -> None:
