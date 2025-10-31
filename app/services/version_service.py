@@ -50,18 +50,20 @@ class VersionService:
         node_type: str,
         config: dict[str, str]
     ) -> dict[str, int]:
-        sanitized_config: dict[str, int] = {}
         query = f"""
+        UNWIND $items AS item
         MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
-        WHERE v.name = $release AND parent.name = $package
-        RETURN v.serial_number
+        WHERE v.name = item.release AND parent.name = item.package
+        RETURN item.package AS package, v.serial_number AS serial_number
         """
-        for package, release in config.items():
-            async with self.driver.session() as session:
-                result = await session.run(query, package=package, release=release)
-                record = await result.single()
-            if record:
-                sanitized_config.update({package: record[0]})
+        items = [{"package": pkg, "release": rel} for pkg, rel in config.items()]
+
+        async with self.driver.session() as session:
+            result = await session.run(query, items=items)
+            records = await result.data()
+
+        sanitized_config = {record["package"]: record["serial_number"] for record in records}
+
         return sanitized_config
 
     async def read_graph_for_version_ssc_info_operation(
