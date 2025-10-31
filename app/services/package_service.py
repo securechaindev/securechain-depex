@@ -156,4 +156,15 @@ class PackageService:
         async with self.driver.session() as session:
             result = await session.run(query, package_name=package_name)
             record = await result.single()
-        return record[0] if record else False
+        return record.get("exists") if record else False
+
+    async def relate_packages(self, node_type: str, req_file_id: str, packages: list[dict[str, Any]]) -> None:
+        query = f"""
+        MATCH (parent:RequirementFile)
+        WHERE elementid(parent) = $req_file_id
+        UNWIND $packages AS package
+        MATCH (p: {node_type}{{name: package.name}})
+        CREATE (parent)-[:REQUIRE{{constraints: package.constraints, parent_version_name: package.parent_version_name}}]->(p)
+        """
+        async with self.driver.session() as session:
+            await session.run(query, req_file_id=req_file_id, packages=packages)
