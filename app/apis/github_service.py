@@ -3,7 +3,7 @@ from datetime import datetime
 
 from aiohttp import ClientConnectorError
 
-from app.exceptions import InvalidRepositoryException
+from app.exceptions import DateNotFoundException, InvalidRepositoryException
 from app.http_session import HTTPSessionManager
 from app.settings import settings
 
@@ -46,7 +46,7 @@ class GitHubService:
 
         repo = response.get("data", {}).get("repository")
         if not repo or not repo.get("defaultBranchRef"):
-            raise InvalidRepositoryException()
+            raise InvalidRepositoryException(owner, name)
 
         date_str = (
             repo["defaultBranchRef"]
@@ -54,6 +54,6 @@ class GitHubService:
             .get("committedDate")
         )
         if not date_str:
-            raise InvalidRepositoryException()
+            raise DateNotFoundException(owner, name)
 
         return datetime.fromisoformat(date_str)

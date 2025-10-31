@@ -46,7 +46,7 @@ async def requirement_file_info(
     if operation_result is not None and operation_result["moment"].replace(tzinfo=UTC) > req_file_moment.replace(tzinfo=UTC):
         result = operation_result["result"]
     else:
-        result = await requirement_file_service.read_graph_for_req_file_info_operation(
+        result = await requirement_file_service.read_graph_for_req_file_ssc_info_operation(
             file_info_request.node_type.value,
             file_info_request.requirement_file_id,
             file_info_request.max_depth

@@ -11,7 +11,7 @@ from app.dependencies import (
     get_repository_service,
 )
 from app.domain import RepositoryInitializer
-from app.exceptions import InvalidRepositoryException
+from app.exceptions import DateNotFoundException, InvalidRepositoryException
 from app.limiter import limiter
 from app.schemas import (
     GetPackageStatusRequest,
@@ -183,18 +183,10 @@ async def init_repository(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     try:
-        try:
-            last_commit_date = await github_service.get_last_commit_date(
-                init_repository_request.owner,
-                init_repository_request.name
-            )
-        except InvalidRepositoryException:
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content=json_encoder.encode({
-                    "detail": "repository_not_found_on_github",
-                }),
-            )
+        last_commit_date = await github_service.get_last_commit_date(
+            init_repository_request.owner,
+            init_repository_request.name
+        )
 
         repository = await repository_service.read_repository_by_owner_and_name(
             init_repository_request.owner,
@@ -226,6 +218,18 @@ async def init_repository(
                     "repository_id": repository["id"],
                 }),
             )
+
+    except InvalidRepositoryException as e:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=json_encoder.encode(e.detail),
+        )
+
+    except DateNotFoundException as e:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=json_encoder.encode(e.detail)
+        )
 
     except Exception as e:
         return JSONResponse(
