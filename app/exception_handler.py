@@ -4,7 +4,7 @@ from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
-from app.dependencies import get_logger
+from app.logger import logger
 
 
 class ExceptionHandler:
@@ -12,7 +12,6 @@ class ExceptionHandler:
     async def request_validation_exception_handler(
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
-        logger = get_logger()
         for error in exc.errors():
             msg = error["msg"]
             if isinstance(msg, Exception):
@@ -27,7 +26,6 @@ class ExceptionHandler:
     async def http_exception_handler(
         request: Request, exc: HTTPException
     ) -> JSONResponse | Response:
-        logger = get_logger()
         detail = {
             "detail": exc.detail if isinstance(exc.detail, str) else "http_error",
         }
@@ -36,7 +34,6 @@ class ExceptionHandler:
 
     @staticmethod
     async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-        logger = get_logger()
         _, exception_value, _ = exc_info()
         detail = {
             "detail": "internal_error",

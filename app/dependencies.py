@@ -3,7 +3,6 @@ from __future__ import annotations
 from app.apis import GitHubService
 from app.database import DatabaseManager
 from app.http_session import HTTPSessionManager
-from app.logger import LoggerManager
 from app.services import (
     OperationService,
     PackageService,
@@ -28,7 +27,6 @@ class ServiceContainer:
     redis_queue: RedisQueue | None = None
     json_encoder: JSONEncoder | None = None
     jwt_bearer: JWTBearer | None = None
-    logger: LoggerManager | None = None
     http_session: HTTPSessionManager | None = None
 
     def __new__(cls) -> ServiceContainer:
@@ -91,11 +89,6 @@ class ServiceContainer:
             self.jwt_bearer = JWTBearer()
         return self.jwt_bearer
 
-    def get_logger(self) -> LoggerManager:
-        if self.logger is None:
-            self.logger = LoggerManager()
-        return self.logger
-
     def get_http_session(self) -> HTTPSessionManager:
         if self.http_session is None:
             self.http_session = HTTPSessionManager()
@@ -144,10 +137,6 @@ def get_json_encoder() -> JSONEncoder:
 
 def get_jwt_bearer() -> JWTBearer:
     return ServiceContainer().get_jwt_bearer()
-
-
-def get_logger() -> LoggerManager:
-    return ServiceContainer().get_logger()
 
 
 def get_http_session() -> HTTPSessionManager:

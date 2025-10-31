@@ -4,12 +4,11 @@ from time import time
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.dependencies import get_logger
+from app.logger import logger
 
 
 class LogRequestMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        logger = get_logger()
         url = f"{request.url.path}?{request.query_params}" if request.query_params else request.url.path
         start_time = time()
         response = await call_next(request)
