@@ -69,7 +69,7 @@ async def valid_graph(
                 {
                     "code": ResponseCode.OPERATION_SUCCESS,
                     "message": ResponseMessage.GRAPH_VALIDATION_SUCCESS,
-                    "result": result
+                    "data": result
                 }
             ),
         )
@@ -118,7 +118,7 @@ async def minimize_impact(
                 {
                     "code": ResponseCode.OPERATION_SUCCESS,
                     "message": ResponseMessage.IMPACT_MINIMIZATION_SUCCESS,
-                    "result": result
+                    "data": result
                 }
             ),
         )
@@ -167,7 +167,7 @@ async def maximize_impact(
                 {
                     "code": ResponseCode.OPERATION_SUCCESS,
                     "message": ResponseMessage.IMPACT_MAXIMIZATION_SUCCESS,
-                    "result": result
+                    "data": result
                 }
             ),
         )
@@ -221,7 +221,7 @@ async def filter_configs(
                 {
                     "code": ResponseCode.OPERATION_SUCCESS,
                     "message": ResponseMessage.CONFIG_FILTERING_SUCCESS,
-                    "result": result
+                    "data": result
                 }
             ),
         )
@@ -271,7 +271,7 @@ async def valid_config(
                 {
                     "code": ResponseCode.OPERATION_SUCCESS,
                     "message": ResponseMessage.CONFIG_VALIDATION_SUCCESS,
-                    "result": result
+                    "data": result
                 }
             ),
         )
@@ -322,7 +322,7 @@ async def complete_config(
                 {
                     "code": ResponseCode.OPERATION_SUCCESS,
                     "message": ResponseMessage.CONFIG_COMPLETION_SUCCESS,
-                    "result": result
+                    "data": result
                 }
             ),
         )
@@ -371,7 +371,7 @@ async def config_by_impact(
                 {
                     "code": ResponseCode.OPERATION_SUCCESS,
                     "message": ResponseMessage.CONFIG_BY_IMPACT_SUCCESS,
-                    "result": result
+                    "data": result
                 }
             ),
         )

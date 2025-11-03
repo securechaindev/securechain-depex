@@ -82,7 +82,7 @@ async def requirement_file_info(
             {
                 "code": ResponseCode.FILE_INFO_SUCCESS,
                 "message": ResponseMessage.FILE_INFO_SUCCESS,
-                "result": result
+                "data": result
             }
         )
     )
@@ -144,7 +144,7 @@ async def package_ssc_info(
             {
                 "code": ResponseCode.PACKAGE_INFO_SUCCESS,
                 "message": ResponseMessage.PACKAGE_INFO_SUCCESS,
-                "result": result
+                "data": result
             }
         )
     )
@@ -207,7 +207,7 @@ async def version_ssc_info(
             {
                 "code": ResponseCode.VERSION_INFO_SUCCESS,
                 "message": ResponseMessage.VERSION_INFO_SUCCESS,
-                "result": result
+                "data": result
             }
         )
     )

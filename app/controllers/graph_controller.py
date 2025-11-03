@@ -248,3 +248,4 @@ async def init_repository(
                 "message": ResponseMessage.ERROR_INITIALIZING_REPOSITORY,
             }),
         )
+

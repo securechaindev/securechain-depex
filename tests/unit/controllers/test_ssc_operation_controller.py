@@ -77,7 +77,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["result"] == cached_result
+        assert response_data["data"] == cached_result
         response_data = loads(response.body)
         assert response_data["code"] == "file_info_success"
         mock_operation_service.replace_operation_result.assert_not_called()
@@ -129,7 +129,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["result"]["total_direct_dependencies"] == 1
+        assert response_data["data"]["total_direct_dependencies"] == 1
         mock_operation_service.replace_operation_result.assert_called_once()
         assert mock_version_filter.filter_versions.call_count == 2
 
@@ -197,7 +197,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["result"] == cached_result
+        assert response_data["data"] == cached_result
         mock_operation_service.replace_operation_result.assert_not_called()
 
     @pytest.mark.asyncio
@@ -238,7 +238,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["result"]["total_direct_dependencies"] == 2
+        assert response_data["data"]["total_direct_dependencies"] == 2
         mock_operation_service.replace_operation_result.assert_called_once()
 
     @pytest.mark.asyncio
@@ -305,7 +305,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["result"] == cached_result
+        assert response_data["data"] == cached_result
         mock_operation_service.replace_operation_result.assert_not_called()
 
     @pytest.mark.asyncio
@@ -347,7 +347,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["result"]["total_direct_dependencies"] == 1
+        assert response_data["data"]["total_direct_dependencies"] == 1
         mock_operation_service.replace_operation_result.assert_called_once()
 
     @pytest.mark.asyncio
