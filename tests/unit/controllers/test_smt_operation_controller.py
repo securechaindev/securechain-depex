@@ -70,7 +70,7 @@ class TestSMTOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies"
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
@@ -99,7 +99,7 @@ class TestSMTOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies"
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
@@ -128,7 +128,7 @@ class TestSMTOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies"
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
@@ -158,7 +158,7 @@ class TestSMTOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies"
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
@@ -188,7 +188,7 @@ class TestSMTOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies"
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
@@ -218,7 +218,7 @@ class TestSMTOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies"
 
     @pytest.mark.asyncio
     @patch("app.controllers.smt_operation_controller.limiter")
@@ -247,4 +247,4 @@ class TestSMTOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies"

@@ -10,8 +10,9 @@ class TestHealthEndpoint:
     def test_health_check_response_structure(self, client):
         response = client.get("/health")
         data = response.json()
-        assert "detail" in data
-        assert data["detail"] == "healthy"
+        assert "code" in data
+        assert "message" in data
+        assert data["code"] == "healthy"
 
     def test_health_check_with_full_app_context(self, client):
         response = client.get("/health")
@@ -20,8 +21,9 @@ class TestHealthEndpoint:
 
         data = response.json()
         assert isinstance(data, dict)
-        assert len(data) == 1
+        assert len(data) == 2
 
-        assert data["detail"] == "healthy"
+        assert data["code"] == "healthy"
+        assert data["message"] == "The API is running and healthy."
 
         assert "application/json" in response.headers["content-type"]

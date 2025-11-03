@@ -68,7 +68,7 @@ class TestGraphController:
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
         assert response_data["repositories"] == mock_repos
-        assert response_data["detail"] == "get_repositories_success"
+        assert response_data["code"] == "get_repositories_success"
         mock_repository_service.read_repositories_by_user_id.assert_called_once_with("user1")
 
     @pytest.mark.asyncio
@@ -93,7 +93,7 @@ class TestGraphController:
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
         assert response_data["package"] == mock_package
-        assert response_data["detail"] == "get_package_status_success"
+        assert response_data["code"] == "get_package_status_success"
         mock_package_service.read_package_status_by_name.assert_called_once_with(
             NodeType.pypi_package.value, "fastapi"
         )
@@ -118,7 +118,7 @@ class TestGraphController:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         response_data = loads(response.body)
-        assert "not_found" in response_data["detail"]
+        assert "not_found" in response_data["code"]
         mock_package_service.read_package_status_by_name.assert_called_once_with(
             NodeType.pypi_package.value, "nonexistent"
         )
@@ -146,7 +146,7 @@ class TestGraphController:
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
         assert response_data["version"] == mock_version
-        assert response_data["detail"] == "get_version_status_success"
+        assert response_data["code"] == "get_version_status_success"
         mock_package_service.read_version_status_by_package_and_name.assert_called_once_with(
             NodeType.pypi_package.value, "fastapi", "1.0.0"
         )
@@ -172,7 +172,7 @@ class TestGraphController:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         response_data = loads(response.body)
-        assert "not_found" in response_data["detail"]
+        assert "not_found" in response_data["code"]
         mock_package_service.read_version_status_by_package_and_name.assert_called_once_with(
             NodeType.pypi_package.value, "fastapi", "999.0.0"
         )
@@ -204,7 +204,7 @@ class TestGraphController:
 
         assert response.status_code == status.HTTP_202_ACCEPTED
         response_data = loads(response.body)
-        assert response_data["detail"] == "repository_queued_for_processing"
+        assert response_data["code"] == "repository_queued_for_processing"
         assert "testowner/testrepo" in response_data["repository"]
         mock_github_service.get_last_commit_date.assert_called_once_with("testowner", "testrepo")
         background_tasks.add_task.assert_called_once()
@@ -239,7 +239,7 @@ class TestGraphController:
 
         assert response.status_code == status.HTTP_202_ACCEPTED
         response_data = loads(response.body)
-        assert response_data["detail"] == "repository_queued_for_processing"
+        assert response_data["code"] == "repository_queued_for_processing"
         background_tasks.add_task.assert_called_once()
 
     @pytest.mark.asyncio

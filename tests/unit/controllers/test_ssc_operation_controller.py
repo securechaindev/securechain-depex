@@ -79,7 +79,7 @@ class TestSSCOperationController:
         response_data = loads(response.body)
         assert response_data["result"] == cached_result
         response_data = loads(response.body)
-        assert response_data["detail"] == "file_info_success"
+        assert response_data["code"] == "file_info_success"
         mock_operation_service.replace_operation_result.assert_not_called()
 
     @pytest.mark.asyncio
@@ -163,7 +163,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies_req_file"
         mock_operation_service.replace_operation_result.assert_not_called()
 
     @pytest.mark.asyncio
@@ -270,7 +270,7 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies_package"
         mock_operation_service.replace_operation_result.assert_not_called()
 
     @pytest.mark.asyncio
@@ -380,5 +380,5 @@ class TestSSCOperationController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["detail"] == "no_dependencies"
+        assert response_data["code"] == "no_dependencies_version"
         mock_operation_service.replace_operation_result.assert_not_called()

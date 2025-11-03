@@ -18,8 +18,9 @@ class TestHealthController:
 
         assert response.status_code == 200
         data = response.json()
-        assert "detail" in data
-        assert data["detail"] == "healthy"
+        assert "code" in data
+        assert "message" in data
+        assert data["code"] == "healthy"
 
     def test_health_check_response_structure(self, client):
         response = client.get("/health")
@@ -27,8 +28,9 @@ class TestHealthController:
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, dict)
-        assert len(data) == 1
-        assert "detail" in data
+        assert len(data) == 2
+        assert "code" in data
+        assert "message" in data
 
     def test_health_check_content_type(self, client):
         response = client.get("/health")
@@ -40,4 +42,4 @@ class TestHealthController:
         for _ in range(5):
             response = client.get("/health")
             assert response.status_code == 200
-            assert response.json()["detail"] == "healthy"
+            assert response.json()["code"] == "healthy"
