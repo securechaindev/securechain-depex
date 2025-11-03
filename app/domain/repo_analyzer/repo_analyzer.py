@@ -5,7 +5,7 @@ from shutil import rmtree
 
 from aiofiles import open
 
-from app.constants import ALL_REQUIREMENT_FILES
+from app.constants import FileTypes
 from app.http_session import HTTPSessionManager
 
 from .requirement_files import AnalyzerRegistry
@@ -61,7 +61,7 @@ class RepositoryAnalyzer:
 
         for item in contents:
             if item["type"] == "file":
-                if any(extension in item["name"] for extension in ALL_REQUIREMENT_FILES):
+                if any(extension in item["name"] for extension in FileTypes.ALL_REQUIREMENT_FILES):
                     raw_url = item["download_url"]
                     async with session.get(raw_url) as file_resp:
                         if file_resp.status == 200:
@@ -89,5 +89,5 @@ class RepositoryAnalyzer:
 
     def is_req_file(self, requirement_file_name: str) -> bool:
         return any(
-            extension in requirement_file_name for extension in ALL_REQUIREMENT_FILES
+            extension in requirement_file_name for extension in FileTypes.ALL_REQUIREMENT_FILES
         )
