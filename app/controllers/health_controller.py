@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse
 
+from app.constants import ResponseCode, ResponseMessage
 from app.dependencies import get_json_encoder
 from app.limiter import limiter
 from app.utils import JSONEncoder
@@ -22,7 +23,8 @@ async def health_check(
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
-                "detail": "healthy",
+                "code": ResponseCode.HEALTHY,
+                "message": ResponseMessage.HEALTHY,
             }
         )
     )

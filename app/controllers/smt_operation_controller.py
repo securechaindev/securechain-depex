@@ -4,6 +4,7 @@ from fastapi import APIRouter, Body, Depends, Request, status
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
+from app.constants import ResponseCode, ResponseMessage
 from app.dependencies import (
     get_json_encoder,
     get_jwt_bearer,
@@ -66,8 +67,9 @@ async def valid_graph(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "result": result,
-                    "detail": "operation_success",
+                    "code": ResponseCode.OPERATION_SUCCESS,
+                    "message": ResponseMessage.GRAPH_VALIDATION_SUCCESS,
+                    "result": result
                 }
             ),
         )
@@ -76,7 +78,8 @@ async def valid_graph(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "detail": "no_dependencies",
+                    "code": ResponseCode.NO_DEPENDENCIES,
+                    "message": ResponseMessage.NO_DEPENDENCIES_TO_VALIDATE,
                 }
             ),
         )
@@ -113,8 +116,9 @@ async def minimize_impact(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "result": result,
-                    "detail": "operation_success",
+                    "code": ResponseCode.OPERATION_SUCCESS,
+                    "message": ResponseMessage.IMPACT_MINIMIZATION_SUCCESS,
+                    "result": result
                 }
             ),
         )
@@ -123,7 +127,8 @@ async def minimize_impact(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "detail": "no_dependencies",
+                    "code": ResponseCode.NO_DEPENDENCIES,
+                    "message": ResponseMessage.NO_DEPENDENCIES_TO_MINIMIZE,
                 }
             ),
         )
@@ -160,8 +165,9 @@ async def maximize_impact(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "result": result,
-                    "detail": "operation_success",
+                    "code": ResponseCode.OPERATION_SUCCESS,
+                    "message": ResponseMessage.IMPACT_MAXIMIZATION_SUCCESS,
+                    "result": result
                 }
             ),
         )
@@ -170,7 +176,8 @@ async def maximize_impact(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "detail": "no_dependencies",
+                    "code": ResponseCode.NO_DEPENDENCIES,
+                    "message": ResponseMessage.NO_DEPENDENCIES_TO_MAXIMIZE,
                 }
             ),
         )
@@ -212,8 +219,9 @@ async def filter_configs(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "result": result,
-                    "detail": "operation_success",
+                    "code": ResponseCode.OPERATION_SUCCESS,
+                    "message": ResponseMessage.CONFIG_FILTERING_SUCCESS,
+                    "result": result
                 }
             ),
         )
@@ -222,7 +230,8 @@ async def filter_configs(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "detail": "no_dependencies",
+                    "code": ResponseCode.NO_DEPENDENCIES,
+                    "message": ResponseMessage.NO_DEPENDENCIES_TO_FILTER,
                 }
             ),
         )
@@ -260,8 +269,9 @@ async def valid_config(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "result": result,
-                    "detail": "operation_success",
+                    "code": ResponseCode.OPERATION_SUCCESS,
+                    "message": ResponseMessage.CONFIG_VALIDATION_SUCCESS,
+                    "result": result
                 }
             ),
         )
@@ -270,7 +280,8 @@ async def valid_config(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "detail": "no_dependencies",
+                    "code": ResponseCode.NO_DEPENDENCIES,
+                    "message": ResponseMessage.NO_DEPENDENCIES_TO_VALIDATE,
                 }
             ),
         )
@@ -309,8 +320,9 @@ async def complete_config(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "result": result,
-                    "detail": "operation_success",
+                    "code": ResponseCode.OPERATION_SUCCESS,
+                    "message": ResponseMessage.CONFIG_COMPLETION_SUCCESS,
+                    "result": result
                 }
             ),
         )
@@ -319,7 +331,8 @@ async def complete_config(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "detail": "no_dependencies",
+                    "code": ResponseCode.NO_DEPENDENCIES,
+                    "message": ResponseMessage.NO_DEPENDENCIES_TO_COMPLETE,
                 }
             ),
         )
@@ -356,8 +369,9 @@ async def config_by_impact(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "result": result,
-                    "detail": "operation_success",
+                    "code": ResponseCode.OPERATION_SUCCESS,
+                    "message": ResponseMessage.CONFIG_BY_IMPACT_SUCCESS,
+                    "result": result
                 }
             ),
         )
@@ -366,7 +380,8 @@ async def config_by_impact(
             status_code=status.HTTP_200_OK,
             content=json_encoder.encode(
                 {
-                    "detail": "no_dependencies",
+                    "code": ResponseCode.NO_DEPENDENCIES,
+                    "message": ResponseMessage.NO_DEPENDENCIES_TO_PROCESS,
                 }
             ),
         )

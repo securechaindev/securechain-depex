@@ -1,12 +1,14 @@
 from fastapi import HTTPException
 
+from app.constants import ResponseCode, ResponseMessage
+
 
 class DateNotFoundException(HTTPException):
     def __init__(self, owner: str, name: str):
         super().__init__(
             status_code=404,
             detail={
-                "code": "date_not_found",
-                "message": f"Last commit date not found in repository {name} for owner {owner}"
+                "code": ResponseCode.DATE_NOT_FOUND,
+                "message": ResponseMessage.DATE_NOT_FOUND.format(name=name, owner=owner)
             }
         )

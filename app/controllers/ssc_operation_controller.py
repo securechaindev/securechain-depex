@@ -4,6 +4,7 @@ from fastapi import APIRouter, Body, Depends, Request, status
 from fastapi.responses import JSONResponse
 from pytz import UTC
 
+from app.constants import ResponseCode, ResponseMessage
 from app.dependencies import (
     get_json_encoder,
     get_jwt_bearer,
@@ -70,7 +71,8 @@ async def requirement_file_info(
                 status_code=status.HTTP_200_OK,
                 content=json_encoder.encode(
                     {
-                        "detail": "no_dependencies",
+                        "code": ResponseCode.NO_DEPENDENCIES_REQ_FILE,
+                        "message": ResponseMessage.NO_DEPENDENCIES_REQ_FILE,
                     }
                 ),
             )
@@ -78,8 +80,9 @@ async def requirement_file_info(
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
-                "result": result,
-                "detail": "file_info_success",
+                "code": ResponseCode.FILE_INFO_SUCCESS,
+                "message": ResponseMessage.FILE_INFO_SUCCESS,
+                "result": result
             }
         )
     )
@@ -130,7 +133,8 @@ async def package_ssc_info(
                 status_code=status.HTTP_200_OK,
                 content=json_encoder.encode(
                     {
-                        "detail": "no_dependencies",
+                        "code": ResponseCode.NO_DEPENDENCIES_PACKAGE,
+                        "message": ResponseMessage.NO_DEPENDENCIES_PACKAGE,
                     }
                 ),
             )
@@ -138,8 +142,9 @@ async def package_ssc_info(
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
-                "result": result,
-                "detail": "file_info_success",
+                "code": ResponseCode.PACKAGE_INFO_SUCCESS,
+                "message": ResponseMessage.PACKAGE_INFO_SUCCESS,
+                "result": result
             }
         )
     )
@@ -191,7 +196,8 @@ async def version_ssc_info(
                 status_code=status.HTTP_200_OK,
                 content=json_encoder.encode(
                     {
-                        "detail": "no_dependencies",
+                        "code": ResponseCode.NO_DEPENDENCIES_VERSION,
+                        "message": ResponseMessage.NO_DEPENDENCIES_VERSION,
                     }
                 ),
             )
@@ -199,8 +205,9 @@ async def version_ssc_info(
     return JSONResponse(
         status_code=status.HTTP_200_OK, content=json_encoder.encode(
             {
-                "result": result,
-                "detail": "file_info_success",
+                "code": ResponseCode.VERSION_INFO_SUCCESS,
+                "message": ResponseMessage.VERSION_INFO_SUCCESS,
+                "result": result
             }
         )
     )

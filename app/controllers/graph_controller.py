@@ -2,6 +2,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Request, status
 from fastapi.responses import JSONResponse
 
 from app.apis import GitHubService
+from app.constants import ResponseCode, ResponseMessage
 from app.dependencies import (
     get_github_service,
     get_json_encoder,
@@ -43,8 +44,9 @@ async def get_repositories(
 ) -> JSONResponse:
     repositories = await repository_service.read_repositories_by_user_id(get_repositories_request.user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder.encode({
-        "repositories": repositories,
-        "detail": "get_repositories_success",
+        "code": ResponseCode.GET_REPOSITORIES_SUCCESS,
+        "message": ResponseMessage.REPOSITORIES_RETRIEVED_SUCCESS,
+        "repositories": repositories
     }))
 
 
@@ -68,15 +70,17 @@ async def get_package_status(
             status_code=status.HTTP_404_NOT_FOUND,
             content=json_encoder.encode(
                 {
-                    "detail": "package_not_found",
+                    "code": ResponseCode.PACKAGE_NOT_FOUND,
+                    "message": ResponseMessage.PACKAGE_NOT_FOUND,
                 }
             ),
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder.encode({
-            "package": package,
-            "detail": "get_package_status_success",
+            "code": ResponseCode.GET_PACKAGE_STATUS_SUCCESS,
+            "message": ResponseMessage.PACKAGE_STATUS_RETRIEVED_SUCCESS,
+            "package": package
         })
     )
 
@@ -105,15 +109,17 @@ async def get_version_status(
             status_code=status.HTTP_404_NOT_FOUND,
             content=json_encoder.encode(
                 {
-                    "detail": "version_not_found",
+                    "code": ResponseCode.VERSION_NOT_FOUND,
+                    "message": ResponseMessage.VERSION_NOT_FOUND,
                 }
             ),
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=json_encoder.encode({
-            "version": version,
-            "detail": "get_version_status_success",
+            "code": ResponseCode.GET_VERSION_STATUS_SUCCESS,
+            "message": ResponseMessage.VERSION_STATUS_RETRIEVED_SUCCESS,
+            "version": version
         }),
     )
 
@@ -150,17 +156,19 @@ async def init_package(
         return JSONResponse(
             status_code=status.HTTP_202_ACCEPTED,
             content=json_encoder.encode({
-                "detail": "package_queued_for_processing",
+                "code": ResponseCode.PACKAGE_QUEUED_FOR_PROCESSING,
+                "message": ResponseMessage.PACKAGE_QUEUED,
                 "message_id": msg_id,
-                "package": init_package_request.package_name,
+                "package": init_package_request.package_name
             }),
         )
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=json_encoder.encode({
-                "detail": "error_queuing_package",
-                "error": str(e),
+                "code": ResponseCode.ERROR_QUEUING_PACKAGE,
+                "message": ResponseMessage.ERROR_QUEUING_PACKAGE,
+                "error": str(e)
             }),
         )
 
@@ -206,16 +214,18 @@ async def init_repository(
             return JSONResponse(
                 status_code=status.HTTP_202_ACCEPTED,
                 content=json_encoder.encode({
-                    "detail": "repository_queued_for_processing",
-                    "repository": f"{init_repository_request.owner}/{init_repository_request.name}",
+                    "code": ResponseCode.REPOSITORY_QUEUED_FOR_PROCESSING,
+                    "message": ResponseMessage.REPOSITORY_QUEUED,
+                    "repository": f"{init_repository_request.owner}/{init_repository_request.name}"
                 }),
             )
         else:
             return JSONResponse(
                 status_code=status.HTTP_409_CONFLICT,
                 content=json_encoder.encode({
-                    "detail": "repository_processing_in_progress",
-                    "repository_id": repository["id"],
+                    "code": ResponseCode.REPOSITORY_PROCESSING_IN_PROGRESS,
+                    "message": ResponseMessage.REPOSITORY_PROCESSING,
+                    "repository_id": repository["id"]
                 }),
             )
 
@@ -235,7 +245,8 @@ async def init_repository(
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=json_encoder.encode({
-                "detail": "error_initializing_repository",
-                "error": str(e),
+                "code": ResponseCode.ERROR_INITIALIZING_REPOSITORY,
+                "message": ResponseMessage.ERROR_INITIALIZING_REPOSITORY,
+                "error": str(e)
             }),
         )
