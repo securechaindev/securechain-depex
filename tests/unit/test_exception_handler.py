@@ -33,7 +33,7 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"detail":"validation_error"}'
+        assert response.body == b'{"code":"validation_error","message":"Request validation failed"}'
         mock_logger.error.assert_called_once()
 
     @pytest.mark.asyncio
@@ -51,7 +51,7 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"detail":"validation_error"}'
+        assert response.body == b'{"code":"validation_error","message":"Request validation failed"}'
         mock_logger.error.assert_called_once_with("Invalid value")
 
     @pytest.mark.asyncio
@@ -71,7 +71,7 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"detail":"validation_error"}'
+        assert response.body == b'{"code":"validation_error","message":"Request validation failed"}'
         mock_logger.error.assert_called_once()
 
     @pytest.mark.asyncio
@@ -84,7 +84,7 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 404
-        assert response.body == b'{"detail":"Resource not found"}'
+        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
         mock_logger.error.assert_called_once_with("Resource not found")
 
     @pytest.mark.asyncio
@@ -97,7 +97,7 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 400
-        assert response.body == b'{"detail":"http_error"}'
+        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
         mock_logger.error.assert_called_once_with({"error": "bad request"})
 
     @pytest.mark.asyncio
@@ -110,7 +110,7 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 401
-        assert response.body == b'{"detail":"Unauthorized"}'
+        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
 
     @pytest.mark.asyncio
     async def test_http_exception_handler_forbidden(
@@ -122,7 +122,52 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 403
-        assert response.body == b'{"detail":"Forbidden"}'
+        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
+
+    @pytest.mark.asyncio
+    async def test_http_exception_handler_with_auth_code_not_authenticated(
+        self, mock_request, mock_logger
+    ):
+        exc = HTTPException(
+            status_code=401,
+            detail={"code": "not_authenticated", "message": "Not authenticated"}
+        )
+
+        with patch("app.exception_handler.logger", mock_logger):
+            response = await ExceptionHandler.http_exception_handler(mock_request, exc)
+
+        assert response.status_code == 401
+        assert response.body == b'{"code":"not_authenticated","message":"Not authenticated"}'
+
+    @pytest.mark.asyncio
+    async def test_http_exception_handler_with_auth_code_token_expired(
+        self, mock_request, mock_logger
+    ):
+        exc = HTTPException(
+            status_code=401,
+            detail={"code": "token_expired", "message": "Token has expired"}
+        )
+
+        with patch("app.exception_handler.logger", mock_logger):
+            response = await ExceptionHandler.http_exception_handler(mock_request, exc)
+
+        assert response.status_code == 401
+        assert response.body == b'{"code":"token_expired","message":"Token has expired"}'
+
+    @pytest.mark.asyncio
+    async def test_http_exception_handler_with_auth_code_invalid_token(
+        self, mock_request, mock_logger
+    ):
+        exc = HTTPException(
+            status_code=401,
+            detail={"code": "invalid_token", "message": "Invalid token"}
+        )
+
+        with patch("app.exception_handler.logger", mock_logger):
+            response = await ExceptionHandler.http_exception_handler(mock_request, exc)
+
+        assert response.status_code == 401
+        assert response.body == b'{"code":"invalid_token","message":"Invalid token"}'
 
     @pytest.mark.asyncio
     async def test_unhandled_exception_handler(self, mock_request, mock_logger):
@@ -135,7 +180,7 @@ class TestExceptionHandler:
                 )
 
         assert response.status_code == 500
-        assert response.body == b'{"detail":"internal_error"}'
+        assert response.body == b'{"code":"internal_error","message":"An internal server error occurred"}'
         mock_logger.error.assert_called_once_with("Something went wrong")
 
     @pytest.mark.asyncio
@@ -157,5 +202,5 @@ class TestExceptionHandler:
                     )
 
             assert response.status_code == 500
-            assert response.body == b'{"detail":"internal_error"}'
+            assert response.body == b'{"code":"internal_error","message":"An internal server error occurred"}'
             mock_logger.error.reset_mock()

@@ -162,13 +162,12 @@ async def init_package(
                 "package": init_package_request.package_name
             }),
         )
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=json_encoder.encode({
                 "code": ResponseCode.ERROR_QUEUING_PACKAGE,
                 "message": ResponseMessage.ERROR_QUEUING_PACKAGE,
-                "error": str(e)
             }),
         )
 
@@ -229,24 +228,23 @@ async def init_repository(
                 }),
             )
 
-    except InvalidRepositoryException as e:
+    except InvalidRepositoryException as err:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=json_encoder.encode(e.detail),
+            content=json_encoder.encode(err.detail),
         )
 
-    except DateNotFoundException as e:
+    except DateNotFoundException as err:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=json_encoder.encode(e.detail)
+            content=json_encoder.encode(err.detail)
         )
 
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=json_encoder.encode({
                 "code": ResponseCode.ERROR_INITIALIZING_REPOSITORY,
                 "message": ResponseMessage.ERROR_INITIALIZING_REPOSITORY,
-                "error": str(e)
             }),
         )
