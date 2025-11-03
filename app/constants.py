@@ -43,6 +43,11 @@ class ResponseCode:
     DATE_NOT_FOUND = "date_not_found"
     REPOSITORY_NOT_FOUND = "repository_not_found"
 
+    # Error codes - General
+    VALIDATION_ERROR = "validation_error"
+    HTTP_ERROR = "http_error"
+    INTERNAL_ERROR = "internal_error"
+
     # Processing errors
     ERROR_QUEUING_PACKAGE = "error_queuing_package"
     ERROR_INITIALIZING_REPOSITORY = "error_initializing_repository"
@@ -59,46 +64,51 @@ class ResponseCode:
 
 class ResponseMessage:
     # Health
-    HEALTHY = "The API is running and healthy."
+    HEALTHY = "The API is running and healthy"
 
     # Success operations
-    GRAPH_VALIDATION_SUCCESS = "Graph validation completed successfully."
-    IMPACT_MINIMIZATION_SUCCESS = "Impact minimization completed successfully."
-    IMPACT_MAXIMIZATION_SUCCESS = "Impact maximization completed successfully."
-    CONFIG_FILTERING_SUCCESS = "Configuration filtering completed successfully."
-    CONFIG_VALIDATION_SUCCESS = "Configuration validation completed successfully."
-    CONFIG_COMPLETION_SUCCESS = "Configuration completion completed successfully."
-    CONFIG_BY_IMPACT_SUCCESS = "Configuration by impact completed successfully."
-    FILE_INFO_SUCCESS = "Requirement file information retrieved successfully."
-    PACKAGE_INFO_SUCCESS = "Package information retrieved successfully."
-    VERSION_INFO_SUCCESS = "Package version information retrieved successfully."
-    REPOSITORIES_RETRIEVED_SUCCESS = "Repositories retrieved successfully."
-    PACKAGE_STATUS_RETRIEVED_SUCCESS = "Package status retrieved successfully."
-    VERSION_STATUS_RETRIEVED_SUCCESS = "Version status retrieved successfully."
+    GRAPH_VALIDATION_SUCCESS = "Graph validation completed successfully"
+    IMPACT_MINIMIZATION_SUCCESS = "Impact minimization completed successfully"
+    IMPACT_MAXIMIZATION_SUCCESS = "Impact maximization completed successfully"
+    CONFIG_FILTERING_SUCCESS = "Configuration filtering completed successfully"
+    CONFIG_VALIDATION_SUCCESS = "Configuration validation completed successfully"
+    CONFIG_COMPLETION_SUCCESS = "Configuration completion completed successfully"
+    CONFIG_BY_IMPACT_SUCCESS = "Configuration by impact completed successfully"
+    FILE_INFO_SUCCESS = "Requirement file information retrieved successfully"
+    PACKAGE_INFO_SUCCESS = "Package information retrieved successfully"
+    VERSION_INFO_SUCCESS = "Package version information retrieved successfully"
+    REPOSITORIES_RETRIEVED_SUCCESS = "Repositories retrieved successfully"
+    PACKAGE_STATUS_RETRIEVED_SUCCESS = "Package status retrieved successfully"
+    VERSION_STATUS_RETRIEVED_SUCCESS = "Version status retrieved successfully"
 
     # Queue operations
-    PACKAGE_QUEUED = "The package has been queued for processing."
-    REPOSITORY_QUEUED = "The repository has been queued for processing."
+    PACKAGE_QUEUED = "The package has been queued for processing"
+    REPOSITORY_QUEUED = "The repository has been queued for processing"
 
     # Info/Warning states
-    NO_DEPENDENCIES_TO_VALIDATE = "The requirement file has no dependencies to validate."
-    NO_DEPENDENCIES_TO_MINIMIZE = "The requirement file has no dependencies to minimize."
-    NO_DEPENDENCIES_TO_MAXIMIZE = "The requirement file has no dependencies to maximize."
-    NO_DEPENDENCIES_TO_FILTER = "The requirement file has no dependencies to filter."
-    NO_DEPENDENCIES_TO_COMPLETE = "The requirement file has no dependencies to complete."
-    NO_DEPENDENCIES_TO_PROCESS = "The requirement file has no dependencies to process."
-    NO_DEPENDENCIES_REQ_FILE = "The requirement file has no dependencies."
-    NO_DEPENDENCIES_PACKAGE = "The package has no dependencies."
-    NO_DEPENDENCIES_VERSION = "The package version has no dependencies."
-    REPOSITORY_PROCESSING = "The repository is already being processed."
+    NO_DEPENDENCIES_TO_VALIDATE = "The requirement file has no dependencies to validate"
+    NO_DEPENDENCIES_TO_MINIMIZE = "The requirement file has no dependencies to minimize"
+    NO_DEPENDENCIES_TO_MAXIMIZE = "The requirement file has no dependencies to maximize"
+    NO_DEPENDENCIES_TO_FILTER = "The requirement file has no dependencies to filter"
+    NO_DEPENDENCIES_TO_COMPLETE = "The requirement file has no dependencies to complete"
+    NO_DEPENDENCIES_TO_PROCESS = "The requirement file has no dependencies to process"
+    NO_DEPENDENCIES_REQ_FILE = "The requirement file has no dependencies"
+    NO_DEPENDENCIES_PACKAGE = "The package has no dependencies"
+    NO_DEPENDENCIES_VERSION = "The package version has no dependencies"
+    REPOSITORY_PROCESSING = "The repository is already being processed"
 
     # Not found errors
-    PACKAGE_NOT_FOUND = "The requested package was not found."
-    VERSION_NOT_FOUND = "The requested version was not found."
+    PACKAGE_NOT_FOUND = "The requested package was not found"
+    VERSION_NOT_FOUND = "The requested version was not found"
+
+    # Error messages - General
+    VALIDATION_ERROR = "Validation error"
+    HTTP_ERROR = "HTTP error"
+    INTERNAL_ERROR = "Internal server error"
 
     # Processing errors
-    ERROR_QUEUING_PACKAGE = "An error occurred while queuing the package for processing."
-    ERROR_INITIALIZING_REPOSITORY = "An error occurred while initializing the repository."
+    ERROR_QUEUING_PACKAGE = "An error occurred while queuing the package for processing"
+    ERROR_INITIALIZING_REPOSITORY = "An error occurred while initializing the repository"
 
     # Exception messages (with dynamic content)
     DATE_NOT_FOUND = "Last commit date not found in repository {name} for owner {owner}"

@@ -33,7 +33,7 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"code":"validation_error","message":"Request validation failed"}'
+        assert response.body == b'{"code":"validation_error","message":"Validation error"}'
         mock_logger.error.assert_called_once()
 
     @pytest.mark.asyncio
@@ -51,7 +51,7 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"code":"validation_error","message":"Request validation failed"}'
+        assert response.body == b'{"code":"validation_error","message":"Validation error"}'
         mock_logger.error.assert_called_once_with("Invalid value")
 
     @pytest.mark.asyncio
@@ -71,7 +71,7 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"code":"validation_error","message":"Request validation failed"}'
+        assert response.body == b'{"code":"validation_error","message":"Validation error"}'
         mock_logger.error.assert_called_once()
 
     @pytest.mark.asyncio
@@ -84,7 +84,7 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 404
-        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
+        assert response.body == b'{"code":"http_error","message":"HTTP error"}'
         mock_logger.error.assert_called_once_with("Resource not found")
 
     @pytest.mark.asyncio
@@ -97,7 +97,7 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 400
-        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
+        assert response.body == b'{"code":"http_error","message":"HTTP error"}'
         mock_logger.error.assert_called_once_with({"error": "bad request"})
 
     @pytest.mark.asyncio
@@ -110,7 +110,7 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 401
-        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
+        assert response.body == b'{"code":"http_error","message":"HTTP error"}'
 
     @pytest.mark.asyncio
     async def test_http_exception_handler_forbidden(
@@ -122,7 +122,7 @@ class TestExceptionHandler:
             response = await ExceptionHandler.http_exception_handler(mock_request, exc)
 
         assert response.status_code == 403
-        assert response.body == b'{"code":"http_error","message":"An HTTP error occurred"}'
+        assert response.body == b'{"code":"http_error","message":"HTTP error"}'
 
     @pytest.mark.asyncio
     async def test_http_exception_handler_with_auth_code_not_authenticated(
@@ -180,7 +180,7 @@ class TestExceptionHandler:
                 )
 
         assert response.status_code == 500
-        assert response.body == b'{"code":"internal_error","message":"An internal server error occurred"}'
+        assert response.body == b'{"code":"internal_error","message":"Internal server error"}'
         mock_logger.error.assert_called_once_with("Something went wrong")
 
     @pytest.mark.asyncio
@@ -202,5 +202,5 @@ class TestExceptionHandler:
                     )
 
             assert response.status_code == 500
-            assert response.body == b'{"code":"internal_error","message":"An internal server error occurred"}'
+            assert response.body == b'{"code":"internal_error","message":"Internal server error"}'
             mock_logger.error.reset_mock()

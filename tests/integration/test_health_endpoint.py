@@ -24,6 +24,6 @@ class TestHealthEndpoint:
         assert len(data) == 2
 
         assert data["code"] == "healthy"
-        assert data["message"] == "The API is running and healthy."
+        assert data["message"] == "The API is running and healthy"
 
         assert "application/json" in response.headers["content-type"]

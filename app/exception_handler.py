@@ -4,6 +4,7 @@ from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
+from app.constants import ResponseCode, ResponseMessage
 from app.logger import logger
 
 
@@ -18,8 +19,8 @@ class ExceptionHandler:
             if isinstance(msg, Exception):
                 msg = str(msg)
         detail = {
-            "code": "validation_error",
-            "message": "Request validation failed",
+            "code": ResponseCode.VALIDATION_ERROR,
+            "message": ResponseMessage.VALIDATION_ERROR,
         }
         logger.error(msg)
         return JSONResponse(status_code=422, content=detail)
@@ -34,8 +35,8 @@ class ExceptionHandler:
             detail = exc.detail
         else:
             detail = {
-                "code": "http_error",
-                "message": "An HTTP error occurred",
+                "code": ResponseCode.HTTP_ERROR,
+                "message": ResponseMessage.HTTP_ERROR,
             }
         logger.error(exc.detail)
         return JSONResponse(status_code=exc.status_code, content=detail)
@@ -47,8 +48,8 @@ class ExceptionHandler:
     ) -> JSONResponse:
         _, exception_value, _ = exc_info()
         detail = {
-            "code": "internal_error",
-            "message": "An internal server error occurred",
+            "code": ResponseCode.INTERNAL_ERROR,
+            "message": ResponseMessage.INTERNAL_ERROR,
         }
         logger.error(str(exception_value))
         return JSONResponse(status_code=500, content=detail)
