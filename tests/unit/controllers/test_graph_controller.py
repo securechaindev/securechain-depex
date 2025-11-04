@@ -67,7 +67,7 @@ class TestGraphController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["repositories"] == mock_repos
+        assert response_data["data"] == mock_repos
         assert response_data["code"] == "get_repositories_success"
         mock_repository_service.read_repositories_by_user_id.assert_called_once_with("user1")
 
@@ -92,7 +92,7 @@ class TestGraphController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["package"] == mock_package
+        assert response_data["data"] == mock_package
         assert response_data["code"] == "get_package_status_success"
         mock_package_service.read_package_status_by_name.assert_called_once_with(
             NodeType.pypi_package.value, "fastapi"
@@ -145,7 +145,7 @@ class TestGraphController:
 
         assert response.status_code == status.HTTP_200_OK
         response_data = loads(response.body)
-        assert response_data["version"] == mock_version
+        assert response_data["data"] == mock_version
         assert response_data["code"] == "get_version_status_success"
         mock_package_service.read_version_status_by_package_and_name.assert_called_once_with(
             NodeType.pypi_package.value, "fastapi", "1.0.0"
@@ -205,7 +205,7 @@ class TestGraphController:
         assert response.status_code == status.HTTP_202_ACCEPTED
         response_data = loads(response.body)
         assert response_data["code"] == "repository_queued_for_processing"
-        assert "testowner/testrepo" in response_data["repository"]
+        assert "testowner/testrepo" in response_data["data"]["repository"]
         mock_github_service.get_last_commit_date.assert_called_once_with("testowner", "testrepo")
         background_tasks.add_task.assert_called_once()
 

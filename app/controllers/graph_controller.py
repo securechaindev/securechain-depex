@@ -46,7 +46,7 @@ async def get_repositories(
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder.encode({
         "code": ResponseCode.GET_REPOSITORIES_SUCCESS,
         "message": ResponseMessage.REPOSITORIES_RETRIEVED_SUCCESS,
-        "repositories": repositories
+        "data": repositories
     }))
 
 
@@ -80,7 +80,7 @@ async def get_package_status(
         content=json_encoder.encode({
             "code": ResponseCode.GET_PACKAGE_STATUS_SUCCESS,
             "message": ResponseMessage.PACKAGE_STATUS_RETRIEVED_SUCCESS,
-            "package": package
+            "data": package
         })
     )
 
@@ -119,7 +119,7 @@ async def get_version_status(
         content=json_encoder.encode({
             "code": ResponseCode.GET_VERSION_STATUS_SUCCESS,
             "message": ResponseMessage.VERSION_STATUS_RETRIEVED_SUCCESS,
-            "version": version
+            "data": version
         }),
     )
 
@@ -151,15 +151,13 @@ async def init_package(
             refresh=init_package_request.refresh,
         )
 
-        msg_id = redis_queue.add_package_message(message)
+        redis_queue.add_package_message(message)
 
         return JSONResponse(
             status_code=status.HTTP_202_ACCEPTED,
             content=json_encoder.encode({
                 "code": ResponseCode.PACKAGE_QUEUED_FOR_PROCESSING,
                 "message": ResponseMessage.PACKAGE_QUEUED,
-                "message_id": msg_id,
-                "package": init_package_request.package_name
             }),
         )
     except Exception:
@@ -215,7 +213,9 @@ async def init_repository(
                 content=json_encoder.encode({
                     "code": ResponseCode.REPOSITORY_QUEUED_FOR_PROCESSING,
                     "message": ResponseMessage.REPOSITORY_QUEUED,
-                    "repository": f"{init_repository_request.owner}/{init_repository_request.name}"
+                    "data": {
+                        "repository": f"{init_repository_request.owner}/{init_repository_request.name}"
+                    }
                 }),
             )
         else:
@@ -224,7 +224,9 @@ async def init_repository(
                 content=json_encoder.encode({
                     "code": ResponseCode.REPOSITORY_PROCESSING_IN_PROGRESS,
                     "message": ResponseMessage.REPOSITORY_PROCESSING,
-                    "repository_id": repository["id"]
+                    "data": {
+                        "repository_id": repository["id"]
+                    }
                 }),
             )
 
