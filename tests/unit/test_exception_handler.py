@@ -33,8 +33,8 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"code":"validation_error","message":"Validation error"}'
-        mock_logger.error.assert_called_once()
+        assert response.body == b'{"code":"validation_error","message":"field required"}'
+        mock_logger.error.assert_called_once_with("field required")
 
     @pytest.mark.asyncio
     async def test_request_validation_exception_handler_with_exception_msg(
@@ -51,7 +51,7 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"code":"validation_error","message":"Validation error"}'
+        assert response.body == b'{"code":"validation_error","message":"Invalid value"}'
         mock_logger.error.assert_called_once_with("Invalid value")
 
     @pytest.mark.asyncio
@@ -71,8 +71,8 @@ class TestExceptionHandler:
             )
 
         assert response.status_code == 422
-        assert response.body == b'{"code":"validation_error","message":"Validation error"}'
-        mock_logger.error.assert_called_once()
+        assert response.body == b'{"code":"validation_error","message":"invalid format"}'
+        mock_logger.error.assert_called_once_with("invalid format")
 
     @pytest.mark.asyncio
     async def test_http_exception_handler_with_string_detail(
