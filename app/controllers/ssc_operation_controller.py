@@ -6,8 +6,8 @@ from pytz import UTC
 
 from app.constants import ResponseCode, ResponseMessage
 from app.dependencies import (
+    get_dual_auth_bearer,
     get_json_encoder,
-    get_jwt_bearer,
     get_operation_service,
     get_package_service,
     get_requirement_file_service,
@@ -30,7 +30,7 @@ router = APIRouter()
     summary="Get Requirement File Information",
     description="Retrieve information about dependnecy graph of a specific requirement file.",
     response_description="Requirement File information.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SSC"]
 )
 @limiter.limit("5/minute")
@@ -93,7 +93,7 @@ async def requirement_file_info(
     summary="Get Package SSC Information",
     description="Retrieve information about the software supply chain of a specific package.",
     response_description="SSC package information.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SSC"]
 )
 @limiter.limit("5/minute")
@@ -155,7 +155,7 @@ async def package_ssc_info(
     summary="Get Package Version SSC Information",
     description="Retrieve information about the software supply chain of a specific package version.",
     response_description="SSC package version information.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SSC"]
 )
 @limiter.limit("5/minute")

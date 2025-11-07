@@ -76,6 +76,11 @@ class DatabaseManager:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.securechain_db.get_collection(settings.DB_OPERATION_RESULT_COLLECTION)
 
+    def get_api_key_collection(self) -> AsyncIOMotorCollection:
+        if self.securechain_db is None:
+            raise RuntimeError("Database not initialized. Call initialize() first.")
+        return self.securechain_db.get_collection(settings.DB_API_KEY_COLLECTION)
+
     def get_neo4j_driver(self) -> AsyncDriver:
         if self.neo4j_driver is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")

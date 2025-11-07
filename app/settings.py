@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     DB_USERS_COLLECTION: str = "user"
     DB_SMT_TEXT_COLLECTION: str = "smt_text"
     DB_OPERATION_RESULT_COLLECTION: str = "operation_result"
+    DB_API_KEY_COLLECTION: str = "api_key"
 
     # SMT Solver Configuration
     SMT_SOLVER_TIMEOUT_MS: int = 3000

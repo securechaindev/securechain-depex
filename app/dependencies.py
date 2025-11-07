@@ -11,7 +11,7 @@ from app.services import (
     SMTService,
     VersionService,
 )
-from app.utils import JSONEncoder, JWTBearer, RedisQueue
+from app.utils import DualAuthBearer, JSONEncoder, JWTBearer, RedisQueue
 
 
 class ServiceContainer:
@@ -27,6 +27,7 @@ class ServiceContainer:
     redis_queue: RedisQueue | None = None
     json_encoder: JSONEncoder | None = None
     jwt_bearer: JWTBearer | None = None
+    dual_auth_bearer: DualAuthBearer | None = None
     http_session: HTTPSessionManager | None = None
 
     def __new__(cls) -> ServiceContainer:
@@ -89,6 +90,11 @@ class ServiceContainer:
             self.jwt_bearer = JWTBearer()
         return self.jwt_bearer
 
+    def get_dual_auth_bearer(self) -> DualAuthBearer:
+        if self.dual_auth_bearer is None:
+            self.dual_auth_bearer = DualAuthBearer()
+        return self.dual_auth_bearer
+
     def get_http_session(self) -> HTTPSessionManager:
         if self.http_session is None:
             self.http_session = HTTPSessionManager()
@@ -137,6 +143,10 @@ def get_json_encoder() -> JSONEncoder:
 
 def get_jwt_bearer() -> JWTBearer:
     return ServiceContainer().get_jwt_bearer()
+
+
+def get_dual_auth_bearer() -> DualAuthBearer:
+    return ServiceContainer().get_dual_auth_bearer()
 
 
 def get_http_session() -> HTTPSessionManager:

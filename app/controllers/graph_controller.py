@@ -4,15 +4,14 @@ from fastapi.responses import JSONResponse
 from app.apis import GitHubService
 from app.constants import ResponseCode, ResponseMessage
 from app.dependencies import (
+    get_dual_auth_bearer,
     get_github_service,
     get_json_encoder,
-    get_jwt_bearer,
     get_package_service,
     get_redis_queue,
     get_repository_service,
 )
 from app.domain import RepositoryInitializer
-from app.exceptions import DateNotFoundException, InvalidRepositoryException
 from app.limiter import limiter
 from app.schemas import (
     GetPackageStatusRequest,
@@ -32,7 +31,7 @@ router = APIRouter()
     summary="Get User Repositories",
     description="Retrieve a list of repositories for a specific user.",
     response_description="List of user repositories.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
@@ -55,6 +54,7 @@ async def get_repositories(
     summary="Get Package Status",
     description="Retrieve the status of a specific package.",
     response_description="Package status.",
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
@@ -90,6 +90,7 @@ async def get_package_status(
     summary="Get Version Status",
     description="Retrieve the status of a specific version.",
     response_description="Version status.",
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
@@ -129,7 +130,7 @@ async def get_version_status(
     summary="Initialize Package",
     description="Queue a package for extraction and analysis. The package will be processed asynchronously by Dagster.",
     response_description="Package queuing status.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
@@ -139,35 +140,26 @@ async def init_package(
     redis_queue: RedisQueue = Depends(get_redis_queue),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
-    try:
-        message = PackageMessageSchema(
-            node_type=init_package_request.node_type.value,
-            package=init_package_request.package_name,
-            vendor=init_package_request.vendor,
-            repository_url=init_package_request.repository_url,
-            constraints=init_package_request.constraints,
-            parent_id=init_package_request.parent_id,
-            parent_version=init_package_request.parent_version,
-            refresh=init_package_request.refresh,
-        )
+    message = PackageMessageSchema(
+        node_type=init_package_request.node_type.value,
+        package=init_package_request.package_name,
+        vendor=init_package_request.vendor,
+        repository_url=init_package_request.repository_url,
+        constraints=init_package_request.constraints,
+        parent_id=init_package_request.parent_id,
+        parent_version=init_package_request.parent_version,
+        refresh=init_package_request.refresh,
+    )
 
-        redis_queue.add_package_message(message)
+    redis_queue.add_package_message(message)
 
-        return JSONResponse(
-            status_code=status.HTTP_202_ACCEPTED,
-            content=json_encoder.encode({
-                "code": ResponseCode.PACKAGE_QUEUED_FOR_PROCESSING,
-                "message": ResponseMessage.PACKAGE_QUEUED,
-            }),
-        )
-    except Exception:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=json_encoder.encode({
-                "code": ResponseCode.ERROR_QUEUING_PACKAGE,
-                "message": ResponseMessage.ERROR_QUEUING_PACKAGE,
-            }),
-        )
+    return JSONResponse(
+        status_code=status.HTTP_202_ACCEPTED,
+        content=json_encoder.encode({
+            "code": ResponseCode.PACKAGE_QUEUED_FOR_PROCESSING,
+            "message": ResponseMessage.PACKAGE_QUEUED,
+        }),
+    )
 
 
 @router.post(
@@ -175,7 +167,7 @@ async def init_package(
     summary="Initialize Repository",
     description="Initialize a repository by creating it in the graph and queuing its packages for extraction.",
     response_description="Repository initialization status.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
@@ -187,67 +179,44 @@ async def init_repository(
     github_service: GitHubService = Depends(get_github_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
-    try:
-        last_commit_date = await github_service.get_last_commit_date(
+    last_commit_date = await github_service.get_last_commit_date(
+        init_repository_request.owner,
+        init_repository_request.name
+    )
+
+    repository = await repository_service.read_repository_by_owner_and_name(
+        init_repository_request.owner,
+        init_repository_request.name
+    )
+
+    if repository is None or repository["is_complete"]:
+        background_tasks.add_task(
+            RepositoryInitializer().init_repository,
             init_repository_request.owner,
-            init_repository_request.name
+            init_repository_request.name,
+            init_repository_request.user_id,
+            repository,
+            last_commit_date,
         )
 
-        repository = await repository_service.read_repository_by_owner_and_name(
-            init_repository_request.owner,
-            init_repository_request.name
-        )
-
-        if repository is None or repository["is_complete"]:
-            background_tasks.add_task(
-                RepositoryInitializer().init_repository,
-                init_repository_request.owner,
-                init_repository_request.name,
-                init_repository_request.user_id,
-                repository,
-                last_commit_date,
-            )
-
-            return JSONResponse(
-                status_code=status.HTTP_202_ACCEPTED,
-                content=json_encoder.encode({
-                    "code": ResponseCode.REPOSITORY_QUEUED_FOR_PROCESSING,
-                    "message": ResponseMessage.REPOSITORY_QUEUED,
-                    "data": {
-                        "repository": f"{init_repository_request.owner}/{init_repository_request.name}"
-                    }
-                }),
-            )
-        else:
-            return JSONResponse(
-                status_code=status.HTTP_409_CONFLICT,
-                content=json_encoder.encode({
-                    "code": ResponseCode.REPOSITORY_PROCESSING_IN_PROGRESS,
-                    "message": ResponseMessage.REPOSITORY_PROCESSING,
-                    "data": {
-                        "repository_id": repository["id"]
-                    }
-                }),
-            )
-
-    except InvalidRepositoryException as err:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=json_encoder.encode(err.detail),
-        )
-
-    except DateNotFoundException as err:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=json_encoder.encode(err.detail)
-        )
-
-    except Exception:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_202_ACCEPTED,
             content=json_encoder.encode({
-                "code": ResponseCode.ERROR_INITIALIZING_REPOSITORY,
-                "message": ResponseMessage.ERROR_INITIALIZING_REPOSITORY,
+                "code": ResponseCode.REPOSITORY_QUEUED_FOR_PROCESSING,
+                "message": ResponseMessage.REPOSITORY_QUEUED,
+                "data": {
+                    "repository": f"{init_repository_request.owner}/{init_repository_request.name}"
+                }
             }),
         )
-
+    else:
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content=json_encoder.encode({
+                "code": ResponseCode.REPOSITORY_PROCESSING_IN_PROGRESS,
+                "message": ResponseMessage.REPOSITORY_PROCESSING,
+                "data": {
+                    "repository_id": repository["id"]
+                }
+            }),
+        )

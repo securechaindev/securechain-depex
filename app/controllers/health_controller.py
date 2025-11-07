@@ -13,7 +13,7 @@ router = APIRouter()
     summary="Health Check",
     description="Check the status of the API.",
     response_description="API status.",
-    tags=["Secure Chain Depex Health"]
+    tags=["Secure Chain Depex - Health"]
 )
 @limiter.limit("25/minute")
 async def health_check(

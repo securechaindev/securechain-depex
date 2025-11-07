@@ -6,8 +6,8 @@ from pytz import UTC
 
 from app.constants import ResponseCode, ResponseMessage
 from app.dependencies import (
+    get_dual_auth_bearer,
     get_json_encoder,
-    get_jwt_bearer,
     get_requirement_file_service,
     get_smt_service,
     get_version_service,
@@ -41,7 +41,7 @@ router = APIRouter()
     summary="Validate Requirement File Graph",
     description="Validate the graph of a requirement file up to a specified level.",
     response_description="Validation result of the requirement file graph.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SMT"]
 )
 @limiter.limit("5/minute")
@@ -90,7 +90,7 @@ async def valid_graph(
     summary="Minimize Impact of Requirement File",
     description="Get the minimized impact and configuration of a specific requirement file.",
     response_description="Minimized Impact Configuration.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SMT"]
 )
 @limiter.limit("5/minute")
@@ -139,7 +139,7 @@ async def minimize_impact(
     summary="Maximize Impact of Requirement File",
     description="Get the maximized impact and configuration of a specific requirement file.",
     response_description="Maximized Impact Configuration.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SMT"]
 )
 @limiter.limit("5/minute")
@@ -188,7 +188,7 @@ async def maximize_impact(
     summary="Filter Configurations of Requirement File",
     description="Get the filtered configurations of a specific requirement file.",
     response_description="Filtered Configurations.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SMT"]
 )
 @limiter.limit("5/minute")
@@ -241,7 +241,7 @@ async def filter_configs(
     summary="Validate a Configuration",
     description="Validate the configuration based on a requirement file and maximum level.",
     response_description="Returns the result of the validation.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SMT"]
 )
 @limiter.limit("5/minute")
@@ -292,7 +292,7 @@ async def valid_config(
     summary="Complete a Configuration",
     description="Complete the configuration based on a requirement file and maximum level.",
     response_description="Returns the result of the completion.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SMT"]
 )
 @limiter.limit("5/minute")
@@ -343,7 +343,7 @@ async def complete_config(
     summary="Complete a Configuration by Impact",
     description="Complete the configuration based on a requirement file, maximum level, and impact.",
     response_description="Returns the result of the completion by impact.",
-    dependencies=[Depends(get_jwt_bearer())],
+    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Operation/SMT"]
 )
 @limiter.limit("5/minute")

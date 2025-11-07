@@ -48,10 +48,6 @@ class ResponseCode:
     HTTP_ERROR = "http_error"
     INTERNAL_ERROR = "internal_error"
 
-    # Processing errors
-    ERROR_QUEUING_PACKAGE = "error_queuing_package"
-    ERROR_INITIALIZING_REPOSITORY = "error_initializing_repository"
-
     # Authentication errors
     NOT_AUTHENTICATED = "not_authenticated"
     TOKEN_EXPIRED = "token_expired"
@@ -105,10 +101,6 @@ class ResponseMessage:
     VALIDATION_ERROR = "Validation error"
     HTTP_ERROR = "HTTP error"
     INTERNAL_ERROR = "Internal server error"
-
-    # Processing errors
-    ERROR_QUEUING_PACKAGE = "An error occurred while queuing the package for processing"
-    ERROR_INITIALIZING_REPOSITORY = "An error occurred while initializing the repository"
 
     # Exception messages (with dynamic content)
     DATE_NOT_FOUND = "Last commit date not found in repository {name} for owner {owner}"
