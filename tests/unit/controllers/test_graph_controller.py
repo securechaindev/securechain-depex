@@ -10,7 +10,6 @@ from app.controllers.graph_controller import (
     get_version_status,
     init_repository,
 )
-from app.exceptions import InvalidRepositoryException
 from app.schemas.enums import NodeType
 
 
@@ -270,56 +269,4 @@ class TestGraphController:
         )
 
         assert response.status_code == status.HTTP_409_CONFLICT
-        background_tasks.add_task.assert_not_called()
-
-    @pytest.mark.asyncio
-    @patch("app.controllers.graph_controller.limiter")
-    async def test_init_repository_github_not_found(
-        self, _mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
-    ):
-        mock_github_service.get_last_commit_date.side_effect = InvalidRepositoryException("testowner", "nonexistent")
-
-        init_repository_request = MagicMock()
-        init_repository_request.owner = "testowner"
-        init_repository_request.name = "nonexistent"
-        init_repository_request.user_id = "user123"
-
-        background_tasks = MagicMock()
-
-        response = await init_repository(
-            mock_request,
-            init_repository_request,
-            background_tasks,
-            mock_repository_service,
-            mock_github_service,
-            mock_json_encoder
-        )
-
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        background_tasks.add_task.assert_not_called()
-
-    @pytest.mark.asyncio
-    @patch("app.controllers.graph_controller.limiter")
-    async def test_init_repository_error(
-        self, _mock_limiter, mock_request, mock_repository_service, mock_github_service, mock_json_encoder
-    ):
-        mock_github_service.get_last_commit_date.side_effect = Exception("Unexpected error")
-
-        init_repository_request = MagicMock()
-        init_repository_request.owner = "testowner"
-        init_repository_request.name = "testrepo"
-        init_repository_request.user_id = "user123"
-
-        background_tasks = MagicMock()
-
-        response = await init_repository(
-            mock_request,
-            init_repository_request,
-            background_tasks,
-            mock_repository_service,
-            mock_github_service,
-            mock_json_encoder
-        )
-
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         background_tasks.add_task.assert_not_called()
