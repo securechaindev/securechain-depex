@@ -4,6 +4,13 @@
 
 Depex is a tool that allows you to reason over the entire configuration space of the Software Supply Chain of an open-source software repository.
 
+### Key Features
+
+- 🔍 **Multi-ecosystem support:** Analyzes Python, JavaScript, Ruby, Rust, Java, and PHP dependencies
+- 🧮 **SMT-based reasoning:** Uses Z3 solver to find optimal dependency configurations
+- 📊 **Graph analysis:** Visualize and query dependency graphs using Neo4j
+- ⚡ **High performance:** Async architecture with Redis caching for SSC ingestion with Dagster
+
 ## Development requirements
 
 1. [Docker](https://www.docker.com/) to deploy the tool.
@@ -138,27 +145,6 @@ uv run ruff check app/
 uv run ruff format app/
 ```
 
-## Project Structure
-
-```
-securechain-depex/
-├── app/                      # Main application code
-│   ├── controllers/          # API endpoints (FastAPI routes)
-│   ├── services/             # Business logic layer
-│   ├── domain/               # Domain models and core logic
-│   │   ├── repo_analyzer/    # Dependency file analyzers
-│   │   └── smt/              # SMT solver operations
-│   ├── schemas/              # Pydantic models for validation
-│   ├── utils/                # Utility functions
-│   ├── exceptions/           # Custom exceptions
-│   └── main.py              # Application entry point
-├── tests/                    # Test suite
-│   ├── unit/                # Unit tests (84% coverage)
-│   └── integration/         # Integration tests
-├── dev/                     # Development Docker files
-└── pyproject.toml           # Project dependencies (uv)
-```
-
 ## Technology Stack
 
 - **Python 3.13+** - Programming language
@@ -171,16 +157,6 @@ securechain-depex/
 - **Motor** - Async MongoDB driver
 - **Pydantic** - Data validation using Python type hints
 - **Pytest** - Testing framework with async support
-
-## Features
-
-- 🔍 **Multi-ecosystem support:** Analyzes Python, JavaScript, Ruby, Rust, Java, and PHP dependencies
-- 🧮 **SMT-based reasoning:** Uses Z3 solver to find optimal dependency configurations
-- 📊 **Graph analysis:** Visualize and query dependency graphs using Neo4j
-- ⚡ **High performance:** Async architecture with Redis caching
-- 🔒 **Secure:** JWT authentication and rate limiting
-- 📝 **Well-documented:** OpenAPI/Swagger documentation at `/docs`
-- ✅ **Well-tested:** 84% code coverage with 407 tests
 
 ## Contributing
 

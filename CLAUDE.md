@@ -69,6 +69,7 @@ If you're an AI agent tasked with working on this project, here's what you need 
 - **Graph-based analysis:** Builds and analyzes dependency graphs using Neo4j
 - **Caching layer:** Redis-based caching for improved performance
 - **Supply Chain Security:** Integrates vulnerability data and supply chain analysis
+- **Dual authentication:** JWT (cookie-based) and API Key (header-based) authentication
 
 ### Supported Ecosystems
 - Python (requirements.txt, pyproject.toml, setup.py, setup.cfg)
@@ -109,7 +110,13 @@ securechain-depex/
 │   │   ├── operations/
 │   │   ├── messages/
 │   │   └── validators/
+│   ├── models/               # Database models (MongoDB documents)
+│   │   └── api_key.py        # API Key model for authentication
 │   ├── utils/                # Utilities
+│   │   ├── api_key_bearer.py      # API Key authentication
+│   │   ├── dual_auth_bearer.py    # Dual JWT + API Key auth
+│   │   ├── jwt_bearer.py          # JWT authentication
+│   │   └── ...
 │   ├── exceptions/           # Custom exceptions
 │   ├── apis/                 # External API clients (GitHub)
 │   ├── database.py           # MongoDB configuration
@@ -131,6 +138,7 @@ securechain-depex/
 ├── uv.lock                  # Locked dependencies for reproducibility
 ├── template.env             # Environment variables template
 ├── README.md                # User documentation
+├── AUTHENTICATION.md        # Authentication documentation
 └── CLAUDE.md               # This file - AI agent guide
 
 Note: Database docker-compose.yml is in the Zenodo data dumps, not in this repo.
@@ -152,6 +160,9 @@ Note: Database docker-compose.yml is in the Zenodo data dumps, not in this repo.
 - `base_analyzer.py`: 95%
 - `repository_service.py`: 100%
 - `package_service.py`: 96%
+- `api_key_bearer.py`: 92% (8 tests)
+- `dual_auth_bearer.py`: 100% (9 tests)
+- `jwt_bearer.py`: 52% (9 tests)
 
 ### Testing Conventions
 
@@ -266,6 +277,47 @@ def mock_json_encoder():
     return encoder
 ```
 
+#### 8. Testing Authentication Components
+When testing authentication (ApiKeyBearer, DualAuthBearer):
+
+```python
+# ApiKeyBearer tests - Mock MongoDB
+@pytest.mark.asyncio
+async def test_api_key_bearer(api_key_bearer, mock_request):
+    mock_request.headers = {"X-API-Key": "sk_test_key"}
+    
+    mock_collection = AsyncMock()
+    mock_collection.find_one.return_value = {
+        "key_hash": api_key_bearer.hash("sk_test_key"),
+        "user_id": "user123",
+        "is_active": True,
+        "expires_at": None
+    }
+    
+    with patch("app.utils.api_key_bearer.DatabaseManager") as mock_db:
+        mock_db_instance = MagicMock()
+        mock_db_instance.get_api_key_collection.return_value = mock_collection
+        mock_db.return_value = mock_db_instance
+        
+        result = await api_key_bearer(mock_request)
+        assert result["user_id"] == "user123"
+
+# DualAuthBearer tests - Mock both bearer classes
+@pytest.mark.asyncio
+async def test_dual_auth(dual_auth_bearer, mock_request):
+    mock_request.headers = {"X-API-Key": "sk_test"}
+    
+    with patch.object(ApiKeyBearer, "__call__", new_callable=AsyncMock, 
+                      return_value={"user_id": "api_user"}):
+        result = await dual_auth_bearer(mock_request)
+        assert result["user_id"] == "api_user"
+```
+
+**Important:** 
+- Mock `DatabaseManager` at class level for ApiKeyBearer tests
+- Patch `ApiKeyBearer.__call__` and `JWTBearer.__call__` as class methods for DualAuthBearer tests
+- Use `AsyncMock` for async authentication methods
+
 ### Testing Commands
 
 ```bash
@@ -308,6 +360,70 @@ The project has comprehensive pytest configuration in `pyproject.toml`:
 - **Async mode:** Automatically detects and runs async tests
 
 ## 🔑 Key Concepts
+
+### 0. Authentication System
+The API implements **dual authentication** supporting both JWT and API Key methods:
+
+#### Authentication Flow
+1. **DualAuthBearer** checks for API Key first (`X-API-Key` header)
+2. If API Key present → validates with **ApiKeyBearer**
+3. If no API Key → falls back to **JWTBearer** (cookie-based)
+4. Both return `{"user_id": "..."}` on success
+
+#### API Key Validation (`ApiKeyBearer`)
+- **Format check:** Must start with `sk_` prefix
+- **MongoDB lookup:** Queries `api_key` collection by hashed key (SHA-256)
+- **Active status:** `is_active` must be `True`
+- **Expiration check:** `expires_at` must be `None` or future datetime
+- **Pydantic validation:** Uses `ApiKey` model for data validation
+- **Returns:** `{"user_id": stored_key.user_id}`
+
+#### API Key Model (`app/models/api_key.py`)
+```python
+class ApiKey(BaseModel):
+    key_hash: str                          # SHA-256 hash of the API key
+    user_id: str                           # User identifier
+    name: Optional[str] = None             # Descriptive name
+    created_at: datetime                   # Creation timestamp
+    expires_at: Optional[datetime] = None  # Expiration (None = never expires)
+    is_active: bool = True                 # Active status flag
+```
+
+#### Protected Endpoints (13 total)
+- **Graph Controller (3):** `get_repositories`, `init_package`, `init_repository`
+- **SMT Controller (7):** `valid_graph`, `minimize_impact`, `maximize_impact`, `filter_configs`, `valid_config`, `complete_config`, `config_by_impact`
+- **SSC Controller (3):** `requirement_file_info`, `package_ssc_info`, `version_ssc_info`
+
+#### Testing Authentication
+```python
+# Test ApiKeyBearer
+@pytest.fixture
+def api_key_bearer():
+    return ApiKeyBearer()
+
+@pytest.mark.asyncio
+async def test_valid_api_key(api_key_bearer, mock_request):
+    mock_request.headers = {"X-API-Key": "sk_valid_key_123"}
+    
+    # Mock MongoDB collection
+    mock_collection = AsyncMock()
+    mock_collection.find_one.return_value = {
+        "key_hash": api_key_bearer.hash("sk_valid_key_123"),
+        "user_id": "user123",
+        "is_active": True,
+        "expires_at": datetime.now(UTC) + timedelta(days=30)
+    }
+    
+    with patch("app.utils.api_key_bearer.DatabaseManager") as mock_db:
+        mock_db_instance = MagicMock()
+        mock_db_instance.get_api_key_collection.return_value = mock_collection
+        mock_db.return_value = mock_db_instance
+        
+        result = await api_key_bearer(mock_request)
+        assert result["user_id"] == "user123"
+```
+
+For complete documentation, see [AUTHENTICATION.md](../AUTHENTICATION.md).
 
 ### 1. Dependency Graphs
 The project builds graphs where:
@@ -386,7 +502,8 @@ test = [
 ```
 
 ### External Services
-- **MongoDB:** Document database for storing operations, packages, and versions
+- **MongoDB:** Document database for storing operations, packages, versions, and **API keys**
+  - Collections: `operations`, `packages`, `versions`, `repositories`, **`api_key`**
 - **Neo4j:** Graph database for dependency graph storage and visualization
 - **Redis:** In-memory cache for operation results
 - **GitHub API:** Source code analysis and repository metadata
@@ -710,10 +827,15 @@ CMD ["uvicorn", "app.main:app", "--reload"]  # Hot-reload enabled
    - Temporary data storage
 
 ### Authentication & Security
-- **JWT-based authentication:** All endpoints protected (except health check)
-- **Rate limiting:** SlowAPI implementation to prevent abuse
+- **Dual authentication system:** 
+  - **JWT (Primary):** Cookie-based authentication with `auth_token` cookie
+  - **API Key (Alternative):** Header-based authentication with `X-API-Key` header
+  - **Priority:** API Key takes precedence over JWT when both are provided
+- **API Key validation:** MongoDB-backed with SHA-256 hashing, active status, and expiration checks
+- **Rate limiting:** SlowAPI implementation to prevent abuse (10/minute per endpoint)
 - **CORS middleware:** Configured for cross-origin requests
 - **Environment-based secrets:** All sensitive data in `.env` files
+- **Protected endpoints:** 13 endpoints across graph, SMT, and SSC controllers use dual authentication
 
 ### Async Architecture
 - **Fully asynchronous:** All I/O operations are async (DB, HTTP, file operations)
@@ -910,13 +1032,14 @@ If you encounter issues not listed here:
 2. Review the [official documentation](https://securechaindev.github.io/)
 3. Contact the team at hi@securechain.dev
 
-## �📅 Last Update
+## 📅 Last Update
 
-**Date:** October 28, 2025  
+**Date:** November 5, 2025  
 **Version:** 1.1.0  
 **Coverage:** 84%  
 **Tests:** 407 passing, 3 skipped  
-**Latest Improvement:** Controller tests (graph, ssc_operation, smt_operation)  
+**Latest Improvement:** Dual authentication system (JWT + API Key) with MongoDB validation  
+**Authentication Tests:** 17 tests (8 ApiKeyBearer + 9 DualAuthBearer)  
 **Python Version:** 3.13+  
 **Package Manager:** uv
 
