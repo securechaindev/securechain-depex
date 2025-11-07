@@ -1,6 +1,5 @@
 from .graphs import (
     GetPackageStatusRequest,
-    GetRepositoriesRequest,
     GetVersionStatusRequest,
     InitPackageRequest,
     InitRepositoryRequest,
@@ -26,7 +25,6 @@ __all__ = [
     "FileInfoRequest",
     "FilterConfigsRequest",
     "GetPackageStatusRequest",
-    "GetRepositoriesRequest",
     "GetVersionStatusRequest",
     "InitPackageRequest",
     "InitRepositoryRequest",

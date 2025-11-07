@@ -15,7 +15,6 @@ from app.domain import RepositoryInitializer
 from app.limiter import limiter
 from app.schemas import (
     GetPackageStatusRequest,
-    GetRepositoriesRequest,
     GetVersionStatusRequest,
     InitPackageRequest,
     InitRepositoryRequest,
@@ -27,21 +26,21 @@ from app.utils import JSONEncoder, RedisQueue
 router = APIRouter()
 
 @router.get(
-    "/graph/repositories/{user_id}",
+    "/graph/repositories",
     summary="Get User Repositories",
-    description="Retrieve a list of repositories for a specific user.",
+    description="Retrieve a list of repositories for the authenticated user.",
     response_description="List of user repositories.",
-    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
 async def get_repositories(
     request: Request,
-    get_repositories_request: GetRepositoriesRequest = Depends(),
+    payload: dict = Depends(get_dual_auth_bearer()),
     repository_service: RepositoryService = Depends(get_repository_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
-    repositories = await repository_service.read_repositories_by_user_id(get_repositories_request.user_id)
+    user_id = payload.get("user_id")
+    repositories = await repository_service.read_repositories_by_user_id(user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder.encode({
         "code": ResponseCode.GET_REPOSITORIES_SUCCESS,
         "message": ResponseMessage.REPOSITORIES_RETRIEVED_SUCCESS,
