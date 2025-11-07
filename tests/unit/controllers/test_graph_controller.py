@@ -54,12 +54,12 @@ class TestGraphController:
         ]
         mock_repository_service.read_repositories_by_user_id.return_value = mock_repos
 
-        get_repositories_request = MagicMock()
-        get_repositories_request.user_id = "user1"
+        # Simular el payload del JWT/API Key
+        mock_payload = {"user_id": "user1"}
 
         response = await get_repositories(
             mock_request,
-            get_repositories_request,
+            mock_payload,
             mock_repository_service,
             mock_json_encoder
         )
