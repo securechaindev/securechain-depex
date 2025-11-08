@@ -188,7 +188,9 @@ class TestGraphController:
         init_repository_request = MagicMock()
         init_repository_request.owner = "testowner"
         init_repository_request.name = "testrepo"
-        init_repository_request.user_id = "user123"
+
+        # Simular el payload del JWT/API Key
+        mock_payload = {"user_id": "user123"}
 
         background_tasks = MagicMock()
 
@@ -196,6 +198,7 @@ class TestGraphController:
             mock_request,
             init_repository_request,
             background_tasks,
+            mock_payload,
             mock_repository_service,
             mock_github_service,
             mock_json_encoder
@@ -223,7 +226,9 @@ class TestGraphController:
         init_repository_request = MagicMock()
         init_repository_request.owner = "testowner"
         init_repository_request.name = "testrepo"
-        init_repository_request.user_id = "user123"
+
+        # Simular el payload del JWT/API Key
+        mock_payload = {"user_id": "user123"}
 
         background_tasks = MagicMock()
 
@@ -231,6 +236,7 @@ class TestGraphController:
             mock_request,
             init_repository_request,
             background_tasks,
+            mock_payload,
             mock_repository_service,
             mock_github_service,
             mock_json_encoder
@@ -255,7 +261,9 @@ class TestGraphController:
         init_repository_request = MagicMock()
         init_repository_request.owner = "testowner"
         init_repository_request.name = "testrepo"
-        init_repository_request.user_id = "user123"
+
+        # Simular el payload del JWT/API Key
+        mock_payload = {"user_id": "user123"}
 
         background_tasks = MagicMock()
 
@@ -263,6 +271,7 @@ class TestGraphController:
             mock_request,
             init_repository_request,
             background_tasks,
+            mock_payload,
             mock_repository_service,
             mock_github_service,
             mock_json_encoder
