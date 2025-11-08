@@ -166,7 +166,6 @@ async def init_package(
     summary="Initialize Repository",
     description="Initialize a repository by creating it in the graph and queuing its packages for extraction.",
     response_description="Repository initialization status.",
-    dependencies=[Depends(get_dual_auth_bearer())],
     tags=["Secure Chain Depex - Graph"]
 )
 @limiter.limit("25/minute")
@@ -174,10 +173,13 @@ async def init_repository(
     request: Request,
     init_repository_request: InitRepositoryRequest,
     background_tasks: BackgroundTasks,
+    payload: dict = Depends(get_dual_auth_bearer()),
     repository_service: RepositoryService = Depends(get_repository_service),
     github_service: GitHubService = Depends(get_github_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
+    user_id = payload.get("user_id")
+
     last_commit_date = await github_service.get_last_commit_date(
         init_repository_request.owner,
         init_repository_request.name
@@ -193,7 +195,7 @@ async def init_repository(
             RepositoryInitializer().init_repository,
             init_repository_request.owner,
             init_repository_request.name,
-            init_repository_request.user_id,
+            user_id,
             repository,
             last_commit_date,
         )
