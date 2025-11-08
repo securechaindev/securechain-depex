@@ -256,6 +256,31 @@ class TestController:
         
         # Verify: Check service calls
         mock_service1.method.assert_called_once_with(...)
+    
+    # Test endpoint with payload injection (for user-scoped operations)
+    @pytest.mark.asyncio
+    @patch("app.controllers.graph_controller.limiter")
+    async def test_endpoint_with_user_context(
+        self, mock_limiter, mock_request,
+        mock_service, mock_json_encoder
+    ):
+        # Arrange: Mock the authenticated payload
+        mock_payload = {"user_id": "user123"}
+        
+        mock_service.user_method.return_value = user_data
+        
+        # Act: Pass payload as parameter
+        response = await endpoint_function(
+            mock_request,
+            mock_payload,  # ← Payload parameter
+            mock_service,
+            mock_json_encoder
+        )
+        
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        # Verify service called with user_id from payload
+        mock_service.user_method.assert_called_once_with("user123")
 ```
 
 #### 7. Common Fixtures
@@ -391,6 +416,8 @@ class ApiKey(BaseModel):
 
 #### Protected Endpoints (13 total)
 - **Graph Controller (3):** `get_repositories`, `init_package`, `init_repository`
+  - `get_repositories`: Uses payload to get `user_id` (no URL parameter needed)
+  - `init_repository`: Uses payload to get `user_id` (removed from request body)
 - **SMT Controller (7):** `valid_graph`, `minimize_impact`, `maximize_impact`, `filter_configs`, `valid_config`, `complete_config`, `config_by_impact`
 - **SSC Controller (3):** `requirement_file_info`, `package_ssc_info`, `version_ssc_info`
 
@@ -421,6 +448,28 @@ async def test_valid_api_key(api_key_bearer, mock_request):
         
         result = await api_key_bearer(mock_request)
         assert result["user_id"] == "user123"
+
+# Test endpoint with payload injection
+@pytest.mark.asyncio
+@patch("app.controllers.graph_controller.limiter")
+async def test_endpoint_with_payload(
+    mock_limiter, mock_request, mock_service, mock_json_encoder
+):
+    # Simulate JWT/API Key payload
+    mock_payload = {"user_id": "user123"}
+    
+    mock_service.some_method.return_value = expected_data
+    
+    response = await endpoint_function(
+        mock_request,
+        mock_payload,  # ← Payload parameter
+        mock_service,
+        mock_json_encoder
+    )
+    
+    assert response.status_code == status.HTTP_200_OK
+    # Verify service was called with user_id from payload
+    mock_service.some_method.assert_called_once_with("user123")
 ```
 
 For complete documentation, see [AUTHENTICATION.md](../AUTHENTICATION.md).
@@ -545,15 +594,40 @@ class CustomAnalyzer(BaseAnalyzer):
 Common pattern in controllers:
 
 ```python
+# Pattern 1: Using payload to extract user_id (recommended for user-scoped operations)
 @router.post("/endpoint")
 @limiter.limit("10/minute")
-async def endpoint(
+async def endpoint_with_user_context(
+    request: Request,
+    request_data: RequestSchema,
+    payload: dict = Depends(get_dual_auth_bearer()),  # ← Inject payload
+    service1: Service1 = Depends(get_service1),
+    service2: Service2 = Depends(get_service2),
+    json_encoder: Encoder = Depends(get_encoder)
+) -> Response:
+    # Extract user_id from authenticated payload
+    user_id = payload.get("user_id")
+    
+    # Use user_id in operations
+    result = await service1.user_specific_operation(user_id, ...)
+    
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder.encode(result)
+    )
+
+# Pattern 2: Using dependencies decorator (when user context not needed in logic)
+@router.post("/endpoint")
+@limiter.limit("10/minute")
+async def endpoint_auth_only(
     request: Request,
     request_data: RequestSchema,
     service1: Service1 = Depends(get_service1),
     service2: Service2 = Depends(get_service2),
     json_encoder: Encoder = Depends(get_encoder)
 ) -> Response:
+    # Authentication validated but user_id not used
+    
     # 1. Read graph data
     graph_data = await service1.read_data(...)
     
@@ -573,6 +647,10 @@ async def endpoint(
         content=json_encoder.encode(result)
     )
 ```
+
+**When to use each pattern:**
+- **Pattern 1 (payload injection):** Use when you need the `user_id` for business logic (e.g., `get_repositories`, `init_repository`)
+- **Pattern 2 (dependencies decorator):** Use when you only need to verify authentication without using user data (e.g., SMT operations, package status)
 
 ## 🎯 Areas with Low Coverage (Improvement Opportunities)
 
@@ -1034,11 +1112,14 @@ If you encounter issues not listed here:
 
 ## 📅 Last Update
 
-**Date:** November 5, 2025  
+**Date:** November 8, 2025  
 **Version:** 1.1.0  
 **Coverage:** 84%  
 **Tests:** 407 passing, 3 skipped  
-**Latest Improvement:** Dual authentication system (JWT + API Key) with MongoDB validation  
+**Latest Improvement:** Refactored graph controller endpoints to use payload injection for user context
+- `get_repositories`: Changed from `/repositories/{user_id}` to `/repositories` (user_id from payload)
+- `init_repository`: Removed `user_id` from request body, now extracted from payload
+- Improved security by preventing user_id manipulation in requests
 **Authentication Tests:** 17 tests (8 ApiKeyBearer + 9 DualAuthBearer)  
 **Python Version:** 3.13+  
 **Package Manager:** uv
