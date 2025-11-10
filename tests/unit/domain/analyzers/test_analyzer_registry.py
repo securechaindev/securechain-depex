@@ -103,7 +103,7 @@ class TestAnalyzerRegistry:
     def test_get_analyzer_with_path_prefix(self):
         registry = AnalyzerRegistry()
         analyzer = registry.get_analyzer("/master/requirements.txt")
-        assert analyzer is None
+        assert isinstance(analyzer, RequirementsTxtAnalyzer)
 
         analyzer = registry.get_analyzer("requirements.txt")
         assert isinstance(analyzer, RequirementsTxtAnalyzer)
@@ -120,7 +120,7 @@ class TestAnalyzerRegistry:
         assert isinstance(analyzer, GemfileAnalyzer)
 
         analyzer = registry.get_analyzer("gemfile")
-        assert analyzer is None
+        assert isinstance(analyzer, GemfileAnalyzer)
 
     def test_registry_contains_all_analyzers(self):
         registry = AnalyzerRegistry()

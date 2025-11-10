@@ -45,7 +45,26 @@ class AnalyzerRegistry:
         }
 
     def get_analyzer(self, filename: str) -> RequirementFileAnalyzer | None:
-        return self.analyzers.get(filename)
+        file_basename = filename.split("/")[-1]
+
+        if file_basename in self.analyzers:
+            return self.analyzers[file_basename]
+
+        file_lower = file_basename.lower()
+
+        if "requirements" in file_lower and file_basename.endswith(".txt"):
+            return self.analyzers["requirements.txt"]
+
+        if "gemfile" in file_lower and not file_basename.endswith((".lock", ".txt")):
+            return self.analyzers.get("Gemfile")
+
+        if "package" in file_lower and file_basename.endswith(".json") and "lock" not in file_lower:
+            return self.analyzers.get("package.json")
+
+        if "package-lock" in file_lower and file_basename.endswith(".json"):
+            return self.analyzers.get("package-lock.json")
+
+        return None
 
     def analyze(
         self,
