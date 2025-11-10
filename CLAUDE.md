@@ -519,7 +519,7 @@ This project uses **uv** as the Python package manager, which is a fast Rust-bas
 ```toml
 [project]
 name = "securechain-depex"
-version = "1.1.0"
+version = "1.1.1"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi==0.116.1",           # Web framework
@@ -974,7 +974,7 @@ CMD ["uvicorn", "app.main:app", "--reload"]  # Hot-reload enabled
 ## 📊 Project Metrics & Goals
 
 ### Current State (October 2025)
-- **Version:** 1.1.0
+- **Version:** 1.1.1
 - **Test Coverage:** 84% (407 tests)
 - **Python Version:** 3.13+
 - **License:** GPL-3.0-or-later
@@ -1113,7 +1113,7 @@ If you encounter issues not listed here:
 ## 📅 Last Update
 
 **Date:** November 8, 2025  
-**Version:** 1.1.0  
+**Version:** 1.1.1
 **Coverage:** 84%  
 **Tests:** 407 passing, 3 skipped  
 **Latest Improvement:** Refactored graph controller endpoints to use payload injection for user context
