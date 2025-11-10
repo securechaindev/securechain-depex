@@ -88,16 +88,6 @@ The project uses Python 3.13 and **uv** as the package manager for faster and mo
    source .venv/bin/activate
    ```
 
-4. **Run the application**:
-   ```bash
-   uv run uvicorn app.main:app --reload
-   ```
-
-5. **Run tests**:
-   ```bash
-   uv run pytest --cov=app --cov-report=term-missing
-   ```
-
 ## Testing
 
 The project uses pytest with coverage tracking. Current coverage: **84%** (407 tests passing).
