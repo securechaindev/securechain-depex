@@ -30,7 +30,7 @@ class VersionService:
         query = f"""
         UNWIND $items AS item
         MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
-        WHERE v.serial_number = item.serial_number AND parent.name = item.package
+        WHERE v.serial_number = item.serial_number AND parent.purl = item.package
         RETURN item.package AS package, v.name AS name
         """
         items = [{"package": pkg, "serial_number": sn} for pkg, sn in config.items()]

@@ -72,7 +72,7 @@ class RequirementFileService:
             [rel IN relationships WHERE type(rel) = 'REQUIRE' |
                 {
                 parent_serial_number: startNode(rel).serial_number,
-                package: endNode(rel).name,
+                package: endNode(rel).purl,
                 constraints: rel.constraints,
                 parent_version_name: rel.parent_version_name,
                 type: CASE WHEN rel.parent_version_name IS NULL THEN 'direct' ELSE 'indirect' END
@@ -80,7 +80,7 @@ class RequirementFileService:
             ] AS require,
             [rel IN relationships WHERE type(rel) = 'HAVE' |
                 {
-                package: startNode(rel).name,
+                package: startNode(rel).purl,
                 name: endNode(rel).name,
                 serial_number: endNode(rel).serial_number,
                 mean: endNode(rel).mean,
