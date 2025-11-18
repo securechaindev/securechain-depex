@@ -60,6 +60,42 @@ class PackageService:
             record = await result.single()
         return record.get("requirement_files") if record else None
 
+    async def read_packages_by_version_and_parent(
+        self,
+        version_purl: str,
+    ) -> dict[str, Any] | None:
+        query = """
+        MATCH (v:Version{purl:$version_purl})-[r:REQUIRE]->(dep)
+        WITH v, r, collect(dep) AS dependencies
+        RETURN {
+            nodes: [dep IN dependencies | {
+                id: dep.purl,
+                label: dep.name,
+                type: labels(dep)[0],
+                props: {
+                    name: dep.name,
+                    vendor: dep.vendor,
+                    repository_url: dep.repository_url,
+                    purl: dep.purl
+                }
+            }],
+            edges: [dep IN dependencies | {
+                id: 'e-' + $version_purl + '-' + dep.purl,
+                source: $version_purl,
+                target: dep.purl,
+                type: 'REQUIRE',
+                props: {
+                    constraints: r.constraints,
+                    parent_version_name: r.parent_version_name
+                }
+            }]
+        } AS expansion_data
+        """
+        async with self.driver.session() as session:
+            result = await session.run(query, version_purl=version_purl)
+            record = await result.single()
+        return record.get("expansion_data") if record else None
+
     async def read_graph_for_package_ssc_info_operation(
         self,
         node_type: str,

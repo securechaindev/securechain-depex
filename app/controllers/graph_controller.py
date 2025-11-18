@@ -10,17 +10,20 @@ from app.dependencies import (
     get_package_service,
     get_redis_queue,
     get_repository_service,
+    get_version_service,
 )
 from app.domain import RepositoryInitializer
 from app.limiter import limiter
 from app.schemas import (
+    ExpandPackageRequest,
+    ExpandVersionRequest,
     GetPackageStatusRequest,
     GetVersionStatusRequest,
     InitPackageRequest,
     InitRepositoryRequest,
     PackageMessageSchema,
 )
-from app.services import PackageService, RepositoryService
+from app.services import PackageService, RepositoryService, VersionService
 from app.utils import JSONEncoder, RedisQueue
 
 router = APIRouter()
@@ -221,3 +224,79 @@ async def init_repository(
                 }
             }),
         )
+
+@router.post(
+    "/graph/expand/package",
+    summary="Expand Package",
+    description="Return package info to expand its versions in the graph visualization.",
+    response_description="Package expansion data.",
+    dependencies=[Depends(get_dual_auth_bearer())],
+    tags=["Secure Chain Depex - Graph"]
+)
+@limiter.limit("25/minute")
+async def expand_package(
+    request: Request,
+    expand_package_request: ExpandPackageRequest,
+    version_service: VersionService = Depends(get_version_service),
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
+) -> JSONResponse:
+    expansion_data = await version_service.read_versions_by_package(
+        expand_package_request.node_type.value,
+        expand_package_request.package_purl
+    )
+    if expansion_data is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=json_encoder.encode(
+                {
+                    "code": ResponseCode.PACKAGE_NOT_FOUND,
+                    "message": ResponseMessage.PACKAGE_NOT_FOUND,
+                }
+            ),
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder.encode({
+            "code": ResponseCode.EXPAND_PACKAGE_SUCCESS,
+            "message": ResponseMessage.PACKAGE_EXPANSION_RETRIEVED_SUCCESS,
+            "data": expansion_data
+        })
+    )
+
+@router.post(
+    "/graph/expand/version",
+    summary="Expand Version",
+    description="Return version info to expand its dependencies in the graph visualization.",
+    response_description="Version expansion data.",
+    dependencies=[Depends(get_dual_auth_bearer())],
+    tags=["Secure Chain Depex - Graph"]
+)
+@limiter.limit("25/minute")
+async def expand_version(
+    request: Request,
+    expand_version_request: ExpandVersionRequest,
+    package_service: PackageService = Depends(get_package_service),
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
+) -> JSONResponse:
+    expansion_data = await package_service.read_packages_by_version_and_parent(
+        expand_version_request.version_purl
+    )
+    if expansion_data is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=json_encoder.encode(
+                {
+                    "code": ResponseCode.VERSION_NOT_FOUND,
+                    "message": ResponseMessage.VERSION_NOT_FOUND,
+                }
+            ),
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder.encode({
+            "code": ResponseCode.EXPAND_VERSION_SUCCESS,
+            "message": ResponseMessage.VERSION_EXPANSION_RETRIEVED_SUCCESS,
+            "data": expansion_data
+        })
+    )
+

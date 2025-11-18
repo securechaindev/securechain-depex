@@ -66,6 +66,40 @@ class VersionService:
 
         return sanitized_config
 
+    async def read_versions_by_package(
+        self,
+        node_type: str,
+        package_purl: str
+    ) -> dict[str, Any] | None:
+        query = f"""
+        MATCH (p:{node_type}{{purl:$package_purl}})-[:HAVE]->(v:Version)
+        WITH p, collect(v) AS versions
+        RETURN {{
+            nodes: [v IN versions | {{
+                id: v.purl,
+                label: v.name,
+                type: 'Version',
+                props: {{
+                    name: v.name,
+                    release_date: v.release_date,
+                    serial_number: v.serial_number,
+                    vulnerabilities: v.vulnerabilities,
+                    purl: v.purl
+                }}
+            }}],
+            edges: [v IN versions | {{
+                id: 'e-' + $package_purl + '-' + v.purl,
+                source: $package_purl,
+                target: v.purl,
+                type: 'HAVE'
+            }}]
+        }} AS expansion_data
+        """
+        async with self.driver.session() as session:
+            result = await session.run(query, package_purl=package_purl)
+            record = await result.single()
+        return record.get("expansion_data") if record else None
+
     async def read_graph_for_version_ssc_info_operation(
         self,
         node_type: str,
