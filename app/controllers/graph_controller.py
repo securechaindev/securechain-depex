@@ -242,7 +242,8 @@ async def expand_package(
 ) -> JSONResponse:
     expansion_data = await version_service.read_versions_by_package(
         expand_package_request.node_type.value,
-        expand_package_request.package_purl
+        expand_package_request.package_purl,
+        expand_package_request.constraints
     )
     if expansion_data is None:
         return JSONResponse(

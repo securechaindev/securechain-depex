@@ -10,3 +10,4 @@ class ExpandPackageRequest(BaseModel):
         pattern=r"^pkg:[a-z]+(/[^/]+)+$",
         description="Package URL following the purl specification (e.g., pkg:pypi/django)"
     )
+    constraints: str | None = Field(..., description="Version constraints for the package (e.g., '>=2.0.0,<3.0.0')")
