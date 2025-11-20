@@ -43,6 +43,7 @@ uv run ruff check app/               # Check linting
 - Ruby: Gemfile, Gemfile.lock
 - Rust: Cargo.toml, Cargo.lock
 - Java: pom.xml
+- SBOM: bom.json, bom.xml, sbom.json, sbom.xml, *.cdx.json, *.cdx.xml (CycloneDX format)
 
 ## 🏗️ Project Structure
 

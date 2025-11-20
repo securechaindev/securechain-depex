@@ -42,84 +42,84 @@ from app.domain.repo_analyzer.requirement_files.setup_py_analyzer import (
 class TestAnalyzerRegistry:
     def test_get_analyzer_requirements_txt(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("requirements.txt")
+        analyzer = registry.get_analyzer("requirements.txt", "")
         assert isinstance(analyzer, RequirementsTxtAnalyzer)
 
     def test_get_analyzer_package_json(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("package.json")
+        analyzer = registry.get_analyzer("package.json", "")
         assert isinstance(analyzer, PackageJsonAnalyzer)
 
     def test_get_analyzer_pyproject_toml(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("pyproject.toml")
+        analyzer = registry.get_analyzer("pyproject.toml", "")
         assert isinstance(analyzer, PyprojectTomlAnalyzer)
 
     def test_get_analyzer_setup_py(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("setup.py")
+        analyzer = registry.get_analyzer("setup.py", "")
         assert isinstance(analyzer, SetupPyAnalyzer)
 
     def test_get_analyzer_setup_cfg(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("setup.cfg")
+        analyzer = registry.get_analyzer("setup.cfg", "")
         assert isinstance(analyzer, SetupCfgAnalyzer)
 
     def test_get_analyzer_package_lock_json(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("package-lock.json")
+        analyzer = registry.get_analyzer("package-lock.json", "")
         assert isinstance(analyzer, PackageLockJsonAnalyzer)
 
     def test_get_analyzer_gemfile(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("Gemfile")
+        analyzer = registry.get_analyzer("Gemfile", "")
         assert isinstance(analyzer, GemfileAnalyzer)
 
     def test_get_analyzer_gemfile_lock(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("Gemfile.lock")
+        analyzer = registry.get_analyzer("Gemfile.lock", "")
         assert isinstance(analyzer, GemfileLockAnalyzer)
 
     def test_get_analyzer_cargo_toml(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("Cargo.toml")
+        analyzer = registry.get_analyzer("Cargo.toml", "")
         assert isinstance(analyzer, CargoTomlAnalyzer)
 
     def test_get_analyzer_cargo_lock(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("Cargo.lock")
+        analyzer = registry.get_analyzer("Cargo.lock", "")
         assert isinstance(analyzer, CargoLockAnalyzer)
 
     def test_get_analyzer_pom_xml(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("pom.xml")
+        analyzer = registry.get_analyzer("pom.xml", "")
         assert isinstance(analyzer, PomXmlAnalyzer)
 
     def test_get_analyzer_packages_config(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("packages.config")
+        analyzer = registry.get_analyzer("packages.config", "")
         assert isinstance(analyzer, PackageConfigAnalyzer)
 
     def test_get_analyzer_with_path_prefix(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("/master/requirements.txt")
+        analyzer = registry.get_analyzer("/master/requirements.txt", "")
         assert isinstance(analyzer, RequirementsTxtAnalyzer)
 
-        analyzer = registry.get_analyzer("requirements.txt")
+        analyzer = registry.get_analyzer("requirements.txt", "")
         assert isinstance(analyzer, RequirementsTxtAnalyzer)
 
     def test_get_analyzer_unknown_file(self):
         registry = AnalyzerRegistry()
-        analyzer = registry.get_analyzer("unknown.file")
+        analyzer = registry.get_analyzer("unknown.file", "")
         assert analyzer is None
 
     def test_get_analyzer_case_sensitive(self):
         registry = AnalyzerRegistry()
 
-        analyzer = registry.get_analyzer("Gemfile")
+        analyzer = registry.get_analyzer("Gemfile", "")
         assert isinstance(analyzer, GemfileAnalyzer)
 
-        analyzer = registry.get_analyzer("gemfile")
+        analyzer = registry.get_analyzer("gemfile", "")
         assert isinstance(analyzer, GemfileAnalyzer)
 
     def test_registry_contains_all_analyzers(self):
@@ -140,5 +140,5 @@ class TestAnalyzerRegistry:
         ]
 
         for filename in expected_files:
-            analyzer = registry.get_analyzer(filename)
+            analyzer = registry.get_analyzer(filename, "")
             assert analyzer is not None, f"No analyzer found for {filename}"

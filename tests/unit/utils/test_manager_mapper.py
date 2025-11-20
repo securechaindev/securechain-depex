@@ -28,10 +28,10 @@ class TestManagerNodeTypeMapper:
         result = ManagerNodeTypeMapper.manager_to_node_type("NuGet")
         assert result == NodeType.nuget_package.value
 
-    def test_invalid_manager_defaults_to_pypi(self):
+    def test_invalid_manager_returns_none(self):
         result = ManagerNodeTypeMapper.manager_to_node_type("InvalidManager")
-        assert result == NodeType.pypi_package.value
+        assert result is None
 
-    def test_case_sensitive_manager(self):
+    def test_case_sensitive_manager_returns_none(self):
         result = ManagerNodeTypeMapper.manager_to_node_type("pypi")
-        assert result == NodeType.pypi_package.value
+        assert result is None

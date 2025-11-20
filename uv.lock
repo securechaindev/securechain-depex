@@ -492,6 +492,15 @@ wheels = [
 ]
 
 [[package]]
+name = "packageurl-python"
+version = "0.17.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/f0/de0ac00a4484c0d87b71e3d9985518278d89797fa725e90abd3453bccb42/packageurl_python-0.17.5.tar.gz", hash = "sha256:a7be3f3ba70d705f738ace9bf6124f31920245a49fa69d4b416da7037dd2de61", size = 43832, upload-time = "2025-08-06T14:08:20.235Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/be/78/9dbb7d2ef240d20caf6f79c0f66866737c9d0959601fd783ff635d1d019d/packageurl_python-0.17.5-py3-none-any.whl", hash = "sha256:f0e55452ab37b5c192c443de1458e3f3b4d8ac27f747df6e8c48adeab081d321", size = 30544, upload-time = "2025-08-06T14:08:19.055Z" },
+]
+
+[[package]]
 name = "packaging"
 version = "25.0"
 source = { registry = "https://pypi.org/simple" }
@@ -915,6 +924,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "motor" },
     { name = "neo4j" },
+    { name = "packageurl-python" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
     { name = "python-dateutil" },
@@ -951,6 +961,7 @@ requires-dist = [
     { name = "httpx", marker = "extra == 'test'", specifier = "==0.28.1" },
     { name = "motor", specifier = "==3.7.1" },
     { name = "neo4j", specifier = "==5.28.1" },
+    { name = "packageurl-python", specifier = ">=0.17.5" },
     { name = "pydantic-settings", specifier = "==2.10.1" },
     { name = "pyjwt", specifier = "==2.10.1" },
     { name = "pytest", marker = "extra == 'test'", specifier = "==8.4.2" },

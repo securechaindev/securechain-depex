@@ -8,10 +8,21 @@ class FileTypes:
     NUGET: ClassVar[list[str]] = ["packages.config"]
     RUBY: ClassVar[list[str]] = ["Gemfile", "Gemfile.lock"]
     CARGO: ClassVar[list[str]] = ["Cargo.toml", "Cargo.lock"]
+    SBOM: ClassVar[list[str]] = ["bom.json", "bom.xml", "sbom.json", "sbom.xml", ".cdx.json", ".cdx.xml"]
 
     ALL_REQUIREMENT_FILES: ClassVar[set[str]] = set(
-        PYPI + NPM + MAVEN + NUGET + RUBY + CARGO
+        PYPI + NPM + MAVEN + NUGET + RUBY + CARGO + SBOM
     )
+
+class PurlTypeToManager:
+    MAPPING: ClassVar[dict[str, str]] = {
+        "pypi": "PyPI",
+        "npm": "NPM",
+        "maven": "Maven",
+        "nuget": "NuGet",
+        "cargo": "Cargo",
+        "gem": "RubyGems",
+    }
 
 class ResponseCode:
     # Health

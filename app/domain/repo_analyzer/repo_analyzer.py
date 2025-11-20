@@ -24,7 +24,7 @@ class RepositoryAnalyzer:
             requirement_file_names = self.get_req_files_names(repository_path)
 
             for requirement_file_name in requirement_file_names:
-                analyzer = self.registry.get_analyzer(requirement_file_name)
+                analyzer = self.registry.get_analyzer(requirement_file_name, repository_path)
                 if analyzer:
                     requirement_files = await analyzer.analyze(
                         requirement_files, repository_path, requirement_file_name

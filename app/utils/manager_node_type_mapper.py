@@ -1,5 +1,6 @@
 from typing import ClassVar
 
+from app.logger import logger
 from app.schemas.enums import Manager, NodeType
 
 
@@ -14,9 +15,10 @@ class ManagerNodeTypeMapper:
     }
 
     @classmethod
-    def manager_to_node_type(cls, manager: str) -> str:
+    def manager_to_node_type(cls, manager: str) -> str | None:
         try:
             manager_enum = Manager(manager)
             return cls.MAPPING[manager_enum].value
         except (ValueError, KeyError):
-            return NodeType.pypi_package.value
+            logger.warning(f"Unknown or unsupported manager: {manager}")
+            return None
