@@ -11,6 +11,9 @@ from app.domain.repo_analyzer.requirement_files.analyzer_registry import (
 from app.domain.repo_analyzer.requirement_files.cyclonedx_sbom_analyzer import (
     CycloneDxSbomAnalyzer,
 )
+from app.domain.repo_analyzer.requirement_files.spdx_sbom_analyzer import (
+    SpdxSbomAnalyzer,
+)
 
 
 class TestAnalyzerRegistrySbomDetection:
@@ -201,3 +204,75 @@ class TestAnalyzerRegistrySbomDetection:
             result = registry.detect_sbom_format(f"sbom-{version}.json", temp_dir)
 
             assert result == "cyclonedx", f"Failed for version {version}"
+
+    def test_detect_spdx_json_format(self, registry, temp_dir):
+        sbom_data = {
+            "spdxVersion": "SPDX-2.3",
+            "dataLicense": "CC0-1.0",
+            "SPDXID": "SPDXRef-DOCUMENT",
+            "name": "Test SBOM",
+            "packages": []
+        }
+        filepath = Path(temp_dir) / "sbom.spdx.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(sbom_data, f)
+
+        result = registry.detect_sbom_format("sbom.spdx.json", temp_dir)
+
+        assert result == "spdx"
+
+    def test_detect_spdx_xml_format(self, registry, temp_dir):
+        root = Element("{http://spdx.org/rdf/terms}SpdxDocument")
+
+        filepath = Path(temp_dir) / "sbom.spdx.xml"
+        with open(filepath, "wb") as f:
+            f.write(tostring(root, encoding="utf-8"))
+
+        result = registry.detect_sbom_format("sbom.spdx.xml", temp_dir)
+
+        assert result == "spdx"
+
+    def test_get_analyzer_returns_spdx_for_valid_sbom_json(self, registry, temp_dir):
+        sbom_data = {
+            "spdxVersion": "SPDX-2.3",
+            "dataLicense": "CC0-1.0",
+            "SPDXID": "SPDXRef-DOCUMENT",
+            "name": "Test SBOM",
+            "packages": []
+        }
+        filepath = Path(temp_dir) / "sbom.spdx.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(sbom_data, f)
+
+        analyzer = registry.get_analyzer("sbom.spdx.json", temp_dir)
+
+        assert analyzer is not None
+        assert isinstance(analyzer, SpdxSbomAnalyzer)
+
+    def test_get_analyzer_returns_spdx_for_valid_sbom_xml(self, registry, temp_dir):
+        root = Element("{http://spdx.org/rdf/terms}SpdxDocument")
+
+        filepath = Path(temp_dir) / "sbom.spdx.xml"
+        with open(filepath, "wb") as f:
+            f.write(tostring(root, encoding="utf-8"))
+
+        analyzer = registry.get_analyzer("sbom.spdx.xml", temp_dir)
+
+        assert analyzer is not None
+        assert isinstance(analyzer, SpdxSbomAnalyzer)
+
+    def test_sbom_detection_with_different_spdx_versions(self, registry, temp_dir):
+        for version in ["SPDX-2.2", "SPDX-2.3"]:
+            sbom_data = {
+                "spdxVersion": version,
+                "dataLicense": "CC0-1.0",
+                "SPDXID": "SPDXRef-DOCUMENT",
+                "packages": []
+            }
+            filepath = Path(temp_dir) / f"sbom-{version}.json"
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(sbom_data, f)
+
+            result = registry.detect_sbom_format(f"sbom-{version}.json", temp_dir)
+
+            assert result == "spdx", f"Failed for version {version}"
