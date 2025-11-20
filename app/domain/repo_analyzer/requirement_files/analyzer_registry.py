@@ -19,6 +19,7 @@ from .pyproject_toml_analyzer import PyprojectTomlAnalyzer
 from .requirements_txt_analyzer import RequirementsTxtAnalyzer
 from .setup_cfg_analyzer import SetupCfgAnalyzer
 from .setup_py_analyzer import SetupPyAnalyzer
+from .spdx_sbom_analyzer import SpdxSbomAnalyzer
 
 
 class AnalyzerRegistry:
@@ -36,7 +37,7 @@ class AnalyzerRegistry:
             "Cargo.lock": CargoLockAnalyzer(),
             "Cargo.toml": CargoTomlAnalyzer(),
             "cyclonedx": CycloneDxSbomAnalyzer(),
-            # "spdx": SpdxSbomAnalyzer(),  # Future: SPDX format support
+            "spdx": SpdxSbomAnalyzer(),
             "Gemfile": GemfileAnalyzer(),
             "Gemfile.lock": GemfileLockAnalyzer(),
             "packages.config": PackageConfigAnalyzer(),
@@ -69,7 +70,7 @@ class AnalyzerRegistry:
         if "package-lock" in file_lower and file_basename.endswith(".json"):
             return self.analyzers.get("package-lock.json")
 
-        if self.is_sbom_file(file_basename) and repository_path:
+        if self.is_sbom_file(file_basename):
             sbom_format = self.detect_sbom_format(filename, repository_path)
             if sbom_format:
                 return self.analyzers.get(sbom_format)
