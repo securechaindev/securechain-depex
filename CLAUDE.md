@@ -15,7 +15,7 @@ When updating this document, prioritize keeping the most critical and frequently
 
 **Key Info:**
 - Python 3.13+ with `uv` package manager
-- Test Coverage: 84% (target: 90%)
+- Test Coverage: 84% (514 tests)
 - Tech Stack: FastAPI, MongoDB, Neo4j, Redis, Z3 solver
 - All I/O operations are async
 
@@ -43,7 +43,10 @@ uv run ruff check app/               # Check linting
 - Ruby: Gemfile, Gemfile.lock
 - Rust: Cargo.toml, Cargo.lock
 - Java: pom.xml
-- SBOM: bom.json, bom.xml, sbom.json, sbom.xml, *.cdx.json, *.cdx.xml (CycloneDX format)
+- .NET: packages.config
+- **SBOM:** CycloneDX and SPDX formats (JSON/XML)
+  - Files: bom.json, sbom.json, *.cdx.json, bom.xml, sbom.xml, *.spdx.json, *.spdx.xml
+  - Multi-ecosystem support (PyPI, NPM, Maven, Cargo, RubyGems, NuGet)
 
 ## 🏗️ Project Structure
 
@@ -440,14 +443,14 @@ docker compose -f dev/docker-compose.yml up --build
 ## 📊 Metrics
 
 - Version: 1.1.1
-- Coverage: 84% (407 tests) - Target: 90%
+- Coverage: 84% (514 tests)
 - Python: 3.13+
 - License: GPL-3.0-or-later
 
 **Low Coverage Areas (Improvement Opportunities):**
-- repository_initializer.py: 23% → 70%+
-- repo_analyzer.py: 24% → 70%+
-- database.py: 31% → 60%+
+- repository_initializer.py: 20% → 70%+
+- repo_analyzer.py: 23% → 70%+
+- database.py: 32% → 60%+
 - github_service.py: 32% → 60%+
 
 ## 🔍 Troubleshooting
@@ -483,10 +486,9 @@ docker compose -f dev/docker-compose.yml up --build
 
 ## 📅 Last Update
 
-**Date:** November 18, 2025
+**Date:** November 20, 2025
 **Version:** 1.1.1
-**Coverage:** 84% (407 tests)
-**Latest:** Added Neo4j query optimization for graph expansion endpoints (expand_package, expand_version)
+**Coverage:** 84% (514 tests)
 
 ---
 
