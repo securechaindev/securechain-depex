@@ -81,10 +81,9 @@ class AnalyzerRegistry:
         return (
             "sbom" in file_lower or
             "bom" in file_lower or
-            filename.endswith(".cdx.json") or
-            filename.endswith(".cdx.xml") or
-            filename.endswith(".spdx.xml") or
-            filename.endswith(".spdx.xml")
+            "cyclonedx" in file_lower or
+            "cdx" in file_lower or
+            "spdx" in file_lower
         )
 
     def detect_sbom_format(self, filename: str, repository_path: str) -> str | None:
