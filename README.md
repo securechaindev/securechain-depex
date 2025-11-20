@@ -6,7 +6,7 @@ Depex is a tool that allows you to reason over the entire configuration space of
 
 ### Key Features
 
-- 🔍 **Multi-ecosystem support:** Analyzes Python, JavaScript, Ruby, Rust, Java, and PHP dependencies
+- 🔍 **Multi-ecosystem support:** Analyzes Python, JavaScript, Ruby, Rust, Java, and PHP dependencies, plus CycloneDX and SPDX SBOM files
 - 🧮 **SMT-based reasoning:** Uses Z3 solver to find optimal dependency configurations
 - 📊 **Graph analysis:** Visualize and query dependency graphs using Neo4j
 - ⚡ **High performance:** Async architecture with Redis caching for SSC ingestion with Dagster
