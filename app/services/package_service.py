@@ -60,13 +60,13 @@ class PackageService:
             record = await result.single()
         return record.get("requirement_files") if record else None
 
-    async def read_packages_by_version_and_parent(
+    async def read_packages_expansion_by_version(
         self,
         version_purl: str,
     ) -> dict[str, Any] | None:
         query = """
-        MATCH (v:Version{purl:$version_purl})-[r:REQUIRE]->(dep)
-        WITH v, r, collect(dep) AS dependencies
+        MATCH (:Version{purl:$version_purl})-[r:REQUIRE]->(dep)
+        WITH r, collect(dep) AS dependencies
         RETURN {
             nodes: [dep IN dependencies | {
                 id: dep.purl,
@@ -93,6 +93,43 @@ class PackageService:
         """
         async with self.driver.session() as session:
             result = await session.run(query, version_purl=version_purl)
+            record = await result.single()
+        return record.get("expansion_data") if record else None
+
+    async def read_packages_expansion_by_req_file(
+        self,
+        requirement_file_id: str,
+    ) -> dict[str, Any] | None:
+        query = """
+        MATCH (rf:RequirementFile)-[r:REQUIRE]->(dep)
+        WHERE elementid(rf) = $requirement_file_id
+        WITH collect({dep: dep, r: r}) AS items
+        RETURN {
+            nodes: [item IN items | {
+                id: item.dep.purl,
+                label: item.dep.name,
+                type: labels(item.dep)[0],
+                props: {
+                    name: item.dep.name,
+                    vendor: item.dep.vendor,
+                    repository_url: item.dep.repository_url,
+                    purl: item.dep.purl
+                }
+            }],
+            edges: [item IN items | {
+                id: 'e-' + $requirement_file_id + '-' + item.dep.purl,
+                source: $requirement_file_id,
+                target: item.dep.purl,
+                type: 'REQUIRE',
+                props: {
+                    constraints: item.r.constraints,
+                    parent_version_name: item.r.parent_version_name
+                }
+            }]
+        } AS expansion_data
+        """
+        async with self.driver.session() as session:
+            result = await session.run(query, requirement_file_id=requirement_file_id)
             record = await result.single()
         return record.get("expansion_data") if record else None
 

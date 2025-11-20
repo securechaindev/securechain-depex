@@ -149,5 +149,7 @@ class SpdxSbomAnalyzer(RequirementFileAnalyzer):
     def normalize_version_for_type(self, version: str, package_type: str) -> str:
         if package_type == "maven":
             return f"[{version}]"
+        elif package_type == "gem":
+            return f"={version}"
         else:
             return f"=={version}"

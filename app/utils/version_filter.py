@@ -1,7 +1,6 @@
 from typing import Any, ClassVar
 
 from univers.version_range import (
-    CargoVersionRange,
     GemVersionRange,
     MavenVersionRange,
     NpmVersionRange,
@@ -23,7 +22,7 @@ class VersionFilter:
     VERSION_RANGE_MAP: ClassVar[dict[str, tuple[type[Version], type[VersionRange]]]] = {
         "PyPIPackage": (PypiVersion, PypiVersionRange),
         "NPMPackage": (SemverVersion, NpmVersionRange),
-        "CargoPackage": (SemverVersion, CargoVersionRange),
+        "CargoPackage": (SemverVersion, NpmVersionRange),
         "MavenPackage": (MavenVersion, MavenVersionRange),
         "RubyGemsPackage": (RubygemsVersion, GemVersionRange),
         "NuGetPackage": (NugetVersion, NugetVersionRange),

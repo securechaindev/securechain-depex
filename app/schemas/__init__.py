@@ -1,5 +1,6 @@
 from .graphs import (
     ExpandPackageRequest,
+    ExpandReqFileRequest,
     ExpandVersionRequest,
     GetPackageStatusRequest,
     GetVersionStatusRequest,
@@ -25,6 +26,7 @@ __all__ = [
     "CompleteConfigRequest",
     "ConfigByImpactRequest",
     "ExpandPackageRequest",
+    "ExpandReqFileRequest",
     "ExpandVersionRequest",
     "FileInfoRequest",
     "FilterConfigsRequest",

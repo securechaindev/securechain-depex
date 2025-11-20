@@ -16,6 +16,7 @@ from app.domain import RepositoryInitializer
 from app.limiter import limiter
 from app.schemas import (
     ExpandPackageRequest,
+    ExpandReqFileRequest,
     ExpandVersionRequest,
     GetPackageStatusRequest,
     GetVersionStatusRequest,
@@ -23,7 +24,11 @@ from app.schemas import (
     InitRepositoryRequest,
     PackageMessageSchema,
 )
-from app.services import PackageService, RepositoryService, VersionService
+from app.services import (
+    PackageService,
+    RepositoryService,
+    VersionService,
+)
 from app.utils import JSONEncoder, RedisQueue
 
 router = APIRouter()
@@ -225,7 +230,44 @@ async def init_repository(
             }),
         )
 
-@router.post(
+@router.get(
+    "/graph/expand/req_file",
+    summary="Expand Requirement File",
+    description="Return requirement file info to expand its versions in the graph visualization.",
+    response_description="Requirement file expansion data.",
+    dependencies=[Depends(get_dual_auth_bearer())],
+    tags=["Secure Chain Depex - Graph"]
+)
+@limiter.limit("25/minute")
+async def expand_req_file(
+    request: Request,
+    expand_req_file_request: ExpandReqFileRequest = Depends(),
+    package_service: PackageService = Depends(get_package_service),
+    json_encoder: JSONEncoder = Depends(get_json_encoder),
+) -> JSONResponse:
+    expansion_data = await package_service.read_packages_expansion_by_req_file(
+        expand_req_file_request.requirement_file_id
+    )
+    if expansion_data is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=json_encoder.encode(
+                {
+                    "code": ResponseCode.REQ_FILE_NOT_FOUND,
+                    "message": ResponseMessage.REQ_FILE_NOT_FOUND,
+                }
+            ),
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=json_encoder.encode({
+            "code": ResponseCode.EXPAND_REQ_FILE_SUCCESS,
+            "message": ResponseMessage.REQ_FILE_EXPANSION_RETRIEVED_SUCCESS,
+            "data": expansion_data
+        })
+    )
+
+@router.get(
     "/graph/expand/package",
     summary="Expand Package",
     description="Return package info to expand its versions in the graph visualization.",
@@ -236,11 +278,11 @@ async def init_repository(
 @limiter.limit("25/minute")
 async def expand_package(
     request: Request,
-    expand_package_request: ExpandPackageRequest,
+    expand_package_request: ExpandPackageRequest = Depends(),
     version_service: VersionService = Depends(get_version_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
-    expansion_data = await version_service.read_versions_by_package(
+    expansion_data = await version_service.read_versions_expansion_by_package(
         expand_package_request.node_type.value,
         expand_package_request.package_purl,
         expand_package_request.constraints
@@ -264,7 +306,7 @@ async def expand_package(
         })
     )
 
-@router.post(
+@router.get(
     "/graph/expand/version",
     summary="Expand Version",
     description="Return version info to expand its dependencies in the graph visualization.",
@@ -275,11 +317,11 @@ async def expand_package(
 @limiter.limit("25/minute")
 async def expand_version(
     request: Request,
-    expand_version_request: ExpandVersionRequest,
+    expand_version_request: ExpandVersionRequest = Depends(),
     package_service: PackageService = Depends(get_package_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
-    expansion_data = await package_service.read_packages_by_version_and_parent(
+    expansion_data = await package_service.read_packages_expansion_by_version(
         expand_version_request.version_purl
     )
     if expansion_data is None:

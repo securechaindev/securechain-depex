@@ -28,9 +28,9 @@ class TestGemfileLockAnalyzer:
             result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {
-            "rails": "== 7.0.4",
-            "puma": "== 5.6.5",
-            "pg": "== 1.4.5"
+            "rails": "= 7.0.4",
+            "puma": "= 5.6.5",
+            "pg": "= 1.4.5"
         }
 
     def test_parse_file_with_version_operators(self, analyzer):
@@ -70,7 +70,7 @@ class TestGemfileLockAnalyzer:
         with patch("builtins.open", mock_open(read_data=gemfile_lock_content)):
             result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
-        assert result == {"bundler": "== 2.3.26"}
+        assert result == {"bundler": "= 2.3.26"}
 
         gemfile_lock_content = """
         GEM
@@ -84,7 +84,7 @@ class TestGemfileLockAnalyzer:
             result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {
-            "standard_version": "== 1.0.0",
+            "standard_version": "= 1.0.0",
             "operator_version": ">= 2.0",
             "tilde_version": "~> 3.1.0",
             "less_than": "< 5"
@@ -124,7 +124,7 @@ class TestGemfileLockAnalyzer:
             result = analyzer.parse_file("/fake/path", "Gemfile.lock")
 
         assert result == {
-            "indented": "== 1.0.0",
-            "normal": "== 2.0.0",
-            "another": "== 3.0.0"
+            "indented": "= 1.0.0",
+            "normal": "= 2.0.0",
+            "another": "= 3.0.0"
         }

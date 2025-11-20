@@ -173,7 +173,7 @@ class TestSpdxSbomAnalyzer:
         result = analyzer.parse_file(temp_dir, "sbom.spdx.json")
 
         assert "RubyGems:rails" in result
-        assert result["RubyGems:rails"] == "==7.0.4"
+        assert result["RubyGems:rails"] == "=7.0.4"
 
     def test_parse_json_nuget_package(self, analyzer, temp_dir):
         packages = [

@@ -15,7 +15,7 @@ dependencies = [
     "python-dotenv==1.1.1",
     "python-dateutil==2.9.0",
     "neo4j==5.28.1",
-    "univers==31.0.0",
+    "univers==31.1.0",
     "z3-solver==4.15.3.0",
     "toml==0.10.2",
     "aiohttp==3.12.14",

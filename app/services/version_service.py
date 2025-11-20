@@ -67,7 +67,7 @@ class VersionService:
 
         return sanitized_config
 
-    async def read_versions_by_package(
+    async def read_versions_expansion_by_package(
         self,
         node_type: str,
         package_purl: str,

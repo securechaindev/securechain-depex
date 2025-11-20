@@ -47,10 +47,12 @@ class ResponseCode:
     NO_DEPENDENCIES_PACKAGE = "no_dependencies_package"
     NO_DEPENDENCIES_VERSION = "no_dependencies_version"
     REPOSITORY_PROCESSING_IN_PROGRESS = "repository_processing_in_progress"
+    EXPAND_REQ_FILE_SUCCESS = "expand_req_file_success"
     EXPAND_PACKAGE_SUCCESS = "expand_package_success"
     EXPAND_VERSION_SUCCESS = "expand_version_success"
 
     # Not found errors
+    REQ_FILE_NOT_FOUND = "req_file_not_found"
     PACKAGE_NOT_FOUND = "package_not_found"
     VERSION_NOT_FOUND = "version_not_found"
     DATE_NOT_FOUND = "date_not_found"
@@ -105,12 +107,14 @@ class ResponseMessage:
     NO_DEPENDENCIES_PACKAGE = "The package has no dependencies"
     NO_DEPENDENCIES_VERSION = "The package version has no dependencies"
     REPOSITORY_PROCESSING = "The repository is already being processed"
+    REQ_FILE_EXPANSION_RETRIEVED_SUCCESS = "Requirement file expansion data retrieved successfully"
     PACKAGE_EXPANSION_RETRIEVED_SUCCESS = "Package expansion data retrieved successfully"
     VERSION_EXPANSION_RETRIEVED_SUCCESS = "Version expansion data retrieved successfully"
 
     # Not found errors
+    REQ_FILE_NOT_FOUND = "The requested requirement file was not found"
     PACKAGE_NOT_FOUND = "The requested package was not found"
-    VERSION_NOT_FOUND = "The requested version was not found"
+    VERSION_NOT_FOUND = "The requested version was not found, or don't have dependencies"
 
     # Error messages - General
     VALIDATION_ERROR = "Validation error"

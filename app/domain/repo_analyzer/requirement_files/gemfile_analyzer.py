@@ -18,7 +18,7 @@ class GemfileAnalyzer(RequirementFileAnalyzer):
                     version.count(".") == 2
                     and not any(op in version for op in ["<", ">", "="])
                 ):
-                    packages[gem] = f"== {version}"
+                    packages[gem] = f"= {version}"
                 else:
                     packages[gem] = version
         return packages
