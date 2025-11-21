@@ -32,10 +32,10 @@ class Settings(BaseSettings):
     DB_MAX_POOL_SIZE: int = 100
     DB_MAX_IDLE_TIME_MS: int = 60000
     DB_DEFAULT_QUERY_TIMEOUT_MS: int = 30000
-    DB_USERS_COLLECTION: str = "user"
-    DB_SMT_TEXT_COLLECTION: str = "smt_text"
-    DB_OPERATION_RESULT_COLLECTION: str = "operation_result"
-    DB_API_KEY_COLLECTION: str = "api_key"
+    DB_USERS_COLLECTION: str = "users"
+    DB_SMT_TEXT_COLLECTION: str = "smts"
+    DB_OPERATION_RESULT_COLLECTION: str = "operation_results"
+    DB_API_KEY_COLLECTION: str = "api_keys"
 
     # SMT Solver Configuration
     SMT_SOLVER_TIMEOUT_MS: int = 3000
