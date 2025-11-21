@@ -17,7 +17,7 @@ Depex is a tool that allows you to reason over the entire configuration space of
 2. [Docker Compose](https://docs.docker.com/compose/) for container orchestration.
 3. It is recommended to use a GUI such as [MongoDB Compass](https://www.mongodb.com/en/products/compass).
 4. The Neo4J browser interface to visualize the graph built from the data is in [localhost:7474](http://0.0.0.0:7474/browser/) when the container is running.
-5. Python 3.13 or higher.
+5. Python 3.14 or higher.
 
 ## Deployment with docker
 
@@ -69,7 +69,7 @@ Access Neo4j browser interface at [http://localhost:7474](http://localhost:7474/
 - **Redis:** Connect to `localhost:6379` to monitor cache
 
 ## Python Environment
-The project uses Python 3.13 and **uv** as the package manager for faster and more reliable dependency management.
+The project uses Python 3.14 and **uv** as the package manager for faster and more reliable dependency management.
 
 ### Setting up the development environment with uv
 
@@ -120,7 +120,7 @@ uv run ruff format app/
 
 ## Technology Stack
 
-- **Python 3.13+** - Programming language
+- **Python 3.14+** - Programming language
 - **FastAPI** - Modern async web framework
 - **uv** - Fast Python package manager (Rust-based)
 - **MongoDB** - Document database for operations and metadata

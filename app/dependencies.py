@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from app.apis import GitHubService
 from app.database import DatabaseManager
 from app.http_session import HTTPSessionManager

@@ -42,7 +42,7 @@ class Settings(BaseSettings):
 
     # Python Version Configuration
     MIN_PYTHON_VERSION_MAJOR: int = 3
-    MIN_PYTHON_VERSION_MINOR: int = 13
+    MIN_PYTHON_VERSION_MINOR: int = 14
 
 @lru_cache
 def get_settings() -> Settings:

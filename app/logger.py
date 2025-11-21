@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from logging import INFO, Formatter, getLogger
 from logging.handlers import RotatingFileHandler
 from pathlib import Path

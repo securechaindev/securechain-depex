@@ -3,7 +3,7 @@ name = "securechain-depex"
 version = "1.1.2"
 description = "Depex is a tool that allows you to reason over the entire configuration space of the Software Supply Chain of an open-source software repository."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 license = { text = "GPL-3.0-or-later" }
 dependencies = [
     "setuptools==80.9.0",

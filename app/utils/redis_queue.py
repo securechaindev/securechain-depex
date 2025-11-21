@@ -17,7 +17,7 @@ class RedisQueue:
                 raise
 
     @classmethod
-    def from_env(cls) -> "RedisQueue":
+    def from_env(cls) -> RedisQueue:
         return cls(settings.REDIS_HOST, settings.REDIS_PORT, settings.REDIS_DB)
 
     def add_package_message(self, message: PackageMessageSchema) -> str:

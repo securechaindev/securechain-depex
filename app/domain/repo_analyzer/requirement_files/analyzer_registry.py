@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from asyncio import run
 from json import load
 from typing import ClassVar

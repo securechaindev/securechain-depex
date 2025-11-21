@@ -129,7 +129,7 @@ class TestPythonVersionValidation:
         assert not RequirementFileAnalyzer.is_compatible_python_version('< "3"')
 
     def test_compatible_version_equals_313(self):
-        assert RequirementFileAnalyzer.is_compatible_python_version('== "3.13"')
+        assert RequirementFileAnalyzer.is_compatible_python_version('== "3.14"')
 
     def test_compatible_no_version_marker(self):
         assert RequirementFileAnalyzer.is_compatible_python_version('some_marker')

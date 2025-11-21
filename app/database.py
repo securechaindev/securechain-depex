@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from neo4j import AsyncDriver, AsyncGraphDatabase
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.collection import AsyncCollection

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from z3 import IntNumRef, ModelRef, RatNumRef
 
 from app.dependencies import ServiceContainer

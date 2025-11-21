@@ -81,7 +81,7 @@ class TestSetupPyAnalyzer:
                 name='myproject',
                 install_requires=[
                     'typing-extensions>=4.0.0; python_version<"3.10"',
-                    'importlib-metadata>=4.0.0; python_version>="3.13"',
+                    'importlib-metadata>=4.0.0; python_version>="3.14"',
                     'backports.zoneinfo; python_version<"3.9"',
                 ],
             )

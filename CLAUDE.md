@@ -14,7 +14,7 @@ When updating this document, prioritize keeping the most critical and frequently
 **Project Type:** FastAPI async web application for software supply chain analysis
 
 **Key Info:**
-- Python 3.13+ with `uv` package manager
+- Python 3.14+ with `uv` package manager
 - Test Coverage: 84% (514 tests)
 - Tech Stack: FastAPI, MongoDB, Neo4j, Redis, Z3 solver
 - All I/O operations are async
@@ -444,7 +444,7 @@ docker compose -f dev/docker-compose.yml up --build
 
 - Version: 1.1.2
 - Coverage: 84% (514 tests)
-- Python: 3.13+
+- Python: 3.14+
 - License: GPL-3.0-or-later
 
 **Low Coverage Areas (Improvement Opportunities):**
