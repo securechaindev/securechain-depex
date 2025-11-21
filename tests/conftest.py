@@ -3,8 +3,8 @@ from collections.abc import AsyncGenerator, Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from motor.motor_asyncio import AsyncIOMotorClient
 from neo4j import AsyncGraphDatabase
+from pymongo import AsyncMongoClient
 
 from app.main import app
 from app.settings import settings
@@ -23,8 +23,8 @@ def client() -> TestClient:
 
 
 @pytest.fixture
-async def mongo_client() -> AsyncGenerator[AsyncIOMotorClient]:
-    client = AsyncIOMotorClient(settings.VULN_DB_URI)
+async def mongo_client() -> AsyncGenerator[AsyncMongoClient]:
+    client = AsyncMongoClient(settings.VULN_DB_URI)
     yield client
     client.close()
 

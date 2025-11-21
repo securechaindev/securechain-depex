@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from motor.motor_asyncio import (
-    AsyncIOMotorClient,
-    AsyncIOMotorCollection,
-    AsyncIOMotorDatabase,
-)
 from neo4j import AsyncDriver, AsyncGraphDatabase
+from pymongo import AsyncMongoClient
+from pymongo.asynchronous.collection import AsyncCollection
+from pymongo.asynchronous.database import AsyncDatabase
 
 from app.logger import logger
 from app.settings import settings
@@ -13,10 +11,10 @@ from app.settings import settings
 
 class DatabaseManager:
     instance: DatabaseManager | None = None
-    mongo_client: AsyncIOMotorClient | None = None
+    mongo_client: AsyncMongoClient | None = None
     neo4j_driver: AsyncDriver | None = None
-    securechain_db: AsyncIOMotorDatabase | None = None
-    vulnerabilities_db: AsyncIOMotorDatabase | None = None
+    securechain_db: AsyncDatabase | None = None
+    vulnerabilities_db: AsyncDatabase | None = None
 
     def __new__(cls) -> DatabaseManager:
         if cls.instance is None:
@@ -26,7 +24,7 @@ class DatabaseManager:
     async def initialize(self) -> None:
         if self.mongo_client is None:
             logger.info("Initializing MongoDB connection pool...")
-            self.mongo_client = AsyncIOMotorClient(
+            self.mongo_client = AsyncMongoClient(
                 settings.VULN_DB_URI,
                 minPoolSize=settings.DB_MIN_POOL_SIZE,
                 maxPoolSize=settings.DB_MAX_POOL_SIZE,
@@ -61,22 +59,22 @@ class DatabaseManager:
             self.neo4j_driver = None
             logger.info("Neo4j driver closed")
 
-    def get_user_collection(self) -> AsyncIOMotorCollection:
+    def get_user_collection(self) -> AsyncCollection:
         if self.securechain_db is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.securechain_db.get_collection(settings.DB_USERS_COLLECTION)
 
-    def get_smt_text_collection(self) -> AsyncIOMotorCollection:
+    def get_smt_text_collection(self) -> AsyncCollection:
         if self.securechain_db is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.securechain_db.get_collection(settings.DB_SMT_TEXT_COLLECTION)
 
-    def get_operation_result_collection(self) -> AsyncIOMotorCollection:
+    def get_operation_result_collection(self) -> AsyncCollection:
         if self.securechain_db is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.securechain_db.get_collection(settings.DB_OPERATION_RESULT_COLLECTION)
 
-    def get_api_key_collection(self) -> AsyncIOMotorCollection:
+    def get_api_key_collection(self) -> AsyncCollection:
         if self.securechain_db is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.securechain_db.get_collection(settings.DB_API_KEY_COLLECTION)
