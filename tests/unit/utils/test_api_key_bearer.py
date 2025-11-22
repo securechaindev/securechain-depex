@@ -33,7 +33,7 @@ class TestApiKeyBearer:
 
         with patch("app.utils.api_key_bearer.DatabaseManager") as mock_db_manager:
             mock_db_instance = MagicMock()
-            mock_db_instance.get_api_key_collection.return_value = mock_collection
+            mock_db_instance.get_api_keys_collection.return_value = mock_collection
             mock_db_manager.return_value = mock_db_instance
 
             result = await api_key_bearer(mock_request)
@@ -64,7 +64,7 @@ class TestApiKeyBearer:
 
         with patch("app.utils.api_key_bearer.DatabaseManager") as mock_db_manager:
             mock_db_instance = MagicMock()
-            mock_db_instance.get_api_key_collection.return_value = mock_collection
+            mock_db_instance.get_api_keys_collection.return_value = mock_collection
             mock_db_manager.return_value = mock_db_instance
 
             with pytest.raises(InvalidTokenException):
@@ -84,7 +84,7 @@ class TestApiKeyBearer:
 
         with patch("app.utils.api_key_bearer.DatabaseManager") as mock_db_manager:
             mock_db_instance = MagicMock()
-            mock_db_instance.get_api_key_collection.return_value = mock_collection
+            mock_db_instance.get_api_keys_collection.return_value = mock_collection
             mock_db_manager.return_value = mock_db_instance
 
             with pytest.raises(InvalidTokenException):
@@ -104,7 +104,7 @@ class TestApiKeyBearer:
 
         with patch("app.utils.api_key_bearer.DatabaseManager") as mock_db_manager:
             mock_db_instance = MagicMock()
-            mock_db_instance.get_api_key_collection.return_value = mock_collection
+            mock_db_instance.get_api_keys_collection.return_value = mock_collection
             mock_db_manager.return_value = mock_db_instance
 
             result = await api_key_bearer(mock_request)

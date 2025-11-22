@@ -30,9 +30,9 @@ class ApiKeyBearer(HTTPBearer):
         key_hash = self.hash(api_key)
 
         db_manager = DatabaseManager()
-        api_key_collection = db_manager.get_api_key_collection()
+        api_keys_collection = db_manager.get_api_keys_collection()
 
-        stored_key_dict = await api_key_collection.find_one({"key_hash": key_hash})
+        stored_key_dict = await api_keys_collection.find_one({"key_hash": key_hash})
 
         if not stored_key_dict:
             raise InvalidTokenException()

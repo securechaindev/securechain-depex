@@ -12,7 +12,7 @@ class TestSMTService:
     def mock_db(self):
         db = MagicMock()
         collection = AsyncMock()
-        db.get_smt_text_collection.return_value = collection
+        db.get_smts_collection.return_value = collection
         return db, collection
 
     @pytest.mark.asyncio

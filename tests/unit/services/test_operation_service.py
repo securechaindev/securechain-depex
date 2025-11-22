@@ -12,7 +12,7 @@ class TestOperationService:
     def mock_db(self):
         db = MagicMock()
         collection = AsyncMock()
-        db.get_operation_result_collection.return_value = collection
+        db.get_operation_results_collection.return_value = collection
         return db, collection
 
     @pytest.mark.asyncio

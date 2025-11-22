@@ -57,22 +57,17 @@ class DatabaseManager:
             self.neo4j_driver = None
             logger.info("Neo4j driver closed")
 
-    def get_user_collection(self) -> AsyncCollection:
+    def get_smts_collection(self) -> AsyncCollection:
         if self.securechain_db is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")
-        return self.securechain_db.get_collection(settings.DB_USERS_COLLECTION)
+        return self.securechain_db.get_collection(settings.DB_SMTS_COLLECTION)
 
-    def get_smt_text_collection(self) -> AsyncCollection:
-        if self.securechain_db is None:
-            raise RuntimeError("Database not initialized. Call initialize() first.")
-        return self.securechain_db.get_collection(settings.DB_SMT_TEXT_COLLECTION)
-
-    def get_operation_result_collection(self) -> AsyncCollection:
+    def get_operation_results_collection(self) -> AsyncCollection:
         if self.securechain_db is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.securechain_db.get_collection(settings.DB_OPERATION_RESULT_COLLECTION)
 
-    def get_api_key_collection(self) -> AsyncCollection:
+    def get_api_keys_collection(self) -> AsyncCollection:
         if self.securechain_db is None:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.securechain_db.get_collection(settings.DB_API_KEY_COLLECTION)
