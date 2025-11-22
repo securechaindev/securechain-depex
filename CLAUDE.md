@@ -354,7 +354,7 @@ class CustomAnalyzer(BaseAnalyzer):
 **Core:**
 - fastapi==0.116.1
 - uvicorn==0.35.0
-- motor==3.7.1 (async MongoDB)
+- PyMongo==4.15.4 (async MongoDB)
 - neo4j==5.28.1
 - redis==5.2.1
 - z3-solver==4.15.3.0
@@ -413,7 +413,7 @@ docker compose -f dev/docker-compose.yml up --build
 
 **Async Architecture:**
 - All I/O operations are async (DB, HTTP, file operations)
-- Motor for MongoDB, aiohttp for HTTP, Neo4j async driver
+- PyMongo async driver for MongoDB, aiohttp for HTTP, Neo4j async driver
 - Neo4j query optimization: Build response structures in Cypher
 
 **Security:**
@@ -479,7 +479,7 @@ docker compose -f dev/docker-compose.yml up --build
 - FastAPI: https://fastapi.tiangolo.com/
 - uv: https://docs.astral.sh/uv/
 - Neo4j Python: https://neo4j.com/docs/python-manual/current/
-- Motor: https://motor.readthedocs.io/
+- PyMongo: https://pymongo.readthedocs.io/en/stable/api/pymongo/asynchronous/index.html
 - Secure Chain: https://securechaindev.github.io/
 - Repository: https://github.com/securechaindev/securechain-depex
 - Data Dumps: https://doi.org/10.5281/zenodo.16739081
