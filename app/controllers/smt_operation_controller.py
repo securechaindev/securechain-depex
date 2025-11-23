@@ -53,15 +53,15 @@ async def valid_graph(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     graph_data = await requirement_file_service.read_data_for_smt_transform(valid_graph_request.requirement_file_id, valid_graph_request.max_depth)
-    smt_text_id = f"{valid_graph_request.requirement_file_id}:{valid_graph_request.max_depth}"
+    smt_id = f"{valid_graph_request.requirement_file_id}:{valid_graph_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, valid_graph_request.node_type.value, "mean")
-        smt_text = await smt_service.read_smt_text(smt_text_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+        smt = await smt_service.read_smt(smt_id)
+        if smt is not None and smt["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
+            smt_model.convert(smt["text"])
         else:
             model_text = smt_model.transform()
-            await smt_service.replace_smt_text(smt_text_id, model_text)
+            await smt_service.replace_smt(smt_id, model_text)
         result = ValidGraphOperation.execute(smt_model)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -102,15 +102,15 @@ async def minimize_impact(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     graph_data = await requirement_file_service.read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_depth)
-    smt_text_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_depth}"
+    smt_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.aggregator)
-        smt_text = await smt_service.read_smt_text(smt_text_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+        smt = await smt_service.read_smt(smt_id)
+        if smt is not None and smt["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
+            smt_model.convert(smt["text"])
         else:
             model_text = smt_model.transform()
-            await smt_service.replace_smt_text(smt_text_id, model_text)
+            await smt_service.replace_smt(smt_id, model_text)
         result = await MinimizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -151,15 +151,15 @@ async def maximize_impact(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     graph_data = await requirement_file_service.read_data_for_smt_transform(min_max_impact_request.requirement_file_id, min_max_impact_request.max_depth)
-    smt_text_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_depth}"
+    smt_id = f"{min_max_impact_request.requirement_file_id}:{min_max_impact_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, min_max_impact_request.node_type.value, min_max_impact_request.aggregator)
-        smt_text = await smt_service.read_smt_text(smt_text_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+        smt = await smt_service.read_smt(smt_id)
+        if smt is not None and smt["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
+            smt_model.convert(smt["text"])
         else:
             model_text = smt_model.transform()
-            await smt_service.replace_smt_text(smt_text_id, model_text)
+            await smt_service.replace_smt(smt_id, model_text)
         result = await MaximizeImpactOperation.execute(smt_model, min_max_impact_request.limit)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -200,15 +200,15 @@ async def filter_configs(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     graph_data = await requirement_file_service.read_data_for_smt_transform(filter_configs_request.requirement_file_id, filter_configs_request.max_depth)
-    smt_text_id = f"{filter_configs_request.requirement_file_id}:{filter_configs_request.max_depth}"
+    smt_id = f"{filter_configs_request.requirement_file_id}:{filter_configs_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, filter_configs_request.node_type.value, filter_configs_request.aggregator)
-        smt_text = await smt_service.read_smt_text(smt_text_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+        smt = await smt_service.read_smt(smt_id)
+        if smt is not None and smt["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
+            smt_model.convert(smt["text"])
         else:
             model_text = smt_model.transform()
-            await smt_service.replace_smt_text(smt_text_id, model_text)
+            await smt_service.replace_smt(smt_id, model_text)
         result = await FilterConfigsOperation.execute(
             smt_model,
             filter_configs_request.max_threshold,
@@ -254,15 +254,15 @@ async def valid_config(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     graph_data = await requirement_file_service.read_data_for_smt_transform(valid_config_request.requirement_file_id, valid_config_request.max_depth)
-    smt_text_id = f"{valid_config_request.requirement_file_id}:{valid_config_request.max_depth}"
+    smt_id = f"{valid_config_request.requirement_file_id}:{valid_config_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, valid_config_request.node_type.value, valid_config_request.aggregator)
-        smt_text = await smt_service.read_smt_text(smt_text_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+        smt = await smt_service.read_smt(smt_id)
+        if smt is not None and smt["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
+            smt_model.convert(smt["text"])
         else:
             model_text = smt_model.transform()
-            await smt_service.replace_smt_text(smt_text_id, model_text)
+            await smt_service.replace_smt(smt_id, model_text)
         config = await version_service.read_serial_numbers_by_releases(valid_config_request.node_type.value, valid_config_request.config)
         result = ValidConfigOperation.execute(smt_model, config)
         return JSONResponse(
@@ -305,15 +305,15 @@ async def complete_config(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     graph_data = await requirement_file_service.read_data_for_smt_transform(complete_config_request.requirement_file_id, complete_config_request.max_depth)
-    smt_text_id = f"{complete_config_request.requirement_file_id}:{complete_config_request.max_depth}"
+    smt_id = f"{complete_config_request.requirement_file_id}:{complete_config_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, complete_config_request.node_type.value, complete_config_request.aggregator)
-        smt_text = await smt_service.read_smt_text(smt_text_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+        smt = await smt_service.read_smt(smt_id)
+        if smt is not None and smt["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
+            smt_model.convert(smt["text"])
         else:
             model_text = smt_model.transform()
-            await smt_service.replace_smt_text(smt_text_id, model_text)
+            await smt_service.replace_smt(smt_id, model_text)
         config = await version_service.read_serial_numbers_by_releases(complete_config_request.node_type.value, complete_config_request.config)
         result = await CompleteConfigOperation.execute(smt_model, config)
         return JSONResponse(
@@ -355,15 +355,15 @@ async def config_by_impact(
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
     graph_data = await requirement_file_service.read_data_for_smt_transform(config_by_impact_request.requirement_file_id, config_by_impact_request.max_depth)
-    smt_text_id = f"{config_by_impact_request.requirement_file_id}:{config_by_impact_request.max_depth}"
+    smt_id = f"{config_by_impact_request.requirement_file_id}:{config_by_impact_request.max_depth}"
     if graph_data["name"] is not None:
         smt_model = SMTModel(graph_data, config_by_impact_request.node_type.value, config_by_impact_request.aggregator)
-        smt_text = await smt_service.read_smt_text(smt_text_id)
-        if smt_text is not None and smt_text["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
-            smt_model.convert(smt_text["text"])
+        smt = await smt_service.read_smt(smt_id)
+        if smt is not None and smt["moment"].replace(tzinfo=UTC) > graph_data["moment"].replace(tzinfo=UTC):
+            smt_model.convert(smt["text"])
         else:
             model_text = smt_model.transform()
-            await smt_service.replace_smt_text(smt_text_id, model_text)
+            await smt_service.replace_smt(smt_id, model_text)
         result = await ConfigByImpactOperation.execute(smt_model, config_by_impact_request.impact)
         return JSONResponse(
             status_code=status.HTTP_200_OK,
