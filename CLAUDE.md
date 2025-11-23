@@ -442,7 +442,7 @@ docker compose -f dev/docker-compose.yml up --build
 
 ## 📊 Metrics
 
-- Version: 1.1.2
+- Version: 1.1.3
 - Coverage: 84% (514 tests)
 - Python: 3.14+
 - License: GPL-3.0-or-later
@@ -487,7 +487,7 @@ docker compose -f dev/docker-compose.yml up --build
 ## 📅 Last Update
 
 **Date:** November 20, 2025
-**Version:** 1.1.2
+**Version:** 1.1.3
 **Coverage:** 84% (514 tests)
 
 ---
