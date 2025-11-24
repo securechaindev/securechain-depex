@@ -482,7 +482,7 @@ docker compose -f dev/docker-compose.yml up --build
 - PyMongo: https://pymongo.readthedocs.io/en/stable/api/pymongo/asynchronous/index.html
 - Secure Chain: https://securechaindev.github.io/
 - Repository: https://github.com/securechaindev/securechain-depex
-- Data Dumps: https://doi.org/10.5281/zenodo.16739081
+- Data Dumps: https://doi.org/10.5281/zenodo.17692376
 
 ## 📅 Last Update
 
