@@ -112,11 +112,14 @@ uv run pytest tests/unit/ -v
 The project uses **Ruff** for linting and formatting:
 
 ```bash
-# Check for linting issues
-uv run ruff check app/
+# Install linter
+uv sync --extra dev
 
-# Format code
-uv run ruff format app/
+# Linting
+uv ruff check app/
+
+# Formatting
+uv ruff format app/
 ```
 
 ## Technology Stack
