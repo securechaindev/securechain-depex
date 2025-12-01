@@ -31,6 +31,6 @@ jobs:
           GRAPH_DB_USER: "neo4j"
           GRAPH_DB_PASSWORD: "test_password"
           VULN_DB_URI: "mongodb://localhost:27017/test"
+          GITHUB_GRAPHQL_API_KEY: "test_github_api_key"
           JWT_ACCESS_SECRET_KEY: "test_access_secret_key"
-          JWT_REFRESH_SECRET_KEY: "test_refresh_secret_key"
         run: uv run pytest -v
