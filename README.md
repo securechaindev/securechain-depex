@@ -78,14 +78,15 @@ The project uses Python 3.14 and **uv** as the package manager for faster and mo
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-2. **Install dependencies**:
+2. **Activate the virtual environment** (uv creates it automatically):
    ```bash
-   uv sync
+   uv venv
+   source .venv/bin/activate
    ```
 
-3. **Activate the virtual environment** (uv creates it automatically):
+3. **Install dependencies**:
    ```bash
-   source .venv/bin/activate
+   uv sync
    ```
 
 ## Testing
