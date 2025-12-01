@@ -94,6 +94,9 @@ The project uses Python 3.14 and **uv** as the package manager for faster and mo
 The project uses pytest with coverage tracking. Current coverage: **84%** (407 tests passing).
 
 ```bash
+# Install test dependencies
+uv sync --extra test
+
 # Run all tests
 uv run pytest
 
