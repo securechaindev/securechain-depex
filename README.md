@@ -78,14 +78,15 @@ The project uses Python 3.14 and **uv** as the package manager for faster and mo
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-2. **Install dependencies**:
+2. **Activate the virtual environment** (uv creates it automatically):
    ```bash
-   uv sync
+   uv venv
+   source .venv/bin/activate
    ```
 
-3. **Activate the virtual environment** (uv creates it automatically):
+3. **Install dependencies**:
    ```bash
-   source .venv/bin/activate
+   uv sync
    ```
 
 ## Testing
@@ -93,6 +94,9 @@ The project uses Python 3.14 and **uv** as the package manager for faster and mo
 The project uses pytest with coverage tracking. Current coverage: **84%** (407 tests passing).
 
 ```bash
+# Install test dependencies
+uv sync --extra test
+
 # Run all tests
 uv run pytest
 
@@ -111,11 +115,14 @@ uv run pytest tests/unit/ -v
 The project uses **Ruff** for linting and formatting:
 
 ```bash
-# Check for linting issues
-uv run ruff check app/
+# Install linter
+uv sync --extra dev
 
-# Format code
-uv run ruff format app/
+# Linting
+uv ruff check app/
+
+# Formatting
+uv ruff format app/
 ```
 
 ## Technology Stack
