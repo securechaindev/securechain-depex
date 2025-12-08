@@ -12,33 +12,47 @@ class ExceptionHandler:
     @staticmethod
     async def request_validation_exception_handler(
         request: Request,
-        exc: RequestValidationError,
+        exc: Exception,
     ) -> JSONResponse:
-        for error in exc.errors():
-            msg = error["msg"]
-            if isinstance(msg, Exception):
-                msg = str(msg)
+        if isinstance(exc, RequestValidationError):
+            for error in exc.errors():
+                msg = error["msg"]
+                if isinstance(msg, Exception):
+                    msg = str(msg)
+            detail = {
+                "code": ResponseCode.VALIDATION_ERROR,
+                "message": msg,
+            }
+            logger.error(msg)
+            return JSONResponse(status_code=422, content=detail)
         detail = {
-            "code": ResponseCode.VALIDATION_ERROR,
-            "message": msg,
+            "code": ResponseCode.INTERNAL_ERROR,
+            "message": ResponseMessage.INTERNAL_ERROR,
         }
-        logger.error(msg)
-        return JSONResponse(status_code=422, content=detail)
+        logger.error(str(exc))
+        return JSONResponse(status_code=500, content=detail)
 
     @staticmethod
     async def http_exception_handler(
         request: Request,
-        exc: HTTPException,
+        exc: Exception,
     ) -> JSONResponse | Response:
-        if isinstance(exc.detail, dict) and "code" in exc.detail:
-            detail = exc.detail
-        else:
-            detail = {
-                "code": ResponseCode.HTTP_ERROR,
-                "message": ResponseMessage.HTTP_ERROR,
-            }
-        logger.error(exc.detail)
-        return JSONResponse(status_code=exc.status_code, content=detail)
+        if isinstance(exc, HTTPException):
+            if isinstance(exc.detail, dict) and "code" in exc.detail:
+                detail = exc.detail
+            else:
+                detail = {
+                    "code": ResponseCode.HTTP_ERROR,
+                    "message": ResponseMessage.HTTP_ERROR,
+                }
+            logger.error(exc.detail)
+            return JSONResponse(status_code=exc.status_code, content=detail)
+        detail = {
+            "code": ResponseCode.INTERNAL_ERROR,
+            "message": ResponseMessage.INTERNAL_ERROR,
+        }
+        logger.error(str(exc))
+        return JSONResponse(status_code=500, content=detail)
 
     @staticmethod
     async def unhandled_exception_handler(
