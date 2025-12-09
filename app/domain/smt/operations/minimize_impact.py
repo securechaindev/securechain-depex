@@ -24,7 +24,7 @@ class MinimizeImpactOperation:
             block = []
             for var in config:
                 if str(var) != "/0":
-                    variable = var()
+                    variable = var() # type: ignore[operator]
                     if "CVSS" not in str(variable):
                         block.append(config[var] != variable)
             solver.add(Or(block))
