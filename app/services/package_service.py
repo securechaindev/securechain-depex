@@ -48,7 +48,7 @@ class PackageService:
             record = await result.single()
         return record.get("version") if record else None
 
-    async def read_packages_by_requirement_file(self, requirement_file_id: str) -> dict[str, str] | None:
+    async def read_packages_by_requirement_file(self, requirement_file_id: str) -> dict[str, str]:
         query = """
         MATCH (rf:RequirementFile) WHERE elementid(rf) = $requirement_file_id
         MATCH (rf)-[requirement_rel]->(package)
@@ -57,7 +57,7 @@ class PackageService:
         async with self.driver.session() as session:
             result = await session.run(query, requirement_file_id=requirement_file_id)
             record = await result.single()
-        return record.get("requirement_files") if record else None
+        return record.get("requirement_files") if record else {}
 
     async def read_packages_expansion_by_version(
         self,

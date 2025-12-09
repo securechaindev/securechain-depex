@@ -44,7 +44,7 @@ class ConfigSanitizer:
 
         if any(char in var_name for char in ("/0", "func_obj")):
             return None
-        
+
         value = config[var]
 
         if isinstance(value, RatNumRef):

@@ -22,7 +22,7 @@ class RequirementFileService:
         )
         return await result.single()
 
-    async def create_requirement_file(self, requirement_file: dict[str, Any], repository_id: str) -> str | None:
+    async def create_requirement_file(self, requirement_file: dict[str, Any], repository_id: str) -> str:
         query = """
         MATCH (r:Repository)
         WHERE elementid(r) = $repository_id
@@ -33,9 +33,9 @@ class RequirementFileService:
         async with self.driver.session() as session:
             result = await session.run(query, requirement_file, repository_id=repository_id)
             record = await result.single()
-        return record.get("id") if record else None
+        return record.get("id") if record else ""
 
-    async def read_requirement_files_by_repository(self, repository_id: str) -> dict[str, str] | None:
+    async def read_requirement_files_by_repository(self, repository_id: str) -> dict[str, str]:
         query = """
         MATCH (r:Repository)
         WHERE elementid(r) = $repository_id
@@ -45,7 +45,7 @@ class RequirementFileService:
         async with self.driver.session() as session:
             result = await session.run(query, repository_id=repository_id)
             record = await result.single()
-        return record.get("requirement_files") if record else None
+        return record.get("requirement_files") if record else {}
 
     async def read_requirement_file_moment(self, requirement_file_id: str) -> datetime | None:
         query = """
@@ -62,7 +62,7 @@ class RequirementFileService:
         self,
         requirement_file_id: str,
         max_depth: int
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any]:
         query = """
         MATCH (rf:RequirementFile)
         WHERE elementid(rf) = $requirement_file_id
@@ -102,7 +102,7 @@ class RequirementFileService:
                     requirement_file_id,
                     max_depth
                 )
-                return record.get("smt_info") if record else None
+                return record.get("smt_info") if record else {}
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (
@@ -111,6 +111,7 @@ class RequirementFileService:
                 or code == "Neo.ClientError.Transaction.TransactionTimedOut"
             ):
                 raise MemoryOutException() from err
+        return {}
 
     async def read_graph_for_req_file_ssc_info_operation(
         self,

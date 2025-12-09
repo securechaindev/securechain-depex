@@ -46,7 +46,7 @@ class RepositoryInitializer:
 
             await self.repository_service.update_repository_is_complete(repository_id, True)
         else:
-            repository_id = repository["id"]
+            repository_id = repository.get("id", "")
 
             needs_update = (
                 not repository["moment"]
@@ -101,7 +101,7 @@ class RepositoryInitializer:
         requirement_file_id: str,
         file_data: dict,
     ) -> None:
-        existing_packages = await self.requirement_file_service.read_packages_by_requirement_file(requirement_file_id)
+        existing_packages = await self.package_service.read_packages_by_requirement_file(requirement_file_id)
         new_packages = file_data.get("packages", {})
 
         for package_name, constraints in existing_packages.items():
@@ -117,7 +117,7 @@ class RepositoryInitializer:
                 await self.requirement_file_service.delete_requirement_file_rel(requirement_file_id, package_name)
 
         if new_packages:
-            manager = file_data.get("manager")
+            manager = file_data.get("manager", "UNKNOWN")
             await self.queue_packages(new_packages, manager, requirement_file_id)
 
         await self.requirement_file_service.update_requirement_file_moment(requirement_file_id)
@@ -128,7 +128,7 @@ class RepositoryInitializer:
         file_data: dict,
         repository_id: str
     ) -> None:
-        manager = file_data.get("manager")
+        manager = file_data.get("manager", "UNKNOWN")
         packages = file_data.get("packages", {})
 
         req_file_id = await self.create_requirement_file(
@@ -180,7 +180,7 @@ class RepositoryInitializer:
                     parent_version=None,
                     refresh=False,
                 )
-                self.redis_queue.add_package_message(message)
+                await self.redis_queue.add_package_message(message)
             else:
                 packages_by_type.setdefault(node_type, []).append({"name": package_name, "constraints": constraints})
 

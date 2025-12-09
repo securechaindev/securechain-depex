@@ -8,7 +8,7 @@ class RepositoryService:
     def __init__(self, db: DatabaseManager):
         self.driver = db.get_neo4j_driver()
 
-    async def create_repository(self, repository: dict[str, Any]) -> str | None:
+    async def create_repository(self, repository: dict[str, Any]) -> str:
         query = """
         MATCH(u:User) WHERE u._id = $user_id
         MERGE(r: Repository{
@@ -23,7 +23,7 @@ class RepositoryService:
         async with self.driver.session() as session:
             result = await session.run(query, repository)
             record = await result.single()
-        return record.get("id") if record else None
+        return record.get("id") if record else ""
 
     async def create_user_repository_rel(self, repository_id: str, user_id: str) -> None:
         query = """
