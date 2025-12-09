@@ -16,7 +16,7 @@ class FilterConfigsOperation:
         config_sanitizer = ConfigSanitizer()
         solver.set("timeout", settings.SMT_SOLVER_TIMEOUT_MS)
         domain_parts = (
-            list(model.domain) if isinstance(model.domain, AstVector) else [model.domain]
+            [model.domain[i] for i in range(len(model.domain))] if isinstance(model.domain, AstVector) else [model.domain]
         )
         if model.func_obj is not None:
             impact = model.func_obj
