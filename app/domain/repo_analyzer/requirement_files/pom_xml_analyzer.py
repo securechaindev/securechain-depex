@@ -26,11 +26,11 @@ class PomXmlAnalyzer(RequirementFileAnalyzer):
                 continue
             group_id_text = group_id.text or ""
             artifact_id_text = artifact_id.text or ""
-            version_text = version.text if version is not None else "any"
+            version_text = version.text if version is not None and version.text is not None else "any"
             if version_text.startswith("${") and version_text.endswith("}"):
                 property_key = version_text[2:-1]
                 version_text = properties.get(property_key, "any")
-            if version_text != "any" and not any(
+            if version_text != "any" and version_text is not None and not any(
                 char in version_text for char in ["[", "]", "(", ")"]
             ):
                 version_text = f"[{version_text}]"
