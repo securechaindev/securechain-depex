@@ -8,7 +8,7 @@ from app.settings import settings
 
 class ConfigByImpactOperation:
     @staticmethod
-    async def execute(model: SMTModel, impact: int) -> list[dict[str, float | int]]:
+    async def execute(model: SMTModel, impact: float) -> list[dict[str, float | int]]:
         solver = Optimize()
         solver.set("timeout", settings.SMT_SOLVER_TIMEOUT_MS)
         result = []
