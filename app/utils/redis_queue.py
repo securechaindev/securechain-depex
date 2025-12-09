@@ -20,14 +20,14 @@ class RedisQueue:
     def from_env(cls) -> RedisQueue:
         return cls(settings.REDIS_HOST, settings.REDIS_PORT, settings.REDIS_DB)
 
-    def add_package_message(self, message: PackageMessageSchema) -> str:
+    async def add_package_message(self, message: PackageMessageSchema) -> str:
         message_dict = message.model_dump(mode="json")
         raw_json = dumps(message_dict)
-        msg_id = self.r.xadd(settings.REDIS_STREAM, {"data": raw_json})
+        msg_id = await self.r.xadd(settings.REDIS_STREAM, {"data": raw_json})
         return msg_id
 
-    def read_batch(self, count: int = 20, block_ms: int | None = None) -> list[tuple[str, str]]:
-        resp = self.r.xreadgroup(
+    async def read_batch(self, count: int = 20, block_ms: int | None = None) -> list[tuple[str, str]]:
+        resp = await self.r.xreadgroup(
             settings.REDIS_GROUP,
             settings.REDIS_CONSUMER,
             {settings.REDIS_STREAM: ">"},
