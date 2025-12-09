@@ -27,7 +27,7 @@ class VersionService:
         self,
         node_type: str,
         config: dict[str, int]
-    ) -> dict[str, str | float | int]:
+    ) -> dict[str, str]:
         # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         UNWIND $items AS item
@@ -45,7 +45,7 @@ class VersionService:
 
         sanitized_config = {pkg: found.get(pkg, sn) for pkg, sn in config.items()}
 
-        return sanitized_config
+        return sanitized_config if sanitized_config else {}
 
     async def read_serial_numbers_by_releases(
         self,

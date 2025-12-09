@@ -15,9 +15,10 @@ class ConfigSanitizer:
             cls.version_service = container.get_version_service()
         return cls.instance
 
-    async def sanitize(self, node_type: str, config: ModelRef) -> dict[str, float | int]:
-        final_config: dict[str, float | int] = {}
-        impact_vars: dict[str, float | int] = {}
+    async def sanitize(self, node_type: str, config: ModelRef) -> dict[str, str | float]:
+        impact_config: dict[str, float] = {}
+        version_config: dict[str, int] = {}
+        impact_vars: dict[str, float] = {}
 
         for var in config:
             value = self.extract_variable_value(config, var)
@@ -25,29 +26,34 @@ class ConfigSanitizer:
                 continue
 
             var_name = str(var)
-            if "impact_" in var_name:
+            if "impact_" in var_name and isinstance(value, float):
                 impact_vars[var_name] = value
-            else:
-                final_config[var_name] = value
+            elif isinstance(value, int):
+                version_config[var_name] = value
 
-        self.process_impact_variables(final_config, impact_vars)
+        self.process_impact_variables(impact_config, impact_vars)
 
-        return await self.version_service.read_releases_by_serial_numbers(node_type, final_config)
+        assert self.version_service is not None
+        final_version_config = await self.version_service.read_releases_by_serial_numbers(node_type, version_config)
+
+        return {**final_version_config, **impact_config}
 
     @staticmethod
-    def extract_variable_value(config: ModelRef, var) -> float | int | None:
+    def extract_variable_value(config: ModelRef, var) -> int | float | None:
         var_name = str(var)
 
         if any(char in var_name for char in ("/0", "func_obj")):
             return None
+        
+        value = config[var]
 
-        if isinstance(config[var], RatNumRef):
+        if isinstance(value, RatNumRef):
             return round(
-                config[var].numerator_as_long() / config[var].denominator_as_long(), 2
+                value.numerator_as_long() / value.denominator_as_long(), 2
             )
 
-        if isinstance(config[var], IntNumRef):
-            value = config[var].as_long()
+        if isinstance(value, IntNumRef):
+            value = value.as_long()
             if value == -1:
                 return None
             return value
@@ -56,9 +62,10 @@ class ConfigSanitizer:
 
     @staticmethod
     def process_impact_variables(
-        final_config: dict[str, float | int], impact_vars: dict[str, float | int]
+        impact_config: dict[str, float],
+        impact_vars: dict[str, float]
     ) -> None:
         for impact_var, impact_value in impact_vars.items():
             base_var = impact_var.replace("impact_", "")
-            if base_var in final_config:
-                final_config[impact_var] = impact_value
+            if base_var in impact_config:
+                impact_config[impact_var] = impact_value
