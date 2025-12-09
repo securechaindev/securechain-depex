@@ -126,7 +126,7 @@ class VersionService:
         package_name: str,
         version_name: str,
         max_depth: int
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any]:
         # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
@@ -200,7 +200,7 @@ class VersionService:
                     version_name,
                     max_depth
                 )
-                return record.get("ssc_version_info") if record else None
+                return record.get("ssc_version_info") if record else {}
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (
@@ -209,3 +209,4 @@ class VersionService:
                 or code == "Neo.ClientError.Transaction.TransactionTimedOut"
             ):
                 raise MemoryOutException() from err
+        return {}

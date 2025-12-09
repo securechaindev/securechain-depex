@@ -47,7 +47,7 @@ async def get_repositories(
     repository_service: RepositoryService = Depends(get_repository_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
-    user_id = payload.get("user_id")
+    user_id = payload.get("user_id", "")
     repositories = await repository_service.read_repositories_by_user_id(user_id)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_encoder.encode({
         "code": ResponseCode.GET_REPOSITORIES_SUCCESS,
@@ -158,7 +158,7 @@ async def init_package(
         refresh=init_package_request.refresh,
     )
 
-    redis_queue.add_package_message(message)
+    await redis_queue.add_package_message(message)
 
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,
@@ -186,7 +186,7 @@ async def init_repository(
     github_service: GitHubService = Depends(get_github_service),
     json_encoder: JSONEncoder = Depends(get_json_encoder),
 ) -> JSONResponse:
-    user_id = payload.get("user_id")
+    user_id = payload.get("user_id", "")
 
     last_commit_date = await github_service.get_last_commit_date(
         init_repository_request.owner,

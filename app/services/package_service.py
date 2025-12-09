@@ -137,7 +137,7 @@ class PackageService:
         node_type: str,
         package_name: str,
         max_depth: int
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any]:
         # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (p:{node_type}{{name:$package_name}})
@@ -210,7 +210,7 @@ class PackageService:
                     package_name,
                     max_depth
                 )
-                return record.get("ssc_package_info") if record else None
+                return record.get("ssc_package_info") if record else {}
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (
@@ -219,6 +219,7 @@ class PackageService:
                 or code == "Neo.ClientError.Transaction.TransactionTimedOut"
             ):
                 raise MemoryOutException() from err
+        return {}
 
     async def exists_package(self, node_type: str, package_name: str) -> bool:
         # TODO: Add dynamic labels where Neo4j supports it with indexes

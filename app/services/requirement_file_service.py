@@ -118,7 +118,7 @@ class RequirementFileService:
         node_type: str,
         requirement_file_id: str,
         max_depth: int
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any]:
         # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (rf:RequirementFile)
@@ -192,7 +192,7 @@ class RequirementFileService:
                     requirement_file_id,
                     max_depth
                 )
-                return record.get("ssc_req_file_info") if record else None
+                return record.get("ssc_req_file_info") if record else {}
         except Neo4jError as err:
             code = getattr(err, "code", "") or ""
             if (
@@ -201,6 +201,7 @@ class RequirementFileService:
                 or code == "Neo.ClientError.Transaction.TransactionTimedOut"
             ):
                 raise MemoryOutException() from err
+        return {}
 
     async def update_requirement_rel_constraints(self, requirement_file_id: str, package_name: str, constraints: str) -> None:
         query = """
