@@ -13,7 +13,7 @@ class DualAuthBearer(HTTPBearer):
         self.jwt_bearer = JWTBearer(cookie_name=cookie_name)
         self.api_key_bearer = ApiKeyBearer(auto_error=False)
 
-    async def __call__(self, request: Request) -> dict[str, Any]:
+    async def __call__(self, request: Request) -> dict[str, Any] | None:
         api_key = request.headers.get("X-API-Key")
         if api_key:
             return await self.api_key_bearer(request)
