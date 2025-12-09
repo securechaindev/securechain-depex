@@ -1,6 +1,6 @@
 from typing import Any
 
-from z3 import ArithRef, BoolRef, Real, parse_smt2_string
+from z3 import ArithRef, AstVector, Real, parse_smt2_string
 
 from app.utils import VersionFilter
 
@@ -10,7 +10,7 @@ class SMTModel:
         self.source_data = source_data
         self.aggregator = aggregator
         self.node_type = node_type
-        self.domain: BoolRef | None = None
+        self.domain: AstVector | None = None
         self.func_obj: ArithRef | None = None
         self.impacts: set[str] = set()
         self.childs: dict[str, dict[str, set[int]]] = {}
