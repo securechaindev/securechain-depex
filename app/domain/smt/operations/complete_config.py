@@ -9,7 +9,7 @@ from app.settings import settings
 class CompleteConfigOperation:
     @staticmethod
     async def execute(
-        model: SMTModel, config: dict[str, int]
+        model: SMTModel, partial_config: dict[str, int]
     ) -> list[dict[str, float | int]]:
         solver = Optimize()
         solver.set("timeout", settings.SMT_SOLVER_TIMEOUT_MS)
@@ -19,7 +19,7 @@ class CompleteConfigOperation:
             impact = model.func_obj
             solver.minimize(impact)
         solver.add(model.domain)
-        for package, serial_number in config.items():
+        for package, serial_number in partial_config.items():
             solver.add(Int(package) == serial_number)
         if solver.check() == sat:
             config = solver.model()
