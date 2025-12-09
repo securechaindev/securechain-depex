@@ -15,5 +15,5 @@ class SMTService:
             upsert=True,
         )
 
-    async def read_smt(self, smt_id: str) -> dict[str, Any]:
+    async def read_smt(self, smt_id: str) -> dict[str, Any] | None:
         return await self.smts_collection.find_one({"smt_id": smt_id})

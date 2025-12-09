@@ -118,6 +118,7 @@ class RequirementFileService:
         requirement_file_id: str,
         max_depth: int
     ) -> dict[str, Any] | None:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (rf:RequirementFile)
         WHERE elementid(rf) = $requirement_file_id

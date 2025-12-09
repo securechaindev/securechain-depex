@@ -22,27 +22,26 @@ class PackageService:
         return await result.single()
 
     async def read_package_status_by_name(self, node_type: str, package_name: str) -> dict[str, Any] | None:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version)
         WITH p, collect(v{{.*}}) AS versions
         RETURN p{{.*, versions: versions}} AS package
         """
         async with self.driver.session() as session:
-            result = await session.run(
-                query,
-                package_name=package_name
-            )
+            result = await session.run(query, package_name=package_name) # type: ignore
             record = await result.single()
         return record.get("package") if record else None
 
     async def read_version_status_by_package_and_name(self, node_type: str, package_name: str, version_name: str) -> dict[str, Any] | None:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH(p:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
         RETURN v{{id: elementid(v), .*}} AS version
         """
         async with self.driver.session() as session:
             result = await session.run(
-                query,
+                query, # type: ignore
                 package_name=package_name,
                 version_name=version_name
             )
@@ -139,6 +138,7 @@ class PackageService:
         package_name: str,
         max_depth: int
     ) -> dict[str, Any] | None:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (p:{node_type}{{name:$package_name}})
         CALL apoc.path.expandConfig(
@@ -221,17 +221,19 @@ class PackageService:
                 raise MemoryOutException() from err
 
     async def exists_package(self, node_type: str, package_name: str) -> bool:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         RETURN EXISTS {{
             MATCH (p:{node_type}{{name: $package_name}})
         }} AS exists
         """
         async with self.driver.session() as session:
-            result = await session.run(query, package_name=package_name)
+            result = await session.run(query, package_name=package_name) # type: ignore
             record = await result.single()
         return record.get("exists") if record else False
 
     async def relate_packages(self, node_type: str, req_file_id: str, packages: list[dict[str, Any]]) -> None:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (parent:RequirementFile)
         WHERE elementid(parent) = $req_file_id
@@ -240,4 +242,4 @@ class PackageService:
         CREATE (parent)-[:REQUIRE{{constraints: package.constraints, parent_version_name: package.parent_version_name}}]->(p)
         """
         async with self.driver.session() as session:
-            await session.run(query, req_file_id=req_file_id, packages=packages)
+            await session.run(query, req_file_id=req_file_id, packages=packages) # type: ignore

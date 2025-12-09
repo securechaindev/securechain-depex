@@ -28,6 +28,7 @@ class VersionService:
         node_type: str,
         config: dict[str, int]
     ) -> dict[str, str | float | int]:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         UNWIND $items AS item
         MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
@@ -37,7 +38,7 @@ class VersionService:
         items = [{"package": pkg, "serial_number": sn} for pkg, sn in config.items()]
 
         async with self.driver.session() as session:
-            result = await session.run(query, items=items)
+            result = await session.run(query, items=items) # type: ignore
             records = await result.data()
 
         found = {record["package"]: record["name"] for record in records}
@@ -51,6 +52,7 @@ class VersionService:
         node_type: str,
         config: dict[str, str]
     ) -> dict[str, int]:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         UNWIND $items AS item
         MATCH (v:Version)<-[:HAVE]-(parent:{node_type})
@@ -60,7 +62,7 @@ class VersionService:
         items = [{"package": pkg, "release": rel} for pkg, rel in config.items()]
 
         async with self.driver.session() as session:
-            result = await session.run(query, items=items)
+            result = await session.run(query, items=items) # type: ignore
             records = await result.data()
 
         sanitized_config = {record["package"]: record["serial_number"] for record in records}
@@ -73,6 +75,7 @@ class VersionService:
         package_purl: str,
         constraints: str | None = None
     ) -> dict[str, Any] | None:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (p:{node_type}{{purl:$package_purl}})-[:HAVE]->(v:Version)
         RETURN collect({{
@@ -84,7 +87,7 @@ class VersionService:
         }}) AS versions
         """
         async with self.driver.session() as session:
-            result = await session.run(query, package_purl=package_purl)
+            result = await session.run(query, package_purl=package_purl) # type: ignore
             record = await result.single()
         if not record:
             return None
@@ -124,6 +127,7 @@ class VersionService:
         version_name: str,
         max_depth: int
     ) -> dict[str, Any] | None:
+        # TODO: Add dynamic labels where Neo4j supports it with indexes
         query = f"""
         MATCH (:{node_type}{{name:$package_name}})-[:HAVE]->(v:Version{{name:$version_name}})
         CALL apoc.path.expandConfig(

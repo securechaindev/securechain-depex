@@ -45,7 +45,7 @@ class RepositoryService:
             record = await result.single()
         return record.get("repository") if record else None
 
-    async def read_repositories_by_user_id(self, user_id: str) -> dict[str, Any]:
+    async def read_repositories_by_user_id(self, user_id: str) -> list[dict[str, Any]]:
         query = """
         MATCH (u:User)-[]->(r:Repository)-[rel:USE]->(rf:RequirementFile)
         WHERE u._id = $user_id

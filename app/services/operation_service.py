@@ -15,5 +15,5 @@ class OperationService:
             upsert=True,
         )
 
-    async def read_operation_result(self, operation_result_id: str) -> dict[str, Any]:
+    async def read_operation_result(self, operation_result_id: str) -> dict[str, Any] | None:
         return await self.operation_results_collection.find_one({"operation_result_id": operation_result_id})
