@@ -52,16 +52,18 @@ class TestConfigSanitizer:
         model = solver.model()
 
         sanitizer.version_service.read_releases_by_serial_numbers.return_value = {
-            "fastapi": "0.100.0",
-            "impact_fastapi": 5.5
+            "fastapi": "0.100.0"
         }
 
-        await sanitizer.sanitize("PyPIPackage", model)
+        result = await sanitizer.sanitize("PyPIPackage", model)
 
         sanitizer.version_service.read_releases_by_serial_numbers.assert_called_once()
         call_args = sanitizer.version_service.read_releases_by_serial_numbers.call_args[0][1]
+        # impact variables are floats, not sent to read_releases_by_serial_numbers
         assert "fastapi" in call_args
-        assert "impact_fastapi" in call_args
+        assert "impact_fastapi" not in call_args
+        # impact variables are handled separately by process_impact_variables
+        assert "fastapi" in result
 
     @pytest.mark.asyncio
     async def test_sanitize_excludes_func_obj(self, sanitizer):

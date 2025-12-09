@@ -70,7 +70,7 @@ class TestRequirementFileService:
 
         rf_id = await req_file_service.create_requirement_file(requirement_file, "nonexistent")
 
-        assert rf_id is None
+        assert rf_id == ""
 
     async def test_read_requirement_files_by_repository_found(self, req_file_service, mock_db_manager):
         _, driver = mock_db_manager
@@ -98,7 +98,7 @@ class TestRequirementFileService:
 
         files = await req_file_service.read_requirement_files_by_repository("nonexistent")
 
-        assert files is None
+        assert files == {}
 
     async def test_read_requirement_file_moment_found(self, req_file_service, mock_db_manager):
         _, driver = mock_db_manager

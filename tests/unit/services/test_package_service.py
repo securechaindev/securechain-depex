@@ -116,7 +116,7 @@ class TestPackageService:
 
         packages = await package_service.read_packages_by_requirement_file("nonexistent")
 
-        assert packages is None
+        assert packages == {}
 
     async def test_read_graph_for_package_ssc_info_operation_success(self, package_service, mock_db_manager):
         _, driver = mock_db_manager
@@ -159,7 +159,7 @@ class TestPackageService:
             "PyPIPackage", "nonexistent", 3
         )
 
-        assert result is None
+        assert result == {}
 
     async def test_read_graph_memory_out_error(self, package_service, mock_db_manager):
         _, driver = mock_db_manager

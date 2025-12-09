@@ -62,7 +62,7 @@ class TestRepositoryService:
 
         repo_id = await repository_service.create_repository(repository)
 
-        assert repo_id is None
+        assert repo_id == ""
 
     async def test_create_user_repository_rel_success(self, repository_service, mock_db_manager):
         _, driver = mock_db_manager

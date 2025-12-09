@@ -155,7 +155,7 @@ class TestVersionService:
             "PyPIPackage", "fastapi", "nonexistent", 3
         )
 
-        assert result is None
+        assert result == {}
 
     async def test_read_graph_memory_out_error(self, version_service, mock_db_manager):
         _, driver = mock_db_manager
