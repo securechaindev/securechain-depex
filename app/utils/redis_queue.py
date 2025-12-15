@@ -26,24 +26,6 @@ class RedisQueue:
         msg_id = await self.r.xadd(settings.REDIS_STREAM, {"data": raw_json})
         return msg_id
 
-    async def read_batch(self, count: int = 20, block_ms: int | None = None) -> list[tuple[str, str]]:
-        resp = await self.r.xreadgroup(
-            settings.REDIS_GROUP,
-            settings.REDIS_CONSUMER,
-            {settings.REDIS_STREAM: ">"},
-            count=count,
-            block=block_ms
-        )
-        if not resp:
-            return []
-        entries = resp[0][1]
-        result = []
-        for msg_id, fields in entries:
-            raw = fields.get("data")
-            if raw:
-                result.append((msg_id, raw))
-        return result
-
     def ack(self, msg_id: str) -> None:
         self.r.xack(settings.REDIS_STREAM, settings.REDIS_GROUP, msg_id)
 

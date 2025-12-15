@@ -100,63 +100,6 @@ class TestRedisQueue:
         assert parsed["vendor"] == "n/a"
         assert "moment" in parsed
 
-    @pytest.mark.asyncio
-    async def test_read_batch_with_messages(self, redis_queue):
-        redis_queue.r.xreadgroup = AsyncMock(return_value=[
-            (
-                "test_stream",
-                [
-                    ("1234-0", {"data": '{"test": "message1"}'}),
-                    ("1235-0", {"data": '{"test": "message2"}'}),
-                ],
-            )
-        ])
-
-        messages = await redis_queue.read_batch(count=10, block_ms=1000)
-
-        assert len(messages) == 2
-        assert messages[0] == ("1234-0", '{"test": "message1"}')
-        assert messages[1] == ("1235-0", '{"test": "message2"}')
-
-        redis_queue.r.xreadgroup.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_read_batch_empty_stream(self, redis_queue):
-        redis_queue.r.xreadgroup = AsyncMock(return_value=[])
-
-        messages = await redis_queue.read_batch(count=20)
-
-        assert messages == []
-
-    @pytest.mark.asyncio
-    async def test_read_batch_with_count_and_block(self, redis_queue):
-        redis_queue.r.xreadgroup = AsyncMock(return_value=[])
-
-        await redis_queue.read_batch(count=50, block_ms=5000)
-
-        call_args = redis_queue.r.xreadgroup.call_args
-        assert call_args[1]["count"] == 50
-        assert call_args[1]["block"] == 5000
-
-    @pytest.mark.asyncio
-    async def test_read_batch_filters_missing_data(self, redis_queue):
-        redis_queue.r.xreadgroup = AsyncMock(return_value=[
-            (
-                "test_stream",
-                [
-                    ("1234-0", {"data": '{"test": "message1"}'}),
-                    ("1235-0", {"other": "field"}),
-                    ("1236-0", {"data": '{"test": "message2"}'}),
-                ],
-            )
-        ])
-
-        messages = await redis_queue.read_batch()
-
-        assert len(messages) == 2
-        assert messages[0][0] == "1234-0"
-        assert messages[1][0] == "1236-0"
-
     def test_ack_message(self, redis_queue):
         redis_queue.r.xack.return_value = 1
 
